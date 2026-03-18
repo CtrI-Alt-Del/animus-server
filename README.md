@@ -150,4 +150,4 @@ uv run poe codecheck
 
 ## 📝 Licenca
 
-Projeto privado da **Animus**.
+Este projeto esta licenciado sob a licenca [MIT](LICENSE).
