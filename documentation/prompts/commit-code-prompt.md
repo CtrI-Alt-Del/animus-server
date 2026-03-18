@@ -20,6 +20,18 @@ Exemplo:
 
 Se existirem arquivos modificados, execute `git add` e `git commit` ate nao restarem mudancas pendentes. Nao apenas sugira mensagens: execute os comandos.
 
+## Validacao automatica da mensagem
+
+A validacao do formato de commit deve ser feita com **Commitlint + Husky** no hook `commit-msg`.
+
+Formato validado automaticamente:
+
+`<type>(<scope opcional>)?: <PROJ-123> <descricao em ingles>`
+
+Exemplo valido:
+
+`feat(auth): ANI-23 add sign in screen`
+
 ## Diretrizes de Execucao
 
 1. Detectar alteracoes com `git status --porcelain`.

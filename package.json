@@ -1,0 +1,15 @@
+{
+  "name": "animus-server-git-hooks",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Commit message validation with Husky and Commitlint",
+  "scripts": {
+    "prepare": "husky",
+    "commitlint": "commitlint --edit"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7"
+  }
+}

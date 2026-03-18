@@ -172,6 +172,9 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
 
+# Node
+node_modules/
+
 # AI Agents
 .agent
 .agents
