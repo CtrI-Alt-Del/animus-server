@@ -1,13 +1,43 @@
-# Tooling
+# Tooling do Projeto
 
-Comandos principais do projeto usando `poe`:
+Este documento centraliza os comandos usados para validacao local do projeto Animus Server.
 
-## Execução da aplicação
+## Pre-requisito
 
-- `uv run poe dev` - executa a aplicação em modo de desenvolvimento.
+Antes de executar qualquer validacao, instale as dependencias do projeto:
 
-## Validacoes
+```bash
+uv sync
+```
 
-- `uv run poe typecheck` - executa o type check com BasedPyright.
-- `uv run poe codecheck` - executa lint e validacao de formatacao com Ruff.
-- `uv run poe test` - executa a suite de testes com Pytest.
+## Execucao da aplicacao
+
+Para executar a aplicacao em modo de desenvolvimento:
+
+```bash
+uv run poe dev
+```
+
+## Typecheck
+
+Para executar a checagem estatica de tipos com BasedPyright:
+
+```bash
+uv run poe typecheck
+```
+
+## Codecheck
+
+Para garantir padrao de formatacao e validacao estatica, execute:
+
+```bash
+uv run poe codecheck
+```
+
+## Testes
+
+Para executar a suite de testes automatizados do projeto:
+
+```bash
+uv run poe test
+```
