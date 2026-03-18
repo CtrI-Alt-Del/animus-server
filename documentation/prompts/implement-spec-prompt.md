@@ -36,7 +36,7 @@ Proibicoes:
 - Arquitetura geral: `documentation/architecture.md`
 - Regras por camada:
   - `documentation/rules/core-layer-rules.md`
-  - `documentation/rules/database-rules.md`
+  - `documentation/rules/database-layer-rules.md`
   - `documentation/rules/rest-layer-rules.md`
 - Padrao de codigo/organizacao: `documentation/rules/code-conventions-rules.md`
 - Testes (indice + docs especializadas):

@@ -92,7 +92,7 @@ Verifique se os arquivos alterados respeitam os limites arquiteturais do projeto
 
 - `documentation/rules/core-layer-rules.md` — `core` puro: sem FastAPI,
   SQLAlchemy, sessão, SQL, env var ou HTTP
-- `documentation/rules/database-rules.md` — apenas persistência/mapeamento, sem
+- `documentation/rules/database-layer-rules.md` — apenas persistência/mapeamento, sem
   regra de negócio
 - `documentation/rules/rest-layer-rules.md` — controllers finos: validam,
   adaptam e delegam para use case

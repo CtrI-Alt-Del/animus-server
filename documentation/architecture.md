@@ -61,7 +61,7 @@ Eventos assincronos: UseCase publica evento via `Broker` -> PubSub (Inngest) -> 
 
 | Tecnologia | Pacote | Finalidade |
 |------------|--------|------------|
-| **Linguagem** | Python 3.12+ | Linguagem principal |
+| **Linguagem** | Python 3.13+ | Linguagem principal |
 | **Framework** | FastAPI | API HTTP e DI |
 | **Servidor ASGI** | Uvicorn (`fastapi[standard]`) | Runtime da aplicacao |
 | **Banco de Dados** | PostgreSQL | Persistencia relacional |

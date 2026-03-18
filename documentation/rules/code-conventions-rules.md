@@ -53,6 +53,6 @@ from animus.core.domain import Horse
 
 ### Observação sobre Tooling Específico
 Ferramentas específicas de domínio (como `alembic` para banco de dados ou `pytest` para testes) estão detalhadas nos seus respectivos arquivos de regras:
-- `documentation/rules/database-rules.md`
+- `documentation/rules/database-layer-rules.md`
 - `documentation/rules/testing-rules.md`
 - `documentation/rules/rest-layer-rules.md`

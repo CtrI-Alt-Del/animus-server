@@ -11,7 +11,7 @@ class Integer(Structure):
     def create(cls, value: int) -> 'Integer':
         if value < 0:
             raise ValidationError(
-                f'Value must be greater than or equal to 0, got {value}'
+                f'Valor deve ser maior ou igual a 0, recebido: {value}'
             )
 
         return cls(value)

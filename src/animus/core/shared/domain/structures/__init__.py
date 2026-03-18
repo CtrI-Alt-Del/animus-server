@@ -5,6 +5,5 @@ from .decimal import Decimal
 from .logical import Logical
 from .phone import Phone
 from .datetime import Datetime
-from .url import Url
 
-__all__ = ['Id', 'Name', 'Text', 'Decimal', 'Logical', 'Phone', 'Datetime', 'Url']
+__all__ = ['Id', 'Name', 'Text', 'Decimal', 'Logical', 'Phone', 'Datetime']

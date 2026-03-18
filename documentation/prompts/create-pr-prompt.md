@@ -2,7 +2,7 @@
 description: Criar pull request padronizado usando GitHub CLI
 ---
 
-# Prompt: Criar PRD
+# Prompt: Criar PR
 
 **Objetivo:** Padronizar a criação de Pull Requests (PRs), garantindo descrições
 claras que facilitem a revisão de código e o rastreamento de tarefas. O foco é

@@ -52,17 +52,14 @@ no `animus-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP).
 
 ### Banco de dados em testes REST (como funciona aqui)
 
-- Os testes REST usam fixture de DB em `tests/conftest.py` que:
-  - exige `ENV.DATABASE_URL` apontando para PostgreSQL
-  - cria um schema isolado por sessao (`animus_test_<uuid>`)
-  - executa `Model.metadata.create_all(...)` no schema de teste
-  - sobrescreve `Sqlalchemy.get_session` para a sessao de teste
-- Consequencia: testes REST devem ser independentes e nao devem depender de ordem/estado entre casos.
+- No estado atual do bootstrap, o repositorio ainda nao possui fixture oficial de banco para REST.
+- Ao introduzir testes REST com persistencia, implemente fixture dedicada em `tests/fixtures/database_fixtures.py` e documente o fluxo aqui.
+- Consequencia: enquanto nao houver fixture de DB, mantenha os testes REST sem dependencia de sessao real.
 
 ### Publicacao/side effects em testes
 
 - Dependencias externas nao deterministicas devem ser isoladas.
-- Padrao atual: `tests/conftest.py` faz patch de `InngestPubSub.register` no fixture `client` para evitar side effects.
+- Quando houver integracao com pubsub no app, faca patch no setup de testes para evitar side effects externos.
 
 ## Comandos rapidos (uso local)
 

@@ -1,12 +1,11 @@
-from animus.app import FastAPIApp
 import pytest
 from fastapi.testclient import TestClient
-from pytest_mock import MockerFixture
-from sqlalchemy.orm import Session
+
+from animus.app import FastAPIApp
 
 
 @pytest.fixture
-def client(mocker: MockerFixture, sqlalchemy_session: Session) -> TestClient:
+def client() -> TestClient:
     app = FastAPIApp.register()
     return TestClient(app)
 

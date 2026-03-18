@@ -1,6 +1,6 @@
-from pydantic import ValidationError
-from animus.core.shared.domain.decorators import structure
 from animus.core.shared.domain.abstracts import Structure
+from animus.core.shared.domain.decorators import structure
+from animus.core.shared.domain.errors import ValidationError
 
 
 @structure
@@ -9,8 +9,11 @@ class Name(Structure):
 
     @staticmethod
     def create(value: str) -> 'Name':
-        if value.isspace() or len(value) < 3:
+        normalized_value = value.strip()
+
+        if len(normalized_value) < 2:
             raise ValidationError(
-                f'Name must be at least 3 characters long and not contain spaces, got {value}'
+                f'Nome deve ter pelo menos 2 caracteres, recebido: {value}'
             )
-        return Name(value=value)
+
+        return Name(value=normalized_value)

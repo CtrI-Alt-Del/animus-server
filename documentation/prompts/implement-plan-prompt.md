@@ -4,7 +4,7 @@ description: Implementar um plano de implementacao derivado de uma spec tecnica.
 
 # Prompt: Implementar Plano
 
-**Objetivo principal** Implementar no codebase um plano de implementacao derivado de uma spec tecnica, seguindo a arquitetura e diretrizes do animus Mobile.
+**Objetivo principal** Implementar no codebase um plano de implementacao derivado de uma spec tecnica, seguindo a arquitetura e diretrizes do animus-server.
 
 ## Entrada
 
@@ -31,7 +31,7 @@ description: Implementar um plano de implementacao derivado de uma spec tecnica.
    Cada subagent recebe como contexto:
    - O plano completo.
    - A lista de tarefas da sua fase.
-   - As regras de camada relevantes (ex.: `ui-layer-rules.md`, `core-layer-rules.md`).
+   - As regras de camada relevantes (ex.: `rest-layer-rules.md`, `core-layer-rules.md`).
    - Instrucao explicita: implementar apenas as tarefas da sua fase, sem ultrapassar o escopo.
 
    > ⚠️ **Regra** Um subagent nunca deve implementar tarefas de outra fase para "adiantar" trabalho.

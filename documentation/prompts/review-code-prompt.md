@@ -34,7 +34,7 @@ Diretrizes de execucao:
 - Arquitetura: `documentation/architecture.md`
 - Por camada (quando aplicavel):
   - `documentation/rules/core-layer-rules.md`
-  - `documentation/rules/database-rules.md`
+  - `documentation/rules/database-layer-rules.md`
   - `documentation/rules/rest-layer-rules.md`
 - Testes:
   - `documentation/rules/testing-rules.md`

@@ -12,5 +12,6 @@ class Email(Structure):
     @staticmethod
     def create(value: str) -> 'Email':
         if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', value):
-            raise ValidationError(f'Invalid email address: {value}')
+            raise ValidationError(f'Email invalido: {value}')
+
         return Email(value=value)
