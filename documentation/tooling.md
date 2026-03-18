@@ -2,6 +2,10 @@
 
 Comandos principais do projeto usando `poe`:
 
+## Execução da aplicação
+
+- `uv run poe dev` - executa a aplicação em modo de desenvolvimento.
+
 ## Validacoes
 
 - `uv run poe typecheck` - executa o type check com BasedPyright.

@@ -4,7 +4,7 @@ description: Prompt para concluir uma spec com validação final, atualização 
 
 # Prompt: Conclude Spec
 
-**Objetivo:** Finalizar e consolidar a implementação de uma Spec técnica no
+**Objetivo:** Finali e consolidar a implementação de uma Spec técnica no
 `animus-server`, garantindo que o código esteja polido, documentado e validado —
 produzindo ao final um checklist de validação, os documentos atualizados e um
 rascunho estruturado para o Pull Request.
