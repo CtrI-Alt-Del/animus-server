@@ -13,7 +13,7 @@ ambiguidades.
 ## Entrada
 
 - **PRD:** deve existir e estar finalizado antes de iniciar a spec.
-- **Esboço da tarefa:** descrição da feature, fix ou refatoração a implementar.
+- **Esboço da tarefa no Jira:** descrição da feature, fix ou refatoração a implementar.
 - **Acesso à codebase:** necessário para pesquisa e validação de padrões.
 
 > Se o PRD estiver ausente ou incompleto, não inicie a spec.
@@ -113,6 +113,7 @@ Use frontmatter e hierarquia de cabeçalhos sem pular níveis.
 ---
 title: <Título claro>
 prd: <caminho para o PRD referente à spec, localizado um nível acima do diretório da spec>
+ticket: <link do ticket da tarefa no Jira>
 status: <em_progresso|concluido>
 last_updated_at: <YYYY-MM-DD>
 ---

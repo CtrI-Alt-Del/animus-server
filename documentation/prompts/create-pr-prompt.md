@@ -15,8 +15,9 @@ de trabalho.
 
 - Uma Spec (especificação) devidamente implementada e validada.
 - Uma Bug Report (relatório de bug) devidamente implementada e validada.
-- Uma branch de funcionalidade (`feature/`), correção (`fix/`) ou refatoração
-  (`refactor/`) com as alterações comitadas.
+- ID do ticket do Jira (ex: `ANI-123`)
+
+> Se o ticket do Jira não estiver presente, não execute o prompt.
 
 ---
 
@@ -41,6 +42,7 @@ de trabalho.
   - direto
   - em PT-BR
   - refletir a essência da alteração
+  - Incluir a task do Jira como prefixo (ex: `[ANI-12] Adiciona tela de sign up`)
 
 Exemplos:
 
@@ -70,17 +72,11 @@ O corpo do PR deve seguir o template abaixo.
 
 ---
 
+> O titulo do PR deve conter como prefixo o id da task do jira (ex: `[ANI-12] Adiciona tela de sign up`).
+
 ## 🎯 Objetivo (obrigatório)
 
 Explique por que este PR foi criado e qual seu propósito central.
-
-## #️⃣ Issues relacionadas (opcional)
-
-Vincule tarefas/buffs:
-
-```
-resolves https://github.com/JohnPetros/equiny/issues/<issue_number>
-```
 
 ---
 
@@ -124,7 +120,7 @@ Passo a passo claro para o revisor validar:
 
 ⚠️ Não usar GitHub MCP. ⚠️ Não usar APIs MCP. Usar exclusivamente **gh**.
 
-> Repositorio: https://github.com/JohnPetros/equiny-server
+> Repositorio: https://github.com/CtrI-Alt-Del/animus-server
 
 Comando padrão:
 
@@ -134,17 +130,7 @@ gh pr create \
   --base main \
   --head <nome-da-branch> \
   --title "<Titulo do PR>" \
-  --body-file pr_body.md
-```
-
-Ou inline:
-
-```
-gh pr create \
-  --base main \
-  --head <branch> \
-  --title "<Titulo>" \
-  --body "<Descrição formatada>"
+  --body-file <body do PR>
 ```
 
 ---
