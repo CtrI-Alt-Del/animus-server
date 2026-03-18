@@ -72,8 +72,6 @@ O corpo do PR deve seguir o template abaixo.
 
 ---
 
-> O titulo do PR deve conter como prefixo o id da task do jira (ex: `[ANI-12] Adiciona tela de sign up`).
-
 ## 🎯 Objetivo (obrigatório)
 
 Explique por que este PR foi criado e qual seu propósito central.
