@@ -1,6 +1,6 @@
 # Regras da Camada REST
 
-> 💡 Use este documento ao criar ou revisar `controllers`, `middlewares`, contratos HTTP e integracoes da API em `src/equiny/rest/`.
+> 💡 Use este documento ao criar ou revisar `controllers`, `middlewares`, contratos HTTP e integracoes da API em `src/animus/rest/`.
 
 ## Visao Geral
 
@@ -33,9 +33,9 @@
 
 | Caminho | Responsabilidade |
 |---|---|
-| `src/equiny/rest/controllers/` | Agrupamento de `controllers` por contexto funcional. |
-| `src/equiny/rest/controllers/<context>/` | Endpoints HTTP do contexto, como `auth`, `profiling`, `matching`, `conversation`, `storage` e `docs`. |
-| `src/equiny/rest/middlewares/` | `Middlewares` por `request` para sessao e clientes anexados ao estado da aplicacao. |
+| `src/animus/rest/controllers/` | Agrupamento de `controllers` por contexto funcional. |
+| `src/animus/rest/controllers/<context>/` | Endpoints HTTP do contexto, como `auth`, `profiling`, `matching`, `conversation`, `storage` e `docs`. |
+| `src/animus/rest/middlewares/` | `Middlewares` por `request` para sessao e clientes anexados ao estado da aplicacao. |
 
 ### Regras de organizacao e nomeacao
 

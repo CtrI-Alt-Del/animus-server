@@ -1,8 +1,8 @@
-# Arquitetura do Projeto Equiny Server
+# Arquitetura do Projeto Animus Server
 
 ## Visao Geral
 
-O Equiny Server usa arquitetura em camadas inspirada em Clean Architecture e Hexagonal Architecture (Ports and Adapters). O objetivo e reduzir acoplamento, isolar regra de negocio no `core` e facilitar testes unitarios e de integracao.
+O animus Server usa arquitetura em camadas inspirada em Clean Architecture e Hexagonal Architecture (Ports and Adapters). O objetivo e reduzir acoplamento, isolar regra de negocio no `core` e facilitar testes unitarios e de integracao.
 
 ## Principios da Arquitetura
 
@@ -17,14 +17,14 @@ O Equiny Server usa arquitetura em camadas inspirada em Clean Architecture e Hex
 
 ## Camadas
 
-- **Core (`src/equiny/core/`)**: Entidades, DTOs, erros de dominio, interfaces (ports) e use cases.
-- **Rest (`src/equiny/rest/`)**: Controllers HTTP e middlewares de request (sessao SQLAlchemy e client Inngest).
-- **Routers (`src/equiny/routers/`)**: Composicao de rotas por contexto e registro de endpoints.
-- **Pipes (`src/equiny/pipes/`)**: Providers de dependencia para `Depends(...)` (repositorios, auth, broker e upload).
-- **Validation (`src/equiny/validation/`)**: Schemas Pydantic de entrada/saida e conversao para DTO.
-- **Database (`src/equiny/database/`)**: Models SQLAlchemy, mappers e implementacoes concretas de repositorios.
-- **Providers (`src/equiny/providers/`)**: Adaptadores de infraestrutura.
-- **PubSub (`src/equiny/pubsub/`)**: Orquestracao assincrona por eventos (Inngest).
+- **Core (`src/animus/core/`)**: Entidades, DTOs, erros de dominio, interfaces (ports) e use cases.
+- **Rest (`src/animus/rest/`)**: Controllers HTTP e middlewares de request (sessao SQLAlchemy e client Inngest).
+- **Routers (`src/animus/routers/`)**: Composicao de rotas por contexto e registro de endpoints.
+- **Pipes (`src/animus/pipes/`)**: Providers de dependencia para `Depends(...)` (repositorios, auth, broker e upload).
+- **Validation (`src/animus/validation/`)**: Schemas Pydantic de entrada/saida e conversao para DTO.
+- **Database (`src/animus/database/`)**: Models SQLAlchemy, mappers e implementacoes concretas de repositorios.
+- **Providers (`src/animus/providers/`)**: Adaptadores de infraestrutura.
+- **PubSub (`src/animus/pubsub/`)**: Orquestracao assincrona por eventos (Inngest).
 
 ## Fluxo de Dados (resumo)
 
@@ -92,7 +92,7 @@ No ambiente de producao, os servicos principais estao distribuidos da seguinte f
 ## Estrutura de Diretorios (essencial)
 
 ```text
-src/equiny/
+src/animus/
 ├── core/
 ├── rest/
 ├── routers/
@@ -105,4 +105,4 @@ src/equiny/
 
 ## Contrato da API
 
-A API do Equiny Server e RESTful com payloads JSON. Os atributos seguem padrao `snake_case`.
+A API do animus Server e RESTful com payloads JSON. Os atributos seguem padrao `snake_case`.

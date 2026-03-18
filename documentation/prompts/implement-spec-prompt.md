@@ -2,9 +2,9 @@
 description: Implementar spec tecnica com execucao iterativa e validacoes por camada
 ---
 
-# Prompt: Implementar spec (equiny-server)
+# Prompt: Implementar spec (animus-server)
 
-Objetivo: executar uma spec tecnica de forma iterativa e validada no `equiny-server`,
+Objetivo: executar uma spec tecnica de forma iterativa e validada no `animus-server`,
 mantendo os limites arquiteturais (Clean + Hexagonal) e a qualidade do codigo.
 
 Entrada:

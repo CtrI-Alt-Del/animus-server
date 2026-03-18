@@ -1,11 +1,11 @@
 ---
-description: Prompt para criar uma especificação técnica detalhada com base no PRD e na arquitetura do equiny-server.
+description: Prompt para criar uma especificação técnica detalhada com base no PRD e na arquitetura do animus-server.
 ---
 
-# Prompt: Criar Spec (equiny-server)
+# Prompt: Criar Spec (animus-server)
 
 **Objetivo:** Detalhar a implementação técnica de uma feature, fix ou
-refatoração no `equiny-server`, atuando como um Tech Lead Sênior. O documento
+refatoração no `animus-server`, atuando como um Tech Lead Sênior. O documento
 deve servir como uma ponte estritamente definida entre o PRD e o código, com
 nível de detalhe suficiente para que a implementação seja direta e sem
 ambiguidades.
@@ -38,15 +38,15 @@ Com base no PRD e no esboço da tarefa, classifique as camadas envolvidas:
 
 | Camada | Localização | Responsabilidade |
 |---|---|---|
-| `core` | `src/equiny/core/` | Entidades, DTOs, erros, ports (interfaces), use cases |
-| `database` | `src/equiny/database/` | Models SQLAlchemy, mappers, repositórios concretos |
-| `rest` | `src/equiny/rest/` | Controllers HTTP finos; valida, adapta e delega |
-| `routers` | `src/equiny/routers/` | Composição de rotas por contexto |
-| `pipes` | `src/equiny/pipes/` | Providers de DI via `Depends(...)` |
-| `validation` | `src/equiny/validation/` | Schemas Pydantic de entrada/saída |
-| `providers` | `src/equiny/providers/` | Adaptadores de infraestrutura (jwt, hash, cache, storage, email, push) |
-| `pubsub` | `src/equiny/pubsub/` | Jobs Inngest e PubSub Redis (eventos assíncronos) |
-| `websocket` | `src/equiny/websocket/` | Channels e canais em tempo real |
+| `core` | `src/animus/core/` | Entidades, DTOs, erros, ports (interfaces), use cases |
+| `database` | `src/animus/database/` | Models SQLAlchemy, mappers, repositórios concretos |
+| `rest` | `src/animus/rest/` | Controllers HTTP finos; valida, adapta e delega |
+| `routers` | `src/animus/routers/` | Composição de rotas por contexto |
+| `pipes` | `src/animus/pipes/` | Providers de DI via `Depends(...)` |
+| `validation` | `src/animus/validation/` | Schemas Pydantic de entrada/saída |
+| `providers` | `src/animus/providers/` | Adaptadores de infraestrutura (jwt, hash, cache, storage, email, push) |
+| `pubsub` | `src/animus/pubsub/` | Jobs Inngest e PubSub Redis (eventos assíncronos) |
+| `websocket` | `src/animus/websocket/` | Channels e canais em tempo real |
 
 **1.3 Mapeamento da codebase**
 
@@ -176,7 +176,7 @@ itens realmente relevantes para implementar a mudança.]
 
 ## [Nome da Camada]
 
-- **`NomeDaClasseOuModulo`** (`src/equiny/camada/arquivo.py`) — *[Breve
+- **`NomeDaClasseOuModulo`** (`src/animus/camada/arquivo.py`) — *[Breve
   descrição do uso (ex: use case a estender, repositório a implementar,
   schema similar).]*
 
@@ -191,60 +191,60 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ## Camada Core (Entidades / Structures / DTOs)
 
-- **Localização:** `src/equiny/core/<contexto>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/` (**novo arquivo** se aplicável)
 - **Tipo:** `@entity` | `@structure` | `@dto`
 - **Atributos:** propriedades com tipos Python
 - **Métodos / factory:** assinatura e responsabilidade
 
 ## Camada Core (Erros de Domínio)
 
-- **Localização:** `src/equiny/core/<contexto>/errors/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/errors/` (**novo arquivo** se aplicável)
 - **Classe base:** ex: `DomainError`, `NotFoundError`, `ConflictError`
 - **Motivo:** quando deve ser levantado
 
 ## Camada Core (Interfaces / Ports)
 
-- **Localização:** `src/equiny/core/<contexto>/interfaces/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/interfaces/` (**novo arquivo** se aplicável)
 - **Métodos:** assinatura com tipos e responsabilidade
 
 ## Camada Core (Use Cases)
 
-- **Localização:** `src/equiny/core/<contexto>/use_cases/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/use_cases/` (**novo arquivo** se aplicável)
 - **Dependências (ports injetados):** quais interfaces são consumidas
 - **Método principal:** `execute(dto: ...) -> ...` — assinatura e responsabilidade
 - **Fluxo resumido:** sequência de passos (busca, validação, persistência, evento)
 
 ## Camada Database (Models SQLAlchemy)
 
-- **Localização:** `src/equiny/database/<contexto>/models/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/database/<contexto>/models/` (**novo arquivo** se aplicável)
 - **Tabela:** nome da tabela no banco
 - **Colunas:** nome, tipo SQLAlchemy e constraints relevantes
 - **Relacionamentos:** ForeignKey, relações ORM
 
 ## Camada Database (Mappers)
 
-- **Localização:** `src/equiny/database/<contexto>/mappers/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/database/<contexto>/mappers/` (**novo arquivo** se aplicável)
 - **Métodos:**
   - `to_entity(model: ...) -> Entity` — assinatura e responsabilidade
   - `to_model(entity: ...) -> Model` — assinatura e responsabilidade
 
 ## Camada Database (Repositórios)
 
-- **Localização:** `src/equiny/database/<contexto>/repositories/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/database/<contexto>/repositories/` (**novo arquivo** se aplicável)
 - **Interface implementada:** port do `core`
 - **Dependências:** `Session` SQLAlchemy
 - **Métodos:** assinatura com tipos e responsabilidade
 
 ## Camada Validation (Schemas Pydantic)
 
-- **Localização:** `src/equiny/validation/<contexto>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/validation/<contexto>/` (**novo arquivo** se aplicável)
 - **Tipo:** `RequestSchema` | `ResponseSchema`
 - **Atributos:** campos com tipos Pydantic e validações relevantes
 - **Método `to_dto()` (se aplicável):** assinatura e DTO retornado
 
 ## Camada REST (Controllers)
 
-- **Localização:** `src/equiny/rest/<contexto>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/rest/<contexto>/` (**novo arquivo** se aplicável)
 - **Método HTTP e path:** ex: `POST /horses`
 - **`status_code`:** código HTTP esperado
 - **`response_model`:** schema Pydantic de saída
@@ -253,26 +253,26 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ## Camada Routers
 
-- **Localização:** `src/equiny/routers/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/routers/` (**novo arquivo** se aplicável)
 - **Prefixo da rota:** ex: `/horses`
 - **Controllers registrados:** lista de controllers que compõem o router
 
 ## Camada Pipes
 
-- **Localização:** `src/equiny/pipes/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/pipes/` (**novo arquivo** se aplicável)
 - **Método `Depends`:** assinatura e o que provê (ex: repositório concreto)
 - **Sessão SQLAlchemy:** se o pipe precisa de sessão, indicar como é obtida
 
 ## Camada Providers
 
-- **Localização:** `src/equiny/providers/<nome>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/providers/<nome>/` (**novo arquivo** se aplicável)
 - **Interface implementada (port):** do `core`
 - **Biblioteca/SDK utilizado:** ex: `boto3`, `firebase-admin`, `redis`
 - **Métodos:** assinatura com tipos e responsabilidade
 
 ## Camada PubSub (Jobs Inngest)
 
-- **Localização:** `src/equiny/pubsub/inngest/jobs/<contexto>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/pubsub/inngest/jobs/<contexto>/` (**novo arquivo** se aplicável)
 - **Evento consumido:** nome do evento (`Event.NAME`) e payload esperado
 - **Dependências:** use cases e repositórios instanciados no job
 - **Passos (`step.run`):** sequência de ações do job
@@ -280,13 +280,13 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ## Camada PubSub (Eventos de Domínio)
 
-- **Localização:** `src/equiny/core/<contexto>/events/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/events/` (**novo arquivo** se aplicável)
 - **`NAME`:** string identificadora do evento (ex: `"profiling/horse_created"`)
 - **Payload:** atributos publicados com tipos
 
 ## Camada WebSocket (Channels)
 
-- **Localização:** `src/equiny/websocket/channels/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/websocket/channels/` (**novo arquivo** se aplicável)
 - **Eventos suportados:** lista de `Event.NAME` que o channel trata
 - **Dependências:** use cases e repositórios injetados
 - **Fluxo por evento:** payload recebido → schema → `UseCase.execute()` → resposta/emissão
@@ -305,7 +305,7 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ## [Nome da Camada]
 
-- **Arquivo:** `src/equiny/camada/arquivo.py`
+- **Arquivo:** `src/animus/camada/arquivo.py`
 - **Mudança:** [Descreva a mudança específica]
 - **Justificativa:** [Por que a mudança é necessária]
 
@@ -320,7 +320,7 @@ refatoração.]
 
 ## [Nome da Camada]
 
-- **Arquivo:** `src/equiny/camada/arquivo.py`
+- **Arquivo:** `src/animus/camada/arquivo.py`
 - **Motivo da remoção:** [Por que pode ser removido]
 - **Impacto esperado:** [Dependências que precisam ser atualizadas]
 
@@ -381,17 +381,17 @@ Para cada item:
 - Quando faltar informação suficiente, registrar em **Pendências / Dúvidas** e
   usar a tool `question` se necessário.
 - Toda referência a código existente deve incluir caminho relativo real
-  (`src/equiny/...`).
+  (`src/animus/...`).
 - Se uma seção não se aplicar, preencher explicitamente com **Não aplicável**.
 - A spec deve ser consistente com os padrões da codebase (nomenclatura,
   organização de módulos, contratos e convenções por camada).---
-description: Prompt para criar uma especificação técnica detalhada com base no PRD e na arquitetura do equiny-server.
+description: Prompt para criar uma especificação técnica detalhada com base no PRD e na arquitetura do animus-server.
 ---
 
-# Prompt: Criar Spec (equiny-server)
+# Prompt: Criar Spec (animus-server)
 
 **Objetivo:** Detalhar a implementação técnica de uma feature, fix ou
-refatoração no `equiny-server`, atuando como um Tech Lead Sênior. O documento
+refatoração no `animus-server`, atuando como um Tech Lead Sênior. O documento
 deve servir como uma ponte estritamente definida entre o PRD e o código, com
 nível de detalhe suficiente para que a implementação seja direta e sem
 ambiguidades.
@@ -424,15 +424,15 @@ Com base no PRD e no esboço da tarefa, classifique as camadas envolvidas:
 
 | Camada | Localização | Responsabilidade |
 |---|---|---|
-| `core` | `src/equiny/core/` | Entidades, DTOs, erros, ports (interfaces), use cases |
-| `database` | `src/equiny/database/` | Models SQLAlchemy, mappers, repositórios concretos |
-| `rest` | `src/equiny/rest/` | Controllers HTTP finos; valida, adapta e delega |
-| `routers` | `src/equiny/routers/` | Composição de rotas por contexto |
-| `pipes` | `src/equiny/pipes/` | Providers de DI via `Depends(...)` |
-| `validation` | `src/equiny/validation/` | Schemas Pydantic de entrada/saída |
-| `providers` | `src/equiny/providers/` | Adaptadores de infraestrutura (jwt, hash, cache, storage, email, push) |
-| `pubsub` | `src/equiny/pubsub/` | Jobs Inngest e PubSub Redis (eventos assíncronos) |
-| `websocket` | `src/equiny/websocket/` | Channels e canais em tempo real |
+| `core` | `src/animus/core/` | Entidades, DTOs, erros, ports (interfaces), use cases |
+| `database` | `src/animus/database/` | Models SQLAlchemy, mappers, repositórios concretos |
+| `rest` | `src/animus/rest/` | Controllers HTTP finos; valida, adapta e delega |
+| `routers` | `src/animus/routers/` | Composição de rotas por contexto |
+| `pipes` | `src/animus/pipes/` | Providers de DI via `Depends(...)` |
+| `validation` | `src/animus/validation/` | Schemas Pydantic de entrada/saída |
+| `providers` | `src/animus/providers/` | Adaptadores de infraestrutura (jwt, hash, cache, storage, email, push) |
+| `pubsub` | `src/animus/pubsub/` | Jobs Inngest e PubSub Redis (eventos assíncronos) |
+| `websocket` | `src/animus/websocket/` | Channels e canais em tempo real |
 
 **1.3 Mapeamento da codebase**
 
@@ -561,7 +561,7 @@ itens realmente relevantes para implementar a mudança.]
 
 ## [Nome da Camada]
 
-- **`NomeDaClasseOuModulo`** (`src/equiny/camada/arquivo.py`) — *[Breve
+- **`NomeDaClasseOuModulo`** (`src/animus/camada/arquivo.py`) — *[Breve
   descrição do uso (ex: use case a estender, repositório a implementar,
   schema similar).]*
 
@@ -576,60 +576,60 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ## Camada Core (Entidades / Structures / DTOs)
 
-- **Localização:** `src/equiny/core/<contexto>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/` (**novo arquivo** se aplicável)
 - **Tipo:** `@entity` | `@structure` | `@dto`
 - **Atributos:** propriedades com tipos Python
 - **Métodos / factory:** assinatura e responsabilidade
 
 ## Camada Core (Erros de Domínio)
 
-- **Localização:** `src/equiny/core/<contexto>/errors/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/errors/` (**novo arquivo** se aplicável)
 - **Classe base:** ex: `DomainError`, `NotFoundError`, `ConflictError`
 - **Motivo:** quando deve ser levantado
 
 ## Camada Core (Interfaces / Ports)
 
-- **Localização:** `src/equiny/core/<contexto>/interfaces/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/interfaces/` (**novo arquivo** se aplicável)
 - **Métodos:** assinatura com tipos e responsabilidade
 
 ## Camada Core (Use Cases)
 
-- **Localização:** `src/equiny/core/<contexto>/use_cases/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/use_cases/` (**novo arquivo** se aplicável)
 - **Dependências (ports injetados):** quais interfaces são consumidas
 - **Método principal:** `execute(dto: ...) -> ...` — assinatura e responsabilidade
 - **Fluxo resumido:** sequência de passos (busca, validação, persistência, evento)
 
 ## Camada Database (Models SQLAlchemy)
 
-- **Localização:** `src/equiny/database/<contexto>/models/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/database/<contexto>/models/` (**novo arquivo** se aplicável)
 - **Tabela:** nome da tabela no banco
 - **Colunas:** nome, tipo SQLAlchemy e constraints relevantes
 - **Relacionamentos:** ForeignKey, relações ORM
 
 ## Camada Database (Mappers)
 
-- **Localização:** `src/equiny/database/<contexto>/mappers/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/database/<contexto>/mappers/` (**novo arquivo** se aplicável)
 - **Métodos:**
   - `to_entity(model: ...) -> Entity` — assinatura e responsabilidade
   - `to_model(entity: ...) -> Model` — assinatura e responsabilidade
 
 ## Camada Database (Repositórios)
 
-- **Localização:** `src/equiny/database/<contexto>/repositories/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/database/<contexto>/repositories/` (**novo arquivo** se aplicável)
 - **Interface implementada:** port do `core`
 - **Dependências:** `Session` SQLAlchemy
 - **Métodos:** assinatura com tipos e responsabilidade
 
 ## Camada Validation (Schemas Pydantic)
 
-- **Localização:** `src/equiny/validation/<contexto>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/validation/<contexto>/` (**novo arquivo** se aplicável)
 - **Tipo:** `RequestSchema` | `ResponseSchema`
 - **Atributos:** campos com tipos Pydantic e validações relevantes
 - **Método `to_dto()` (se aplicável):** assinatura e DTO retornado
 
 ## Camada REST (Controllers)
 
-- **Localização:** `src/equiny/rest/<contexto>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/rest/<contexto>/` (**novo arquivo** se aplicável)
 - **Método HTTP e path:** ex: `POST /horses`
 - **`status_code`:** código HTTP esperado
 - **`response_model`:** schema Pydantic de saída
@@ -638,26 +638,26 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ## Camada Routers
 
-- **Localização:** `src/equiny/routers/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/routers/` (**novo arquivo** se aplicável)
 - **Prefixo da rota:** ex: `/horses`
 - **Controllers registrados:** lista de controllers que compõem o router
 
 ## Camada Pipes
 
-- **Localização:** `src/equiny/pipes/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/pipes/` (**novo arquivo** se aplicável)
 - **Método `Depends`:** assinatura e o que provê (ex: repositório concreto)
 - **Sessão SQLAlchemy:** se o pipe precisa de sessão, indicar como é obtida
 
 ## Camada Providers
 
-- **Localização:** `src/equiny/providers/<nome>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/providers/<nome>/` (**novo arquivo** se aplicável)
 - **Interface implementada (port):** do `core`
 - **Biblioteca/SDK utilizado:** ex: `boto3`, `firebase-admin`, `redis`
 - **Métodos:** assinatura com tipos e responsabilidade
 
 ## Camada PubSub (Jobs Inngest)
 
-- **Localização:** `src/equiny/pubsub/inngest/jobs/<contexto>/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/pubsub/inngest/jobs/<contexto>/` (**novo arquivo** se aplicável)
 - **Evento consumido:** nome do evento (`Event.NAME`) e payload esperado
 - **Dependências:** use cases e repositórios instanciados no job
 - **Passos (`step.run`):** sequência de ações do job
@@ -665,13 +665,13 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ## Camada PubSub (Eventos de Domínio)
 
-- **Localização:** `src/equiny/core/<contexto>/events/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/core/<contexto>/events/` (**novo arquivo** se aplicável)
 - **`NAME`:** string identificadora do evento (ex: `"profiling/horse_created"`)
 - **Payload:** atributos publicados com tipos
 
 ## Camada WebSocket (Channels)
 
-- **Localização:** `src/equiny/websocket/channels/` (**novo arquivo** se aplicável)
+- **Localização:** `src/animus/websocket/channels/` (**novo arquivo** se aplicável)
 - **Eventos suportados:** lista de `Event.NAME` que o channel trata
 - **Dependências:** use cases e repositórios injetados
 - **Fluxo por evento:** payload recebido → schema → `UseCase.execute()` → resposta/emissão
@@ -690,7 +690,7 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ## [Nome da Camada]
 
-- **Arquivo:** `src/equiny/camada/arquivo.py`
+- **Arquivo:** `src/animus/camada/arquivo.py`
 - **Mudança:** [Descreva a mudança específica]
 - **Justificativa:** [Por que a mudança é necessária]
 
@@ -705,7 +705,7 @@ refatoração.]
 
 ## [Nome da Camada]
 
-- **Arquivo:** `src/equiny/camada/arquivo.py`
+- **Arquivo:** `src/animus/camada/arquivo.py`
 - **Motivo da remoção:** [Por que pode ser removido]
 - **Impacto esperado:** [Dependências que precisam ser atualizadas]
 
@@ -766,7 +766,7 @@ Para cada item:
 - Quando faltar informação suficiente, registrar em **Pendências / Dúvidas** e
   usar a tool `question` se necessário.
 - Toda referência a código existente deve incluir caminho relativo real
-  (`src/equiny/...`).
+  (`src/animus/...`).
 - Se uma seção não se aplicar, preencher explicitamente com **Não aplicável**.
 - A spec deve ser consistente com os padrões da codebase (nomenclatura,
   organização de módulos, contratos e convenções por camada).

@@ -4,7 +4,7 @@ description: Implementar um plano de implementacao derivado de uma spec tecnica.
 
 # Prompt: Implementar Plano
 
-**Objetivo principal** Implementar no codebase um plano de implementacao derivado de uma spec tecnica, seguindo a arquitetura e diretrizes do Equiny Mobile.
+**Objetivo principal** Implementar no codebase um plano de implementacao derivado de uma spec tecnica, seguindo a arquitetura e diretrizes do animus Mobile.
 
 ## Entrada
 

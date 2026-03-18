@@ -1,6 +1,6 @@
 # Regras da Camada Pipes
 
-> 💡 Use este documento ao criar ou revisar `dependency providers`, `guards` e montagem de dependencias reutilizaveis em `src/equiny/pipes/`.
+> 💡 Use este documento ao criar ou revisar `dependency providers`, `guards` e montagem de dependencias reutilizaveis em `src/animus/pipes/`.
 
 ## Visao Geral
 
@@ -33,7 +33,7 @@
 
 | Caminho | Responsabilidade |
 |---|---|
-| `src/equiny/pipes/` | Modulo unico com arquivos `*_pipe.py` por assunto, como `auth`, `database`, `providers`, `pubsub`, `profiling`, `matching`, `conversation`, `storage` e `ai`. |
+| `src/animus/pipes/` | Modulo unico com arquivos `*_pipe.py` por assunto, como `auth`, `database`, `providers`, `pubsub`, `profiling`, `matching`, `conversation`, `storage` e `ai`. |
 
 ### Regras de organizacao e nomeacao
 

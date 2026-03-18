@@ -2,11 +2,11 @@
 description: Corrigir efeitos colaterais de mudancas com diagnostico e validacao
 ---
 
-# Prompt: Corrigir side effects (equiny-server)
+# Prompt: Corrigir side effects (animus-server)
 
 Objetivo: identificar e corrigir regressao, erro de import, erro de lint/type ou
 falha de testes causada por alteracoes manuais, restabelecendo a integridade do
-`equiny-server`.
+`animus-server`.
 
 Entrada:
 

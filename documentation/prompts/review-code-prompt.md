@@ -2,9 +2,9 @@
 description: Revisar codigo com foco em corretude, arquitetura e qualidade
 ---
 
-# Prompt: Revisar codigo (equiny-server)
+# Prompt: Revisar codigo (animus-server)
 
-Objetivo: revisar mudancas no `equiny-server` com foco em corretude, aderencia as
+Objetivo: revisar mudancas no `animus-server` com foco em corretude, aderencia as
 regras do repo e qualidade (lint/format, typecheck e testes).
 
 Entrada:

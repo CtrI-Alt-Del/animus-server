@@ -1,6 +1,6 @@
 # Regras da Camada PubSub
 
-> 💡 Use este documento ao criar ou revisar publicacao de eventos, `jobs`, `brokers` e fluxos assincronos em `src/equiny/pubsub/`.
+> 💡 Use este documento ao criar ou revisar publicacao de eventos, `jobs`, `brokers` e fluxos assincronos em `src/animus/pubsub/`.
 
 ## Visao Geral
 
@@ -33,11 +33,11 @@
 
 | Caminho | Responsabilidade |
 |---|---|
-| `src/equiny/pubsub/inngest/` | Integracao com runtime do `Inngest` e `broker` usado para eventos assincronos. |
-| `src/equiny/pubsub/inngest/jobs/` | `Jobs` de `background` organizados por contexto. |
-| `src/equiny/pubsub/redis/` | Runtime de `pub/sub` para entrega realtime e disparo de jobs leves. |
-| `src/equiny/pubsub/redis/brokers/` | `Brokers` especializados por contexto para fan-out via `Redis`. |
-| `src/equiny/pubsub/redis/jobs/` | `Jobs` acionados a partir de mensagens consumidas do `Redis`. |
+| `src/animus/pubsub/inngest/` | Integracao com runtime do `Inngest` e `broker` usado para eventos assincronos. |
+| `src/animus/pubsub/inngest/jobs/` | `Jobs` de `background` organizados por contexto. |
+| `src/animus/pubsub/redis/` | Runtime de `pub/sub` para entrega realtime e disparo de jobs leves. |
+| `src/animus/pubsub/redis/brokers/` | `Brokers` especializados por contexto para fan-out via `Redis`. |
+| `src/animus/pubsub/redis/jobs/` | `Jobs` acionados a partir de mensagens consumidas do `Redis`. |
 
 ### Regras de organizacao e nomeacao
 

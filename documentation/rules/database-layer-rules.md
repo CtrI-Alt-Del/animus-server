@@ -3,7 +3,7 @@
 # Visao Geral
 
 - Objetivo da camada
-  - Implementar a persistencia da aplicacao em `src/equiny/database/`, isolando detalhes de SQLAlchemy, sessao, modelos e mapeamento.
+  - Implementar a persistencia da aplicacao em `src/animus/database/`, isolando detalhes de SQLAlchemy, sessao, modelos e mapeamento.
 - Responsabilidades principais
   - Definir models ORM, mappers e repositories concretos aderentes aos contratos publicados pelo `core`.
   - Centralizar criacao de engine, `Session`, context managers e bootstrap de acesso ao banco.
@@ -16,11 +16,11 @@
 # Estrutura de Diretorios Globais
 
 - Mapa de pastas relevantes
-  - `src/equiny/database/sqlalchemy/`
-  - `src/equiny/database/sqlalchemy/models/`
-  - `src/equiny/database/sqlalchemy/mappers/`
-  - `src/equiny/database/sqlalchemy/repositories/`
-  - `src/equiny/database/sqlalchemy/seeders/`
+  - `src/animus/database/sqlalchemy/`
+  - `src/animus/database/sqlalchemy/models/`
+  - `src/animus/database/sqlalchemy/mappers/`
+  - `src/animus/database/sqlalchemy/repositories/`
+  - `src/animus/database/sqlalchemy/seeders/`
 - Responsabilidade de cada diretorio
   - `sqlalchemy/`: configuracao de engine, session factory, base de acesso e exports da implementacao principal.
   - `sqlalchemy/models/<context>/`: representacao ORM das tabelas e relacionamentos por contexto.

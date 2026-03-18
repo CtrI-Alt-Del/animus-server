@@ -1,6 +1,6 @@
 # Regras da Camada Core
 
-> 💡 Use este documento ao criar ou revisar regras de negocio, `entities`, `structures`, `DTOs`, `events`, `interfaces` e `use_cases` em `src/equiny/core/`.
+> 💡 Use este documento ao criar ou revisar regras de negocio, `entities`, `structures`, `DTOs`, `events`, `interfaces` e `use_cases` em `src/animus/core/`.
 
 ## Visao Geral
 
@@ -8,7 +8,7 @@
 
 | Aspecto | Diretriz |
 |---|---|
-| **Objetivo** | Concentrar a regra de negocio pura da aplicacao em `src/equiny/core/`. |
+| **Objetivo** | Concentrar a regra de negocio pura da aplicacao em `src/animus/core/`. |
 | **Papel arquitetural** | Ser o centro da arquitetura, sem depender de transporte, persistencia ou SDKs externos. |
 | **Entrada principal** | `use_cases` e tipos de dominio consumidos por camadas externas. |
 | **Saida principal** | `DTOs`, `responses`, `events`, `errors` e `interfaces` estaveis para o restante do sistema. |
@@ -33,13 +33,13 @@
 
 | Caminho | Responsabilidade |
 |---|---|
-| `src/equiny/core/shared/` | Tipos, abstractions, decorators, `interfaces`, `errors` e `responses` reutilizaveis. |
-| `src/equiny/core/auth/` | Dominio e fluxos de autenticacao e conta. |
-| `src/equiny/core/profiling/` | Dominio e fluxos de perfil, cavalos e presenca. |
-| `src/equiny/core/matching/` | Dominio e fluxos de `swipe`, `match` e verificacoes relacionadas. |
-| `src/equiny/core/conversation/` | Dominio e fluxos de conversa, `chat`, mensagem e `icebreaker`. |
-| `src/equiny/core/storage/` | Tipos e `use_cases` ligados a arquivos, anexos e `upload URL`. |
-| `src/equiny/core/notification/` | Contratos e fluxos de notificacao por email e `push`. |
+| `src/animus/core/shared/` | Tipos, abstractions, decorators, `interfaces`, `errors` e `responses` reutilizaveis. |
+| `src/animus/core/auth/` | Dominio e fluxos de autenticacao e conta. |
+| `src/animus/core/profiling/` | Dominio e fluxos de perfil, cavalos e presenca. |
+| `src/animus/core/matching/` | Dominio e fluxos de `swipe`, `match` e verificacoes relacionadas. |
+| `src/animus/core/conversation/` | Dominio e fluxos de conversa, `chat`, mensagem e `icebreaker`. |
+| `src/animus/core/storage/` | Tipos e `use_cases` ligados a arquivos, anexos e `upload URL`. |
+| `src/animus/core/notification/` | Contratos e fluxos de notificacao por email e `push`. |
 
 ### Regras de organizacao e nomeacao
 

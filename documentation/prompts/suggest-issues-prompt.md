@@ -19,7 +19,7 @@ Sugerir issues para o projeto baseado em um PRD
 
 A funcionalidade geralmente pode cabe em uma só issue, porém se a funcionalidade for muito grande, divida em issues diferentes
 
-> Repositorio do projeto: https://github.com/JohnPetros/equiny
+> Repositorio do projeto: https://github.com/JohnPetros/animus
 
 ## 🎯 Objetivo
 <!-- O que esta issue quer alcançar? Qual o resultado esperado? -->

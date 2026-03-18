@@ -5,7 +5,7 @@ description: Prompt para concluir uma spec com validação final, atualização 
 # Prompt: Conclude Spec
 
 **Objetivo:** Finalizar e consolidar a implementação de uma Spec técnica no
-`equiny-server`, garantindo que o código esteja polido, documentado e validado —
+`animus-server`, garantindo que o código esteja polido, documentado e validado —
 produzindo ao final um checklist de validação, os documentos atualizados e um
 rascunho estruturado para o Pull Request.
 
@@ -80,8 +80,8 @@ no seguinte formato:
 ```markdown
 ## Checklist de Validação
 
-- [x] <Requisito A> — implementado em `src/equiny/camada/arquivo.py`
-- [x] <Requisito B> — implementado em `src/equiny/camada/arquivo.py`
+- [x] <Requisito A> — implementado em `src/animus/camada/arquivo.py`
+- [x] <Requisito B> — implementado em `src/animus/camada/arquivo.py`
 - [ ] <Requisito C> — **ausente ou incompleto** (detalhe o gap)
 ```
 

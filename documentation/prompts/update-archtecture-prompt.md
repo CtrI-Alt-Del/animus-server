@@ -2,10 +2,10 @@
 description: Atualizar documento de arquitetura conforme mudancas reais do servidor
 ---
 
-# Prompt: Atualizar documento de arquitetura (equiny-server)
+# Prompt: Atualizar documento de arquitetura (animus-server)
 
 Objetivo: manter `documentation/architecture.md` sincronizado com a realidade do
-`equiny-server` (Clean Architecture + Hexagonal/Ports and Adapters), incluindo
+`animus-server` (Clean Architecture + Hexagonal/Ports and Adapters), incluindo
 camadas, responsabilidades, stack e estrutura de diretorios.
 
 Entradas:
@@ -29,7 +29,7 @@ Diretrizes de execucao:
 
 - Visao geral: reafirme Clean/Hex e descreva o por que da separacao.
 - Stack: mantenha alinhado ao `pyproject.toml` (Python/FastAPI/SQLAlchemy/uv/pytest/ruff/pyright/poe).
-- Estrutura de diretorios: sincronize com `src/equiny/**` (core/database/rest/routers/validation/middlewares).
+- Estrutura de diretorios: sincronize com `src/animus/**` (core/database/rest/routers/validation/middlewares).
 - Camadas e responsabilidades:
   - `core`: entidades, use cases, ports, erros de dominio; sem FastAPI/SQLAlchemy/HTTP/env.
   - `database`: models/mappers/repositorios; sem regra de negocio.
@@ -42,7 +42,7 @@ Diretrizes de execucao:
 
 - Exemplos e nomes: devem refletir o codigo real do repo (nomes de pacotes, pastas, comandos).
 - Diagramas ASCII: atualize apenas quando houver mudanca relevante (sem especular).
-- Nao introduza camadas inexistentes (ex.: UI) no `equiny-server`.
+- Nao introduza camadas inexistentes (ex.: UI) no `animus-server`.
 
 Saida esperada:
 

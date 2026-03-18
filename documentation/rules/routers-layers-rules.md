@@ -1,6 +1,6 @@
 # Regras da Camada Routers
 
-> 💡 Use este documento ao criar ou revisar composicao de rotas HTTP em `src/equiny/routers/`.
+> 💡 Use este documento ao criar ou revisar composicao de rotas HTTP em `src/animus/routers/`.
 
 ## Visao Geral
 
@@ -23,7 +23,7 @@
 
 - `routers` deve priorizar composicao e organizacao, nao implementacao de regra de negocio.
 - Routers HTTP nao devem conhecer `ORM`, `session`, providers ou detalhes de persistencia.
-- O fluxo de `WebSocket` fica fisicamente em `src/equiny/routers/`, mas segue regras adicionais de `documentation/rules/websocket-layer-rules.md`.
+- O fluxo de `WebSocket` fica fisicamente em `src/animus/routers/`, mas segue regras adicionais de `documentation/rules/websocket-layer-rules.md`.
 
 > 💡 Regra pratica: **`Router = composicao`** e **`Controller = endpoint`**.
 
@@ -33,8 +33,8 @@
 
 | Caminho | Responsabilidade |
 |---|---|
-| `src/equiny/routers/` | Ponto de composicao dos routers publicos da aplicacao. |
-| `src/equiny/routers/<context>/` | Routers HTTP agrupados por contexto, como `auth`, `profiling`, `conversation`, `matching`, `storage` e `docs`. |
+| `src/animus/routers/` | Ponto de composicao dos routers publicos da aplicacao. |
+| `src/animus/routers/<context>/` | Routers HTTP agrupados por contexto, como `auth`, `profiling`, `conversation`, `matching`, `storage` e `docs`. |
 
 ### Regras de organizacao e nomeacao
 

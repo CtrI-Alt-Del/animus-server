@@ -1,7 +1,7 @@
-# Regras gerais para testes (equiny-server)
+# Regras gerais para testes (animus-server)
 
 Use este documento como indice rapido para escolher a estrategia de teste correta
-no `equiny-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP).
+no `animus-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP).
 
 ## Tooling de testes
 
@@ -15,7 +15,7 @@ no `equiny-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP).
 - Arquivo: `pyproject.toml` (secao `[tool.pytest.ini_options]`)
 - Defaults relevantes do repo:
   - `testpaths = ["tests"]`
-  - `pythonpath = [".", "src"]` (imports a partir de `equiny` funcionam nos testes)
+  - `pythonpath = [".", "src"]` (imports a partir de `animus` funcionam nos testes)
 - Plugins usados no projeto:
   - `pytest-cov` (cobertura, quando habilitado)
   - `pytest-mock` (fixture `mocker`)
@@ -25,7 +25,7 @@ no `equiny-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP).
 ### Use cases (core)
 
 - Leia `documentation/rules/use-cases-testing-rules.md` antes de criar/alterar/revisar testes em `tests/core/**/use_cases/`.
-- Use quando o alvo e regra de negocio em `src/equiny/core/**` (mocks de ports/repositorios; foco em `use_case.execute(...)`).
+- Use quando o alvo e regra de negocio em `src/animus/core/**` (mocks de ports/repositorios; foco em `use_case.execute(...)`).
 
 ### Controllers (REST)
 
@@ -54,7 +54,7 @@ no `equiny-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP).
 
 - Os testes REST usam fixture de DB em `tests/conftest.py` que:
   - exige `ENV.DATABASE_URL` apontando para PostgreSQL
-  - cria um schema isolado por sessao (`equiny_test_<uuid>`)
+  - cria um schema isolado por sessao (`animus_test_<uuid>`)
   - executa `Model.metadata.create_all(...)` no schema de teste
   - sobrescreve `Sqlalchemy.get_session` para a sessao de teste
 - Consequencia: testes REST devem ser independentes e nao devem depender de ordem/estado entre casos.

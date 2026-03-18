@@ -2,10 +2,10 @@
 description: Corrigir bug com planejamento, implementacao iterativa e validacoes
 ---
 
-# Prompt: Corrigir bug (equiny-server)
+# Prompt: Corrigir bug (animus-server)
 
 Objetivo: ler o bug report, planejar a correcao e implementar as mudancas
-necessarias no `equiny-server`, garantindo qualidade (lint/type/tests) e
+necessarias no `animus-server`, garantindo qualidade (lint/type/tests) e
 respeito aos limites arquiteturais.
 
 Entradas:

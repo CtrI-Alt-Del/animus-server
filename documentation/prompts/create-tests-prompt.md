@@ -2,14 +2,14 @@
 description: Criar testes para core e rest seguindo regras do repositorio
 ---
 
-# Prompt: Criar testes (equiny-server)
+# Prompt: Criar testes (animus-server)
 
-Objetivo: orientar a criacao de testes consistentes para o `equiny-server`, cobrindo
+Objetivo: orientar a criacao de testes consistentes para o `animus-server`, cobrindo
 regra de negocio (`core`) e contrato HTTP (`rest`) sem acoplar a infraestrutura no lugar errado.
 
 Entrada:
 
-- Codigo fonte a ser testado (use case em `src/equiny/core/**`, controller/rota em `src/equiny/rest/**`/`src/equiny/routers/**`, ou estruturas de apoio).
+- Codigo fonte a ser testado (use case em `src/animus/core/**`, controller/rota em `src/animus/rest/**`/`src/animus/routers/**`, ou estruturas de apoio).
 
 ---
 

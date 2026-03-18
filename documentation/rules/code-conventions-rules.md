@@ -39,7 +39,7 @@ A ordem das importações deve respeitar a seguinte hierarquia, com cada grupo s
 
 1. **Standard Library:** Pacotes nativos do Python (ex: `os`, `sys`, `datetime`).
 2. **Third Party:** Bibliotecas de terceiros (ex: `fastapi`, `sqlalchemy`, `pydantic`).
-3. **First Party:** Módulos do projeto (ex: `equiny.core`, `equiny.rest`).
+3. **First Party:** Módulos do projeto (ex: `animus.core`, `animus.rest`).
 
 **Exemplo:**
 ```python
@@ -48,7 +48,7 @@ from datetime import datetime
 
 from fastapi import APIRouter
 
-from equiny.core.domain import Horse
+from animus.core.domain import Horse
 ```
 
 ### Observação sobre Tooling Específico
