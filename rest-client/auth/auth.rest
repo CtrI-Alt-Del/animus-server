@@ -1,0 +1,31 @@
+@url = {{BASE_URL}}/auth
+@name = Usuario Teste
+@email = joaopcarvalho.cds@gmail.com
+@password = Senha@123
+@verificationToken = cole-o-token-aqui
+
+### Criar conta (SignUpController)
+POST {{url}}/sign-up
+Content-Type: application/json
+
+{
+  "name": "{{name}}",
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Verificar email (VerifyEmailController)
+GET {{url}}/verify-email
+Content-Type: application/json
+
+{
+  "token": "{{verificationToken}}"
+}
+
+### Reenviar email de verificacao (ResendVerificationEmailController)
+POST {{url}}/resend-verification-email
+Content-Type: application/json
+
+{
+  "email": "{{email}}"
+}

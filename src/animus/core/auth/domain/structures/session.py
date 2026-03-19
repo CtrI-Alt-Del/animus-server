@@ -10,12 +10,21 @@ class Session(Structure):
     refresh_token: Token
 
     @classmethod
-    def create(cls, access_token: Token, refresh_token: Token) -> 'Session':
-        return cls(access_token=access_token, refresh_token=refresh_token)
+    def create(cls, dto: SessionDto) -> 'Session':
+        return cls(
+            access_token=Token.create(
+                value=dto.access_token.value,
+                expires_at=dto.access_token.expires_at,
+            ),
+            refresh_token=Token.create(
+                value=dto.refresh_token.value,
+                expires_at=dto.refresh_token.expires_at,
+            ),
+        )
 
     @property
     def dto(self) -> SessionDto:
         return SessionDto(
-            access_token=self.access_token.value,
-            refresh_token=self.refresh_token.value,
+            access_token=self.access_token.dto,
+            refresh_token=self.refresh_token.dto,
         )
