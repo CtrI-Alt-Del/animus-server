@@ -9,7 +9,7 @@ class Decimal(Structure):
 
     @classmethod
     def create(cls, value: float) -> 'Decimal':
-        if value < 0.0:
+        if value < 0.0 or value >= 1:
             raise ValidationError(
                 f'Valor deve ser maior ou igual a 0.0, recebido: {value}'
             )

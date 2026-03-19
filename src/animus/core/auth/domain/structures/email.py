@@ -15,3 +15,7 @@ class Email(Structure):
             raise ValidationError(f'Email invalido: {value}')
 
         return Email(value=value)
+
+    @property
+    def dto(self) -> str:
+        return self.value
