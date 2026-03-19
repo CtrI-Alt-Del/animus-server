@@ -151,3 +151,5 @@ uv run poe codecheck
 ## 📝 Licenca
 
 Este projeto esta licenciado sob a licenca [MIT](LICENSE).
+
+estou criando testes de integração com testcontainers. Inngest possui imagem disponivel em docker. Mas inngest necessita do FastApiApp rodando. É possível subir test containers para testar inngest nesse necessario?

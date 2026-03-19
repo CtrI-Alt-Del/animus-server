@@ -15,13 +15,13 @@ Entrada:
 
 ## Diretrizes de execucao
 
-### 1) Aderencia as regras do projeto (leitura progressiva)
+### 1 Aderencia as regras do projeto (leitura progressiva)
 
 - Sempre comece por `documentation/rules/testing-rules.md`.
 - Se for use case (`core`): leia `documentation/rules/use-cases-testing-rules.md`.
 - Se for controller (`rest`): leia `documentation/rules/controllers-testing-rules.md`.
 
-### 2) Estrutura e nomenclatura
+### 2 Estrutura e nomenclatura
 
 - Testes nao sao co-localizados no codigo fonte; ficam em `tests/`.
 - Use cases (core):
@@ -35,7 +35,7 @@ Entrada:
   - classe: `Test<ControllerName>`
   - metodo: `test_should_<resultado>_when_<condicao>`
 
-### 3) Stack de testes
+### 3 Stack de testes
 
 - Runner/framework: `pytest`
 - Execucao padrao: `poe test` (usa `pytest -s -x -vv`)
@@ -44,12 +44,12 @@ Entrada:
   - fixture util: `mocker` (pytest-mock), quando fizer sentido
 - REST client: `fastapi.testclient.TestClient` via fixture `client`
 
-### 4) Preparacao de dados (fakers)
+### 4 Preparacao de dados (fakers)
 
 - Reaproveite massa de teste em `tests/fakers/**`.
 - Prefira dados explicitamente configurados quando forem parte da regra (evite aleatoriedade em asserts).
 
-### 5) Estrategia por tipo de teste
+### 5 Estrategia por tipo de teste
 
 - Use case (core):
   - foco: comportamento de negocio do metodo `execute(...)`
@@ -61,13 +61,13 @@ Entrada:
   - exercite o app com `TestClient` usando fixtures `client` e `auth_headers` (quando autenticado)
   - evite acoplar a detalhes internos do use case
 
-### 6) Regras do repo que impactam testes REST
+### 6 Regras do repo que impactam testes REST
 
 - `tests/conftest.py` cria schema isolado no Postgres por sessao de testes e sobrescreve `Sqlalchemy.get_session`.
 - Testes REST exigem `ENV.DATABASE_URL` apontando para PostgreSQL.
 - Side effects externos: fixture `client` faz patch de `InngestPubSub.register` para evitar efeitos colaterais.
 
-### 7) Qualidade
+### 7 Qualidade
 
 - Use Arrange / Act / Assert com separacao por linha em branco (sem comentarios).
 - Cada teste deve ser independente (nao depender de ordem/estado de outro teste).

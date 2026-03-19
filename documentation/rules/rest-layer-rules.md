@@ -121,3 +121,14 @@
 - Contrato de resposta baseado em `Model` ORM.
 - Instanciacao espalhada de adaptadores concretos que poderiam ser reutilizados via `pipes`.
 - `Middleware` carregando fluxo de feature em vez de concern transversal.
+
+### ❌ Anti-padrão: Nomear Body com contexto em vez de `_Body`
+
+**O que foi feito:**
+Em `controllers` HTTP, o schema de body foi nomeado com prefixo do endpoint (ex: `SignUpBody`) em vez do padrao local `_Body`.
+
+**Por que está errado:**
+Quebra a convencao adotada para handlers de endpoint do projeto, aumenta variacao de nomenclatura sem ganho funcional e dificulta leitura rapida do arquivo quando ha um unico body por controller.
+
+**O que deve ser feito:**
+Para controllers que recebem body, usar `_Body` como nome da classe local do schema de entrada e manter o nome do caso de uso no `*Controller`.

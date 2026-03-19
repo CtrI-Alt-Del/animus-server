@@ -35,10 +35,7 @@
 |---|---|
 | `src/animus/core/shared/` | Tipos, abstractions, decorators, `interfaces`, `errors` e `responses` reutilizaveis. |
 | `src/animus/core/auth/` | Dominio e fluxos de autenticacao e conta. |
-| `src/animus/core/profiling/` | Dominio e fluxos de perfil, cavalos e presenca. |
-| `src/animus/core/matching/` | Dominio e fluxos de `swipe`, `match` e verificacoes relacionadas. |
-| `src/animus/core/conversation/` | Dominio e fluxos de conversa, `chat`, mensagem e `icebreaker`. |
-| `src/animus/core/storage/` | Tipos e `use_cases` ligados a arquivos, anexos e `upload URL`. |
+| `src/animus/core/intake/` | Dominio e fluxos de peticoes, analises, precedentes e pastas. |
 | `src/animus/core/notification/` | Contratos e fluxos de notificacao por email e `push`. |
 
 ### Regras de organizacao e nomeacao
@@ -97,7 +94,7 @@
 ### Dependencias permitidas e proibidas
 
 - `core` pode depender de `core/shared` e, com criterio, de contratos de outros contextos internos.
-- `core` nao deve depender de `rest`, `routers`, `pipes`, `database`, `providers`, `pubsub`, `websocket` ou SDKs externos.
+- `core` nao deve depender de `rest`, `routers`, `pipes`, `database`, `providers`, `pubsub` ou SDKs externos.
 
 ### Contratos de comunicacao
 
