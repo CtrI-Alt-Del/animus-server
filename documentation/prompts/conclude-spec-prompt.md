@@ -4,10 +4,9 @@ description: Prompt para concluir uma spec com validação final, atualização 
 
 # Prompt: Conclude Spec
 
-**Objetivo:** Finali e consolidar a implementação de uma Spec técnica no
+**Objetivo:** Finalizar e consolidar a implementação de uma Spec técnica no
 `animus-server`, garantindo que o código esteja polido, documentado e validado —
-produzindo ao final um checklist de validação, os documentos atualizados e um
-rascunho estruturado para o Pull Request.
+produzindo ao final um checklist de validação, os documentos atualizados.
 
 ---
 
@@ -24,19 +23,7 @@ rascunho estruturado para o Pull Request.
 Esta fase é analítica e deve ser concluída antes de qualquer atualização de
 documento.
 
-**1.1 Lint e Formatação**
-
-Execute `poe codecheck` na raiz do projeto. O comando roda o Ruff para lint e
-formatação. Nenhum warning ou erro deve restar. Caso existam, liste-os
-explicitamente e aguarde correção antes de prosseguir.
-
-**1.2 Checagem de Tipos**
-
-Execute `poe typecheck` na raiz do projeto. O Pyright deve retornar zero erros.
-Liste qualquer violação de tipo explicitamente e aguarde correção antes de
-prosseguir.
-
-**1.3 Testes**
+**1.1 Testes**
 
 Execute `poe test` na raiz do projeto. Todos os testes — novos e existentes —
 devem estar passando. Caso algum falhe, interrompa e reporte.
@@ -45,7 +32,7 @@ devem estar passando. Caso algum falhe, interrompa e reporte.
 > explicitamente, indicando que são regressões anteriores e não introduzidas
 > pela implementação atual.
 
-**1.3.1 Cobertura de Testes**
+**1.1.1 Cobertura de Testes**
 
 Com base no diff injetado no contexto e nas regras em
 `documentation/rules/testing-rules.md`, verifique se os novos comportamentos
@@ -67,9 +54,33 @@ Ao final desta etapa, produza um relatório de cobertura no seguinte formato:
 - [ ] <Comportamento C> — **sem cobertura** (detalhe o que está faltando)
 ```
 
-Caso existam lacunas em caminhos críticos, liste-as como pendências e aguarde
-decisão antes de prosseguir para a Fase 2. Não avance com itens críticos
-descobertos.
+**1.1.2 Criação de Testes para Componentes sem Cobertura**
+
+Caso existam itens sem cobertura no relatório acima, acione um **subagent**
+para criá-los antes de avançar para a Fase 2.
+
+O subagent deve receber como contexto:
+
+- O prompt `documentation/prompts/create-tests-prompt.md` como instrução base.
+- A lista de componentes sem cobertura identificados no relatório (1.1.1),
+  com os caminhos reais dos arquivos fonte (`src/animus/...`).
+- O caminho da Spec técnica, para referência de contratos e comportamentos
+  esperados.
+
+> O subagent é responsável por criar os arquivos de teste, seguir as regras de
+> nomenclatura e estrutura do projeto, e garantir que `poe test` passe ao final.
+> Não avance para a Fase 2 enquanto o subagent não concluir sem falhas.
+
+**1.2 Lint e Formatação**
+
+Execute `poe codecheck` na raiz do projeto. O comando roda o Ruff para lint e
+formatação. Nenhum warning ou erro deve restar. Caso existam, liste-os
+explicitamente e corrija antes de prosseguir.
+
+**1.3 Checagem de Tipos**
+
+Execute `poe typecheck` na raiz do projeto. O Pyright deve retornar zero erros.
+Liste qualquer violação de tipo explicitamente e corrija antes de prosseguir.
 
 **1.4 Cobertura de Requisitos**
 
@@ -85,21 +96,31 @@ no seguinte formato:
 - [ ] <Requisito C> — **ausente ou incompleto** (detalhe o gap)
 ```
 
-**1.5 Conformidade Arquitetural**
+**1.5 Conformidade Arquitetural e de Padrões**
 
-Verifique se os arquivos alterados respeitam os limites arquiteturais do projeto
-(conforme `documentation/architecture.md` e as regras das camadas envolvidas):
+Leia `documentation/rules/rules.md` para identificar quais documentos de regras
+são acionados pelas camadas impactadas pela Spec. Em seguida, leia cada um dos
+docs relevantes e valide o código implementado contra eles.
+
+Verifique obrigatoriamente:
 
 - `documentation/rules/core-layer-rules.md` — `core` puro: sem FastAPI,
   SQLAlchemy, sessão, SQL, env var ou HTTP
-- `documentation/rules/database-layer-rules.md` — apenas persistência/mapeamento, sem
-  regra de negócio
+- `documentation/rules/database-layer-rules.md` — apenas persistência/mapeamento,
+  sem regra de negócio
 - `documentation/rules/rest-layer-rules.md` — controllers finos: validam,
   adaptam e delegam para use case
 - `documentation/rules/code-conventions-rules.md` — nomenclatura, organização
   de módulos e padrões de código
 
-Liste explicitamente qualquer desvio identificado.
+Para cada regra violada, reporte:
+
+- **Arquivo:** caminho relativo do arquivo com o desvio
+- **Regra violada:** referência ao doc e à regra específica
+- **Desvio encontrado:** descrição objetiva do problema
+- **Correção necessária:** o que deve ser ajustado
+
+Corrija todos os desvios encontrados antes de avançar para a Fase 2.
 
 ---
 
@@ -110,12 +131,13 @@ pendências.
 
 **2.1 Atualização da Spec Técnica**
 
-Refine o documento da Spec para refletir decisões de design tomadas durante a
-implementação ou desvios de caminho. A audiência é técnica — mantenha o nível
-de detalhe de engenharia. Atualize também:
+Atualize apenas os metadados da Spec para refletir a conclusão da implementação:
 
-- **Status:** `concluído`
+- **Status:** `closed`
 - **Última atualização:** `{{ today }}`
+
+Não altere o conteúdo técnico da spec nesta fase — desvios de implementação
+devem ter sido capturados pelo `update-spec-prompt` durante o desenvolvimento.
 
 **2.2 Atualização do PRD**
 
@@ -129,6 +151,12 @@ Marque como concluídos os itens endereçados pela implementação. A audiência
 
 > 💡 Não copie conteúdo técnico de baixo nível para o PRD — sintetize o valor
 > entregue.
+
+**Divergência spec → PRD:** Caso a implementação concluída introduza algum
+aspecto que contradiga ou não esteja coberto pelo PRD (ex: regra de negócio
+refinada, escopo ampliado ou reduzido, comportamento diferente do especificado),
+atualize o PRD para refletir a realidade entregue. Registre a divergência no
+campo **"O que mudou em relação à Spec original"** do resumo de conclusão da spec (seção 3.1).
 
 **2.3 Atualização da Arquitetura (se aplicável)**
 
@@ -148,9 +176,9 @@ padrão e exemplos práticos.
 
 Esta fase produz o artefato final para facilitar a abertura do Pull Request.
 
-**3.1 Rascunho do Pull Request**
+**3.1 Resumo de conclusão da spec**
 
-Gere um rascunho de descrição de PR com a seguinte estrutura obrigatória:
+Gere um resumo de conclusão com a seguinte estrutura obrigatória:
 ```markdown
 ## O que foi feito
 
@@ -162,7 +190,8 @@ Gere um rascunho de descrição de PR com a seguinte estrutura obrigatória:
 
 ## O que mudou em relação à Spec original
 
-<Desvios ou refinamentos ocorridos durante a implementação. Se nenhum, declare
+<Desvios ou refinamentos ocorridos durante a implementação, incluindo
+divergências que implicaram atualização do PRD. Se nenhum, declarar
 explicitamente "Nenhum desvio em relação à Spec original.">
 
 ## Pontos de atenção para o revisor
@@ -180,7 +209,7 @@ atenção identificado.">
 - [ ] Cobertura de testes verificada e lacunas críticas endereçadas
 - [ ] Limites arquiteturais validados (`core` puro, `rest` fino, `database` isolado)
 - [ ] Spec atualizada com status `concluído` e data
-- [ ] PRD atualizado com os itens concluídos
+- [ ] PRD atualizado com os itens concluídos (e divergências registradas, se houver)
 - [ ] `architecture.md` atualizado (se aplicável)
 - [ ] Rules atualizadas (se novos padrões foram introduzidos)
 ```
@@ -191,8 +220,9 @@ atenção identificado.">
 
 Ao final da execução, devem ter sido produzidos:
 
-1. **Relatório de cobertura de testes** (Fase 1.3.1)
-2. **Checklist de validação** de requisitos (Fase 1.4)
-3. **Spec atualizada** com status `concluído` e data (Fase 2.1)
-4. **PRD atualizado** com itens marcados como concluídos (Fase 2.2)
-5. **Rascunho de PR** com estrutura completa (Fase 3.1)
+1. **Relatório de cobertura de testes** (Fase 1.1.1)
+2. **Testes criados pelo subagent** para componentes sem cobertura (Fase 1.1.2, quando aplicável)
+3. **Checklist de validação** de requisitos (Fase 1.4)
+4. **Spec atualizada** com status `concluído` e data (Fase 2.1)
+5. **PRD atualizado** com itens marcados como concluídos e divergências registradas, se houver (Fase 2.2)
+6. **Resumo de conclusão da spec** com estrutura completa (Fase 3.1)

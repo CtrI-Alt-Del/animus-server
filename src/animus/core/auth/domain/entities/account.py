@@ -12,18 +12,19 @@ class Account(Entity):
     id: Id
     name: Name
     email: Email
-    password: Text
+    password: Text | None
     is_verified: Logical
     is_active: Logical
     social_accounts: list[SocialAccount]
 
     @classmethod
     def create(cls, dto: AccountDto) -> 'Account':
+        password = Text.create(dto.password) if dto.password is not None else None
         return cls(
             id=Id.create(dto.id),
             name=Name.create(dto.name),
             email=Email.create(dto.email),
-            password=Text.create(dto.password),
+            password=password,
             is_verified=Logical.create(dto.is_verified),
             is_active=Logical.create(dto.is_active),
             social_accounts=[
@@ -38,7 +39,7 @@ class Account(Entity):
             id=self.id.value,
             name=self.name.value,
             email=self.email.value,
-            password=self.password.value,
+            password=self.password.value if self.password is not None else None,
             is_verified=self.is_verified.value,
             is_active=self.is_active.value,
             social_accounts=[item.dto for item in self.social_accounts],

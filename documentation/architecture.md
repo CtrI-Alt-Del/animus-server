@@ -32,6 +32,8 @@ HTTP Request -> Middleware -> Router -> Controller -> UseCase (`core`) -> Reposi
 
 Eventos assincronos: UseCase publica evento via `Broker` -> PubSub (Inngest) -> Job/Canal WebSocket -> Cliente conectado.
 
+Fluxo de autenticacao ja implementado: `POST /auth/sign-up` -> `SignUpController` -> `SignUpUseCase` -> `AccountsRepository` / `HashProvider` / `EmailVerificationProvider` -> `Broker` -> `SendAccountVerificationEmailJob` -> `EmailSenderProvider`.
+
 ## Padroes Principais
 
 - **Clean + Hexagonal** para separar regra de negocio de infraestrutura.

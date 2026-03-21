@@ -4,3 +4,9 @@ Leia os documentos
 - documentation/architecture.md Para entender a arquitetura da aplicação
 - documentation/rules/rules.md Para entende as regras e diretizes de desenvolvimento da aplicação
 - documentation/rules/tooling.md Para entender os principais comandos via terminal
+
+MCPs:
+
+- Use MCP da Atlassian para recuperar informações do Confluence e do Jira
+- Use o MCP do Context7 para buscar documentação atualizada de algum aspecto específico de algum framework, biblioteca ou configuração externa
+- Use o MCP do Serena para navegar pela codebase de forma otimizada

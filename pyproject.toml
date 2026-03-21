@@ -22,6 +22,8 @@ dependencies = [
   "testcontainers>=4.14.1",
   "psycopg2-binary>=2.9.11",
   "itsdangerous>=2.2.0",
+  "python-jose>=3.5.0",
+  "resend>=2.13.0",
 ]
 
 [dependency-groups]
