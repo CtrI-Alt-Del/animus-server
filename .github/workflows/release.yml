@@ -29,5 +29,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm install -D semantic-release @semantic-release/changelog @semantic-release/git semantic-release-replace-plugin
+          npm install -D semantic-release @semantic-release/changelog @semantic-release/git semantic-release-replace-plugin @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/github
           npx semantic-release
