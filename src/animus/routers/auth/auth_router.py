@@ -5,6 +5,7 @@ from animus.rest.controllers.auth import (
     SignUpController,
     VerifyEmailController,
 )
+from animus.rest.controllers.auth.sign_in_with_google_controller import SignInWithGoogleController
 
 
 class AuthRouter:
@@ -15,5 +16,6 @@ class AuthRouter:
         SignUpController.handle(router)
         VerifyEmailController.handle(router)
         ResendVerificationEmailController.handle(router)
+        SignInWithGoogleController.handle(router)
 
         return router

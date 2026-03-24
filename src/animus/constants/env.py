@@ -19,6 +19,7 @@ class _Env(BaseSettings):
     RESEND_SENDER_EMAIL: str = 'onboarding@resend.dev'
 
     ANIMUS_SERVER_URL: str = 'http://localhost:8080'
+    GOOGLE_CLIENT_ID: str = 'change_this'
 
     model_config = SettingsConfigDict(
         env_file='.env',

@@ -6,7 +6,7 @@ from animus.core.shared.domain.decorators import dto
 class AccountDto:
     name: str
     email: str
-    password: str | None
+    password: str | None = None
     id: str | None = None
     is_verified: bool = False
     is_active: bool = True

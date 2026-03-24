@@ -1,3 +1,4 @@
+from animus.constants.env import Env
 from animus.core.auth.interfaces import (
     EmailVerificationProvider,
     HashProvider,
@@ -9,6 +10,7 @@ from animus.providers.auth import (
     ItsdangerousEmailVerificationProvider,
     JoseJwtProvider,
 )
+from animus.providers.auth.google.google_oauth_provider import GoogleOAuthProvider
 from animus.providers.notification import (
     ResendEmailSenderProvider,
 )
@@ -30,3 +32,6 @@ class ProvidersPipe:
     @staticmethod
     def get_email_sender_provider() -> EmailSenderProvider:
         return ResendEmailSenderProvider()
+    @staticmethod
+    def get_google_oauth_provider() -> GoogleOAuthProvider:
+        return GoogleOAuthProvider(client_id=Env.GOOGLE_CLIENT_ID)

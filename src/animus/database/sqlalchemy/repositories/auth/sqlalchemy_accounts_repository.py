@@ -30,7 +30,7 @@ class SqlalchemyAccountsRepository(AccountsRepository):
 
         return AccountMapper.to_entity(model)
 
-    def add(self, account: Account, password: Text) -> None:
+    def add(self, account: Account, password: Text | None) -> None:
         self._sqlalchemy.add(AccountMapper.to_model(account, password))
 
     def add_many(self, accounts: list[tuple[Account, Text]]) -> None:
@@ -49,3 +49,11 @@ class SqlalchemyAccountsRepository(AccountsRepository):
         model.name = account.name.value
         model.is_verified = account.is_verified.value
         model.is_active = account.is_active.value
+    def try_to_find_by_email(self, email: Email) -> Account | None:
+        model = self._sqlalchemy.scalar(
+            select(AccountModel).where(AccountModel.email == email.value)
+        )
+        if model is None:
+            return None
+
+        return AccountMapper.to_entity(model)

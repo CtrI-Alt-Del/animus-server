@@ -2,10 +2,12 @@ from .accounts_repository import AccountsRepository
 from .email_verification_provider import EmailVerificationProvider
 from .hash_provider import HashProvider
 from .jwt_provider import JwtProvider
+from .oauth_provider import OAuthProvider
 
 __all__ = [
     'AccountsRepository',
     'HashProvider',
     'JwtProvider',
     'EmailVerificationProvider',
+    'OAuthProvider'
 ]
