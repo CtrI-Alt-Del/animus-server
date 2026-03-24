@@ -1,5 +1,3 @@
-from typing import ClassVar
-
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from animus.constants import Env
@@ -10,8 +8,6 @@ from animus.core.shared.domain.structures import Logical, Text
 
 
 class ItsdangerousEmailVerificationProvider(EmailVerificationProvider):
-    _invalidated_tokens: ClassVar[set[str]] = set()
-
     @staticmethod
     def _serializer() -> URLSafeTimedSerializer:
         return URLSafeTimedSerializer(Env.EMAIL_VERIFICATION_SECRET_KEY)
@@ -24,9 +20,6 @@ class ItsdangerousEmailVerificationProvider(EmailVerificationProvider):
         return Text.create(token)
 
     def verify_verification_token(self, verification_token: Text) -> Logical:
-        if verification_token.value in self._invalidated_tokens:
-            return Logical.create_false()
-
         try:
             self._serializer().loads(
                 verification_token.value,
@@ -39,9 +32,6 @@ class ItsdangerousEmailVerificationProvider(EmailVerificationProvider):
         return Logical.create_true()
 
     def decode_email_from_token(self, verification_token: Text) -> Email:
-        if verification_token.value in self._invalidated_tokens:
-            raise InvalidEmailVerificationTokenError
-
         try:
             value = self._serializer().loads(
                 verification_token.value,
@@ -54,4 +44,4 @@ class ItsdangerousEmailVerificationProvider(EmailVerificationProvider):
         return Email.create(str(value))
 
     def invalidate_verification_token(self, verification_token: Text) -> None:
-        self._invalidated_tokens.add(verification_token.value)
+        _ = verification_token
