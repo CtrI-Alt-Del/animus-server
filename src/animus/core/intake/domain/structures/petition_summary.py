@@ -1,4 +1,4 @@
-from animus.core.intake.domain.structures.dtos.predecent_summary_dto import (
+from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
     PetitionSummaryDto,
 )
 from animus.core.shared.domain.decorators import structure

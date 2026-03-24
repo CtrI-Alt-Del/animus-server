@@ -62,7 +62,7 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 - **`Email`** (`src/animus/core/auth/domain/structures/email.py`) — `Structure` usada para normalizar e validar e-mail no dominio.
 - **`Password`** (`src/animus/core/auth/domain/structures/password.py`) — `Structure` de senha forte usada no `sign-up`; serve de referencia para manter `sign-in` sem reintroduzir regra de cadastro no controller.
 - **`Session` / `SessionDto` / `TokenDto`** (`src/animus/core/auth/domain/structures/session.py`, `src/animus/core/auth/domain/structures/dtos/session_dto.py`, `src/animus/core/auth/domain/structures/dtos/token_dto.py`) — contrato atual de sessao retornado pelos fluxos autenticados.
-- **`AccountsRepository`** (`src/animus/core/auth/interfaces/accounts_repository.py`) — port de persistencia com `find_by_email()` e `find_by_email()`; ainda nao expoe uma forma dedicada de recuperar `password_hash`.
+- **`AccountsRepository`** (`src/animus/core/auth/interfaces/accounts_repository.py`) — port de persistencia com `find_by_id()`, `find_by_email()` e `find_password_hash_by_email()`; expoe uma forma dedicada de recuperar `password_hash` sem acoplar hash na entidade de dominio.
 - **`HashProvider`** (`src/animus/core/auth/interfaces/hash_provider.py`) — contrato para geracao e verificacao de hash; `verify(password: Text, hashed_password: Text) -> Logical` ja existe.
 - **`JwtProvider`** (`src/animus/core/auth/interfaces/jwt_provider.py`) — contrato para emissao de `Session`; ja retorna o tipo de dominio necessario para o endpoint.
 - **`SignUpUseCase`** (`src/animus/core/auth/use_cases/sign_up_use_case.py`) — referencia direta de orquestracao com portas injetadas e retorno de DTO.

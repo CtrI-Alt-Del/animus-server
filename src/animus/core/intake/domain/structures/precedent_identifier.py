@@ -1,8 +1,8 @@
-from ctypes import Structure
 from animus.core.intake.domain.structures import Court, PrecedentKind
 from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
     PrecedentIdentifierDto,
 )
+from animus.core.shared.domain.abstracts import Structure
 from animus.core.shared.domain.decorators import structure
 from animus.core.shared.domain.structures import Integer
 

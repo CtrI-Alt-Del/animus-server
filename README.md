@@ -151,8 +151,3 @@ uv run poe codecheck
 ## 📝 Licenca
 
 Este projeto esta licenciado sob a licenca [MIT](LICENSE).
-
-agora vamos falara as steps do workflow do Agno que deve seguir o fluxo gerar o petition summary como structted output com document content como input
-passo 2: Usar o use case que cria e salva PetitionSummary no banco e retornar PetitionSummary
-o workflow deve se chamar SummarizePetitionWorkflow
-CreatePetitionSummaryUseCase

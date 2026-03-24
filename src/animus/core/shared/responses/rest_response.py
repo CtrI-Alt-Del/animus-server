@@ -48,7 +48,7 @@ class RestResponse[Body]:
 
     @property
     def is_successful(self) -> bool:
-        return self._status_code <= HTTPStatus.BAD_REQUEST
+        return self._status_code < HTTPStatus.BAD_REQUEST
 
     @property
     def is_failure(self) -> bool:
