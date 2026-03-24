@@ -8,19 +8,19 @@ from animus.core.shared.domain.structures import Text
 
 @structure
 class PetitionDocument(Structure):
-    file_key: Text
+    file_path: Text
     name: Text
 
     @classmethod
     def create(cls, dto: PetitionDocumentDto) -> 'PetitionDocument':
         return cls(
-            file_key=Text.create(dto.file_key),
+            file_path=Text.create(dto.file_path),
             name=Text.create(dto.name),
         )
 
     @property
     def dto(self) -> PetitionDocumentDto:
         return PetitionDocumentDto(
-            file_key=self.file_key.value,
+            file_path=self.file_path.value,
             name=self.name.value,
         )

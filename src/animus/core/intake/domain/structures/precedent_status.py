@@ -6,8 +6,8 @@ from animus.core.shared.domain.errors import ValidationError
 
 
 class PrecedentStatusValue(StrEnum):
-    VIGENTE = 'vigente'
     TRANSITADO_EM_JULGADO = 'transitado em julgado'
+    VIGENTE = 'vigente'
 
 
 @structure

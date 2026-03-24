@@ -2,7 +2,7 @@ from typing import Protocol
 
 from animus.core.intake.domain.entities import Folder
 from animus.core.shared.domain.structures import Id, Integer, Text
-from animus.core.shared.responses import PaginationResponse
+from animus.core.shared.responses import CursorPaginationResponse
 
 
 class FoldersRepository(Protocol):
@@ -11,7 +11,7 @@ class FoldersRepository(Protocol):
         search: Text,
         cursor: Id | None,
         limit: Integer,
-    ) -> PaginationResponse[Folder]: ...
+    ) -> CursorPaginationResponse[Folder]: ...
 
     def add(self, folder: Folder) -> None: ...
 
