@@ -11,20 +11,25 @@ from tests.fixtures.auth_fixtures import CreateAccountFixture
 
 
 class TestSignInWithGoogleController:
-    @patch('animus.providers.auth.google.google_oauth_provider.GoogleOAuthProvider.get_user_info')
+    @patch(
+        'animus.providers.auth.google.google_oauth_provider.GoogleOAuthProvider.get_user_info'
+    )
     def test_should_return_201_and_persist_account_when_account_does_not_exist(
         self,
         mock_get_user_info: MagicMock,
         client: TestClient,
         sqlalchemy_session_factory: sessionmaker[Session],
     ) -> None:
-        mock_get_user_info.return_value = (Text.create('Maria Google'), Email.create('maria.google@example.com'))
+        mock_get_user_info.return_value = (
+            Text.create('Maria Google'),
+            Email.create('maria.google@example.com'),
+        )
         payload = {'id_token': 'valid_mocked_id_token'}
 
         response = client.post('/auth/sign-up/google', json=payload)
 
         if response.status_code != 201:
-            print("ERRO DA API:", response.json())
+            print('ERRO DA API:', response.json())
         assert response.status_code == 201
 
         inspection_session = sqlalchemy_session_factory()
@@ -44,16 +49,21 @@ class TestSignInWithGoogleController:
         assert 'value' in json_response['access_token']
         assert 'refresh_token' in json_response
 
-    @patch('animus.providers.auth.google.google_oauth_provider.GoogleOAuthProvider.get_user_info')
+    @patch(
+        'animus.providers.auth.google.google_oauth_provider.GoogleOAuthProvider.get_user_info'
+    )
     def test_should_return_201_and_return_session_when_account_already_exists(
         self,
-        mock_get_user_info,
+        mock_get_user_info: MagicMock,
         client: TestClient,
         create_account: CreateAccountFixture,
     ) -> None:
         email = 'maria.google@example.com'
-        mock_get_user_info.return_value = (Text.create('Maria Google'), Email.create('maria.google@example.com'))
-        
+        mock_get_user_info.return_value = (
+            Text.create('Maria Google'),
+            Email.create('maria.google@example.com'),
+        )
+
         create_account(email=email, name='Maria Google')
 
         payload = {'id_token': 'valid_mocked_id_token'}
