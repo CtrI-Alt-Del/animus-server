@@ -20,12 +20,12 @@ class AccountMapper:
         )
 
     @staticmethod
-    def to_model(account: Account, password_hash: Text) -> AccountModel:
+    def to_model(account: Account, password_hash: Text | None) -> AccountModel:
         return AccountModel(
             id=account.id.value,
             name=account.name.value,
             email=account.email.value,
-            password_hash=password_hash.value,
+            password_hash=password_hash.value if password_hash else None,
             is_verified=account.is_verified.value,
             is_active=account.is_active.value,
         )
