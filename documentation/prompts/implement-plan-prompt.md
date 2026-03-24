@@ -21,7 +21,7 @@ description: Implementar um plano de implementacao derivado de uma spec tecnica.
    - Antes de implementar uma camada, se necessario, consulte as regras correspondentes em `documentation/rules/`.
    - Preserve padroes existentes (nomenclatura, organizacao de pastas, providers, presenters).
 
-3. **Orquestracao com subagents (se aplicavel)**
+3. **Orquestracao com subagents**
 
    Execute o plano respeitando o grafo de dependencias das fases:
 

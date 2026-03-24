@@ -207,7 +207,7 @@ atenção identificado.">
 - [ ] `poe typecheck` retornou zero erros
 - [ ] `poe test` passou sem falhas (ou regressões pré-existentes devidamente sinalizadas)
 - [ ] Cobertura de testes verificada e lacunas críticas endereçadas
-- [ ] Limites arquiteturais validados (`core` puro, `rest` fino, `database` isolado)
+- [ ] Limites arquiteturais validados
 - [ ] Spec atualizada com status `concluído` e data
 - [ ] PRD atualizado com os itens concluídos (e divergências registradas, se houver)
 - [ ] `architecture.md` atualizado (se aplicável)

@@ -161,14 +161,7 @@ Categorias relevantes para o server (usar apenas se aplicável):
 
 ---
 
-# 4. Regras de Negócio e Invariantes (Obrigatório)
-
-[Liste as regras e invariantes de domínio que a implementação deve garantir.
-Ex: "não é permitido cadastrar dois usuários com o mesmo e-mail".]
-
----
-
-# 5. O que já existe? (Obrigatório)
+# 4. O que já existe? (Obrigatório)
 
 [Liste recursos da codebase que serão utilizados ou impactados. Inclua apenas
 itens realmente relevantes para implementar a mudança.]
@@ -181,7 +174,7 @@ itens realmente relevantes para implementar a mudança.]
 
 ---
 
-# 6. O que deve ser criado? (Depende da tarefa)
+# 5. O que deve ser criado? (Depende da tarefa)
 
 [Descreva novos componentes dividindo por camadas. Para cada arquivo novo,
 detalhe e marque explicitamente como **novo arquivo**.]
@@ -302,7 +295,7 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ---
 
-# 7. O que deve ser modificado? (Depende da tarefa)
+# 6. O que deve ser modificado? (Depende da tarefa)
 
 [Descreva alterações em código existente.]
 
@@ -316,7 +309,7 @@ detalhe e marque explicitamente como **novo arquivo**.]
 
 ---
 
-# 8. O que deve ser removido? (Depende da tarefa)
+# 7. O que deve ser removido? (Depende da tarefa)
 
 [Descreva remoções de código legado, endpoints obsoletos ou limpeza de
 refatoração.]
@@ -331,7 +324,7 @@ refatoração.]
 
 ---
 
-# 9. Decisões Técnicas e Trade-offs (Obrigatório)
+# 8. Decisões Técnicas e Trade-offs (Obrigatório)
 
 [Registre decisões relevantes para revisão futura.]
 
@@ -344,7 +337,7 @@ Para cada decisão importante:
 
 ---
 
-# 10. Diagramas e Referências (Obrigatório)
+# 9. Diagramas e Referências (Obrigatório)
 
 - **Fluxo de dados:** diagrama em notação ASCII mostrando a interação entre
   camadas para o fluxo principal da feature.
@@ -355,7 +348,7 @@ Para cada decisão importante:
 
 ---
 
-# 11. Pendências / Dúvidas (Quando aplicável)
+# 10. Pendências / Dúvidas (Quando aplicável)
 
 [Liste perguntas em aberto, incongruências e pontos que dependem de
 confirmação.]

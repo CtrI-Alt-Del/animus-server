@@ -152,4 +152,7 @@ uv run poe codecheck
 
 Este projeto esta licenciado sob a licenca [MIT](LICENSE).
 
-estou criando testes de integração com testcontainers. Inngest possui imagem disponivel em docker. Mas inngest necessita do FastApiApp rodando. É possível subir test containers para testar inngest nesse necessario?
+agora vamos falara as steps do workflow do Agno que deve seguir o fluxo gerar o petition summary como structted output com document content como input
+passo 2: Usar o use case que cria e salva PetitionSummary no banco e retornar PetitionSummary
+o workflow deve se chamar SummarizePetitionWorkflow
+CreatePetitionSummaryUseCase
