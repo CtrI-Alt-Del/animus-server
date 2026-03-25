@@ -15,12 +15,7 @@ Content-Type: application/json
 }
 
 ### Verificar email (VerifyEmailController)
-GET {{url}}/verify-email
-Content-Type: application/json
-
-{
-  "token": "{{verificationToken}}"
-}
+GET {{url}}/verify-email?token={{verificationToken}}
 
 ### Reenviar email de verificacao (ResendVerificationEmailController)
 POST {{url}}/resend-verification-email
@@ -28,4 +23,13 @@ Content-Type: application/json
 
 {
   "email": "{{email}}"
+}
+
+### Entrar com email e senha (SignInController)
+POST {{url}}/sign-in
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
 }

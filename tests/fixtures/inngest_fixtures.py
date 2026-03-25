@@ -2,7 +2,7 @@ import json
 import socket
 import threading
 import time
-from collections.abc import Callable, Generator
+from collections.abc import Callable, Iterator
 from http.client import HTTPResponse
 from typing import Any, cast
 from urllib import request
@@ -22,8 +22,8 @@ class InngestTestRuntime:
 
     def post_event(self, *, name: str, data: dict[str, Any]) -> HTTPResponse:
         payload = json.dumps({'name': name, 'data': data}).encode()
-        response = request.urlopen(
-            request.Request(
+        response = request.urlopen(  # noqa: S310
+            request.Request(  # noqa: S310
                 url=f'{self.base_url}/e/test',
                 data=payload,
                 headers={'Content-Type': 'application/json'},
@@ -62,8 +62,8 @@ def _wait_until(
         try:
             if predicate():
                 return
-        except Exception:
-            pass
+        except (ConnectionError, OSError, RuntimeError):
+            continue
         time.sleep(interval_seconds)
 
     msg = 'condition not satisfied before timeout'
@@ -79,7 +79,7 @@ def _can_connect(*, host: str, port: int) -> bool:
 def inngest_runtime(
     monkeypatch: pytest.MonkeyPatch,
     sqlalchemy_session_factory: SessionFactory,
-) -> Generator[InngestTestRuntime]:
+) -> Iterator[InngestTestRuntime]:
     app_port = _find_free_port()
     inngest_port = _find_free_port()
 
@@ -98,7 +98,7 @@ def inngest_runtime(
     server = Server(
         Config(
             app=app,
-            host='0.0.0.0',
+            host='0.0.0.0',  # noqa: S104
             port=app_port,
             log_level='warning',
         )
@@ -110,7 +110,7 @@ def inngest_runtime(
         _wait_until(lambda: server.started)
 
         with (
-            DockerContainer('inngest/inngest:latest')
+            DockerContainer('inngest/inngest:v0.27.0')
             .with_command(
                 'inngest dev '
                 f'-u http://host.docker.internal:{app_port}/api/inngest '

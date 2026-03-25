@@ -1,4 +1,5 @@
 from .list_response import ListResponse
-from .pagination_response import PaginationResponse
+from .cursor_pagination_response import CursorPaginationResponse
+from .page_pagination_response import PagePaginationResponse
 
-__all__ = ['ListResponse', 'PaginationResponse']
+__all__ = ['ListResponse', 'CursorPaginationResponse', 'PagePaginationResponse']

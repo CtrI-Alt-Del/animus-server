@@ -32,6 +32,7 @@ class ProvidersPipe:
     @staticmethod
     def get_email_sender_provider() -> EmailSenderProvider:
         return ResendEmailSenderProvider()
+
     @staticmethod
     def get_google_oauth_provider() -> GoogleOAuthProvider:
         return GoogleOAuthProvider(client_id=Env.GOOGLE_CLIENT_ID)

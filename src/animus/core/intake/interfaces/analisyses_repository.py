@@ -2,7 +2,7 @@ from typing import Protocol
 
 from animus.core.intake.domain.entities import Analysis
 from animus.core.shared.domain.structures import Id, Integer, Text
-from animus.core.shared.responses import PaginationResponse
+from animus.core.shared.responses import CursorPaginationResponse
 
 
 class AnalisysesRepository(Protocol):
@@ -13,7 +13,7 @@ class AnalisysesRepository(Protocol):
         search: Text,
         cursor: Id | None,
         limit: Integer,
-    ) -> PaginationResponse[Analysis]: ...
+    ) -> CursorPaginationResponse[Analysis]: ...
 
     def add(self, analysis: Analysis) -> None: ...
 

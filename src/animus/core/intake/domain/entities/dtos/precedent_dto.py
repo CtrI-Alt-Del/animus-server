@@ -1,14 +1,13 @@
+from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
+    PrecedentIdentifierDto,
+)
 from animus.core.shared.domain.decorators import dto
 
 
 @dto
 class PrecedentDto:
-    court: str
-    number: int
-    synthesis: str
-    kind: str
+    identifier: PrecedentIdentifierDto
     status: str
-    title: str
     enunciation: str
     thesis: str
     last_updated_in_pangea_at: str

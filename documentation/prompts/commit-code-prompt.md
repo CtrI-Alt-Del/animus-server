@@ -1,65 +1,143 @@
 ---
-description: Prompt para analisar alteracoes e executar commits reais com Conventional Commits e task do Jira.
+description: Prompt para analisar alteracoes e executar commits reais com Conventional Commits + task Jira.
 ---
 
 # Prompt: Fazer Commits no Codigo
 
-## Objetivo
+**Objetivo Principal**
 
-Criar e executar commits reais no repositorio com mensagens no padrao Conventional Commits e com inclusao obrigatoria da task do Jira.
+Criar **e executar commits reais** no repositorio para todas as alteracoes detectadas,
+seguindo o padrao **Conventional Commits** com inclusao obrigatoria da task no Jira.
 
-Formato obrigatorio:
+Voce **deve executar comandos git**, nao apenas sugerir mensagens.
 
-`<type>(<scope opcional>)?: <JIRA-123> <descricao em ingles>`
+---
+
+## Regra Critica
+
+Se existirem arquivos modificados, voce e obrigado a:
+
+- executar `git add`
+- executar `git commit`
+- repetir o processo ate nao restarem mudancas pendentes
+
+Nunca apenas sugira commits. Nunca pare somente na mensagem. **Sempre execute os comandos.**
+
+---
+
+## Diretrizes de Execucao
+
+### Pre-condicao obrigatoria
+
+Antes de qualquer comando git, valide se a entrada do usuario forneceu a task Jira.
+
+> ⚠️ **REGRA DE INFERENCIA PELO NOME DA BRANCH**
+>
+> Se o usuario **nao informar** o `JIRA-TASK-ID`, voce **NAO deve interromper imediatamente**.
+> Antes, execute obrigatoriamente:
+>
+> ```bash
+> git branch --show-current
+> ```
+>
+> Extraia o ID no formato `ANI-123` do nome da branch. Exemplos de branches validas:
+>
+> - `feature/ANI-42-add-login` → `ANI-42`
+> - `ANI-77-fix-duplicate-achievement` → `ANI-77`
+> - `bugfix/ANI-123` → `ANI-123`
+>
+> Use o ID extraido como `JIRA-TASK-ID` para todos os commits.
+>
+> **Somente se a branch nao contiver um ID valido no formato `ANI-123`**, interrompa a execucao com:
+>
+> ```
+> ERROR: Missing Jira task id (expected format: ANI-123). Branch name also does not contain a valid task id.
+> ```
+
+Regras de validacao do ID:
+
+- Se **fornecido pelo usuario** no formato `ANI-123` → use diretamente
+- Se **nao fornecido** → tente extrair do nome da branch com `git branch --show-current`
+- Se **nenhuma das duas fontes** tiver um ID valido → interrompa a execucao
+
+---
+
+### 1 Detectar Alteracoes
+
+Execute primeiro:
+
+`git status --porcelain`
+
+- Se vazio -> responda: `No changes to commit`
+- Se houver alteracoes -> continue
+
+---
+
+### 2 Analise do Contexto
+
+- Analise nome/caminho e tambem o diff das alteracoes
+- Agrupe por responsabilidade
+- Se houver mudancas em camadas diferentes (ex: UI e REST), crie commits separados
+
+---
+
+### 3 Padrao de Mensagem (Strict)
+
+Cada commit deve seguir **obrigatoriamente** o formato:
+
+`<type>: <JIRA-TASK-ID> <description>`
 
 Exemplo:
 
 `feat: ANI-23 add sign in screen`
 
-## Regra Critica
+Regras:
 
-Se existirem arquivos modificados, execute `git add` e `git commit` ate nao restarem mudancas pendentes. Nao apenas sugira mensagens: execute os comandos.
+- Mensagem em ingles
+- `JIRA-TASK-ID` obrigatoria em todos os commits (ex: `ANI-23`)
+- Um commit por responsabilidade
+- Sem emoji
 
-## Validacao automatica da mensagem
+Tipos permitidos (Conventional Commits):
 
-A validacao do formato de commit deve ser feita com **Commitlint + Husky** no hook `commit-msg`.
+- `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
 
-Formato validado automaticamente:
+---
 
-`<type>(<scope opcional>)?: <PROJ-123> <descricao em ingles>`
+### 4 Execucao Obrigatoria
 
-Exemplo valido:
+Para cada grupo de arquivos identificado, execute:
 
-`feat(auth): ANI-23 add sign in screen`
+`git add <arquivos-do-grupo>`
+`git commit -m "<type>: <JIRA-TASK-ID> <description>"`
 
-## Diretrizes de Execucao
+Nao peca confirmacao. Nao gere apenas sugestao. **Execute.**
 
-1. Detectar alteracoes com `git status --porcelain`.
-2. Se vazio, responder `No changes to commit`.
-3. Se houver alteracoes, agrupar por responsabilidade e criar commits separados quando necessario.
-4. Escrever mensagens em ingles no formato exigido.
+---
 
-## Tipos permitidos
+### 5 Exemplos de Referencia
 
-- `build`
-- `chore`
-- `ci`
-- `docs`
-- `feat`
-- `fix`
-- `perf`
-- `refactor`
-- `revert`
-- `style`
-- `test`
+- `feat: ANI-23 add sign in screen`
+- `fix: ANI-77 prevent duplicate achievement unlock`
+- `refactor: ANI-91 simplify challenge repository contract`
+- `docs: ANI-10 update mobile architecture guide`
 
-## Checklist antes de cada commit
+---
 
-- Mensagem segue Conventional Commits.
-- Mensagem inclui task Jira no formato `PROJ-123`.
-- Descricao curta e objetiva em ingles.
-- Commit representa um unico grupo de responsabilidade.
+### 6 Verificacao Final (Antes de cada commit)
 
-## Exemplo de comando
+- tipo valido de Conventional Commits
+- task Jira presente no formato `ANI-123`
+- descricao curta, objetiva e em ingles
+- representa corretamente o grupo de arquivos
 
-`git add <arquivos-do-grupo> && git commit -m "feat: ANI-23 add sign in screen"`
+---
+
+### 7 Formato de Saida Obrigatorio
+
+Mostre apenas comandos executados:
+
+`EXECUTING: git add src/modules/auth/sign-in.tsx`
+`EXECUTING: git commit -m "feat: ANI-23 add sign in screen"`
+
+Sem explicacoes longas. Sem sugestoes. Sem parar antes de commitar.

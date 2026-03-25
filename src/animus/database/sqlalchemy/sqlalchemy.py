@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from contextlib import contextmanager
-from collections.abc import Generator
+from collections.abc import Iterator
 from sqlalchemy.orm import sessionmaker, Session
 
 from animus.constants import Env
@@ -30,7 +30,7 @@ class Sqlalchemy:
 
     @staticmethod
     @contextmanager
-    def session() -> Generator[Session]:
+    def session() -> Iterator[Session]:
         session = Sqlalchemy.get_session()
         try:
             yield session

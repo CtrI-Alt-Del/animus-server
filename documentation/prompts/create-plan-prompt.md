@@ -31,6 +31,8 @@
 
 > ⚠️ **Regra** Não leia desnecessariamente os arquivos especificados na `spec`, pois a spec já foi validada.
 
+> ⚠️ **Regra** Não incluir testes automatizados.
+
 ## Saida esperada
 
 - Uma lista de fases (com objetivo).

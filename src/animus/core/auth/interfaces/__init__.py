@@ -9,5 +9,5 @@ __all__ = [
     'HashProvider',
     'JwtProvider',
     'EmailVerificationProvider',
-    'OAuthProvider'
+    'OAuthProvider',
 ]

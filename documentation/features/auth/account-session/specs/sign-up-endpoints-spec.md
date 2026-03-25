@@ -1,8 +1,8 @@
 ---
 title: Endpoints de sign-up, verificacao e reenvio de e-mail
-prd: documentation/features/auth/account-session/prd.md
+prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/AwACAQ
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-35
-status: concluido
+status: closed
 last_updated_at: 2026-03-19
 ---
 
@@ -217,8 +217,9 @@ Entregar o primeiro fluxo HTTP completo de `auth` no `animus-server`, cobrindo `
 - **Metodos:**
   - `find_by_id(account_id: Id) -> Account` - busca a conta por ID ou lanca `AccountNotFoundError`.
   - `find_by_email(email: Email) -> Account` - busca a conta por e-mail ou lanca `AccountNotFoundError`.
-  - `add(account: Account, password: Text) -> None` - persiste uma nova conta manual com `password_hash`.
-  - `add_many(accounts: list[tuple[Account, Text]]) -> None` - persiste varias contas manuais com seus hashes; mantem o port coerente com a nova separacao de senha.
+  - `find_password_hash_by_email(email: Email) -> Text | None` - busca o hash de senha de uma conta manual pelo e-mail ou retorna `None` quando a conta nao possui hash.
+  - `add(account: Account, password_hash: Text | None) -> None` - persiste uma nova conta com `password_hash` quando disponivel.
+  - `add_many(accounts: list[tuple[Account, Text | None]]) -> None` - persiste varias contas com seus hashes quando disponiveis, mantendo o port coerente com a separacao entre entidade e hash.
   - `replace(account: Account) -> None` - atualiza `name`, `is_verified` e `is_active` sem alterar `password_hash`.
 
 - **Localizacao:** `src/animus/database/sqlalchemy/repositories/auth/__init__.py` (**novo arquivo**)
@@ -384,7 +385,7 @@ Entregar o primeiro fluxo HTTP completo de `auth` no `animus-server`, cobrindo `
 - **Justificativa:** preserva compatibilidade estrutural do DTO sem expor senha ou hash na API.
 
 - **Arquivo:** `src/animus/core/auth/interfaces/accounts_repository.py`
-- **Mudanca:** alterar `add()` para `add(account: Account, password: Text) -> None` e `add_many()` para `add_many(accounts: list[tuple[Account, Text]]) -> None`.
+- **Mudanca:** alterar `add()` para `add(account: Account, password_hash: Text) -> None` e `add_many()` para `add_many(accounts: list[tuple[Account, Text]]) -> None`.
 - **Justificativa:** o hash da senha deixa de fazer parte de `Account`, mas continua sendo necessario na persistencia.
 
 - **Arquivo:** `src/animus/core/auth/interfaces/email_verification_provider.py`
@@ -584,7 +585,3 @@ SignUpUseCase / ResendVerificationEmailUseCase
   - `src/animus/app.py`
 
 ---
-
-# 11. Pendencias / Duvidas
-
-Sem pendências.

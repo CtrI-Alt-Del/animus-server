@@ -19,7 +19,7 @@ class Account(Entity):
 
     @classmethod
     def create(cls, dto: AccountDto) -> 'Account':
-        password=Text.create(dto.password) if dto.password else None
+        password = Text.create(dto.password) if dto.password else None
         return cls(
             id=Id.create(dto.id),
             name=Name.create(dto.name),

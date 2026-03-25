@@ -8,7 +8,20 @@ from animus.core.shared.domain.errors import ValidationError
 class PrecedentKindValue(StrEnum):
     SUM = 'SUM'
     SV = 'SV'
+    OJ = 'OJ'
     RG = 'RG'
+    RR = 'RR'
+    TR = 'TR'
+    IRDR = 'IRDR'
+    IAC = 'IAC'
+    PUIL = 'PUIL'
+    ADI = 'ADI'
+    ADC = 'ADC'
+    ADO = 'ADO'
+    ADPF = 'ADPF'
+    NT = 'NT'
+    GR = 'GR'
+    CONT = 'CONT'
 
 
 @structure

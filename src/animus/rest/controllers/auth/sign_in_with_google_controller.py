@@ -28,12 +28,10 @@ class SignInWithGoogleController:
                 Depends(DatabasePipe.get_accounts_repository_from_request),
             ],
             jwt_provider: Annotated[
-                JwtProvider, 
-                Depends(ProvidersPipe.get_jwt_provider)
+                JwtProvider, Depends(ProvidersPipe.get_jwt_provider)
             ],
             google_oauth_provider: Annotated[
-                OAuthProvider, 
-                Depends(ProvidersPipe.get_google_oauth_provider)
+                OAuthProvider, Depends(ProvidersPipe.get_google_oauth_provider)
             ],
         ) -> SessionDto:
             use_case = SignInWithGoogleUseCase(
@@ -41,6 +39,4 @@ class SignInWithGoogleController:
                 jwt_provider=jwt_provider,
                 google_oauth_provider=google_oauth_provider,
             )
-            return use_case.execute(
-                id_token=body.id_token
-            )
+            return use_case.execute(id_token=body.id_token)

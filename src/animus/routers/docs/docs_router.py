@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
-from animus.rest.controllers.docs.render_docs_page_controller import RenderDocsPageController
-
+from animus.rest.controllers.docs.render_docs_page_controller import (
+    RenderDocsPageController,
+)
 
 
 class DocsRouter:

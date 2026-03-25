@@ -8,7 +8,6 @@ from animus.app import FastAPIApp  # noqa: E402
 app = FastAPIApp.register()
 
 
-
 def main() -> None:
     from animus.constants import Env
 

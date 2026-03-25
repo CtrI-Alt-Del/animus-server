@@ -3,10 +3,9 @@ from enum import StrEnum
 from animus.core.intake.domain.entities.dtos.analysis_status_dto import (
     AnalysisStatusDto,
 )
-from animus.core.shared.domain.abstracts import Entity
-from animus.core.shared.domain.decorators import entity
+from animus.core.shared.domain.abstracts import Structure
+from animus.core.shared.domain.decorators import structure
 from animus.core.shared.domain.errors import ValidationError
-from animus.core.shared.domain.structures import Id
 
 
 class AnalysisStatusValue(StrEnum):
@@ -17,8 +16,8 @@ class AnalysisStatusValue(StrEnum):
     FAILED = 'FAILED'
 
 
-@entity
-class AnalysisStatus(Entity):
+@structure
+class AnalysisStatus(Structure):
     value: AnalysisStatusValue
 
     @classmethod
@@ -28,8 +27,8 @@ class AnalysisStatus(Entity):
         except ValueError as error:
             raise ValidationError(f'Status de analise invalido: {dto.value}') from error
 
-        return cls(id=Id.create(dto.id), value=normalized_value)
+        return cls(value=normalized_value)
 
     @property
     def dto(self) -> AnalysisStatusDto:
-        return AnalysisStatusDto(id=self.id.value, value=self.value.value)
+        return AnalysisStatusDto(value=self.value.value)

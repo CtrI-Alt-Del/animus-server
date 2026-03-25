@@ -26,8 +26,18 @@ def upgrade() -> None:
         sa.Column('password_hash', sa.String(), nullable=False),
         sa.Column('is_verified', sa.Boolean(), nullable=False),
         sa.Column('is_active', sa.Boolean(), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.Column('updated_at', sa.DateTime(), nullable=False),
+        sa.Column(
+            'created_at',
+            sa.DateTime(),
+            nullable=False,
+            server_default=sa.func.now(),
+        ),
+        sa.Column(
+            'updated_at',
+            sa.DateTime(),
+            nullable=False,
+            server_default=sa.func.now(),
+        ),
         sa.PrimaryKeyConstraint('id'),
     )
     op.create_index(op.f('ix_accounts_email'), 'accounts', ['email'], unique=True)

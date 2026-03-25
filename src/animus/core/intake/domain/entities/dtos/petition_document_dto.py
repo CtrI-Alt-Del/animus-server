@@ -3,5 +3,5 @@ from animus.core.shared.domain.decorators import dto
 
 @dto
 class PetitionDocumentDto:
-    file_key: str
+    file_path: str
     name: str

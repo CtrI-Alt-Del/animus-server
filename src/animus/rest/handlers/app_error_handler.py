@@ -5,6 +5,7 @@ from animus.core.shared.domain.errors import (
     AppError,
     AuthError,
     ConflictError,
+    ForbiddenError,
     NotFoundError,
     ValidationError,
 )
@@ -47,6 +48,10 @@ class AppErrorHandler:
         return AppErrorHandler._build_response(401, error)
 
     @staticmethod
+    async def handle_forbidden_error(_: Request, error: Exception) -> JSONResponse:
+        return AppErrorHandler._build_response(403, error)
+
+    @staticmethod
     async def handle_app_error(_: Request, error: Exception) -> JSONResponse:
         return AppErrorHandler._build_response(400, error)
 
@@ -58,4 +63,7 @@ class AppErrorHandler:
             ValidationError, AppErrorHandler.handle_validation_error
         )
         app.add_exception_handler(AuthError, AppErrorHandler.handle_auth_error)
+        app.add_exception_handler(
+            ForbiddenError, AppErrorHandler.handle_forbidden_error
+        )
         app.add_exception_handler(AppError, AppErrorHandler.handle_app_error)

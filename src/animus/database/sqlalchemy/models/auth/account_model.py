@@ -10,6 +10,8 @@ class AccountModel(Model):
     id: Mapped[str] = mapped_column(String(26), primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
-    password_hash: Mapped[str | None] = mapped_column(String, nullable=True,default=None)
+    password_hash: Mapped[str | None] = mapped_column(
+        String, nullable=True, default=None
+    )
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

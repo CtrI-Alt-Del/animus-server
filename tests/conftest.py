@@ -39,6 +39,6 @@ def client(
 
 pytest_plugins = [
     'fixtures.auth_fixtures',
-    'fixtures.sqlachemy_fixtures',
+    'fixtures.sqlalchemy_fixtures',
     'fixtures.inngest_fixtures',
 ]
