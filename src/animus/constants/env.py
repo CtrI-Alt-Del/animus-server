@@ -11,9 +11,8 @@ class _Env(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRATION_SECONDS: int = 3600
     JWT_REFRESH_TOKEN_EXPIRATION_SECONDS: int = 3600
 
-    EMAIL_VERIFICATION_SECRET_KEY: str = ''
-    EMAIL_VERIFICATION_SALT: str = 'email-verification'
-    EMAIL_VERIFICATION_TOKEN_MAX_AGE_SECONDS: int = 3600
+    REDIS_URL: str = 'redis://localhost:6379/0'
+    EMAIL_VERIFICATION_OTP_TTL_SECONDS: int = 3600
 
     RESEND_API_KEY: str = 're_change_this'
     RESEND_SENDER_EMAIL: str = 'onboarding@resend.dev'

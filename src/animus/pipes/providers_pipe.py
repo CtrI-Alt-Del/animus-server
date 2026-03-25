@@ -1,19 +1,20 @@
 from animus.constants.env import Env
 from animus.core.auth.interfaces import (
-    EmailVerificationProvider,
     HashProvider,
     JwtProvider,
 )
 from animus.core.notification.interfaces import EmailSenderProvider
+from animus.core.shared.interfaces import CacheProvider, OtpProvider
 from animus.providers.auth import (
     Argon2idHashProvider,
-    ItsdangerousEmailVerificationProvider,
     JoseJwtProvider,
+    SecretsOtpProvider,
 )
 from animus.providers.auth.google.google_oauth_provider import GoogleOAuthProvider
 from animus.providers.notification import (
     ResendEmailSenderProvider,
 )
+from animus.providers.shared import RedisCacheProvider
 
 
 class ProvidersPipe:
@@ -26,8 +27,12 @@ class ProvidersPipe:
         return JoseJwtProvider()
 
     @staticmethod
-    def get_email_verification_provider() -> EmailVerificationProvider:
-        return ItsdangerousEmailVerificationProvider()
+    def get_cache_provider() -> CacheProvider:
+        return RedisCacheProvider(redis_url=Env.REDIS_URL)
+
+    @staticmethod
+    def get_otp_provider() -> OtpProvider:
+        return SecretsOtpProvider()
 
     @staticmethod
     def get_email_sender_provider() -> EmailSenderProvider:

@@ -48,9 +48,7 @@ class TestSignUpController:
         assert (
             fake_inngest_client.sent_events[0].data['account_email'] == payload['email']
         )
-        assert fake_inngest_client.sent_events[0].data[
-            'account_email_verification_token'
-        ]
+        assert fake_inngest_client.sent_events[0].data['account_email_otp']
 
     def test_should_return_409_when_email_already_exists(
         self,

@@ -2,7 +2,7 @@
 @name = Usuario Teste
 @email = joaopcarvalho.cds@gmail.com
 @password = Senha@123
-@verificationToken = cole-o-token-aqui
+@otp = 076320
 
 ### Criar conta (SignUpController)
 POST {{url}}/sign-up
@@ -14,15 +14,21 @@ Content-Type: application/json
   "password": "{{password}}"
 }
 
-### Verificar email (VerifyEmailController)
-GET {{url}}/verify-email?token={{verificationToken}}
-
 ### Reenviar email de verificacao (ResendVerificationEmailController)
 POST {{url}}/resend-verification-email
 Content-Type: application/json
 
 {
   "email": "{{email}}"
+}
+
+### Verificar email com OTP (VerifyEmailController)
+POST {{url}}/verify-email
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "otp": "{{otp}}"
 }
 
 ### Entrar com email e senha (SignInController)

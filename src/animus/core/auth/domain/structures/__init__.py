@@ -3,6 +3,7 @@ from .password import Password
 from .session import Session
 from .social_account_provider import SocialAccountProvider, SocialAccountProviderValue
 from .token import Token
+from .otp import Otp
 
 __all__ = [
     'Email',
@@ -11,4 +12,5 @@ __all__ = [
     'Session',
     'SocialAccountProvider',
     'SocialAccountProviderValue',
+    'Otp',
 ]

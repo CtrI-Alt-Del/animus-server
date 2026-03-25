@@ -1,38 +1,50 @@
+from animus.constants.cache_keys import CacheKeys
 from animus.core.auth.domain.errors import (
     AccountNotFoundError,
     InvalidEmailVerificationTokenError,
 )
+from animus.core.auth.domain.structures import Email, Otp
 from animus.core.auth.domain.structures.dtos import SessionDto
 from animus.core.auth.interfaces import (
     AccountsRepository,
-    EmailVerificationProvider,
     JwtProvider,
 )
+from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Text
+from animus.core.shared.interfaces import CacheProvider
 
 
 class VerifyEmailUseCase:
     def __init__(
         self,
         accounts_repository: AccountsRepository,
-        email_verification_provider: EmailVerificationProvider,
+        cache_provider: CacheProvider,
         jwt_provider: JwtProvider,
     ) -> None:
         self._accounts_repository = accounts_repository
-        self._email_verification_provider = email_verification_provider
+        self._cache_provider = cache_provider
         self._jwt_provider = jwt_provider
 
-    def execute(self, token: str) -> SessionDto:
-        verification_token = Text.create(token)
-        is_valid_token = self._email_verification_provider.verify_verification_token(
-            verification_token
+    def execute(self, email: str, otp: str) -> SessionDto:
+        account_email = Email.create(email)
+        account_email_otp = Otp.create(otp)
+
+        email_verification_cache_key = CacheKeys().get_email_verification(
+            account_email.value
         )
-        if is_valid_token.is_false:
+        cached_account_email_otp = self._cache_provider.get(
+            email_verification_cache_key
+        )
+        if cached_account_email_otp is None:
             raise InvalidEmailVerificationTokenError
 
-        account_email = self._email_verification_provider.decode_email_from_token(
-            verification_token
-        )
+        try:
+            stored_account_email_otp = Otp.create(cached_account_email_otp.value)
+        except ValidationError as error:
+            raise InvalidEmailVerificationTokenError from error
+
+        if account_email_otp != stored_account_email_otp:
+            raise InvalidEmailVerificationTokenError
 
         try:
             account = self._accounts_repository.find_by_email(account_email)
@@ -43,8 +55,6 @@ class VerifyEmailUseCase:
             account.verify()
             self._accounts_repository.replace(account)
 
-        self._email_verification_provider.invalidate_verification_token(
-            verification_token
-        )
+        self._cache_provider.delete(email_verification_cache_key)
 
         return self._jwt_provider.encode(Text.create(account.id.value)).dto
