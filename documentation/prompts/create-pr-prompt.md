@@ -114,6 +114,8 @@ Passo a passo claro para o revisor validar:
 
 ---
 
+> Não incluir as palavras entre parênteses, são meramente instruções.
+
 ## 4️⃣ Criação via gh CLI
 
 ⚠️ Não usar GitHub MCP. ⚠️ Não usar APIs MCP. Usar exclusivamente **gh**.
