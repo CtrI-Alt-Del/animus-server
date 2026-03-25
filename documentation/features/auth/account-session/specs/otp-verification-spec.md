@@ -8,7 +8,7 @@ last_updated_at: 2026-03-25
 
 # 1. Objetivo
 
-Substituir o fluxo atual de verificacao de e-mail baseado em link com token assinado por um fluxo de OTP numerico de 6 digitos armazenado no Redis com TTL de 1 hora, fazendo com que `POST /auth/verify-email` passe a receber `email` e `otp`, que `sign-up` e `resend-verification-email` gerem o OTP no proprio `UseCase`, persistam esse valor temporario via `CacheProvider` e publiquem o evento de envio, e que o job assincrono apenas entregue o codigo por e-mail em texto simples, preservando a emissao de `SessionDto` apos a confirmacao da conta.
+Substituir o fluxo atual de verificacao de e-mail baseado em link com token assinado por um fluxo de OTP numerico de 6 digitos armazenado no Redis com TTL de 1 hora, fazendo com que `POST /auth/verify-email` passe a receber `email` e `otp`, que `sign-up` e `resend-verification-email` gerem o OTP no proprio `UseCase`, persistam esse valor temporario via `CacheProvider` e publiquem o evento de envio, e que o job assincrono apenas entregue o codigo por e-mail em HTML, preservando a emissao de `SessionDto` apos a confirmacao da conta.
 
 ---
 
@@ -20,7 +20,7 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 - Introduzir o contrato `OtpProvider` no `core/shared`, criar uma `Structure` de TTL em `shared` e evoluir `CacheProvider` com `set_with_ttl(...)`.
 - Criar adaptadores concretos para gerar OTP e persistir/consultar valores no Redis.
 - Ajustar `SignUpUseCase`, `ResendVerificationEmailUseCase`, `VerifyEmailUseCase`, `EmailVerificationRequestedEvent` e `SendAccountVerificationEmailJob` para que o OTP seja gerado e persistido nos `use_cases`, e o job apenas envie o e-mail.
-- Alterar o envio de e-mail de verificacao para texto simples contendo o codigo OTP.
+- Alterar o envio de e-mail de verificacao para HTML contendo o codigo OTP.
 - Remover o fluxo HTTP/HTML baseado em link de verificacao e os artefatos de token que ficarem sem uso na codebase.
 - Atualizar configuracao e dependencias minimas necessarias para Redis.
 
@@ -39,12 +39,12 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 ## 3.1 Funcionais
 
 - `POST /auth/verify-email` deve receber body JSON com `email: str` e `otp: str`.
-- O endpoint deve buscar o OTP esperado em `CacheProvider.get("otp:email_verification:{email}")`.
+- O endpoint deve buscar o OTP esperado em `CacheProvider.get("auth:email_verification:{email}")`.
 - Se a chave nao existir ou se o valor nao coincidir com o OTP informado, o fluxo deve lancar `InvalidEmailVerificationTokenError`.
 - Em caso de sucesso, o fluxo deve localizar a conta por e-mail, executar `account.verify()` quando `is_verified == False`, persistir a alteracao e remover a chave do cache com `CacheProvider.delete(...)`.
 - `POST /auth/verify-email` deve retornar `200` com `SessionDto` emitido por `JwtProvider.encode(...)`.
 - `POST /auth/sign-up` e `POST /auth/resend-verification-email` devem gerar um `Otp` no `UseCase`, persisti-lo em `CacheProvider.set_with_ttl(...)` e publicar `EmailVerificationRequestedEvent` contendo `account_email` e `account_email_otp`.
-- `SendAccountVerificationEmailJob` deve apenas enviar por e-mail o OTP ja recebido no evento, em texto simples.
+- `SendAccountVerificationEmailJob` deve apenas enviar por e-mail o OTP ja recebido no evento, em HTML.
 - `POST /auth/resend-verification-email` deve sobrescrever a mesma chave de cache e reiniciar o TTL ao gerar um novo OTP.
 
 ## 3.2 Nao funcionais
@@ -128,7 +128,7 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 
 - **Localizacao:** `src/animus/core/shared/interfaces/otp_provider.py` (**novo arquivo**)
 - **Metodos:**
-  - `generate(length: int) -> Otp` — gera um codigo numerico aleatorio com a quantidade de digitos solicitada e devolve a `Structure` de dominio validada.
+  - `generate() -> Otp` — gera um codigo numerico aleatorio de 6 digitos e devolve a `Structure` de dominio validada.
 
 ## Camada Providers
 
@@ -136,7 +136,7 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 - **Interface implementada (port):** `OtpProvider`
 - **Biblioteca/SDK utilizado:** `secrets` da standard library
 - **Metodos:**
-  - `generate(length: int) -> Otp` — gera OTP numerico usando fonte criptograficamente segura e devolve `Otp.create(...)`.
+  - `generate() -> Otp` — gera OTP numerico de 6 digitos usando fonte criptograficamente segura e devolve `Otp.create(...)`.
 
 - **Localizacao:** `src/animus/providers/shared/cache/redis/redis_cache_provider.py` (**novo arquivo**)
 - **Interface implementada (port):** `CacheProvider`
@@ -159,7 +159,7 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 - **Justificativa:** o fluxo deixa de verificar link assinado e passa a comparar um codigo armazenado no Redis, mantendo a verificacao da conta e a emissao de sessao no `core`.
 
 - **Arquivo:** `src/animus/core/auth/use_cases/sign_up_use_case.py`
-- **Mudanca:** remover a dependencia de `EmailVerificationProvider`, adicionar dependencias de `OtpProvider` e `CacheProvider`, criar `ttl = Ttl.create(...)`, gerar `otp = otp_provider.generate(length=6)`, persistir `CacheProvider.set_with_ttl(...)` e publicar `EmailVerificationRequestedEvent(account_email=..., account_email_otp=...)`.
+- **Mudanca:** remover a dependencia de `EmailVerificationProvider`, adicionar dependencias de `OtpProvider` e `CacheProvider`, criar `ttl = Ttl.create(...)`, gerar `otp = otp_provider.generate()`, persistir `CacheProvider.set_with_ttl(...)` e publicar `EmailVerificationRequestedEvent(account_email=..., account_email_otp=...)`.
 - **Justificativa:** o OTP deve nascer no `core`, nao no job, e o `UseCase` continua sendo o orquestrador do fluxo sincrono.
 
 - **Arquivo:** `src/animus/core/auth/use_cases/resend_verification_email_use_case.py`
@@ -219,7 +219,7 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 ## Camada Providers
 
 - **Arquivo:** `src/animus/providers/notification/email_sender/resend/resend_email_sender_provider.py`
-- **Mudanca:** remover a montagem de `verification_url`, parar de usar HTML dedicado e enviar e-mail em texto simples com o codigo OTP, recebendo `Email` e `Otp` como parametros tipados.
+- **Mudanca:** remover a montagem de `verification_url`, trocar o HTML dedicado baseado em link por um template HTML com o codigo OTP, recebendo `Email` e `Otp` como parametros tipados.
 - **Justificativa:** o usuario agora confirma a conta digitando o codigo no app, sem navegar para uma pagina web.
 
 - **Arquivo:** `src/animus/constants/env.py`
@@ -261,7 +261,7 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 - **Impacto esperado:** remover o export correspondente em `src/animus/providers/auth/__init__.py` e a dependencia de `itsdangerous` do wiring deste fluxo.
 
 - **Arquivo:** `src/animus/providers/notification/email_sender/constants/email_verification_html.py`
-- **Motivo da remocao:** o e-mail deixa de conter CTA HTML com link e passa a conter somente o codigo OTP em texto simples.
+- **Motivo da remocao:** o e-mail deixa de conter CTA HTML com link e passa a conter um template HTML com o codigo OTP.
 - **Impacto esperado:** simplificar `ResendEmailSenderProvider` e eliminar a constante HTML hoje usada apenas por esse provider.
 
 ## Camada REST
@@ -308,7 +308,7 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
   - **Motivo da escolha:** o Jira exige Redis com TTL e cita operacao equivalente a `setex`; alem disso, a arquitetura ja define Redis como tecnologia da stack.
   - **Impactos / trade-offs:** a feature passa a depender de configuracao adicional de Redis em ambiente local e remoto.
 
-- **Decisao:** reutilizar `src/animus/constants/cache_keys.py` para montar a chave `otp:email_verification:{email}`.
+- **Decisao:** reutilizar `src/animus/constants/cache_keys.py` para montar a chave `auth:email_verification:{email}`.
   - **Alternativas consideradas:** manter a chave inline nos `use_cases`; encapsular a string apenas no adapter Redis.
   - **Motivo da escolha:** a constante ja existe, reduz duplicacao e deixa o formato da chave consistente em todos os pontos do fluxo.
   - **Impactos / trade-offs:** o formato da chave passa a ficar acoplado a um modulo compartilhado de constantes da aplicacao, o que e aceitavel para esse detalhe transversal.
@@ -327,13 +327,13 @@ POST /auth/verify-email
   -> VerifyEmailUseCase.execute(email, otp)
        -> Email.create(...)
        -> Otp.create(...)
-       -> CacheProvider.get("otp:email_verification:{email}") -> Text | None
+        -> CacheProvider.get("auth:email_verification:{email}") -> Text | None
        -> Otp.create(valor_persistido)
        -> comparar otp informado x otp persistido
        -> AccountsRepository.find_by_email(...)
        -> account.verify()
        -> AccountsRepository.replace(account)
-       -> CacheProvider.delete("otp:email_verification:{email}")
+        -> CacheProvider.delete("auth:email_verification:{email}")
        -> JwtProvider.encode(account.id)
   -> 200 SessionDto
 ```
@@ -343,7 +343,7 @@ POST /auth/verify-email
 ```text
 POST /auth/sign-up | POST /auth/resend-verification-email
   -> SignUpUseCase / ResendVerificationEmailUseCase
-  -> OtpProvider.generate(length=6)
+  -> OtpProvider.generate()
   -> Ttl.create(3600)
   -> CacheProvider.set_with_ttl(key, Text.create(otp.value), ttl)
   -> Broker.publish(EmailVerificationRequestedEvent(account_email, account_email_otp))

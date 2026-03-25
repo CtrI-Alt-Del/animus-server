@@ -55,7 +55,7 @@ class TestResendVerificationEmailUseCase:
 
         self.use_case.execute(email='maria@example.com')
 
-        self.otp_provider_mock.generate.assert_called_once_with(length=6)
+        self.otp_provider_mock.generate.assert_called_once_with()
         self.cache_provider_mock.set_with_ttl.assert_called_once()
         self.broker_mock.publish.assert_called_once()
         published_event = self.broker_mock.publish.call_args.args[0]

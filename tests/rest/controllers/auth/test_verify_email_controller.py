@@ -21,6 +21,9 @@ class TestVerifyEmailController:
             '/auth/resend-verification-email',
             json={'email': 'maria@example.com'},
         )
+        assert resend_response.status_code == 204
+        assert len(fake_inngest_client.sent_events) == 1
+
         otp = fake_inngest_client.sent_events[0].data['account_email_otp']
 
         response = client.post(
@@ -36,7 +39,6 @@ class TestVerifyEmailController:
         inspection_session.close()
 
         assert response.status_code == 200
-        assert resend_response.status_code == 204
         assert json_response['access_token']['value']
         assert json_response['access_token']['expires_at']
         assert json_response['refresh_token']['value']

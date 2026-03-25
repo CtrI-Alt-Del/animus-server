@@ -60,7 +60,7 @@ class TestSignUpUseCase:
         self.hash_provider_mock.generate.assert_called_once_with(
             Text.create(valid_password)
         )
-        self.otp_provider_mock.generate.assert_called_once_with(length=6)
+        self.otp_provider_mock.generate.assert_called_once_with()
         self.cache_provider_mock.set_with_ttl.assert_called_once()
         self.accounts_repository_mock.add.assert_called_once()
         self.broker_mock.publish.assert_called_once()

@@ -23,7 +23,7 @@ Entrada:
 - Sempre comece por `documentation/rules/testing-rules.md`.
 - Se for use case (`core`): leia `documentation/rules/use-cases-testing-rules.md`.
 - Se for controller (`rest`): leia `documentation/rules/controllers-testing-rules.md`.
-- Se for job assincrono (`pubsub`/`inngest`): leia `documentation/rules/pubsub-jobs-testing-rules.md`.
+- Se for job assincrono (`pubsub`/`inngest`): leia `documentation/rules/jobs-testing-rules.md`.
 
 ### 2 Estrutura e nomenclatura
 

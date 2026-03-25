@@ -16,8 +16,6 @@ from animus.core.shared.interfaces import Broker, CacheProvider, OtpProvider
 
 
 class SignUpUseCase:
-    _OTP_LENGTH = 6
-
     def __init__(
         self,
         accounts_repository: AccountsRepository,
@@ -63,7 +61,7 @@ class SignUpUseCase:
         )
         self._accounts_repository.add(account, password_hash)
 
-        account_email_otp = self._otp_provider.generate(length=self._OTP_LENGTH)
+        account_email_otp = self._otp_provider.generate()
         email_verification_cache_key = CacheKeys().get_email_verification(
             account_email.value
         )

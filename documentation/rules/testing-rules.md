@@ -35,12 +35,12 @@ no `animus-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP e
 
 ### Jobs PubSub (Inngest)
 
-- Leia `documentation/rules/pubsub-jobs-testing-rules.md` antes de criar/alterar/revisar testes em `tests/pubsub/inngest/jobs/**`.
+- Leia `documentation/rules/jobs-testing-rules.md` antes de criar/alterar/revisar testes em `tests/pubsub/inngest/jobs/**`.
 - Use quando o alvo e um job assincrono em `src/animus/pubsub/inngest/jobs/**`, com foco no evento consumido, na orquestracao do runtime e no side effect observavel.
 
 ### Mudanca envolve mais de uma camada
 
-- Leia primeiro o documento da regra mais interna (`use-cases-testing-rules.md`) e depois os das bordas impactadas (`controllers-testing-rules.md`, `pubsub-jobs-testing-rules.md`).
+- Leia primeiro o documento da regra mais interna (`use-cases-testing-rules.md`) e depois os das bordas impactadas (`controllers-testing-rules.md`, `jobs-testing-rules.md`).
 - Em PRs que adicionam endpoints, jobs e/ou use cases novos, releia todos os documentos aplicaveis antes de finalizar.
 
 ## Regras praticas do projeto

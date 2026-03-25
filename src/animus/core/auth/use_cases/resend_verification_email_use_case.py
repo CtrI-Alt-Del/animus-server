@@ -8,8 +8,6 @@ from animus.core.shared.interfaces import Broker, CacheProvider, OtpProvider
 
 
 class ResendVerificationEmailUseCase:
-    _OTP_LENGTH = 6
-
     def __init__(
         self,
         accounts_repository: AccountsRepository,
@@ -35,7 +33,7 @@ class ResendVerificationEmailUseCase:
         if account.is_verified.is_true:
             raise AccountAlreadyVerifiedError
 
-        account_email_otp = self._otp_provider.generate(length=self._OTP_LENGTH)
+        account_email_otp = self._otp_provider.generate()
         email_verification_cache_key = CacheKeys().get_email_verification(
             account.email.value
         )
