@@ -1,4 +1,4 @@
-## 🎯 Objetivo
+## Objetivo
 
 Descreva por que este PR foi criado e qual problema, entrega ou necessidade ele resolve.
 
@@ -9,7 +9,7 @@ Exemplos:
 - Consolida uma refatoracao necessaria para suportar Y
 -->
 
-## 🐛 Causa do bug
+## Causa do bug
 
 Descreva a causa tecnica raiz, se este PR for uma correcao de bug.
 
@@ -17,12 +17,24 @@ Descreva a causa tecnica raiz, se este PR for uma correcao de bug.
 Opcional. Remova esta secao se nao se aplicar.
 -->
 
-## 📋 Changelog
+## Changelog
 
 - [ ] Arquivos e modulos alterados descritos de forma objetiva
 - [ ] Comportamentos modificados listados
 - [ ] Regras adicionadas ou removidas registradas
 - [ ] Refatoracoes relevantes descritas
+
+## Novas dependencias
+
+- [ ] Nao houve adicao de novas dependencias
+
+<!--
+Se houver novas dependencias, detalhe:
+- nome do pacote
+- onde foi adicionado (`pyproject.toml`, `uv.lock`, etc.)
+- motivo da adicao
+- impacto esperado (build, runtime, seguranca, custo)
+-->
 
 <!--
 Sugestao de conteudo:
@@ -32,7 +44,7 @@ Sugestao de conteudo:
 - adiciona validacao para ...
 -->
 
-## 🧪 Como testar
+## Como testar
 
 1. ...
 2. ...
@@ -47,7 +59,7 @@ Exemplos:
 4. Valide manualmente o endpoint/fluxo impactado
 -->
 
-## 👀 Observações
+## Observações
 
 - Decisoes de arquitetura relevantes
 - Riscos ou efeitos colaterais esperados
