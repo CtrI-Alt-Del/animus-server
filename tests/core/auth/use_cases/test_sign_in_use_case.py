@@ -44,7 +44,7 @@ class TestSignInUseCase:
         self.encoded_session_mock.dto = self.expected_session
 
     def test_should_return_session_when_credentials_are_valid(self) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
         account = self._create_account(is_verified=True, is_active=True)
         password_hash = Text.create('stored-password-hash')
 
@@ -78,7 +78,7 @@ class TestSignInUseCase:
     def test_should_raise_invalid_credentials_error_when_account_does_not_exist(
         self,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
         self.accounts_repository_mock.find_by_email.return_value = None
 
         with pytest.raises(InvalidCredentialsError):
@@ -94,7 +94,7 @@ class TestSignInUseCase:
     def test_should_raise_invalid_credentials_error_when_password_hash_is_missing(
         self,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
         account = self._create_account(is_verified=True, is_active=True)
 
         self.accounts_repository_mock.find_by_email.return_value = account
@@ -112,7 +112,7 @@ class TestSignInUseCase:
     def test_should_raise_invalid_credentials_error_when_password_is_incorrect(
         self,
     ) -> None:
-        invalid_password = 'WrongPassword123'  # noqa: S105
+        invalid_password = 'WrongPassword123'
         account = self._create_account(is_verified=True, is_active=True)
         password_hash = Text.create('stored-password-hash')
 
@@ -137,7 +137,7 @@ class TestSignInUseCase:
     def test_should_raise_account_not_verified_error_when_account_is_not_verified(
         self,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
         account = self._create_account(is_verified=False, is_active=True)
         password_hash = Text.create('stored-password-hash')
 
@@ -158,7 +158,7 @@ class TestSignInUseCase:
     def test_should_raise_account_inactive_error_when_account_is_inactive(
         self,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
         account = self._create_account(is_verified=True, is_active=False)
         password_hash = Text.create('stored-password-hash')
 

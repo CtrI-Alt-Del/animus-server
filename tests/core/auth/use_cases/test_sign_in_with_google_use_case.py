@@ -51,7 +51,7 @@ class TestSignInWithGoogleUseCase:
     def test_should_create_account_and_link_social_when_account_does_not_exist(
         self,
     ) -> None:
-        oauth_token = 'test_id_token'  # noqa: S105
+        oauth_token = 'test_id_token'
         name = Text.create('Test User')
         email = Email.create('test@example.com')
 
@@ -73,7 +73,7 @@ class TestSignInWithGoogleUseCase:
     def test_should_link_social_account_and_replace_when_account_exists_but_not_linked(
         self,
     ) -> None:
-        oauth_token = 'test_id_token'  # noqa: S105
+        oauth_token = 'test_id_token'
         name = Text.create('Test User')
         email = Email.create('test@example.com')
         account_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
@@ -105,7 +105,7 @@ class TestSignInWithGoogleUseCase:
     def test_should_only_return_session_when_account_exists_and_already_linked(
         self,
     ) -> None:
-        oauth_token = 'test_id_token'  # noqa: S105
+        oauth_token = 'test_id_token'
         name = Text.create('Test User')
         email = Email.create('test@example.com')
         account_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'

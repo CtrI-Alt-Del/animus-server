@@ -14,7 +14,7 @@ class TestSignUpController:
         fake_inngest_client: FakeInngestClient,
         sqlalchemy_session_factory: sessionmaker[Session],
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
         payload = {
             'name': 'Maria Silva',
             'email': 'maria@example.com',
@@ -55,7 +55,7 @@ class TestSignUpController:
         client: TestClient,
         create_account: CreateAccountFixture,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
 
         create_account(email='maria@example.com')
 
@@ -78,7 +78,7 @@ class TestSignUpController:
         self,
         client: TestClient,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
 
         response = client.post(
             '/auth/sign-up',
@@ -94,7 +94,7 @@ class TestSignUpController:
         self,
         client: TestClient,
     ) -> None:
-        weak_password = 'weak'  # noqa: S105
+        weak_password = 'weak'
 
         response = client.post(
             '/auth/sign-up',

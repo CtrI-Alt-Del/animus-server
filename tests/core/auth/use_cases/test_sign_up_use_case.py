@@ -44,7 +44,7 @@ class TestSignUpUseCase:
         )
 
     def test_should_create_account_and_publish_verification_event(self) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
 
         self.accounts_repository_mock.find_by_email.return_value = None
         self.hash_provider_mock.generate.return_value = Text.create('hashed-password')
@@ -91,7 +91,7 @@ class TestSignUpUseCase:
     def test_should_raise_account_already_exists_error_when_email_already_exists(
         self,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
 
         self.accounts_repository_mock.find_by_email.return_value = object()
 
@@ -109,7 +109,7 @@ class TestSignUpUseCase:
         self.broker_mock.publish.assert_not_called()
 
     def test_should_raise_validation_error_when_password_is_weak(self) -> None:
-        weak_password = 'weak'  # noqa: S105
+        weak_password = 'weak'
 
         with pytest.raises(ValidationError, match='pelo menos 8 caracteres'):
             self.use_case.execute(
