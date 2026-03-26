@@ -3,12 +3,12 @@ title: Verificacao de e-mail por OTP no Redis
 prd: ../prd.md
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-57
 status: closed
-last_updated_at: 2026-03-25
+last_updated_at: 2026-03-26
 ---
 
 # 1. Objetivo
 
-Substituir o fluxo atual de verificacao de e-mail baseado em link com token assinado por um fluxo de OTP numerico de 6 digitos armazenado no Redis com TTL de 1 hora, fazendo com que `POST /auth/verify-email` passe a receber `email` e `otp`, que `sign-up` e `resend-verification-email` gerem o OTP no proprio `UseCase`, persistam esse valor temporario via `CacheProvider` e publiquem o evento de envio, e que o job assincrono apenas entregue o codigo por e-mail em HTML, preservando a emissao de `SessionDto` apos a confirmacao da conta.
+Substituir o fluxo atual de verificacao de e-mail baseado em link com token assinado por um fluxo de OTP numerico de 6 digitos armazenado no Redis com TTL de 1 hora, fazendo com que `POST /auth/verify-email` passe a receber `email` e `otp`, que `sign-up` e `resend-verification-email` gerem o OTP no proprio `UseCase`, persistam esse valor temporario via `CacheProvider` e publiquem o evento de envio, e que o job assincrono apenas entregue o codigo por e-mail em HTML, preservando a emissao de `SessionDto` apos a confirmacao da conta e aplicando rate limit por tentativas de validacao de OTP.
 
 ---
 
@@ -46,12 +46,16 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 - `POST /auth/sign-up` e `POST /auth/resend-verification-email` devem gerar um `Otp` no `UseCase`, persisti-lo em `CacheProvider.set_with_ttl(...)` e publicar `EmailVerificationRequestedEvent` contendo `account_email` e `account_email_otp`.
 - `SendAccountVerificationEmailJob` deve apenas enviar por e-mail o OTP ja recebido no evento, em HTML.
 - `POST /auth/resend-verification-email` deve sobrescrever a mesma chave de cache e reiniciar o TTL ao gerar um novo OTP.
+- `POST /auth/verify-email` deve aplicar rate limit por e-mail, bloqueando novas tentativas quando o contador de tentativas restantes atingir `0`.
+- Em falha de verificacao por OTP divergente, o contador de tentativas restantes deve ser decrementado em cache usando a chave `auth:email_verification_attempts:{email}`.
+- Em verificacao bem-sucedida, o contador de tentativas restantes deve ser removido junto da chave de OTP.
 
 ## 3.2 Nao funcionais
 
 - **Seguranca:** o OTP deve ter exatamente `6` digitos numericos e ser gerado com fonte criptograficamente segura.
 - **Seguranca:** o erro de verificacao deve continuar colapsando os casos de OTP ausente, expirado ou divergente em uma unica resposta de dominio.
 - **Seguranca:** o OTP deve ser de uso unico; apos sucesso, a chave precisa ser removida antes do retorno da resposta HTTP.
+- **Seguranca:** o fluxo deve limitar tentativas consecutivas por e-mail para reduzir risco de brute force no OTP.
 - **Idempotencia:** o job Inngest deve usar `step.run(...)` apenas para normalizacao e envio, sem regenerar OTP em reexecucoes do mesmo evento.
 - **Compatibilidade retroativa:** esta task quebra o contrato HTTP atual de `GET /auth/verify-email?token=...` com retorno HTML para `POST /auth/verify-email` com body JSON e retorno `SessionDto`; consumidores precisam ser atualizados junto com o backend.
 - **Compatibilidade retroativa:** a tabela `accounts` e o schema SQLAlchemy permanecem inalterados; nenhum dado de OTP vai para PostgreSQL.
@@ -155,8 +159,8 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 ## Camada Core
 
 - **Arquivo:** `src/animus/core/auth/use_cases/verify_email_use_case.py`
-- **Mudanca:** trocar a dependencia de `EmailVerificationProvider` por `CacheProvider`, alterar a assinatura para `execute(email: str, otp: str) -> SessionDto`, validar `Email.create(email)` + `Otp.create(otp)` antes de consultar o cache e comparar `Otp` informado com o valor retornado por `CacheProvider.get(...)` convertido para `Otp`.
-- **Justificativa:** o fluxo deixa de verificar link assinado e passa a comparar um codigo armazenado no Redis, mantendo a verificacao da conta e a emissao de sessao no `core`.
+- **Mudanca:** trocar a dependencia de `EmailVerificationProvider` por `CacheProvider`, alterar a assinatura para `execute(email: str, otp: str) -> SessionDto`, validar `Email.create(email)` + `Otp.create(otp)` antes de consultar o cache e comparar `Otp` informado com o valor retornado por `CacheProvider.get(...)` convertido para `Otp`; adicionar controle de tentativas restantes por e-mail com bloqueio em `0` e decremento em OTP divergente.
+- **Justificativa:** o fluxo deixa de verificar link assinado e passa a comparar um codigo armazenado no Redis, mantendo a verificacao da conta e a emissao de sessao no `core`, com protecao adicional contra brute force.
 
 - **Arquivo:** `src/animus/core/auth/use_cases/sign_up_use_case.py`
 - **Mudanca:** remover a dependencia de `EmailVerificationProvider`, adicionar dependencias de `OtpProvider` e `CacheProvider`, criar `ttl = Ttl.create(...)`, gerar `otp = otp_provider.generate()`, persistir `CacheProvider.set_with_ttl(...)` e publicar `EmailVerificationRequestedEvent(account_email=..., account_email_otp=...)`.
@@ -227,8 +231,8 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
 - **Justificativa:** o novo fluxo depende de cache e deixa de depender de segredo/salt para assinatura de link.
 
 - **Arquivo:** `src/animus/constants/cache_keys.py`
-- **Mudanca:** adicionar ou consolidar uma API explicita para a chave de OTP de verificacao de e-mail, por exemplo `email_verification_otp(email: str) -> str`.
-- **Justificativa:** evitar string literals duplicadas e garantir consistencia entre geracao, reenvio e verificacao do OTP.
+- **Mudanca:** adicionar ou consolidar APIs explicitas para as chaves de OTP e de tentativas de verificacao de e-mail (`auth:email_verification:{email}` e `auth:email_verification_attempts:{email}`).
+- **Justificativa:** evitar string literals duplicadas e garantir consistencia entre geracao, reenvio, verificacao e rate limit do OTP.
 
 - **Arquivo:** `.env.example`
 - **Mudanca:** refletir as novas variaveis de ambiente de Redis/TTL e remover as do fluxo legado de token.
@@ -313,6 +317,11 @@ Substituir o fluxo atual de verificacao de e-mail baseado em link com token assi
   - **Motivo da escolha:** a constante ja existe, reduz duplicacao e deixa o formato da chave consistente em todos os pontos do fluxo.
   - **Impactos / trade-offs:** o formato da chave passa a ficar acoplado a um modulo compartilhado de constantes da aplicacao, o que e aceitavel para esse detalhe transversal.
 
+- **Decisao:** aplicar rate limit por e-mail no `VerifyEmailUseCase` com contador de tentativas restantes em cache.
+  - **Alternativas consideradas:** limitar na camada HTTP; limitar por IP no gateway; nao limitar no backend.
+  - **Motivo da escolha:** manter a regra de seguranca no `core`, desacoplada da borda HTTP e reaproveitavel em qualquer adapter.
+  - **Impactos / trade-offs:** requer uma chave extra de cache para tentativas e limpeza explicita do contador em verificacao bem-sucedida.
+
 ---
 
 # 9. Diagramas e Referencias
@@ -327,14 +336,18 @@ POST /auth/verify-email
   -> VerifyEmailUseCase.execute(email, otp)
        -> Email.create(...)
        -> Otp.create(...)
+       -> CacheProvider.get("auth:email_verification_attempts:{email}") -> Text | None
+       -> validar tentativas restantes > 0
         -> CacheProvider.get("auth:email_verification:{email}") -> Text | None
-       -> Otp.create(valor_persistido)
-       -> comparar otp informado x otp persistido
-       -> AccountsRepository.find_by_email(...)
-       -> account.verify()
-       -> AccountsRepository.replace(account)
+        -> Otp.create(valor_persistido)
+        -> comparar otp informado x otp persistido
+       -> em divergencia: CacheProvider.set("auth:email_verification_attempts:{email}", Text.create(remaining_attempts - 1))
+        -> AccountsRepository.find_by_email(...)
+        -> account.verify()
+        -> AccountsRepository.replace(account)
         -> CacheProvider.delete("auth:email_verification:{email}")
-       -> JwtProvider.encode(account.id)
+       -> CacheProvider.delete("auth:email_verification_attempts:{email}")
+        -> JwtProvider.encode(account.id)
   -> 200 SessionDto
 ```
 
