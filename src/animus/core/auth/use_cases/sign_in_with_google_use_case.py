@@ -1,4 +1,3 @@
-from animus.core.auth.domain.errors import AccountNotFoundError
 from animus.core.auth.domain.structures.dtos import SessionDto
 from animus.core.auth.domain.entities.account import Account
 from animus.core.auth.domain.entities.dtos.account_dto import AccountDto
@@ -27,10 +26,7 @@ class SignInWithGoogleUseCase:
     def execute(self, id_token: str) -> SessionDto:
         name, email = self._google_oauth_provider.get_user_info(Text.create(id_token))
 
-        try:
-            account = self._accounts_repository.find_by_email(email)
-        except AccountNotFoundError:
-            account = None
+        account = self._accounts_repository.find_by_email(email)
 
         if not account:
             account = Account.create(

@@ -55,7 +55,6 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "google-auth" },
     { name = "inngest" },
-    { name = "itsdangerous" },
     { name = "psycopg", extra = ["binary"] },
     { name = "psycopg2-binary" },
     { name = "pwdlib", extra = ["argon2"] },
@@ -66,6 +65,7 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "python-jose" },
     { name = "python-ulid" },
+    { name = "redis" },
     { name = "resend" },
     { name = "scalar-fastapi" },
     { name = "sqlalchemy" },
@@ -90,7 +90,6 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.7" },
     { name = "google-auth", specifier = ">=2.49.1" },
     { name = "inngest", specifier = ">=0.5.15" },
-    { name = "itsdangerous", specifier = ">=2.2.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "pwdlib", extras = ["argon2"], specifier = ">=0.3.0" },
@@ -101,6 +100,7 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "python-jose", specifier = ">=3.5.0" },
     { name = "python-ulid" },
+    { name = "redis", specifier = ">=5.0.0" },
     { name = "resend", specifier = ">=2.13.0" },
     { name = "scalar-fastapi", specifier = ">=1.8.1" },
     { name = "sqlalchemy", specifier = ">=2.0.46" },
@@ -842,15 +842,6 @@ wheels = [
 ]
 
 [[package]]
-name = "itsdangerous"
-version = "2.2.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9c/cb/8ac0172223afbccb63986cc25049b154ecfb5e85932587206f42317be31d/itsdangerous-2.2.0.tar.gz", hash = "sha256:e0050c0b7da1eea53ffaf149c0cfbb5c6e2e2b69c4bef22c81fa6eb73e5f6173", size = 54410, upload-time = "2024-04-16T21:28:15.614Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/04/96/92447566d16df59b2a776c0fb82dbc4d9e07cd95062562af01e408583fc4/itsdangerous-2.2.0-py3-none-any.whl", hash = "sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef", size = 16234, upload-time = "2024-04-16T21:28:14.499Z" },
-]
-
-[[package]]
 name = "jcs"
 version = "0.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1402,6 +1393,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/da/92/1446574745d74df0c92e6aa4a7b0b3130706a4142b2d1a5869f2eaa423c6/pyyaml-6.0.3-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:16249ee61e95f858e83976573de0f5b2893b3677ba71c9dd36b9cf8be9ac6d65", size = 829923, upload-time = "2025-09-25T21:32:54.537Z" },
     { url = "https://files.pythonhosted.org/packages/f0/7a/1c7270340330e575b92f397352af856a8c06f230aa3e76f86b39d01b416a/pyyaml-6.0.3-cp314-cp314t-win_amd64.whl", hash = "sha256:4ad1906908f2f5ae4e5a8ddfce73c320c2a1429ec52eafd27138b7f1cbe341c9", size = 174062, upload-time = "2025-09-25T21:32:55.767Z" },
     { url = "https://files.pythonhosted.org/packages/f1/12/de94a39c2ef588c7e6455cfbe7343d3b2dc9d6b6b2f40c4c6565744c873d/pyyaml-6.0.3-cp314-cp314t-win_arm64.whl", hash = "sha256:ebc55a14a21cb14062aa4162f906cd962b28e2e9ea38f9b4391244cd8de4ae0b", size = 149341, upload-time = "2025-09-25T21:32:56.828Z" },
+]
+
+[[package]]
+name = "redis"
+version = "7.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/7f/3759b1d0d72b7c92f0d70ffd9dc962b7b7b5ee74e135f9d7d8ab06b8a318/redis-7.4.0.tar.gz", hash = "sha256:64a6ea7bf567ad43c964d2c30d82853f8df927c5c9017766c55a1d1ed95d18ad", size = 4943913, upload-time = "2026-03-24T09:14:37.53Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/3a/95deec7db1eb53979973ebd156f3369a72732208d1391cd2e5d127062a32/redis-7.4.0-py3-none-any.whl", hash = "sha256:a9c74a5c893a5ef8455a5adb793a31bb70feb821c86eccb62eebef5a19c429ec", size = 409772, upload-time = "2026-03-24T09:14:35.968Z" },
 ]
 
 [[package]]

@@ -23,7 +23,7 @@ de trabalho.
 
 ## Diretrizes de Execução
 
-### 1️⃣ Análise do Contexto
+### 1 Analise do Contexto
 
 - Revise a Spec implementada e o changelog das alterações realizadas.
 - Identifique:
@@ -34,7 +34,7 @@ de trabalho.
 
 ---
 
-### 2️⃣ Definição do Título
+### 2 Definicao do Titulo
 
 - Deve ser:
 
@@ -50,7 +50,7 @@ Exemplos:
 - Correção do erro de carregamento de imagem
 - Correção de navegação para tela de catálogo
 
-⚠️ Não incluir prefixos no título:
+Nao incluir prefixos no titulo:
 
 ```
 feat/
@@ -60,7 +60,7 @@ refactor/
 
 ---
 
-### 3️⃣ Estrutura da Descrição (Body)
+### 3 Estrutura da Descricao (Body)
 
 O corpo do PR deve seguir o template abaixo.
 
@@ -72,19 +72,19 @@ O corpo do PR deve seguir o template abaixo.
 
 ---
 
-## 🎯 Objetivo (obrigatório)
+## Objetivo (obrigatorio)
 
 Explique por que este PR foi criado e qual seu propósito central.
 
 ---
 
-## 🐛 Causa do bug (opcional — apenas fix)
+## Causa do bug (opcional - apenas fix)
 
 Descreva a causa técnica raiz.
 
 ---
 
-## 📋 Changelog (obrigatório)
+## Changelog (obrigatorio)
 
 Lista técnica das mudanças:
 
@@ -95,7 +95,20 @@ Lista técnica das mudanças:
 
 ---
 
-## 🧪 Como testar (obrigatório)
+## Novas dependencias (opcional)
+
+Informe se houve adicao de novas dependencias no PR.
+
+Se houve, detalhe:
+
+- nome do pacote
+- local da adicao (`pyproject.toml`, `uv.lock`, etc.)
+- motivo da inclusao
+- impacto esperado em build/runtime/seguranca
+
+---
+
+## Como testar (obrigatorio)
 
 Passo a passo claro para o revisor validar:
 
@@ -105,7 +118,7 @@ Passo a passo claro para o revisor validar:
 
 ---
 
-## 👀 Observações (opcional)
+## Observacoes (opcional)
 
 - decisões de arquitetura
 - limitações conhecidas
@@ -114,9 +127,11 @@ Passo a passo claro para o revisor validar:
 
 ---
 
-## 4️⃣ Criação via gh CLI
+> Não incluir as palavras entre parênteses, são meramente instruções.
 
-⚠️ Não usar GitHub MCP. ⚠️ Não usar APIs MCP. Usar exclusivamente **gh**.
+## 4 Criacao via gh CLI
+
+Nao usar GitHub MCP. Nao usar APIs MCP. Usar exclusivamente **gh**.
 
 > Repositorio: https://github.com/CtrI-Alt-Del/animus-server
 
@@ -133,7 +148,7 @@ gh pr create \
 
 ---
 
-## 5️⃣ Retorno
+## 5 Retorno
 
 Após criação:
 

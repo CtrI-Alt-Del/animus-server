@@ -41,4 +41,5 @@ pytest_plugins = [
     'fixtures.auth_fixtures',
     'fixtures.sqlalchemy_fixtures',
     'fixtures.inngest_fixtures',
+    'fixtures.redis_fixtures',
 ]
