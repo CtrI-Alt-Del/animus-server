@@ -1,3 +1,4 @@
+###
 @url = {{BASE_URL}}/auth
 @name = Usuario Teste
 @email = joaopcarvalho.cds@gmail.com
@@ -32,4 +33,24 @@ Content-Type: application/json
 {
   "email": "{{email}}",
   "password": "{{password}}"
+}
+
+
+### teste 
+POST https://pangeabnp.pdpj.jus.br/api/v1/precedentes
+Content-Type: application/json 
+
+{
+"filtro": {
+    "ordenacao": "Text",
+    "orgaos": [
+      "TRT18",
+      "TJPA"
+    ],
+    "pagina": 1,
+    "tipos": [
+      "IRDR",
+      "IAC"
+    ]
+  }
 }

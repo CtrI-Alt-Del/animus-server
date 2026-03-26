@@ -20,6 +20,13 @@ class _Env(BaseSettings):
 
     ANIMUS_SERVER_URL: str = 'http://localhost:8080'
     GOOGLE_CLIENT_ID: str = 'change_this'
+    PANGEA_SERVICE_URL: str ='https://pangeabnp.pdpj.jus.br'
+    EMBEDDING_AI_MODEL:str ='models/text-embedding-004'
+
+    VERTEX_AI_PROJECT:str =''
+    VERTEX_AI_LOCATION:str =''
+    VERTEX_AI_INDEX_ENDPOINT_ID:str =''
+    VERTEX_AI_DEPLOY_INDEX_ID:str =''
 
     model_config = SettingsConfigDict(
         env_file='.env',
