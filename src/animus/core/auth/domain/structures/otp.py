@@ -15,7 +15,7 @@ class Otp(Structure):
 
         if not re.fullmatch(r'\d{6}', normalized):
             raise ValidationError(
-                f'OTP invalido: deve conter exatamente 6 digitos numericos, recebido: {value!r}'
+                f'OTP inválido: deve conter exatamente 6 digitos numericos, recebido: {value!r}'
             )
 
         return cls(value=normalized)

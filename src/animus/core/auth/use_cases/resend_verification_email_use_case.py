@@ -1,5 +1,8 @@
 from animus.constants.cache_keys import CacheKeys
-from animus.core.auth.domain.errors import AccountAlreadyVerifiedError
+from animus.core.auth.domain.errors import (
+    AccountAlreadyVerifiedError,
+    AccountNotFoundError,
+)
 from animus.core.auth.domain.events import EmailVerificationRequestedEvent
 from animus.core.auth.domain.structures import Email
 from animus.core.auth.interfaces import AccountsRepository
@@ -29,6 +32,9 @@ class ResendVerificationEmailUseCase:
     def execute(self, email: str) -> None:
         account_email = Email.create(email)
         account = self._accounts_repository.find_by_email(account_email)
+
+        if account is None:
+            raise AccountNotFoundError
 
         if account.is_verified.is_true:
             raise AccountAlreadyVerifiedError

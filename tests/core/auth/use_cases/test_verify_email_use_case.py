@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from unittest.mock import call
 from unittest.mock import create_autospec
 
 import pytest
@@ -7,7 +8,6 @@ from animus.constants.cache_keys import CacheKeys
 from animus.core.auth.domain.entities import Account
 from animus.core.auth.domain.entities.dtos import AccountDto
 from animus.core.auth.domain.errors import (
-    AccountNotFoundError,
     InvalidEmailVerificationTokenError,
 )
 from animus.core.auth.domain.structures import Session
@@ -64,15 +64,18 @@ class TestVerifyEmailUseCase:
                 ),
             )
         )
-        self.cache_provider_mock.get.return_value = Text.create('123456')
+        self.cache_provider_mock.get.side_effect = [None, Text.create('123456')]
         self.accounts_repository_mock.find_by_email.return_value = account
         self.jwt_provider_mock.encode.return_value = session
 
         result = self.use_case.execute(email='maria@example.com', otp='123456')
 
         self.accounts_repository_mock.replace.assert_called_once_with(account)
-        self.cache_provider_mock.delete.assert_called_once_with(
-            CacheKeys().get_email_verification('maria@example.com')
+        self.cache_provider_mock.delete.assert_has_calls(
+            [
+                call(CacheKeys().get_email_verification('maria@example.com')),
+                call(CacheKeys().get_email_verification_attempts('maria@example.com')),
+            ]
         )
         self.jwt_provider_mock.encode.assert_called_once_with(
             Text.create(account.id.value)
@@ -82,7 +85,7 @@ class TestVerifyEmailUseCase:
         assert result.refresh_token.value == 'refresh-token'
 
     def test_should_raise_invalid_token_error_when_cache_value_is_missing(self) -> None:
-        self.cache_provider_mock.get.return_value = None
+        self.cache_provider_mock.get.side_effect = [None, None]
 
         with pytest.raises(InvalidEmailVerificationTokenError):
             self.use_case.execute(email='maria@example.com', otp='123456')
@@ -93,11 +96,15 @@ class TestVerifyEmailUseCase:
         self.jwt_provider_mock.encode.assert_not_called()
 
     def test_should_raise_invalid_token_error_when_otp_does_not_match(self) -> None:
-        self.cache_provider_mock.get.return_value = Text.create('654321')
+        self.cache_provider_mock.get.side_effect = [None, Text.create('654321')]
 
         with pytest.raises(InvalidEmailVerificationTokenError):
             self.use_case.execute(email='maria@example.com', otp='123456')
 
+        self.cache_provider_mock.set.assert_called_once_with(
+            key=CacheKeys().get_email_verification_attempts('maria@example.com'),
+            value=Text.create('2'),
+        )
         self.accounts_repository_mock.find_by_email.assert_not_called()
         self.accounts_repository_mock.replace.assert_not_called()
         self.cache_provider_mock.delete.assert_not_called()
@@ -106,7 +113,7 @@ class TestVerifyEmailUseCase:
     def test_should_raise_invalid_token_error_when_cached_otp_is_malformed(
         self,
     ) -> None:
-        self.cache_provider_mock.get.return_value = Text.create('abc123')
+        self.cache_provider_mock.get.side_effect = [None, Text.create('abc123')]
 
         with pytest.raises(InvalidEmailVerificationTokenError):
             self.use_case.execute(email='maria@example.com', otp='123456')
@@ -116,9 +123,23 @@ class TestVerifyEmailUseCase:
         self.cache_provider_mock.delete.assert_not_called()
         self.jwt_provider_mock.encode.assert_not_called()
 
+    def test_should_raise_invalid_token_error_when_remaining_attempts_reached_zero(
+        self,
+    ) -> None:
+        self.cache_provider_mock.get.return_value = Text.create('0')
+
+        with pytest.raises(InvalidEmailVerificationTokenError):
+            self.use_case.execute(email='maria@example.com', otp='123456')
+
+        self.accounts_repository_mock.find_by_email.assert_not_called()
+        self.accounts_repository_mock.replace.assert_not_called()
+        self.cache_provider_mock.set.assert_not_called()
+        self.cache_provider_mock.delete.assert_not_called()
+        self.jwt_provider_mock.encode.assert_not_called()
+
     def test_should_raise_invalid_token_error_when_account_is_not_found(self) -> None:
-        self.cache_provider_mock.get.return_value = Text.create('123456')
-        self.accounts_repository_mock.find_by_email.side_effect = AccountNotFoundError()
+        self.cache_provider_mock.get.side_effect = [None, Text.create('123456')]
+        self.accounts_repository_mock.find_by_email.return_value = None
 
         with pytest.raises(InvalidEmailVerificationTokenError):
             self.use_case.execute(email='maria@example.com', otp='123456')

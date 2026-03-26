@@ -3,7 +3,6 @@ from animus.core.auth.domain.entities import Account
 from animus.core.auth.domain.entities.dtos import AccountDto
 from animus.core.auth.domain.errors import (
     AccountAlreadyExistsError,
-    AccountNotFoundError,
 )
 from animus.core.auth.domain.events import EmailVerificationRequestedEvent
 from animus.core.auth.domain.structures import Email, Password
@@ -41,11 +40,8 @@ class SignUpUseCase:
         account_email = Email.create(email)
         account_password = Password.create(password)
 
-        try:
-            self._accounts_repository.find_by_email(account_email)
-        except AccountNotFoundError:
-            pass
-        else:
+        existing_account = self._accounts_repository.find_by_email(account_email)
+        if existing_account is not None:
             raise AccountAlreadyExistsError
 
         account = Account.create(

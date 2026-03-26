@@ -5,7 +5,6 @@ import pytest
 from animus.constants.cache_keys import CacheKeys
 from animus.core.auth.domain.errors import (
     AccountAlreadyExistsError,
-    AccountNotFoundError,
 )
 from animus.core.auth.domain.events import EmailVerificationRequestedEvent
 from animus.core.auth.domain.structures import Otp
@@ -47,7 +46,7 @@ class TestSignUpUseCase:
     def test_should_create_account_and_publish_verification_event(self) -> None:
         valid_password = 'Password123'  # noqa: S105
 
-        self.accounts_repository_mock.find_by_email.side_effect = AccountNotFoundError()
+        self.accounts_repository_mock.find_by_email.return_value = None
         self.hash_provider_mock.generate.return_value = Text.create('hashed-password')
         self.otp_provider_mock.generate.return_value = Otp.create('123456')
 

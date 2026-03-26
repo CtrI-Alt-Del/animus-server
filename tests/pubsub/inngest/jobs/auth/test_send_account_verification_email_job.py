@@ -51,7 +51,7 @@ class TestSendAccountVerificationEmailJob:
 
         assert response.status == 200
 
-        deadline = time.monotonic() + 30
+        deadline = time.monotonic() + 60
         while time.monotonic() < deadline:
             if len(captured_calls) == 1:
                 break

@@ -2,7 +2,7 @@
 @name = Usuario Teste
 @email = joaopcarvalho.cds@gmail.com
 @password = Senha@123
-@otp = 076320
+@otp = 583108
 
 ### Criar conta (SignUpController)
 POST {{url}}/sign-up

@@ -9,7 +9,7 @@ ACCOUNT_VERIFICATION_EMAIL_TEMPLATE = """<!doctype html>
     <div
       style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;"
     >
-      Use o codigo OTP para confirmar seu e-mail e ativar sua conta no Animus.
+      Use o codigo de verificação para confirmar seu e-mail e ativar sua conta no Animus.
     </div>
 
     <table

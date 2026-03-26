@@ -2,11 +2,11 @@ from typing import NamedTuple
 
 
 class CacheKeys(NamedTuple):
-    EMAIL_VERIFICATION_OTP = 'auth:email_verification'
-    EMAIL_VERIFICATION = EMAIL_VERIFICATION_OTP
-
-    def email_verification_otp(self, email: str) -> str:
-        return f'{self.EMAIL_VERIFICATION_OTP}:{email}'
+    EMAIL_VERIFICATION = 'auth:email_verification'
+    EMAIL_VERIFICATION_ATTEMPTS = 'auth:email_verification_attempts'
 
     def get_email_verification(self, email: str) -> str:
-        return self.email_verification_otp(email)
+        return f'{self.EMAIL_VERIFICATION}:{email}'
+
+    def get_email_verification_attempts(self, email: str) -> str:
+        return f'{self.EMAIL_VERIFICATION_ATTEMPTS}:{email}'

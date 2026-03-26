@@ -2,7 +2,6 @@ from unittest.mock import ANY, MagicMock, create_autospec
 
 import pytest
 
-from animus.core.auth.domain.errors import AccountNotFoundError
 from animus.core.auth.domain.structures.dtos.session_dto import SessionDto
 from animus.core.auth.domain.structures.dtos.token_dto import TokenDto
 from animus.core.auth.domain.structures.email import Email
@@ -57,7 +56,7 @@ class TestSignInWithGoogleUseCase:
         email = Email.create('test@example.com')
 
         self.google_oauth_provider_mock.get_user_info.return_value = (name, email)
-        self.accounts_repository_mock.find_by_email.side_effect = AccountNotFoundError()
+        self.accounts_repository_mock.find_by_email.return_value = None
         self.jwt_provider_mock.encode.return_value = self.mock_encoded_result
 
         result = self.use_case.execute(oauth_token)

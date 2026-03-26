@@ -6,7 +6,6 @@ from animus.core.auth.domain.entities import Account
 from animus.core.auth.domain.entities.dtos import AccountDto
 from animus.core.auth.domain.errors import (
     AccountInactiveError,
-    AccountNotFoundError,
     AccountNotVerifiedError,
     InvalidCredentialsError,
 )
@@ -80,7 +79,7 @@ class TestSignInUseCase:
         self,
     ) -> None:
         valid_password = 'Password123'  # noqa: S105
-        self.accounts_repository_mock.find_by_email.side_effect = AccountNotFoundError()
+        self.accounts_repository_mock.find_by_email.return_value = None
 
         with pytest.raises(InvalidCredentialsError):
             self.use_case.execute(
