@@ -8,6 +8,7 @@ from animus.core.shared.domain.errors import ValidationError
 @structure
 class Otp(Structure):
     value: str
+    MAX_VERIFICATION_ATTEMPTS: int = 3
 
     @classmethod
     def create(cls, value: str) -> 'Otp':

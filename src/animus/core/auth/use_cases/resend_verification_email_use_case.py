@@ -4,7 +4,7 @@ from animus.core.auth.domain.errors import (
     AccountNotFoundError,
 )
 from animus.core.auth.domain.events import EmailVerificationRequestedEvent
-from animus.core.auth.domain.structures import Email
+from animus.core.auth.domain.structures import Email, Otp
 from animus.core.auth.interfaces import AccountsRepository
 from animus.core.shared.domain.structures import Text, Ttl
 from animus.core.shared.interfaces import Broker, CacheProvider, OtpProvider
@@ -43,10 +43,17 @@ class ResendVerificationEmailUseCase:
         email_verification_cache_key = CacheKeys().get_email_verification(
             account.email.value
         )
+        email_verification_attempts_cache_key = (
+            CacheKeys().get_email_verification_attempts(account_email.value)
+        )
         self._cache_provider.set_with_ttl(
             key=email_verification_cache_key,
             value=Text.create(account_email_otp.value),
             ttl=self._email_verification_otp_ttl,
+        )
+        self._cache_provider.set(
+            email_verification_attempts_cache_key,
+            Text.create(str(Otp.MAX_VERIFICATION_ATTEMPTS)),
         )
 
         self._broker.publish(
