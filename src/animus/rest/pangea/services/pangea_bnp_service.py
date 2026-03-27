@@ -8,6 +8,7 @@ from animus.core.shared.responses.page_pagination_response import PagePagination
 from animus.rest.pangea.services.mappers.pangea_bnp_precedent_mapper import (
     PangeaBnpPrecedentMapper,
 )
+from animus.rest.pangea.services.models.pangea_bnp_precedent import PangeaBnpResponse
 
 
 class PangeaBnpService(PangeaService):
@@ -22,26 +23,39 @@ class PangeaBnpService(PangeaService):
         tipos = [kind.value for kind in PrecedentKindValue]
         payload = {
             'filtro': {
+                'buscaGeral': '',
+                'cancelados': False,
                 'ordenacao': 'Text',
                 'orgaos': orgaos,
                 'pagina': page,
                 'tipos': tipos,
             }
         }
-        #@OTODO:colocar tipagem no metodo
-        pangea_bnp_precedents = self._client.post(
-            path='api/v1/precedentes', body=payload
+        response_data = self._client.post(
+            response_model=PangeaBnpResponse, path='api/v1/precedentes', body=payload
         ).body
         precedents: list[Precedent] = []
-        for pangea_bnp_precedent in pangea_bnp_precedents:
+        if not response_data:
+            return PagePaginationResponse(
+                items=[], total=0, page=page, page_size=page_size
+            )
+        actual_page_size = (
+            response_data.posicao_final - response_data.posicao_inicial
+        ) + 1
+        if actual_page_size <= 0:
+            actual_page_size = page_size
+        for model in response_data.resultados:
             try:
-                precedent = PangeaBnpPrecedentMapper.to_entity(pangea_bnp_precedent)
+                precedent = PangeaBnpPrecedentMapper.to_entity(model)
                 precedents.append(precedent)
             except Exception as error:
-                print(error)
+                print(
+                    f'Erro ao processar precedente {getattr(model, "id", "S/ID")}: {error}'
+                )
+
         return PagePaginationResponse[Precedent](
             items=precedents,
-            total=len(precedents),
+            total=response_data.total,
             page=page,
-            page_size=page_size
+            page_size=actual_page_size,
         )

@@ -1,6 +1,4 @@
-from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
-    PrecedentIdentifierDto,
-)
+from ...structures.precedent_identifier import PrecedentIdentifierDto
 from animus.core.shared.domain.decorators import dto
 
 

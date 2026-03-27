@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from animus.core.intake.domain.entities import Analysis
+from animus.core.intake.domain.entities.analysis import Analysis
 from animus.core.shared.domain.structures import Id, Integer, Text
 from animus.core.shared.responses import CursorPaginationResponse
 

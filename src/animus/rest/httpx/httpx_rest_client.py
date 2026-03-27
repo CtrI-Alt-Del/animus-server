@@ -11,16 +11,31 @@ class HttpxRestClient(RestClient):
     def __init__(self):
         self._client = httpx.Client()
 
-    def _build_response(self, response: httpx.Response) -> RestResponse[Any]:
-        body = None
+    def _build_response[T](
+        self, response: httpx.Response, response_model: type[T]
+    ) -> RestResponse[T]:
+        body: Any = None
         error_message = None
+
         try:
             if response.content:
-                body = response.json()
-        except Exception:
-            body = response.text if response.text else None
+                raw_json = response.json()
 
-        if response.is_error:
+                if isinstance(raw_json, dict) and hasattr(response_model, 'create'):
+                    body = response_model.create(**raw_json)  # type: ignore
+                elif isinstance(raw_json, dict):
+                    body = response_model(**raw_json)  # type: ignore
+                else:
+                    body = response_model(raw_json)  # type: ignore
+
+        except Exception as e:
+            #@TODO: criar classe de LOG!
+            print(f"DEBUG: Falha ao instanciar o modelo {response_model.__name__}: {e}")
+            body = response.text if response.text else None
+            if response.is_error:
+                error_message = f'Parse Error: {e!s}'
+
+        if response.is_error and not error_message:
             error_message = str(body) if body else f'HTTP Error {response.status_code}'
 
         return RestResponse(
@@ -29,35 +44,53 @@ class HttpxRestClient(RestClient):
             error_message=error_message,
         )
 
-    def get(self, path: str, query_params: Json | None = None) -> RestResponse[Any]:
+    def get[T](
+        self, path: str, response_model: type[T], query_params: Json | None = None
+    ) -> RestResponse[T]:
         response = self._client.get(url=path, params=query_params)
-        return self._build_response(response)
+        return self._build_response(response, response_model)
 
-    def post(
-        self, path: str, body: Any | None = None, query_params: Json | None = None
-    ) -> RestResponse[Any]:
+    def post[T](
+        self,
+        path: str,
+        response_model: type[T],
+        body: Any | None = None,
+        query_params: Json | None = None,
+    ) -> RestResponse[T]:
         response = self._client.post(url=path, json=body, params=query_params)
-        return self._build_response(response)
+        return self._build_response(response, response_model)
 
-    def put(
-        self, path: str, body: Any | None = None, query_params: Json | None = None
-    ) -> RestResponse[Any]:
+    def put[T](
+        self,
+        path: str,
+        response_model: type[T],
+        body: Any | None = None,
+        query_params: Json | None = None,
+    ) -> RestResponse[T]:
         response = self._client.put(url=path, json=body, params=query_params)
-        return self._build_response(response)
+        return self._build_response(response, response_model)
 
-    def patch(
-        self, path: str, body: Any | None = None, query_params: Json | None = None
-    ) -> RestResponse[Any]:
+    def patch[T](
+        self,
+        path: str,
+        response_model: type[T],
+        body: Any | None = None,
+        query_params: Json | None = None,
+    ) -> RestResponse[T]:
         response = self._client.patch(url=path, json=body, params=query_params)
-        return self._build_response(response)
+        return self._build_response(response, response_model)
 
-    def delete(
-        self, path: str, body: Any | None = None, query_params: Json | None = None
-    ) -> RestResponse[Any]:
+    def delete[T](
+        self,
+        path: str,
+        response_model: type[T],
+        body: Any | None = None,
+        query_params: Json | None = None,
+    ) -> RestResponse[T]:
         response = self._client.request(
             'DELETE', url=path, json=body, params=query_params
         )
-        return self._build_response(response)
+        return self._build_response(response, response_model)
 
     def get_base_url(self) -> str:
         return str(self._client.base_url)

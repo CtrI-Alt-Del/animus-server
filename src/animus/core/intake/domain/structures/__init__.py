@@ -1,4 +1,3 @@
-from .analysis_precedent import AnalysisPrecedent
 from .court import Court, CourtValue
 from .petition_document import PetitionDocument
 from .petition_embedding import PetitionEmbedding
@@ -11,7 +10,6 @@ from .precedent_kind import PrecedentKind, PrecedentKindValue
 from .precedent_status import PrecedentStatus, PrecedentStatusValue
 
 __all__ = [
-    'AnalysisPrecedent',
     'Court',
     'CourtValue',
     'PetitionDocument',

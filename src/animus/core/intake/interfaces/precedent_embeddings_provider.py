@@ -1,7 +1,8 @@
 from typing import Protocol
 
-from animus.core.intake.domain.entities import Precedent
-from animus.core.intake.domain.structures import PrecedentEmbedding
+from animus.core.intake.domain.entities.precedent import Precedent
+from animus.core.intake.domain.structures.precedent_embedding import PrecedentEmbedding
+
 
 
 class PrecedentEmbeddingsProvider(Protocol):

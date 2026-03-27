@@ -19,7 +19,7 @@ class VectorizePrecedentsJob:
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
-            fn_id='vectorize-precedents', trigger=TriggerCron(cron='* * * * *')
+            fn_id='vectorize-precedents', trigger=TriggerCron(cron="0 2 * * 1")
         )
         async def _(context: Context) -> None:
             page = 1
@@ -34,16 +34,13 @@ class VectorizePrecedentsJob:
                 page += 1
 
         async def _vectorize_precedents(page: int, page_size: int) -> bool:
-            #@TODO: todo no pangeabnp service
-            #@TODO: cirar pangeabnpModel
-            #@TODO: talvez error no embedding_provider
-            qdrant_client = QdrantClient(url=Env.QDRANT_URL)
             with Sqlalchemy.session() as session:
                 use_case = VectorizePrecedentsUseCase(
                     pangea_service=PangeaBnpService(client=HttpxRestClient()),
                     precedents_repository=SqlalchemyPrecedentsRepository(session),
                     embeddings_provider=GeminiPrecedentEmbeddingsProvider(),
-                    embeddings_repository=QdrantPrecedentsEmbeddingsRepository(qdrant_client,collection_prefix=Env.ENV),
+                    embeddings_repository=QdrantPrecedentsEmbeddingsRepository(),
                 )
                 result = use_case.execute(page=page, page_size=page_size)
                 return result.has_next_page
+        return _

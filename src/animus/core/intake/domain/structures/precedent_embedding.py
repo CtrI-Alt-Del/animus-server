@@ -1,5 +1,5 @@
 from animus.core.intake.domain.structures.court import Court
-from animus.core.intake.domain.structures.dtos import PrecedentEmbeddingDto
+from animus.core.intake.domain.structures.dtos.precedent_embedding_dto import PrecedentEmbeddingDto
 from animus.core.intake.domain.structures.precedent_embedding_field import (
     PrecedentEmbeddingField,
 )

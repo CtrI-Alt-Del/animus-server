@@ -15,9 +15,8 @@ from animus.core.shared.domain.structures.text import Text
 
 
 class GeminiPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
-    def __init__(self, api_key: str | None = None) -> None:
-        if api_key:
-            self._client = genai.Client(api_key=api_key)
+    def __init__(self) -> None:
+        self._client = genai.Client(api_key=Env.GEMINI_API_KEY)
         self._model = Env.EMBEDDING_AI_MODEL
 
     def generate(self, precedents: list[Precedent]) -> list[PrecedentEmbedding]:
@@ -56,8 +55,8 @@ class GeminiPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
             prec: Precedent = metadata['precedent']
             results.append(
                 PrecedentEmbedding.create(
-                    score=Decimal.create(1.0), # Score padrão inicial (será recalculado na busca)
-                    vector=[Decimal.create(v) for v in vector],
+                    score=Decimal.create(1.0), 
+                    vector=[Decimal.create(v) for v in vector.values],
                     field=PrecedentEmbeddingField.create(metadata["field"]),
                     court=prec.identifier.court,
                     number=prec.identifier.number,

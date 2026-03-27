@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from animus.core.intake.domain.entities import Petition
+from animus.core.intake.domain.entities.petition import Petition
 from animus.core.shared.domain.structures import Id
 from animus.core.shared.responses import ListResponse
 

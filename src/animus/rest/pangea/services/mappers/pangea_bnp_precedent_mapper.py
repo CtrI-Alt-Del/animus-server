@@ -1,52 +1,61 @@
-from datetime import datetime, timezone
-from typing import Any
+import re
+from datetime import UTC, datetime
 
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
 from animus.core.intake.domain.entities.precedent import Precedent
 from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
     PrecedentIdentifierDto,
 )
+from animus.rest.pangea.services.models.pangea_bnp_process import (
+    PangeaBnpPrecedentProcess,
+)
 
 
 class PangeaBnpPrecedentMapper:
     @staticmethod
-    def to_dto(payload: dict[str, Any]) -> PrecedentDto:
-        raw_date = payload.get('ultimaAtualizacao')
-        last_updated = (
-            datetime.strptime(raw_date, '%d/%m/%Y').isoformat()
-            if raw_date
-            else datetime.now(timezone.utc).isoformat()
+    def _clean_text(text: str | None) -> str:
+        if not text:
+            return ''
+        text = re.sub(r'<[^>]*>', ' ', text)
+        text = (
+            text.replace('\\r', ' ')
+            .replace('\\n', ' ')
+            .replace('\r', ' ')
+            .replace('\n', ' ')
         )
-        enunciation_text = payload.get('questao', '').strip()
-        thesis_text = payload.get('teseFirmada', '').strip()
-        court = payload.get('orgao', '')
-        kind = payload.get('tipo')
-        process_number = payload.get('nr')
-        process_status = payload.get('situacao', '').strip()
-        if not court:
-            raise ValueError
-        if not kind:
-            raise ValueError
-        if not process_number:
-            raise ValueError
-        if not process_number:
-            raise ValueError
+        return ' '.join(text.split()).strip()
 
-        precedent_identifer = PrecedentIdentifierDto(
-            court=court,
-            kind=kind,
-            number=process_number,
+    @staticmethod
+    def to_dto(process: PangeaBnpPrecedentProcess) -> PrecedentDto:
+        try:
+            last_updated = (
+                datetime.strptime(process.ultima_atualizacao, '%d/%m/%Y').isoformat()
+                if process.ultima_atualizacao
+                else datetime.now(UTC).isoformat()
+            )
+        except (ValueError, TypeError):
+            last_updated = datetime.now(UTC).isoformat()
+        thesis_source = process.tese
+        if not thesis_source and process.highlight:
+            thesis_source = process.highlight.tese
+        thesis_text = PangeaBnpPrecedentMapper._clean_text(thesis_source)
+        enunciation_text = PangeaBnpPrecedentMapper._clean_text(process.questao)
+        if not process.orgao or not process.tipo or not process.nr:
+            raise ValueError(f'Dados obrigatórios ausentes no precedente {process.id}')
+        identifier = PrecedentIdentifierDto(
+            court=process.orgao,
+            kind=process.tipo,
+            number=int(process.nr),
         )
 
         return PrecedentDto(
-            id=payload.get('id'),
-            identifier=precedent_identifer,
-            status=process_status,
+            identifier=identifier,
+            status=process.situacao.strip(),
             enunciation=enunciation_text,
-            thesis=thesis_text,
+            thesis=thesis_text if thesis_text else enunciation_text,
             last_updated_in_pangea_at=last_updated,
         )
 
     @classmethod
-    def to_entity(cls, payload: dict[str, Any]) ->Precedent:
-        return Precedent.create(cls.to_dto(payload))
+    def to_entity(cls, process: PangeaBnpPrecedentProcess) -> Precedent:
+        return Precedent.create(cls.to_dto(process))
