@@ -64,20 +64,24 @@ def gcs_client(gcs_emulator_url: str) -> Iterator[Client]:
             os.environ['STORAGE_EMULATOR_HOST'] = previous_env_host
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def create_gcs_bucket(gcs_client: Client) -> None:
     bucket = gcs_client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
     gcs_client.create_bucket(bucket)  # pyright: ignore[reportUnknownMemberType]
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def patch_gcs_env(monkeypatch: pytest.MonkeyPatch, gcs_emulator_url: str) -> None:
     monkeypatch.setattr(Env, 'STORAGE_EMULATOR_HOST', gcs_emulator_url)
     monkeypatch.setenv('STORAGE_EMULATOR_HOST', gcs_emulator_url)
 
 
 @pytest.fixture
-def upload_gcs_file(gcs_client: Client) -> UploadGcsFileFixture:
+def upload_gcs_file(
+    gcs_client: Client,
+    create_gcs_bucket: None,
+    patch_gcs_env: None,
+) -> UploadGcsFileFixture:
     def _upload_gcs_file(
         file_path: str,
         content: bytes,
