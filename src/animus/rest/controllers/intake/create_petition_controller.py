@@ -36,7 +36,7 @@ class CreatePetitionController:
         @router.post('/petitions', status_code=201, response_model=PetitionDto)
         def _(
             body: _Body,
-            account_id: Annotated[Id, Depends(AuthPipe.get_account_id)],
+            account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
             analisyses_repository: Annotated[
                 AnalisysesRepository,
                 Depends(DatabasePipe.get_analisyses_repository_from_request),

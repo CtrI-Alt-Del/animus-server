@@ -68,4 +68,3 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         model.account_id = analysis.account_id.value
         model.status = analysis.status.value.value
         model.is_archived = analysis.is_archived.value
-        model.summary = analysis.summary.value

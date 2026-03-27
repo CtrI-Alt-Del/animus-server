@@ -34,7 +34,7 @@ class IntakePipe:
     @staticmethod
     def verify_petition_document_path_by_account(
         petition_id: str,
-        account_id: Annotated[Id, Depends(AuthPipe.get_account_id)],
+        account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
         petitions_repository: Annotated[
             PetitionsRepository,
             Depends(DatabasePipe.get_petitions_repository_from_request),

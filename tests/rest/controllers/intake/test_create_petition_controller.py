@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import UTC, datetime
 
 import pytest
 from fastapi.testclient import TestClient
@@ -29,8 +30,7 @@ def create_analysis(
         account_id: str,
         analysis_id: str | None = None,
         name: str = 'Analise inicial',
-        status: str = AnalysisStatusValue.DONE.value,
-        summary: str = 'Resumo da analise',
+        status: str = AnalysisStatusValue.WAITING_PETITION.value,
         folder_id: str | None = None,
         is_archived: bool = False,
     ) -> AnalysisModel:
@@ -42,7 +42,7 @@ def create_analysis(
             account_id=account_id,
             status=status,
             is_archived=is_archived,
-            summary=summary,
+            created_at=datetime.now(UTC),
         )
         session.add(model)
         session.commit()

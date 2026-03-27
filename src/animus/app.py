@@ -1,5 +1,8 @@
+import os
+
 from fastapi import FastAPI
 
+from animus.constants import Env
 from animus.pubsub.inngest.inngest_pubsub import InngestPubSub
 from animus.rest.handlers import AppErrorHandler
 from animus.rest.middlewares import (
@@ -13,7 +16,20 @@ from animus.routers.intake.intake_router import IntakeRouter
 
 class FastAPIApp:
     @staticmethod
+    def _configure_storage_emulator() -> None:
+        storage_emulator_host = Env.STORAGE_EMULATOR_HOST
+        if Env.MODE == 'dev' and not storage_emulator_host:
+            storage_emulator_host = 'http://localhost:4443'
+
+        if storage_emulator_host:
+            os.environ['STORAGE_EMULATOR_HOST'] = storage_emulator_host
+        else:
+            os.environ.pop('STORAGE_EMULATOR_HOST', None)
+
+    @staticmethod
     def register() -> FastAPI:
+        FastAPIApp._configure_storage_emulator()
+
         app = FastAPI(
             docs_url=None,
             redoc_url=None,

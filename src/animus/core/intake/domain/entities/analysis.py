@@ -5,7 +5,7 @@ from animus.core.intake.domain.entities.dtos.analysis_status_dto import (
 )
 from animus.core.shared.domain.abstracts import Entity
 from animus.core.shared.domain.decorators import entity
-from animus.core.shared.domain.structures import Id, Logical, Name, Text
+from animus.core.shared.domain.structures import Datetime, Id, Logical, Name
 
 
 @entity
@@ -15,7 +15,7 @@ class Analysis(Entity):
     account_id: Id
     status: AnalysisStatus
     is_archived: Logical
-    summary: Text
+    created_at: Datetime
 
     @classmethod
     def create(cls, dto: AnalysisDto) -> 'Analysis':
@@ -28,7 +28,7 @@ class Analysis(Entity):
             account_id=Id.create(dto.account_id),
             status=AnalysisStatus.create(AnalysisStatusDto(value=dto.status)),
             is_archived=Logical.create(dto.is_archived),
-            summary=Text.create(dto.summary),
+            created_at=Datetime.create(dto.created_at),
         )
 
     @property
@@ -40,5 +40,5 @@ class Analysis(Entity):
             account_id=self.account_id.value,
             status=self.status.value.value,
             is_archived=self.is_archived.value,
-            summary=self.summary.value,
+            created_at=self.created_at.value.isoformat(),
         )

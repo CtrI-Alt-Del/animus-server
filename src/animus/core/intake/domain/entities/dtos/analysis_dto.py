@@ -6,7 +6,7 @@ class AnalysisDto:
     name: str
     account_id: str
     status: str
-    summary: str
+    created_at: str
     folder_id: str | None = None
     is_archived: bool = False
     id: str | None = None

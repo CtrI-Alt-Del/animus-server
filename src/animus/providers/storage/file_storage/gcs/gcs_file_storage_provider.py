@@ -1,5 +1,3 @@
-import os
-
 from google.cloud.storage import Client
 
 from animus.constants import Env
@@ -10,12 +8,7 @@ from animus.core.storage.interfaces import FileStorageProvider
 
 class GcsFileStorageProvider(FileStorageProvider):
     def __init__(self) -> None:
-        storage_emulator_host = Env.STORAGE_EMULATOR_HOST
-        if Env.MODE == 'dev' and not storage_emulator_host:
-            storage_emulator_host = 'http://localhost:4443'
-
-        if storage_emulator_host:
-            os.environ['STORAGE_EMULATOR_HOST'] = storage_emulator_host
+        if Env.STORAGE_EMULATOR_HOST or Env.MODE == 'dev':
             self._client = Client.create_anonymous_client()
         else:
             self._client = Client()

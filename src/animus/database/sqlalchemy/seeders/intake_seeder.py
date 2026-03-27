@@ -39,8 +39,8 @@ class IntakeSeeder:
                 id='01KMQTN9YCHWG20ZZEPNBRYW87',
                 name='Analise de exemplo',
                 account_id=account_ids[0].value,
-                status='DONE',
-                summary='Resumo inicial de analise para dados de seed',
+                status='WAITING_PETITION',
+                created_at=datetime.now(UTC).isoformat(),
             )
         )
         self._analisyses_repository.add(analysis)

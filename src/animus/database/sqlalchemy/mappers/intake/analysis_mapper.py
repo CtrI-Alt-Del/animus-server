@@ -14,7 +14,7 @@ class AnalysisMapper:
                 account_id=model.account_id,
                 status=model.status,
                 is_archived=model.is_archived,
-                summary=model.summary,
+                created_at=model.created_at.isoformat(),
             )
         )
 
@@ -27,5 +27,5 @@ class AnalysisMapper:
             account_id=entity.account_id.value,
             status=entity.status.value.value,
             is_archived=entity.is_archived.value,
-            summary=entity.summary.value,
+            created_at=entity.created_at.value,
         )
