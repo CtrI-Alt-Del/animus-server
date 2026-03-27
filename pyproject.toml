@@ -28,6 +28,7 @@ dependencies = [
   "google-auth>=2.49.1",
   "google-cloud-aiplatform>=1.143.0",
   "google-genai>=1.68.0",
+  "qdrant-client>=1.17.1",
 ]
 
 [dependency-groups]

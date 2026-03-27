@@ -28,6 +28,9 @@ class _Env(BaseSettings):
     VERTEX_AI_INDEX_ENDPOINT_ID:str =''
     VERTEX_AI_DEPLOY_INDEX_ID:str =''
 
+    QDRANT_URL:str="http://localhost:6333"
+    ENV:str
+
     model_config = SettingsConfigDict(
         env_file='.env',
         extra='ignore',
