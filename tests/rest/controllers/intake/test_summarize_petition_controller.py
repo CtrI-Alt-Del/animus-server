@@ -8,8 +8,7 @@ from animus.core.intake.domain.entities.dtos.petition_document_dto import (
 from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
     PetitionSummaryDto,
 )
-from animus.core.shared.domain.structures import Decimal, Text
-from animus.core.storage.domain.structures.file import File
+from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.repositories.intake.sqlalchemy_analisyses_repository import (
     SqlalchemyAnalisysesRepository,
 )
@@ -22,36 +21,21 @@ from animus.pipes.ai_pipe import AiPipe
 from animus.pipes.providers_pipe import ProvidersPipe
 from animus.providers.auth.jwt.jose.jose_jwt_provider import JoseJwtProvider
 from tests.fixtures.auth_fixtures import CreateAccountFixture
-
-
-class FakeFileStorageProvider:
-    def __init__(self) -> None:
-        self.received_file_path: Text | None = None
-
-    def generate_upload_url(self, file_path: Text) -> None:
-        raise NotImplementedError
-
-    def get_file(self, file_path: Text) -> File:
-        self.received_file_path = file_path
-
-        return File.create(
-            value=b'%PDF-1.4',
-            key=file_path,
-            size_in_bytes=Decimal.create(0.5),
-            mime_type=Text.create('application/pdf'),
-        )
+from tests.fixtures.gcs_fixtures import UploadGcsFileFixture
 
 
 class FakePdfProvider:
     def __init__(self, content: str) -> None:
         self.content = content
+        self.calls_count = 0
 
-    def extract_content(self, pdf_file: File) -> Text:
+    def extract_content(self, pdf_file: object) -> Text:
+        self.calls_count += 1
         return Text.create(self.content)
 
 
 class FakeDocxProvider:
-    def extract_content(self, docx_file: File) -> Text:
+    def extract_content(self, docx_file: object) -> Text:
         raise AssertionError('DOCX provider should not be used in this scenario')
 
 
@@ -106,6 +90,7 @@ class TestSummarizePetitionController:
         client: TestClient,
         create_account: CreateAccountFixture,
         sqlalchemy_session_factory: sessionmaker[Session],
+        upload_gcs_file: UploadGcsFileFixture,
     ) -> None:
         account = create_account(is_verified=True, is_active=True)
         access_token = _make_access_token(account.id)
@@ -113,7 +98,11 @@ class TestSummarizePetitionController:
             sqlalchemy_session_factory,
             account.id,
         )
-        fake_file_storage_provider = FakeFileStorageProvider()
+        upload_gcs_file(
+            'intake/analyses/01TEST/petitions/petition.pdf',
+            b'%PDF-1.4 fake petition bytes',
+            'application/pdf',
+        )
         fake_pdf_provider = FakePdfProvider('Fatos e pedidos da peticao inicial')
         fake_workflow = FakeSummarizePetitionWorkflow(
             PetitionSummaryDto(
@@ -126,9 +115,6 @@ class TestSummarizePetitionController:
         )
         app = client.app
         assert isinstance(app, FastAPI)
-        app.dependency_overrides[ProvidersPipe.get_file_storage_provider] = lambda: (
-            fake_file_storage_provider
-        )
         app.dependency_overrides[ProvidersPipe.get_pdf_provider] = lambda: (
             fake_pdf_provider
         )
@@ -152,9 +138,7 @@ class TestSummarizePetitionController:
                 'Resumo dos fundamentos juridicos',
             ],
         }
-        assert fake_file_storage_provider.received_file_path == Text.create(
-            'intake/analyses/01TEST/petitions/petition.pdf'
-        )
+        assert fake_pdf_provider.calls_count == 1
         assert fake_workflow.received_petition_id == petition_id
         assert fake_workflow.received_document_content == Text.create(
             'Fatos e pedidos da peticao inicial'
