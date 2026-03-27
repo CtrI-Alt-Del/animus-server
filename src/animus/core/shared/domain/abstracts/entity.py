@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC
 from typing import TYPE_CHECKING
 
@@ -9,7 +11,7 @@ if TYPE_CHECKING:
 
 @entity
 class Entity(ABC):
-    id: 'Id'
+    id: Id
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Entity):
