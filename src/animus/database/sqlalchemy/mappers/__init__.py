@@ -1,3 +1,10 @@
+from . import intake
 from .auth import AccountMapper
+from .intake import PetitionMapper, PetitionSummaryMapper
 
-__all__ = ['AccountMapper']
+__all__ = [
+    'intake',
+    'AccountMapper',
+    'PetitionMapper',
+    'PetitionSummaryMapper',
+]

@@ -6,8 +6,9 @@ from animus.rest.middlewares import (
     HandleInngestClientMiddleware,
     HandleSqlalchemySessionMiddleware,
 )
-from animus.routers import AuthRouter
+from animus.routers.auth.auth_router import AuthRouter
 from animus.routers.docs.docs_router import DocsRouter
+from animus.routers.intake.intake_router import IntakeRouter
 
 
 class FastAPIApp:
@@ -19,6 +20,7 @@ class FastAPIApp:
         )
 
         app.include_router(AuthRouter.register())
+        app.include_router(IntakeRouter.register())
         app.include_router(DocsRouter.register())
 
         HandleSqlalchemySessionMiddleware.handle(app)

@@ -27,6 +27,8 @@ services:
       - "8288:8288"
     depends_on:
       - postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   redis:
     image: redis:7-alpine
@@ -43,6 +45,37 @@ services:
       timeout: 5s
       retries: 10
 
+  gcs:
+    image: fsouza/fake-gcs-server:latest
+    container_name: animus_gcs
+    restart: unless-stopped
+    command: -scheme http -external-url http://localhost:4443
+    ports:
+      - "4443:4443"
+    volumes:
+      - animus_gcs_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4443/storage/v1/b"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  gcs_ui:
+    image: ghcr.io/drehelis/gcp-emulator-ui:main
+    container_name: animus_gcs_ui
+    restart: unless-stopped
+    ports:
+      - "9090:80"
+    environment:
+      STORAGE_EMULATOR_URL: gcs:4443
+      PUBSUB_EMULATOR_URL: gcs:4443
+      FIRESTORE_EMULATOR_URL: gcs:4443
+      DATASTORE_EMULATOR_URL: gcs:4443
+      DATASTORE_FILE_SERVER_URL: gcs:4443
+    depends_on:
+      - gcs
+
 volumes:
   animus_postgres_data:
   animus_redis_data:
+  animus_gcs_data:

@@ -1,4 +1,4 @@
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Literal
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,9 +9,14 @@ class _Env(BaseSettings):
     MIN_EMAIL_VERIFICATION_OTP_TTL_SECONDS: ClassVar[int] = 60
     MAX_EMAIL_VERIFICATION_OTP_TTL_SECONDS: ClassVar[int] = 86400
 
+    MODE: Literal['dev', 'stg', 'prod'] = 'dev'
+
     HOST: str = '127.0.0.1'
     PORT: int = 8080
     DATABASE_URL: str = 'postgresql://animus:animus@localhost:5432/animus'
+    GCS_BUCKET_NAME: str = 'animus'
+    STORAGE_EMULATOR_HOST: str = ''
+    GEMINI_API_KEY: str = ''
 
     JWT_SECRET_KEY: str = ''
     JWT_ALGORITHM: str = 'HS256'
@@ -48,6 +53,17 @@ class _Env(BaseSettings):
             return cls.DEFAULT_EMAIL_VERIFICATION_OTP_TTL_SECONDS
 
         return parsed_value
+
+    @field_validator('STORAGE_EMULATOR_HOST')
+    @classmethod
+    def validate_storage_emulator_host(cls, value: str, info: Any) -> str:
+        mode = str(info.data.get('MODE', 'dev'))
+
+        if value and mode != 'dev':
+            msg = 'STORAGE_EMULATOR_HOST can only be used when MODE is dev'
+            raise ValueError(msg)
+
+        return value
 
 
 Env = _Env()
