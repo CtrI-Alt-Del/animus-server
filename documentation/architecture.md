@@ -24,6 +24,7 @@ O animus Server usa arquitetura em camadas inspirada em Clean Architecture e Hex
 - **Validation (`src/animus/validation/`)**: Schemas Pydantic de entrada/saida e conversao para DTO.
 - **Database (`src/animus/database/`)**: Models SQLAlchemy, mappers e implementacoes concretas de repositorios.
 - **Providers (`src/animus/providers/`)**: Adaptadores de infraestrutura.
+- **AI (`src/animus/ai/`)**: Workflows, teams e saídas estruturadas com Agno/Gemini para casos de uso síncronos guiados pelo `core`.
 - **PubSub (`src/animus/pubsub/`)**: Orquestracao assincrona por eventos (Inngest).
 
 ## Fluxo de Dados (resumo)
@@ -37,6 +38,10 @@ Fluxos de autenticacao ja implementados:
 - `POST /auth/resend-verification-email` -> `ResendVerificationEmailController` -> `ResendVerificationEmailUseCase` -> `AccountsRepository` / `OtpProvider` / `CacheProvider` -> `Broker` -> `SendAccountVerificationEmailJob`.
 - `POST /auth/verify-email` -> `VerifyEmailController` -> `VerifyEmailUseCase` -> `AccountsRepository` / `CacheProvider` / `JwtProvider` -> `SessionDto`.
 - `POST /auth/sign-in` -> `SignInController` -> `SignInUseCase` -> `AccountsRepository` / `HashProvider` / `JwtProvider` -> `SessionDto`.
+
+Fluxos de intake ja implementados:
+- `POST /intake/petitions` -> `CreatePetitionController` -> `AuthPipe` / `IntakePipe.verify_analysis_by_account(...)` -> `CreatePetitionUseCase` -> `PetitionsRepository` -> PostgreSQL (`petitions`) -> `PetitionDto`.
+- `POST /intake/petitions/{petition_id}/summary` -> `SummarizePetitionController` -> `AuthPipe` / `IntakePipe.verify_petition_document_path_by_account(...)` -> `StoragePipe` -> `GetDocumentContentUseCase` -> `FileStorageProvider` / `PdfProvider` / `DocxProvider` -> `SummarizePetitionWorkflow` -> `CreatePetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
 
 ## Padroes Principais
 
@@ -103,6 +108,7 @@ src/animus/
 ├── rest/
 ├── routers/
 ├── pipes/
+├── ai/
 ├── validation/
 ├── database/
 ├── providers/
