@@ -46,7 +46,7 @@ services:
       retries: 10
 
   gcs:
-    image: fsouza/fake-gcs-server:latest
+    image: fsouza/fake-gcs-server:latest@sha256:3730da0e31f7e5186a90ec4899dc2c336104e7599df400411392ef17e684c31f
     container_name: animus_gcs
     restart: unless-stopped
     command: -scheme http -external-url http://localhost:4443
@@ -61,7 +61,7 @@ services:
       retries: 10
 
   gcs_ui:
-    image: ghcr.io/drehelis/gcp-emulator-ui:main
+    image: ghcr.io/drehelis/gcp-emulator-ui:main@sha256:13fee08c517fb07a4652a5852841f047d4fa09714c4d85a63b883ab7ea4d095e
     container_name: animus_gcs_ui
     restart: unless-stopped
     ports:

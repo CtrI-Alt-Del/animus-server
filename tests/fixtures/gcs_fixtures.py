@@ -10,6 +10,10 @@ from testcontainers.core.container import DockerContainer
 from animus.constants import Env
 
 UploadGcsFileFixture = Callable[[str, bytes, str], None]
+_FAKE_GCS_IMAGE = (
+    'fsouza/fake-gcs-server:latest'
+    '@sha256:3730da0e31f7e5186a90ec4899dc2c336104e7599df400411392ef17e684c31f'
+)
 
 
 def _gcs_emulator_is_ready(base_url: str) -> bool:
@@ -24,7 +28,7 @@ def _gcs_emulator_is_ready(base_url: str) -> bool:
 @pytest.fixture(scope='session')
 def gcs_container() -> Iterator[DockerContainer]:
     with (
-        DockerContainer('fsouza/fake-gcs-server:latest')
+        DockerContainer(_FAKE_GCS_IMAGE)
         .with_command('-scheme http')
         .with_exposed_ports(4443)
     ) as container:
