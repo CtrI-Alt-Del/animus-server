@@ -63,7 +63,7 @@ class BertimbauPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
             convert_to_numpy=True,
             show_progress_bar=True,
         )
-        vectors = cast(list[list[float]], raw_vectors.tolist())
+        vectors = cast('list[list[float]]', raw_vectors.tolist())
 
         results: list[PrecedentEmbedding] = []
         for metadata, vector in zip(metadata_tracking, vectors):  # noqa: B905

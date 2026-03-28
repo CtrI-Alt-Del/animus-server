@@ -75,7 +75,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
             points.append(
                 PointStruct(
                     id=str(uuid.uuid5(uuid.NAMESPACE_OID, composite_key)),
-                    vector=cast(dict[str, Any], data['vectors']),
+                    vector=cast('dict[str, Any]', data['vectors']),
                     payload={
                         'court': data['court'],
                         'kind': data['kind'],
@@ -108,7 +108,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
                 )
 
                 for point in query_response.points:
-                    payload = cast(dict[str, object], point.payload or {})
+                    payload = cast('dict[str, object]', point.payload or {})
 
                     court = payload.get('court')
                     kind = payload.get('kind')
@@ -123,7 +123,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
                     chunk = ''
                     chunks = payload.get('chunks')
                     if isinstance(chunks, dict):
-                        chunks_dict = cast(dict[str, object], chunks)
+                        chunks_dict = cast('dict[str, object]', chunks)
                         maybe_chunk = chunks_dict.get(target_field)
                         if isinstance(maybe_chunk, str):
                             chunk = maybe_chunk

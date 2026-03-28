@@ -36,7 +36,9 @@ class VectorizePrecedentsJob:
             while True:
                 has_next = await context.step.run(
                     f'vectorize-page-{page}',
-                    lambda: _vectorize_precedents(page, page_size),
+                    lambda page=page, page_size=page_size: _vectorize_precedents(
+                        page, page_size
+                    ),
                 )
                 if not has_next:
                     break
