@@ -1,4 +1,6 @@
-from animus.core.intake.domain.structures.dtos.petition_embedding_dto import PetitionEmbeddingDto
+from animus.core.intake.domain.structures.dtos.petition_embedding_dto import (
+    PetitionEmbeddingDto,
+)
 from animus.core.shared.domain.abstracts import Structure
 from animus.core.shared.domain.decorators import structure
 from animus.core.shared.domain.structures import Decimal, Text

@@ -1,4 +1,3 @@
-
 from animus.core.intake.domain.entities.precedent import Precedent
 from animus.core.intake.interfaces.pangea_service import PangeaService
 from animus.core.intake.interfaces.precedent_embeddings_provider import (

@@ -5,7 +5,7 @@ from animus.database.sqlalchemy.models.model import Model
 
 
 class PrecedentModel(Model):
-    __tablename__="precedents"
+    __tablename__ = 'precedents'
 
     id: Mapped[str] = mapped_column(String(26), primary_key=True)
     court: Mapped[str] = mapped_column(String(10), nullable=False, index=True)

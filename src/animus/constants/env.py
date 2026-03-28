@@ -35,8 +35,8 @@ class _Env(BaseSettings):
     VERTEX_AI_DEPLOY_INDEX_ID: str = ''
 
     QDRANT_URL: str = 'http://localhost:6333'
-    ENV: str = "dev"
-    GEMINI_API_KEY:str="change_this"
+    ENV: str = 'dev'
+    GEMINI_API_KEY: str = 'change_this'
 
     model_config = SettingsConfigDict(
         env_file='.env',

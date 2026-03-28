@@ -8,7 +8,7 @@ type Json = dict[str, Any]
 
 
 class HttpxRestClient(RestClient):
-    def __init__(self)->None:
+    def __init__(self) -> None:
         self._client = httpx.Client()
 
     def _build_response[T](
@@ -28,18 +28,18 @@ class HttpxRestClient(RestClient):
                 else:
                     body = response_model(raw_json)  # type: ignore
 
-        except Exception as e: #noqa: BLE001
-            #@TODO: criar classe de LOG!
-            print(f"DEBUG: Falha ao instanciar o modelo {response_model.__name__}: {e}")
+        except Exception as e:  # noqa: BLE001
+            # @TODO: criar classe de LOG!
+            print(f'DEBUG: Falha ao instanciar o modelo {response_model.__name__}: {e}')
             body = response.text if response.text else None
             if response.is_error:
                 error_message = f'Parse Error: {e!s}'
 
         if response.is_error and not error_message:
-            error_message = str(body) if body else f'HTTP Error {response.status_code}' #type:ignore
+            error_message = str(body) if body else f'HTTP Error {response.status_code}'  # type:ignore
 
         return RestResponse(
-            body=body, #type:ignore
+            body=body,  # type:ignore
             status_code=response.status_code,
             error_message=error_message,
         )

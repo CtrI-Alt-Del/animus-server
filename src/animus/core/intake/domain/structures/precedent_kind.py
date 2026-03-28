@@ -23,7 +23,7 @@ class PrecedentKindValue(StrEnum):
     GR = 'GR'
     CONT = 'CONT'
     SIRDR = 'SIRDR'
-    IRR ='IRR'
+    IRR = 'IRR'
     CT = 'CT'
 
 

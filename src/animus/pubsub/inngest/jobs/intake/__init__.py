@@ -1,3 +1,3 @@
 from .vectorize_precedents import VectorizePrecedentsJob
 
-__all__=["VectorizePrecedentsJob"]
+__all__ = ['VectorizePrecedentsJob']

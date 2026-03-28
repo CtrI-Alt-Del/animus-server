@@ -5,7 +5,6 @@ from animus.core.shared.domain.decorators import structure
 from animus.core.shared.domain.structures import Id, Logical, Percentage
 
 
-
 @structure
 class AnalysisPrecedent(Structure):
     analysis_id: Id

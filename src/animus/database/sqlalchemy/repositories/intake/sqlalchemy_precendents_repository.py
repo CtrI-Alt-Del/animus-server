@@ -2,7 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.precedent import Precedent
-from animus.core.intake.domain.errors.precedent_not_found_error import PrecedentNotFoundError
+from animus.core.intake.domain.errors.precedent_not_found_error import (
+    PrecedentNotFoundError,
+)
 from animus.core.intake.domain.structures.court import Court
 from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
     PrecedentIdentifierDto,
@@ -41,7 +43,7 @@ class SqlalchemyPrecedentsRepository(PrecedentsRepository):
             select(PrecedentModel.court, PrecedentModel.kind, PrecedentModel.number)
         ).all()
 
-        identifiers:set[PrecedentIdentifier] = set()
+        identifiers: set[PrecedentIdentifier] = set()
         for row in results:
             dto = PrecedentIdentifierDto(
                 court=row.court, kind=row.kind, number=row.number

@@ -22,7 +22,9 @@ class VertexAiPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         self,
     ) -> None:
         aiplatform.init(project=Env.VERTEX_AI_PROJECT, location=Env.VERTEX_AI_LOCATION)
-        self._index_endpoint = aiplatform.MatchingEngineIndexEndpoint(Env.VERTEX_AI_INDEX_ENDPOINT_ID)
+        self._index_endpoint = aiplatform.MatchingEngineIndexEndpoint(
+            Env.VERTEX_AI_INDEX_ENDPOINT_ID
+        )
         self._deployed_index_id = Env.VERTEX_AI_DEPLOY_INDEX_ID
 
     def find_many(

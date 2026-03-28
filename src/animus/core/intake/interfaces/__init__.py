@@ -6,6 +6,7 @@ from .precedent_embeddings_provider import PrecedentEmbeddingsProvider
 from .precedents_embeddings_repository import PrecedentsEmbeddingsRepository
 from .precedents_repository import PrecedentsRepository
 from .pangea_service import PangeaService
+
 __all__ = [
     'PetitionsRepository',
     'PrecedentsRepository',
@@ -14,5 +15,5 @@ __all__ = [
     'FoldersRepository',
     'PetitionEmbeddingsProvider',
     'PrecedentEmbeddingsProvider',
-    'PangeaService'
+    'PangeaService',
 ]

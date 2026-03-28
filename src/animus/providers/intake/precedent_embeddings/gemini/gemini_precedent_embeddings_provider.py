@@ -1,7 +1,7 @@
 from typing import Any
 
 import google.genai as genai
-from google.genai.types import ContentEmbedding # noqa: TC002
+from google.genai.types import ContentEmbedding  # noqa: TC002
 
 from animus.constants.env import Env
 from animus.core.intake.domain.entities.precedent import Precedent
@@ -58,7 +58,7 @@ class GeminiPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
             results.append(
                 PrecedentEmbedding.create(
                     score=Decimal.create(1.0),
-                    vector=[Decimal.create(v) for v in vector.values], #type:ignore
+                    vector=[Decimal.create(v) for v in vector.values],  # type:ignore
                     field=PrecedentEmbeddingField.create(metadata['field']),
                     court=prec.identifier.court,
                     number=prec.identifier.number,

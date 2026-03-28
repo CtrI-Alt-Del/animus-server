@@ -10,7 +10,4 @@ class PangeaBnpAggregation(Structure):
 
     @classmethod
     def create(cls, **data: Any) -> 'PangeaBnpAggregation':
-        return cls(
-            tipo=str(data.get('tipo', '')),
-            total=int(data.get('total', 0))
-        )
+        return cls(tipo=str(data.get('tipo', '')), total=int(data.get('total', 0)))

@@ -7,7 +7,7 @@ from animus.core.shared.domain.decorators.structure import structure
 
 @structure
 class PangeaBnpParadigmProcess(Structure):
-    numero: str = ""
+    numero: str = ''
     link: str | None = None
 
     @classmethod
@@ -17,7 +17,6 @@ class PangeaBnpParadigmProcess(Structure):
 
 @structure
 class PangeaBnpHighlight(Structure):
-
     tese: str | None = None
     tese_snippet: str | None = None
 
@@ -28,17 +27,17 @@ class PangeaBnpHighlight(Structure):
 
 @structure
 class PangeaBnpPrecedentProcess(Structure):
-    id: str = ""
+    id: str = ''
     nr: int = 0
-    orgao: str = ""
-    tipo: str = ""
-    questao: str = ""
-    situacao: str = ""
+    orgao: str = ''
+    tipo: str = ''
+    questao: str = ''
+    situacao: str = ''
     ultima_atualizacao: str | None = None
     numero_tema: int | None = None
     tese: str | None = None
     highlight: PangeaBnpHighlight | None = None
-    processos_paradigma: list[PangeaBnpParadigmProcess] = field(default_factory=list) # type:ignore
+    processos_paradigma: list[PangeaBnpParadigmProcess] = field(default_factory=list)  # type:ignore
 
     @classmethod
     def create(cls, **data: Any) -> 'PangeaBnpPrecedentProcess':
