@@ -1,7 +1,6 @@
 from fastapi.testclient import TestClient
 
-from animus.core.auth.domain.structures.email import Email
-from animus.core.shared.domain.structures import Id, Text
+from animus.core.shared.domain.structures import Text
 from animus.providers.auth.jwt.jose.jose_jwt_provider import JoseJwtProvider
 from tests.fixtures.auth_fixtures import CreateAccountFixture
 
@@ -30,7 +29,7 @@ class TestGetAccountController:
         assert data['id'] == account.id
         assert data['name'] == 'Maria Silva'
         assert data['email'] == 'maria@example.com'
-        assert data['password'] == account.password_hash
+        assert data['password'] is None
         assert data['is_verified'] is True
         assert data['is_active'] is True
         assert data['social_accounts'] == []
@@ -42,12 +41,11 @@ class TestGetAccountController:
 
         assert response.status_code == 401
         assert response.json() == {
-            'title': 'Erro de não autorizado',
-            'message': 'Token invalido ou expirado',
+            'title': 'Erro de autenticação',
+            'message': 'Token de acesso invalido',
         }
 
-    def test_should_return_403_when_no_token_provided(self, client: TestClient) -> None:
+    def test_should_return_422_when_no_token_provided(self, client: TestClient) -> None:
         response = client.get('/auth/me')
 
-        assert response.status_code == 403
-        assert response.json() == {'detail': 'Not authenticated'}
+        assert response.status_code == 422

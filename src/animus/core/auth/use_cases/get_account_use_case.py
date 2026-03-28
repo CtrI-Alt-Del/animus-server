@@ -14,8 +14,6 @@ class GetAccountUseCase:
     def execute(self, account_id: Id) -> AccountDto:
         account = self._accounts_repository.find_by_id(account_id)
 
-        if not account:
-            raise AccountNotFoundError()
 
         if not account.is_active.value:
             raise AccountInactiveError()
@@ -24,7 +22,7 @@ class GetAccountUseCase:
             id=account.id.value if account.id else None,
             name=account.name.value,
             email=account.email.value,
-            password=account.password.value if account.password else None,
+            password=None,
             is_verified=account.is_verified.value,
             is_active=account.is_active.value,
             social_accounts=[
