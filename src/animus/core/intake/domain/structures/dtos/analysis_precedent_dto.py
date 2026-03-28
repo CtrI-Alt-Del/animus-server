@@ -6,5 +6,6 @@ from animus.core.shared.domain.decorators import dto
 class AnalysisPrecedentDto:
     analysis_id: str
     precedent: PrecedentDto
-    applicability_percentage: float | None = None
     is_chosen: bool = False
+    applicability_percentage: float | None = None
+    synthesis: str | None = None
