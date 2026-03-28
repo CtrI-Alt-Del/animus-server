@@ -1,3 +1,18 @@
+# [1.5.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.4.0...v1.5.0) (2026-03-28)
+
+
+### Bug Fixes
+
+* ANI-47 fix test speed ([f38073c](https://github.com/CtrI-Alt-Del/animus-server/commit/f38073c059f4cd06dfdd4e506f0efe49aa2bc219))
+* ANI-47 fixed linter problems ([29cb106](https://github.com/CtrI-Alt-Del/animus-server/commit/29cb10685999c3cec68160494a761fb75e3999da))
+
+
+### Features
+
+* **intake:** ANI-47 add qdrant provider ([445aaef](https://github.com/CtrI-Alt-Del/animus-server/commit/445aaefeb83e65aaa4065bbb24713ffbaeafa35c))
+* **intake:** ANI-47 add vectorize precedents job ([04a792a](https://github.com/CtrI-Alt-Del/animus-server/commit/04a792a1a710aaa9c1bfff907c7aeaea78421430))
+* **intake:** ANI-47 finish vetorization job ([3a11469](https://github.com/CtrI-Alt-Del/animus-server/commit/3a11469681514d725d856d9d6aa76b9d919d2838))
+
 # [1.4.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.3.0...v1.4.0) (2026-03-26)
 
 

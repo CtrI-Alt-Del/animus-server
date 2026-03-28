@@ -1,0 +1,6 @@
+from .qdrant_precedents_embeddings_repository import (
+    QdrantPrecedentsEmbeddingsRepository,
+)
+
+
+__all__ = ['QdrantPrecedentsEmbeddingsRepository']

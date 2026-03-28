@@ -10,13 +10,13 @@ class _Env(BaseSettings):
     MAX_EMAIL_VERIFICATION_OTP_TTL_SECONDS: ClassVar[int] = 86400
 
     MODE: Literal['dev', 'stg', 'prod'] = 'dev'
-
     HOST: str = '127.0.0.1'
     PORT: int = 8080
+    ANIMUS_SERVER_URL: str = 'http://localhost:8080'
+
     DATABASE_URL: str = 'postgresql://animus:animus@localhost:5432/animus'
     GCS_BUCKET_NAME: str = 'animus'
     STORAGE_EMULATOR_HOST: str = ''
-    GEMINI_API_KEY: str = ''
 
     JWT_SECRET_KEY: str = ''
     JWT_ALGORITHM: str = 'HS256'
@@ -26,11 +26,15 @@ class _Env(BaseSettings):
     REDIS_URL: str = 'redis://localhost:6379/0'
     EMAIL_VERIFICATION_OTP_TTL_SECONDS: int = DEFAULT_EMAIL_VERIFICATION_OTP_TTL_SECONDS
 
-    RESEND_API_KEY: str = 're_change_this'
+    RESEND_API_KEY: str = 'change_this'
     RESEND_SENDER_EMAIL: str = 'onboarding@resend.dev'
 
-    ANIMUS_SERVER_URL: str = 'http://localhost:8080'
     GOOGLE_CLIENT_ID: str = 'change_this'
+    PANGEA_SERVICE_URL: str = 'https://pangeabnp.pdpj.jus.br'
+
+    QDRANT_URL: str = 'http://localhost:6333'
+    GEMINI_API_KEY: str = 'change_this'
+    OPENAI_API_KEY: str = 'change_this'
 
     model_config = SettingsConfigDict(
         env_file='.env',

@@ -1,3 +1,6 @@
+from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
+    PrecedentIdentifierDto,
+)
 from animus.core.shared.domain.decorators import dto
 
 
@@ -6,6 +9,5 @@ class PrecedentEmbeddingDto:
     score: float
     vector: list[float]
     field: str
-    court: str
-    number: int
+    identifier: PrecedentIdentifierDto
     chunk: str

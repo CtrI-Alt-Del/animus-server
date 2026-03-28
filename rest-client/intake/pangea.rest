@@ -1,0 +1,22 @@
+### Buscar precedentes
+POST https://pangeabnp.pdpj.jus.br/api/v1/precedentes
+Content-Type: application/json 
+
+{
+  "filtro": {
+    "buscaGeral": "",
+    "todasPalavras": "",
+    "quaisquerPalavras": "",
+    "semPalavras": "",
+    "trechoExato": "",
+    "atualizacaoDesde": "",
+    "atualizacaoAte": "",
+    "cancelados": false,
+    "ordenacao": "Text",
+    "nr": "",
+    "pagina": 1,
+    "tamanhoPagina": 100,
+    "orgaos": ["STF","STJ","TST","STM","TNU","TRF01","TRF02","TRF03","TRF04","TRF05","TRF06","TJAC","TJAL","TJAP","TJAM","TJBA","TJCE","TJDF","TJES","TJGO","TJMA","TJMT","TJMS","TJMG","TJPA","TJPB","TJPR","TJPE","TJPI","TJRJ","TJRN","TJRS","TJRO","TJRR","TJSC","TJSP","TJSE","TJTO","TRT01","TRT02","TRT03","TRT04","TRT05","TRT06","TRT07","TRT08","TRT09","TRT10","TRT11","TRT12","TRT13","TRT14","TRT15","TRT16","TRT17","TRT18","TRT19","TRT20","TRT21","TRT22","TRT23","TRT24"],
+    "tipos": ["SUM","SV","RG","ADI","ADC","ADO","ADPF","IAC","SIRDR","RR","CT","IRDR","IRR","PUIL","NT","OJ"]
+    }
+}

@@ -1,11 +1,15 @@
-from animus.core.intake.domain.structures.court import Court
-from animus.core.intake.domain.structures.dtos import PrecedentEmbeddingDto
+from animus.core.intake.domain.structures.dtos.precedent_embedding_dto import (
+    PrecedentEmbeddingDto,
+)
 from animus.core.intake.domain.structures.precedent_embedding_field import (
     PrecedentEmbeddingField,
 )
+from animus.core.intake.domain.structures.precedent_identifier import (
+    PrecedentIdentifier,
+)
 from animus.core.shared.domain.abstracts import Structure
 from animus.core.shared.domain.decorators import structure
-from animus.core.shared.domain.structures import Decimal, Integer, Text
+from animus.core.shared.domain.structures import Decimal, Text
 
 
 @structure
@@ -13,27 +17,17 @@ class PrecedentEmbedding(Structure):
     score: Decimal
     vector: list[Decimal]
     field: PrecedentEmbeddingField
-    court: Court
-    number: Integer
+    identifier: PrecedentIdentifier
     chunk: Text
 
     @classmethod
-    def create(
-        cls,
-        score: Decimal,
-        vector: list[Decimal],
-        field: PrecedentEmbeddingField,
-        court: Court,
-        number: Integer,
-        chunk: Text,
-    ) -> 'PrecedentEmbedding':
+    def create(cls, dto: PrecedentEmbeddingDto) -> 'PrecedentEmbedding':
         return cls(
-            score=score,
-            vector=vector,
-            field=field,
-            court=court,
-            number=number,
-            chunk=chunk,
+            score=Decimal.create(dto.score),
+            vector=[Decimal.create(value) for value in dto.vector],
+            field=PrecedentEmbeddingField.create(dto.field),
+            identifier=PrecedentIdentifier.create(dto.identifier),
+            chunk=Text.create(dto.chunk),
         )
 
     @property
@@ -42,7 +36,6 @@ class PrecedentEmbedding(Structure):
             score=self.score.value,
             vector=[item.value for item in self.vector],
             field=self.field.dto,
-            court=self.court.dto,
-            number=self.number.value,
+            identifier=self.identifier.dto,
             chunk=self.chunk.value,
         )

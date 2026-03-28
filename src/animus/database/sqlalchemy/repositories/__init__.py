@@ -3,6 +3,7 @@ from .intake import (
     SqlalchemyAnalisysesRepository,
     SqlalchemyPetitionSummariesRepository,
     SqlalchemyPetitionsRepository,
+    SqlalchemyPrecedentsRepository,
 )
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     'SqlalchemyAnalisysesRepository',
     'SqlalchemyPetitionsRepository',
     'SqlalchemyPetitionSummariesRepository',
+    'SqlalchemyPrecedentsRepository',
 ]
