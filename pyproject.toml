@@ -26,6 +26,9 @@ dependencies = [
   "resend>=2.13.0",
   "scalar-fastapi>=1.8.1",
   "google-auth>=2.49.1",
+  "google-cloud-aiplatform>=1.143.0",
+  "google-genai>=1.68.0",
+  "qdrant-client>=1.17.1",
 ]
 
 [dependency-groups]
@@ -80,7 +83,7 @@ shell = "ruff check --fix src tests && ruff format --check src tests"
 
 [tool.ruff]
 line-length = 88
-target-version = "1.4.0"
+target-version = "py313"
 fix = true
 show-fixes = true
 indent-width = 4

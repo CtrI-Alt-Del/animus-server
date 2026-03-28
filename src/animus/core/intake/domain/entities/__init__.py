@@ -1,4 +1,3 @@
-from .analysis import Analysis
 from .analysis_status import AnalysisStatus, AnalysisStatusValue
 from .folder import Folder
 from .petition import Petition
@@ -10,5 +9,4 @@ __all__ = [
     'AnalysisStatusValue',
     'Petition',
     'Precedent',
-    'Analysis',
 ]

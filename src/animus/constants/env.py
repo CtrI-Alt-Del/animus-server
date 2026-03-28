@@ -26,6 +26,17 @@ class _Env(BaseSettings):
 
     ANIMUS_SERVER_URL: str = 'http://localhost:8080'
     GOOGLE_CLIENT_ID: str = 'change_this'
+    PANGEA_SERVICE_URL: str = 'https://pangeabnp.pdpj.jus.br'
+    EMBEDDING_AI_MODEL: str = 'gemini-embedding-001'
+
+    VERTEX_AI_PROJECT: str = ''
+    VERTEX_AI_LOCATION: str = ''
+    VERTEX_AI_INDEX_ENDPOINT_ID: str = ''
+    VERTEX_AI_DEPLOY_INDEX_ID: str = ''
+
+    QDRANT_URL: str = 'http://localhost:6333'
+    ENV: str = 'dev'
+    GEMINI_API_KEY: str = 'change_this'
 
     model_config = SettingsConfigDict(
         env_file='.env',
