@@ -91,10 +91,10 @@ class TestVectorizePrecedentsJob:
         assert captured_calls == [
             {
                 'page': 1,
-                'page_size': 100,
+                'page_size': 200,
             },
             {
                 'page': 2,
-                'page_size': 100,
+                'page_size': 200,
             },
         ]
