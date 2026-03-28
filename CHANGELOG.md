@@ -1,3 +1,16 @@
+# [1.6.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.5.0...v1.6.0) (2026-03-28)
+
+
+### Bug Fixes
+
+* ANI-45 resolve Ruff B023 and typing cast lint issues ([3556568](https://github.com/CtrI-Alt-Del/animus-server/commit/3556568de06fe45c95422bd013e71a398c05451e))
+
+
+### Features
+
+* ANI-45 add petition endpoints and summary flow ([6c48352](https://github.com/CtrI-Alt-Del/animus-server/commit/6c48352d55001d18b2d8e5366307f657a065bce8))
+* ANI-45 implement precedent vectorization pipeline ([e9a15a5](https://github.com/CtrI-Alt-Del/animus-server/commit/e9a15a5daab249f566c780a199c380d3732e5e4b))
+
 # [1.5.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.4.0...v1.5.0) (2026-03-28)
 
 
