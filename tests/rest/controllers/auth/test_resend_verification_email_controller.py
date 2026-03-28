@@ -27,9 +27,7 @@ class TestResendVerificationEmailController:
         assert fake_inngest_client.sent_events[0].data['account_email'] == (
             'maria@example.com'
         )
-        assert fake_inngest_client.sent_events[0].data[
-            'account_email_verification_token'
-        ]
+        assert fake_inngest_client.sent_events[0].data['account_email_otp']
 
     def test_should_return_409_when_account_is_already_verified(
         self,

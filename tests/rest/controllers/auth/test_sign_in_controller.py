@@ -11,7 +11,7 @@ class TestSignInController:
         client: TestClient,
         create_account: CreateAccountFixture,
     ) -> None:
-        password = 'Password123'  # noqa: S105
+        password = 'Password123'
         password_hash = Argon2idHashProvider().generate(Text.create(password)).value
 
         create_account(
@@ -65,7 +65,7 @@ class TestSignInController:
         client: TestClient,
         create_account: CreateAccountFixture,
     ) -> None:
-        password = 'Password123'  # noqa: S105
+        password = 'Password123'
         password_hash = Argon2idHashProvider().generate(Text.create(password)).value
 
         create_account(
@@ -94,7 +94,7 @@ class TestSignInController:
         client: TestClient,
         create_account: CreateAccountFixture,
     ) -> None:
-        password = 'Password123'  # noqa: S105
+        password = 'Password123'
         password_hash = Argon2idHashProvider().generate(Text.create(password)).value
 
         create_account(

@@ -69,7 +69,7 @@ src/animus/
 - Python 3.13+
 - [uv](https://github.com/astral-sh/uv)
 - PostgreSQL local ou acessivel via `DATABASE_URL`
-- Node.js/npm apenas se voce for executar o ambiente local do Inngest
+- Node.js/npm apenas se voce for executar o ambiente local do Inngest ou executar alterações no código
 
 ### Passo a passo
 
@@ -92,6 +92,12 @@ src/animus/
 
    ```bash
    uv sync
+   ```
+
+   #### Apenas se for desenvolver
+
+   ```bash
+   npm i
    ```
 
 4. **Prepare o banco de dados:**

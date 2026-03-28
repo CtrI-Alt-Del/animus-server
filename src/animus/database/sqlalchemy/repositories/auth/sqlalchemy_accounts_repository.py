@@ -2,7 +2,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from animus.core.auth.domain.entities import Account
-from animus.core.auth.domain.errors import AccountNotFoundError
 from animus.core.auth.domain.structures.email import Email
 from animus.core.auth.interfaces import AccountsRepository
 from animus.core.shared.domain.structures import Id, Text
@@ -14,19 +13,19 @@ class SqlalchemyAccountsRepository(AccountsRepository):
     def __init__(self, sqlalchemy: Session) -> None:
         self._sqlalchemy = sqlalchemy
 
-    def find_by_id(self, account_id: Id) -> Account:
+    def find_by_id(self, account_id: Id) -> Account | None:
         model = self._sqlalchemy.get(AccountModel, account_id.value)
         if model is None:
-            raise AccountNotFoundError
+            return None
 
         return AccountMapper.to_entity(model)
 
-    def find_by_email(self, email: Email) -> Account:
+    def find_by_email(self, email: Email) -> Account | None:
         model = self._sqlalchemy.scalar(
             select(AccountModel).where(AccountModel.email == email.value)
         )
         if model is None:
-            raise AccountNotFoundError
+            return None
 
         return AccountMapper.to_entity(model)
 
@@ -53,7 +52,7 @@ class SqlalchemyAccountsRepository(AccountsRepository):
     def replace(self, account: Account) -> None:
         model = self._sqlalchemy.get(AccountModel, account.id.value)
         if model is None:
-            raise AccountNotFoundError
+            return
 
         model.name = account.name.value
         model.is_verified = account.is_verified.value

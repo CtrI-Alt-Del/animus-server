@@ -14,7 +14,7 @@ class TestSignUpController:
         fake_inngest_client: FakeInngestClient,
         sqlalchemy_session_factory: sessionmaker[Session],
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
         payload = {
             'name': 'Maria Silva',
             'email': 'maria@example.com',
@@ -48,16 +48,14 @@ class TestSignUpController:
         assert (
             fake_inngest_client.sent_events[0].data['account_email'] == payload['email']
         )
-        assert fake_inngest_client.sent_events[0].data[
-            'account_email_verification_token'
-        ]
+        assert fake_inngest_client.sent_events[0].data['account_email_otp']
 
     def test_should_return_409_when_email_already_exists(
         self,
         client: TestClient,
         create_account: CreateAccountFixture,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
 
         create_account(email='maria@example.com')
 
@@ -80,7 +78,7 @@ class TestSignUpController:
         self,
         client: TestClient,
     ) -> None:
-        valid_password = 'Password123'  # noqa: S105
+        valid_password = 'Password123'
 
         response = client.post(
             '/auth/sign-up',
@@ -96,7 +94,7 @@ class TestSignUpController:
         self,
         client: TestClient,
     ) -> None:
-        weak_password = 'weak'  # noqa: S105
+        weak_password = 'weak'
 
         response = client.post(
             '/auth/sign-up',

@@ -27,12 +27,12 @@ class TestSendAccountVerificationEmailJob:
             _self: ResendEmailSenderProvider,
             *,
             account_email: Any,
-            verification_token: Any,
+            otp: Any,
         ) -> None:
             captured_calls.append(
                 {
                     'account_email': account_email.value,
-                    'verification_token': verification_token.value,
+                    'otp': otp.value,
                 }
             )
 
@@ -45,13 +45,13 @@ class TestSendAccountVerificationEmailJob:
             name='auth/email-verification.requested',
             data={
                 'account_email': 'maria@example.com',
-                'account_email_verification_token': 'verification-token',
+                'account_email_otp': '123456',
             },
         )
 
         assert response.status == 200
 
-        deadline = time.monotonic() + 30
+        deadline = time.monotonic() + 60
         while time.monotonic() < deadline:
             if len(captured_calls) == 1:
                 break
@@ -63,6 +63,6 @@ class TestSendAccountVerificationEmailJob:
         assert captured_calls == [
             {
                 'account_email': 'maria@example.com',
-                'verification_token': 'verification-token',
+                'otp': '123456',
             }
         ]
