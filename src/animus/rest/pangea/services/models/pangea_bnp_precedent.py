@@ -18,11 +18,11 @@ class PangeaBnpResponse(Structure):
     def create(cls, **data: Any) -> 'PangeaBnpResponse':
         return cls(
             aggs_especies=[
-                PangeaBnpAggregation.create(**agg) 
+                PangeaBnpAggregation.create(**agg)
                 for agg in data.get('aggsEspecies', [])
             ],
             aggs_orgaos=[
-                PangeaBnpAggregation.create(**agg) 
+                PangeaBnpAggregation.create(**agg)
                 for agg in data.get('aggsOrgaos', [])
             ],
             posicao_final=int(data.get('posicao_final', 0)),

@@ -13,10 +13,10 @@ class PrecedentModel(Model):
     number: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
 
     status: Mapped[str] = mapped_column(String(50), nullable=False)
-    
+
     enunciation: Mapped[str] = mapped_column(Text, nullable=False)
     thesis: Mapped[str] = mapped_column(Text, nullable=False)
-    
+
     last_updated_in_pangea_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )

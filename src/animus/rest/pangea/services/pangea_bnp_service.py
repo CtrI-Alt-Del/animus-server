@@ -48,7 +48,7 @@ class PangeaBnpService(PangeaService):
             try:
                 precedent = PangeaBnpPrecedentMapper.to_entity(model)
                 precedents.append(precedent)
-            except Exception as error:
+            except Exception as error: # noqa: BLE001
                 print(
                     f'Erro ao processar precedente {getattr(model, "id", "S/ID")}: {error}'
                 )

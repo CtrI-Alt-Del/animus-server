@@ -1,4 +1,4 @@
-from ...structures.precedent_identifier import PrecedentIdentifierDto
+from ...structures.precedent_identifier import PrecedentIdentifierDto # noqa: TID252
 from animus.core.shared.domain.decorators import dto
 
 

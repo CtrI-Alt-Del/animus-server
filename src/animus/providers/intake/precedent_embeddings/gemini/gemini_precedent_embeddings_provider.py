@@ -1,12 +1,14 @@
 from typing import Any
 
 import google.genai as genai
-from google.genai.types import ContentEmbedding
+from google.genai.types import ContentEmbedding # noqa: TC002
 
 from animus.constants.env import Env
 from animus.core.intake.domain.entities.precedent import Precedent
 from animus.core.intake.domain.structures.precedent_embedding import PrecedentEmbedding
-from animus.core.intake.domain.structures.precedent_embedding_field import PrecedentEmbeddingField
+from animus.core.intake.domain.structures.precedent_embedding_field import (
+    PrecedentEmbeddingField,
+)
 from animus.core.intake.interfaces.precedent_embeddings_provider import (
     PrecedentEmbeddingsProvider,
 )
@@ -40,27 +42,27 @@ class GeminiPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
                 metadata_tracking.append(
                     {
                         'precedent': precedent,
-                        'field': 'THESIS',  # Substitua pelo valor correto do seu StrEnum
+                        'field': 'THESIS',
                         'chunk': precedent.thesis.value,
                     }
                 )
         if not texts_to_embed:
             return []
-        response = self._client.models.embed_content( # type:ignore
+        response = self._client.models.embed_content(  # type:ignore
             model=self._model,
             contents=texts_to_embed,
         )
-        embeddings: list[ContentEmbedding] = response.embeddings # type:ignore
-        for metadata, vector in zip(metadata_tracking, embeddings):
+        embeddings: list[ContentEmbedding] = response.embeddings  # type:ignore
+        for metadata, vector in zip(metadata_tracking, embeddings):  # noqa: B905
             prec: Precedent = metadata['precedent']
             results.append(
                 PrecedentEmbedding.create(
-                    score=Decimal.create(1.0), 
-                    vector=[Decimal.create(v) for v in vector.values],
-                    field=PrecedentEmbeddingField.create(metadata["field"]),
+                    score=Decimal.create(1.0),
+                    vector=[Decimal.create(v) for v in vector.values], #type:ignore
+                    field=PrecedentEmbeddingField.create(metadata['field']),
                     court=prec.identifier.court,
                     number=prec.identifier.number,
-                    chunk=Text.create(metadata["chunk"]),
+                    chunk=Text.create(metadata['chunk']),
                 )
             )
         return results

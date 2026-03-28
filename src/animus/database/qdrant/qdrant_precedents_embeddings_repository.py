@@ -87,7 +87,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         )
         results: list[PrecedentEmbedding] = []
 
-        for original_query, query_response in zip(petition_embeddings, batch_results):  # type:ignore
+        for original_query, query_response in zip(petition_embeddings, batch_results):  # noqa: B905 #type:ignore
             for point in query_response.points:  # type:ignore
                 payload = point.payload or {}  # type:ignore
 
