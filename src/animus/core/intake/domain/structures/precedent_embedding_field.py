@@ -6,7 +6,6 @@ from animus.core.shared.domain.errors import ValidationError
 
 
 class PrecedentEmbeddingFieldValue(StrEnum):
-    TITLE = 'TITLE'
     THESIS = 'THESIS'
     ENUNCIATION = 'ENUNCIATION'
 

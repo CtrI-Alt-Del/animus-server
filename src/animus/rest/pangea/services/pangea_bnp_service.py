@@ -26,9 +26,10 @@ class PangeaBnpService(PangeaService):
                 'buscaGeral': '',
                 'cancelados': False,
                 'ordenacao': 'Text',
-                'orgaos': orgaos,
                 'pagina': page,
+                'tamanhoPagina': page_size,
                 'tipos': tipos,
+                'orgaos': orgaos,
             }
         }
         response_data = self._client.post(

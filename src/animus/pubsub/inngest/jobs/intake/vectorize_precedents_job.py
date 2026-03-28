@@ -1,4 +1,5 @@
 from typing import Any
+import asyncio
 
 from inngest import Context, Inngest, TriggerCron, TriggerEvent
 
@@ -12,8 +13,8 @@ from animus.database.sqlalchemy.repositories.intake.sqlalchemy_precendents_repos
     SqlalchemyPrecedentsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
-from animus.providers.intake.precedent_embeddings.gemini.gemini_precedent_embeddings_provider import (
-    GeminiPrecedentEmbeddingsProvider,
+from animus.providers.intake.precedent_embeddings.bertimbau.bertimbau_precedent_embeddings_provider import (
+    BertimbauPrecedentEmbeddingsProvider,
 )
 from animus.rest.httpx.httpx_rest_client import HttpxRestClient
 from animus.rest.pangea.services.pangea_bnp_service import PangeaBnpService
@@ -31,11 +32,13 @@ class VectorizePrecedentsJob:
         )
         async def _(context: Context) -> None:
             page = 1
-            page_size = 100
+            page_size = 200
             while True:
                 has_next = await context.step.run(
                     f'vectorize-page-{page}',
-                    lambda: _vectorize_precedents(page, page_size),  # noqa: B023
+                    lambda page=page, page_size=page_size: _vectorize_precedents(
+                        page, page_size
+                    ),
                 )
                 if not has_next:
                     break
@@ -46,10 +49,14 @@ class VectorizePrecedentsJob:
                 use_case = VectorizePrecedentsUseCase(
                     pangea_service=PangeaBnpService(client=HttpxRestClient()),
                     precedents_repository=SqlalchemyPrecedentsRepository(session),
-                    embeddings_provider=GeminiPrecedentEmbeddingsProvider(),
+                    embeddings_provider=BertimbauPrecedentEmbeddingsProvider(),
                     embeddings_repository=QdrantPrecedentsEmbeddingsRepository(),
                 )
-                result = use_case.execute(page=page, page_size=page_size)
-                return result.has_next_page
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: use_case.execute(page=page, page_size=page_size),
+                )
+                return response.has_next_page
 
         return _

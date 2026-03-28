@@ -6,6 +6,8 @@ from animus.core.shared.responses import ListResponse
 
 
 class PetitionsRepository(Protocol):
+    def find_by_id(self, petition_id: Id) -> Petition | None: ...
+
     def find_all_by_analysis_id_ordered_by_uploaded_at(
         self,
         analysis_id: Id,

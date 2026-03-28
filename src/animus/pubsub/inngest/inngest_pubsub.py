@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from inngest import Inngest, fast_api
 
 from animus.pubsub.inngest.jobs.auth import SendAccountVerificationEmailJob
-from animus.pubsub.inngest.jobs.intake.vectorize_precedents import (
+from animus.pubsub.inngest.jobs.intake.vectorize_precedents_job import (
     VectorizePrecedentsJob,
 )
 

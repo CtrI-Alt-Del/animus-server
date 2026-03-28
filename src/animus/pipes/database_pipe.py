@@ -4,7 +4,17 @@ from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
 from animus.core.auth.interfaces import AccountsRepository
+from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.petition_summaries_repository import (
+    PetitionSummariesRepository,
+)
+from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
 from animus.database.sqlalchemy.repositories.auth import SqlalchemyAccountsRepository
+from animus.database.sqlalchemy.repositories.intake import (
+    SqlalchemyAnalisysesRepository,
+    SqlalchemyPetitionSummariesRepository,
+    SqlalchemyPetitionsRepository,
+)
 
 
 def get_sqlalchemy_session_from_request(request: Request) -> Session:
@@ -17,3 +27,21 @@ class DatabasePipe:
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
     ) -> AccountsRepository:
         return SqlalchemyAccountsRepository(sqlalchemy)
+
+    @staticmethod
+    def get_petitions_repository_from_request(
+        sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
+    ) -> PetitionsRepository:
+        return SqlalchemyPetitionsRepository(sqlalchemy)
+
+    @staticmethod
+    def get_petition_summaries_repository_from_request(
+        sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
+    ) -> PetitionSummariesRepository:
+        return SqlalchemyPetitionSummariesRepository(sqlalchemy)
+
+    @staticmethod
+    def get_analisyses_repository_from_request(
+        sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
+    ) -> AnalisysesRepository:
+        return SqlalchemyAnalisysesRepository(sqlalchemy)

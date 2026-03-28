@@ -9,11 +9,11 @@ type Json = dict[str, Any]
 
 class HttpxRestClient(RestClient):
     def __init__(self) -> None:
-        self._client = httpx.Client()
+        self._client = httpx.Client(timeout=60.0)
 
-    def _build_response[T](
-        self, response: httpx.Response, response_model: type[T]
-    ) -> RestResponse[T]:
+    def _build_response[Body](
+        self, response: httpx.Response, response_model: type[Body]
+    ) -> RestResponse[Body]:
         body: Any = None
         error_message = None
 
@@ -44,49 +44,49 @@ class HttpxRestClient(RestClient):
             error_message=error_message,
         )
 
-    def get[T](
-        self, path: str, response_model: type[T], query_params: Json | None = None
-    ) -> RestResponse[T]:
+    def get[Body](
+        self, path: str, response_model: type[Body], query_params: Json | None = None
+    ) -> RestResponse[Body]:
         response = self._client.get(url=path, params=query_params)
         return self._build_response(response, response_model)
 
-    def post[T](
+    def post[Body](
         self,
         path: str,
-        response_model: type[T],
+        response_model: type[Body],
         body: Any | None = None,
         query_params: Json | None = None,
-    ) -> RestResponse[T]:
+    ) -> RestResponse[Body]:
         response = self._client.post(url=path, json=body, params=query_params)
         return self._build_response(response, response_model)
 
-    def put[T](
+    def put[Body](
         self,
         path: str,
-        response_model: type[T],
+        response_model: type[Body],
         body: Any | None = None,
         query_params: Json | None = None,
-    ) -> RestResponse[T]:
+    ) -> RestResponse[Body]:
         response = self._client.put(url=path, json=body, params=query_params)
         return self._build_response(response, response_model)
 
-    def patch[T](
+    def patch[Body](
         self,
         path: str,
-        response_model: type[T],
+        response_model: type[Body],
         body: Any | None = None,
         query_params: Json | None = None,
-    ) -> RestResponse[T]:
+    ) -> RestResponse[Body]:
         response = self._client.patch(url=path, json=body, params=query_params)
         return self._build_response(response, response_model)
 
-    def delete[T](
+    def delete[Body](
         self,
         path: str,
-        response_model: type[T],
+        response_model: type[Body],
         body: Any | None = None,
         query_params: Json | None = None,
-    ) -> RestResponse[T]:
+    ) -> RestResponse[Body]:
         response = self._client.request(
             'DELETE', url=path, json=body, params=query_params
         )

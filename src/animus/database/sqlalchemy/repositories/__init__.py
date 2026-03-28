@@ -1,4 +1,15 @@
 from .auth import SqlalchemyAccountsRepository
-from .intake import SqlalchemyPrecedentsRepository
+from .intake import (
+    SqlalchemyAnalisysesRepository,
+    SqlalchemyPetitionSummariesRepository,
+    SqlalchemyPetitionsRepository,
+    SqlalchemyPrecedentsRepository,
+)
 
-__all__ = ['SqlalchemyAccountsRepository', 'SqlalchemyPrecedentsRepository']
+__all__ = [
+    'SqlalchemyAccountsRepository',
+    'SqlalchemyAnalisysesRepository',
+    'SqlalchemyPetitionsRepository',
+    'SqlalchemyPetitionSummariesRepository',
+    'SqlalchemyPrecedentsRepository',
+]

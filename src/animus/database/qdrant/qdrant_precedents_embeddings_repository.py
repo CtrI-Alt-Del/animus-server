@@ -1,23 +1,36 @@
 import uuid
+from typing import Any, TypedDict, cast
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, QueryRequest, VectorParams
+from qdrant_client.models import Distance, PointStruct, VectorParams
 
 from animus.constants.env import Env
-from animus.core.intake.domain.structures.court import Court
+from animus.core.intake.domain.structures.dtos.precedent_embedding_dto import (
+    PrecedentEmbeddingDto,
+)
+from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
+    PrecedentIdentifierDto,
+)
 from animus.core.intake.domain.structures.petition_embedding import PetitionEmbedding
 from animus.core.intake.domain.structures.precedent_embedding import PrecedentEmbedding
 from animus.core.intake.interfaces.precedents_embeddings_repository import (
     PrecedentsEmbeddingsRepository,
 )
-from animus.core.shared.domain.structures import Decimal, Integer, Text
 from animus.core.shared.responses.list_response import ListResponse
+
+
+class _GroupedPoint(TypedDict):
+    court: str
+    kind: str
+    number: int
+    vectors: dict[str, list[float]]
+    chunks: dict[str, str]
 
 
 class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
     def __init__(self) -> None:
         self._client = QdrantClient(url=Env.QDRANT_URL)
-        self._collection_name = f'{Env.ENV}_precedents'
+        self._collection_name = f'{Env.MODE}_precedents'
         self._ensure_collection_exists()
 
     def _ensure_collection_exists(self) -> None:
@@ -25,43 +38,54 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
             self._client.create_collection(
                 collection_name=self._collection_name,
                 vectors_config={
-                    'enunciation': VectorParams(size=3072, distance=Distance.COSINE),
-                    'thesis': VectorParams(size=3072, distance=Distance.COSINE),
+                    'enunciation': VectorParams(size=1024, distance=Distance.COSINE),
+                    'thesis': VectorParams(size=1024, distance=Distance.COSINE),
                 },
             )
 
     def add_many(self, precedents_embeddings: list[PrecedentEmbedding]) -> None:
         if not precedents_embeddings:
             return
-        grouped_points = {}
-        for emb in precedents_embeddings:
-            composite_key = f'{emb.court.dto}::{emb.number.value}'
+
+        grouped_points: dict[str, _GroupedPoint] = {}
+        for embedding in precedents_embeddings:
+            composite_key = (
+                f'{embedding.identifier.court.dto}'
+                f'::{embedding.identifier.kind.dto}'
+                f'::{embedding.identifier.number.value}'
+            )
 
             if composite_key not in grouped_points:
                 grouped_points[composite_key] = {
-                    'court': emb.court.dto,
-                    'number': emb.number.value,
+                    'court': embedding.identifier.court.dto,
+                    'kind': embedding.identifier.kind.dto,
+                    'number': embedding.identifier.number.value,
                     'vectors': {},
+                    'chunks': {},
                 }
 
-            vector_floats = [float(v.value) for v in emb.vector]
-            field_name = emb.field.dto.lower()
-            grouped_points[composite_key]['vectors'][field_name] = vector_floats
-        points = []
-        for composite_key, data in grouped_points.items():  # type:ignore
-            point_id = str(uuid.uuid5(uuid.NAMESPACE_OID, composite_key))  # type:ignore
-            points.append(  # type:ignore
+            field_name = embedding.field.dto.lower()
+            grouped_points[composite_key]['vectors'][field_name] = [
+                float(value.value) for value in embedding.vector
+            ]
+            grouped_points[composite_key]['chunks'][field_name] = embedding.chunk.value
+
+        points: list[PointStruct] = []
+        for composite_key, data in grouped_points.items():
+            points.append(
                 PointStruct(
-                    id=point_id,
-                    vector=data['vectors'],  # type:ignore
+                    id=str(uuid.uuid5(uuid.NAMESPACE_OID, composite_key)),
+                    vector=cast('dict[str, Any]', data['vectors']),
                     payload={
                         'court': data['court'],
+                        'kind': data['kind'],
                         'number': data['number'],
+                        'chunks': data['chunks'],
                     },
                 )
             )
 
-        self._client.upsert(collection_name=self._collection_name, points=points)  # type:ignore
+        self._client.upsert(collection_name=self._collection_name, points=points)
 
     def find_many(
         self, petition_embeddings: list[PetitionEmbedding]
@@ -69,37 +93,55 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         if not petition_embeddings:
             return ListResponse(items=[])
 
-        requests = []
-        for p_emb in petition_embeddings:
-            target_field = p_emb.field.dto.lower()  # type:ignore
-            requests.append(  # type:ignore
-                QueryRequest(
-                    query=[float(v.value) for v in p_emb.vector],
-                    using=target_field,  # type:ignore
+        results: list[PrecedentEmbedding] = []
+        for petition_embedding in petition_embeddings:
+            query_vector = [float(value.value) for value in petition_embedding.vector]
+
+            for target_field in ('enunciation', 'thesis'):
+                query_response = self._client.query_points(
+                    collection_name=self._collection_name,
+                    query=query_vector,
+                    using=target_field,
                     limit=10,
                     with_payload=True,
-                    with_vector=False,  # Economiza banda de rede
+                    with_vectors=False,
                 )
-            )
-        batch_results = self._client.query_batch(  # type:ignore
-            collection_name=self._collection_name,
-            requests=requests,
-        )
-        results: list[PrecedentEmbedding] = []
 
-        for original_query, query_response in zip(petition_embeddings, batch_results):  # noqa: B905 #type:ignore
-            for point in query_response.points:  # type:ignore
-                payload = point.payload or {}  # type:ignore
+                for point in query_response.points:
+                    payload = cast('dict[str, object]', point.payload or {})
 
-                results.append(
-                    PrecedentEmbedding.create(
-                        score=Decimal.create(point.score),  # type:ignore
-                        vector=[],
-                        field=original_query.field,  # type:ignore
-                        court=Court.create(payload.get('court', '')),  # type:ignore
-                        number=Integer.create(int(payload.get('number', 0))),  # type:ignore
-                        chunk=Text.create(''),
+                    court = payload.get('court')
+                    kind = payload.get('kind')
+                    number = payload.get('number')
+                    if not isinstance(court, str):
+                        continue
+                    if not isinstance(kind, str):
+                        continue
+                    if not isinstance(number, int):
+                        continue
+
+                    chunk = ''
+                    chunks = payload.get('chunks')
+                    if isinstance(chunks, dict):
+                        chunks_dict = cast('dict[str, object]', chunks)
+                        maybe_chunk = chunks_dict.get(target_field)
+                        if isinstance(maybe_chunk, str):
+                            chunk = maybe_chunk
+
+                    results.append(
+                        PrecedentEmbedding.create(
+                            PrecedentEmbeddingDto(
+                                score=float(point.score),
+                                vector=[],
+                                field=target_field.upper(),
+                                identifier=PrecedentIdentifierDto(
+                                    court=court,
+                                    kind=kind,
+                                    number=number,
+                                ),
+                                chunk=chunk,
+                            )
+                        )
                     )
-                )
 
         return ListResponse(items=results)

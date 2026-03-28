@@ -6,7 +6,7 @@ from animus.core.shared.responses import CursorPaginationResponse
 
 
 class AnalisysesRepository(Protocol):
-    def find_by_id(self, account_id: Id) -> Analysis: ...
+    def find_by_id(self, analysis_id: Id) -> Analysis | None: ...
 
     def find_many(
         self,
