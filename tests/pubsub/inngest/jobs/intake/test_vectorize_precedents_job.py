@@ -8,7 +8,13 @@ from pytest import MonkeyPatch
 from animus.core.intake.use_cases.vectorize_precedents_use_case import (
     VectorizePrecedentsUseCase,
 )
+from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
+    QdrantPrecedentsEmbeddingsRepository,
+)
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
+from animus.providers.intake.precedent_embeddings.gemini.gemini_precedent_embeddings_provider import (
+    GeminiPrecedentEmbeddingsProvider,
+)
 
 
 class TestVectorizePrecedentsJob:
@@ -24,6 +30,17 @@ class TestVectorizePrecedentsJob:
         inngest_runtime: Any,
     ) -> None:
         captured_calls: list[dict[str, int]] = []
+
+        monkeypatch.setattr(
+            QdrantPrecedentsEmbeddingsRepository,
+            '__init__',
+            lambda *args, **kwargs: None,  # type:ignore
+        )
+        monkeypatch.setattr(
+            GeminiPrecedentEmbeddingsProvider,
+            '__init__',
+            lambda *args, **kwargs: None,  # type:ignore
+        )
 
         def _execute(
             _self: Any,
@@ -55,7 +72,6 @@ class TestVectorizePrecedentsJob:
             lambda: mock_session_cm,
         )
 
-        # Disparamos o evento manual que adicionamos ao Job
         response = inngest_runtime.post_event(
             name='intake/vectorize-precedents.requested',
             data={},
