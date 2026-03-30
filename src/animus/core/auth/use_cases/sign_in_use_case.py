@@ -1,6 +1,5 @@
 from animus.core.auth.domain.errors import (
     AccountInactiveError,
-    AccountNotFoundError,
     AccountNotVerifiedError,
     InvalidCredentialsError,
 )
@@ -25,10 +24,9 @@ class SignInUseCase:
         account_email = Email.create(email)
         account_password = Text.create(password)
 
-        try:
-            account = self._accounts_repository.find_by_email(account_email)
-        except AccountNotFoundError as error:
-            raise InvalidCredentialsError from error
+        account = self._accounts_repository.find_by_email(account_email)
+        if account is None:
+            raise InvalidCredentialsError
 
         password_hash = self._accounts_repository.find_password_hash_by_email(
             account_email

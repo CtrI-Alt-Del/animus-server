@@ -2,7 +2,6 @@ from unittest.mock import ANY, MagicMock, create_autospec
 
 import pytest
 
-from animus.core.auth.domain.errors import AccountNotFoundError
 from animus.core.auth.domain.structures.dtos.session_dto import SessionDto
 from animus.core.auth.domain.structures.dtos.token_dto import TokenDto
 from animus.core.auth.domain.structures.email import Email
@@ -52,12 +51,12 @@ class TestSignInWithGoogleUseCase:
     def test_should_create_account_and_link_social_when_account_does_not_exist(
         self,
     ) -> None:
-        oauth_token = 'test_id_token'  # noqa: S105
+        oauth_token = 'test_id_token'
         name = Text.create('Test User')
         email = Email.create('test@example.com')
 
         self.google_oauth_provider_mock.get_user_info.return_value = (name, email)
-        self.accounts_repository_mock.find_by_email.side_effect = AccountNotFoundError()
+        self.accounts_repository_mock.find_by_email.return_value = None
         self.jwt_provider_mock.encode.return_value = self.mock_encoded_result
 
         result = self.use_case.execute(oauth_token)
@@ -74,7 +73,7 @@ class TestSignInWithGoogleUseCase:
     def test_should_link_social_account_and_replace_when_account_exists_but_not_linked(
         self,
     ) -> None:
-        oauth_token = 'test_id_token'  # noqa: S105
+        oauth_token = 'test_id_token'
         name = Text.create('Test User')
         email = Email.create('test@example.com')
         account_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
@@ -106,7 +105,7 @@ class TestSignInWithGoogleUseCase:
     def test_should_only_return_session_when_account_exists_and_already_linked(
         self,
     ) -> None:
-        oauth_token = 'test_id_token'  # noqa: S105
+        oauth_token = 'test_id_token'
         name = Text.create('Test User')
         email = Email.create('test@example.com')
         account_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'

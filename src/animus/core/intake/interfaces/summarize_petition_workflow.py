@@ -1,13 +1,14 @@
 from typing import Protocol
 
-from animus.core.intake.domain.structures import PetitionEmbedding, PrecedentEmbedding
-from animus.core.shared.responses import ListResponse
+from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
+    PetitionSummaryDto,
+)
+from animus.core.shared.domain.structures import Text
 
 
 class SummarizePetitionWorkflow(Protocol):
-    def find_many(
+    def run(
         self,
-        petition_embeddings: list[PetitionEmbedding],
-    ) -> ListResponse[PrecedentEmbedding]: ...
-
-    def add_many(self, precedents_embeddings: list[PrecedentEmbedding]) -> None: ...
+        petition_id: str,
+        petition_document_content: Text,
+    ) -> PetitionSummaryDto: ...

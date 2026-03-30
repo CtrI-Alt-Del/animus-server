@@ -13,9 +13,7 @@ _DEFAULT_PASSWORD_HASH = object()
 @pytest.fixture(autouse=True)
 def auth_test_environment(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     monkeypatch.setattr(Env, 'JWT_SECRET_KEY', 'test-jwt-secret')
-    monkeypatch.setattr(Env, 'EMAIL_VERIFICATION_SECRET_KEY', 'test-email-secret')
-    monkeypatch.setattr(Env, 'EMAIL_VERIFICATION_SALT', 'test-email-salt')
-    monkeypatch.setattr(Env, 'EMAIL_VERIFICATION_TOKEN_MAX_AGE_SECONDS', 3600)
+    monkeypatch.setattr(Env, 'EMAIL_VERIFICATION_OTP_TTL_SECONDS', 3600)
 
     yield
 

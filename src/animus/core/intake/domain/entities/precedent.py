@@ -1,8 +1,8 @@
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
-from animus.core.intake.domain.structures import PrecedentStatus
 from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
 )
+from animus.core.intake.domain.structures.precedent_status import PrecedentStatus
 from animus.core.shared.domain.abstracts import Entity
 from animus.core.shared.domain.decorators import entity
 from animus.core.shared.domain.structures import Datetime, Id, Text

@@ -1,0 +1,105 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - production
+  pull_request:
+    branches:
+      - main
+      - production
+
+jobs:
+  validate-branches:
+    name: "Validate Branch Rules"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Check Main -> Production Merge"
+        if: github.base_ref == 'production' && github.head_ref != 'main'
+        run: exit 1
+
+      - name: "Block Production -> Main Merge"
+        if: github.base_ref == 'main' && github.head_ref == 'production'
+        run: exit 1
+
+      - name: "Approve valid merge"
+        if: (github.base_ref == 'production' && github.head_ref == 'main') || (github.base_ref == 'main' && github.head_ref != 'production')
+        run: true
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [validate-branches]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: '3.13'
+
+      - name: Typecheck
+        run: uv run poe typecheck
+
+  codecheck:
+    name: Codecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [typecheck]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: '3.13'
+
+      - name: Codecheck
+        run: uv run poe codecheck
+
+      - name: Ensure codecheck produced no diffs
+        run: git diff --exit-code
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [codecheck]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: '3.13'
+
+      - name: Tests
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: uv run poe test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [tests]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: '3.13'
+
+      - name: Build
+        run: uv build

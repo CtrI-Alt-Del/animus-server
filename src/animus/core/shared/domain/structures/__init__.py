@@ -7,6 +7,7 @@ from .percentage import Percentage
 from .logical import Logical
 from .phone import Phone
 from .datetime import Datetime
+from .ttl import Ttl
 
 __all__ = [
     'Id',
@@ -18,4 +19,5 @@ __all__ = [
     'Logical',
     'Phone',
     'Datetime',
+    'Ttl',
 ]

@@ -13,7 +13,7 @@ class TestSqlalchemyAccountsRepository:
         sqlalchemy_session: Session,
         create_account: CreateAccountFixture,
     ) -> None:
-        stored_password_hash = 'stored-password-hash'  # noqa: S105
+        stored_password_hash = 'stored-password-hash'
         create_account(
             email='maria@example.com',
             password_hash=stored_password_hash,

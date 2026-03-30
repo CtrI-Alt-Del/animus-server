@@ -6,26 +6,42 @@ type Json = dict[str, Any]
 
 
 class RestClient(Protocol):
-    def get(self, path: str, query_params: Json | None = None) -> RestResponse[Any]: ...
+    def get[T](
+        self, path: str, response_model: type[T], query_params: Json | None = None
+    ) -> RestResponse[T]: ...
 
-    def post(
-        self, path: str, body: Any | None = None, query_params: Json | None = None
-    ) -> RestResponse[Any]: ...
+    def post[T](
+        self,
+        path: str,
+        response_model: type[T],
+        body: Any | None = None,
+        query_params: Json | None = None,
+    ) -> RestResponse[T]: ...
 
-    def put(
-        self, path: str, body: Any | None = None, query_params: Json | None = None
-    ) -> RestResponse[Any]: ...
+    def put[T](
+        self,
+        path: str,
+        response_model: type[T],
+        body: Any | None = None,
+        query_params: Json | None = None,
+    ) -> RestResponse[T]: ...
 
-    def patch(
-        self, path: str, body: Any | None = None, query_params: Json | None = None
-    ) -> RestResponse[Any]: ...
+    def patch[T](
+        self,
+        path: str,
+        response_model: type[T],
+        body: Any | None = None,
+        query_params: Json | None = None,
+    ) -> RestResponse[T]: ...
 
-    def delete(
-        self, path: str, body: Any | None = None, query_params: Json | None = None
-    ) -> RestResponse[Any]: ...
+    def delete[T](
+        self,
+        path: str,
+        response_model: type[T],
+        body: Any | None = None,
+        query_params: Json | None = None,
+    ) -> RestResponse[T]: ...
 
     def get_base_url(self) -> str: ...
-
     def set_base_url(self, base_url: str) -> None: ...
-
     def set_header(self, key: str, value: str) -> None: ...

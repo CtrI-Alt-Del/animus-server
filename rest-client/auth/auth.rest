@@ -1,8 +1,19 @@
+###
 @url = {{BASE_URL}}/auth
 @name = Usuario Teste
-@email = joaopcarvalho.cds@gmail.com
+@email = animus.ctrlaltdel@gmail.com
 @password = Senha@123
-@verificationToken = cole-o-token-aqui
+@otp = 583108
+
+### Entrar com email e senha (SignInController)
+POST {{url}}/sign-in
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
 
 ### Criar conta (SignUpController)
 POST {{url}}/sign-up
@@ -14,9 +25,6 @@ Content-Type: application/json
   "password": "{{password}}"
 }
 
-### Verificar email (VerifyEmailController)
-GET {{url}}/verify-email?token={{verificationToken}}
-
 ### Reenviar email de verificacao (ResendVerificationEmailController)
 POST {{url}}/resend-verification-email
 Content-Type: application/json
@@ -25,11 +33,12 @@ Content-Type: application/json
   "email": "{{email}}"
 }
 
-### Entrar com email e senha (SignInController)
-POST {{url}}/sign-in
+### Verificar email com OTP (VerifyEmailController)
+POST {{url}}/verify-email
 Content-Type: application/json
 
 {
   "email": "{{email}}",
-  "password": "{{password}}"
+  "otp": "{{otp}}"
 }
+

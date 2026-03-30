@@ -22,6 +22,9 @@ class PrecedentKindValue(StrEnum):
     NT = 'NT'
     GR = 'GR'
     CONT = 'CONT'
+    SIRDR = 'SIRDR'
+    IRR = 'IRR'
+    CT = 'CT'
 
 
 @structure

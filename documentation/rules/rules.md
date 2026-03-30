@@ -132,6 +132,26 @@
 
 ---
 
+## `ai-layer-rules.md`
+
+### Quando ler
+
+- Ao criar/alterar **Workflows**, **Teams** ou **Toolkits** Agno em `src/animus/ai/agno/`.
+- Ao implementar uma interface `*Workflow` do `core` usando LLM (Gemini, OpenAI etc.).
+- Ao adicionar novo agente, nova ferramenta ou novo domínio na camada AI.
+- Ao montar ou alterar o wiring de `Workflow` no `AiPipe`.
+
+### Instruções práticas
+
+- **Workflow** monta o `agno.Workflow` dentro do `run()`, não no construtor.
+- Use `_StepNames` como `NamedTuple` para centralizar nomes de steps; evite strings mágicas.
+- **Team** expõe agentes como `@property`; use `textwrap.dedent` para instruções multi-linha.
+- **Toolkit** estende `agno.tools.Toolkit`; toda ferramenta exige docstring com `Args` e `Returns`.
+- Toolkit pode chamar `UseCase` internamente — é o ponto de acoplamento controlado com o domínio.
+- Toda instanciação de `Workflow` concreto ocorre no `AiPipe`; retorne sempre a interface do `core`.
+
+---
+
 ## `testing-rules.md`
 
 ### Quando ler
@@ -159,5 +179,6 @@
 | Roteamento/composição de módulos | `routers-layers-rules.md` |
 | Injeção de dependência | `pipes-layer-rules.md` |
 | Jobs assíncronos/eventos | `pubsub-layer-rules.md` |
+| Workflows, agentes e ferramentas AI (Agno) | `ai-layer-rules.md` |
 | Testes (índice geral) | `testing-rules.md` |
 | Estilo/nomeação/organização | `code-conventions-rules.md` |

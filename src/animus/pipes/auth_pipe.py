@@ -35,7 +35,7 @@ class AuthPipe:
             raise AuthError('Tipo de token invalido')
 
         subject = payload.get('sub')
-        if not subject:
+        if subject is None:
             raise AuthError('Token sem subject')
 
         account_id = Id.create(subject)

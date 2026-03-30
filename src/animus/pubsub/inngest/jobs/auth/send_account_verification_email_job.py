@@ -4,16 +4,15 @@ from typing import Any
 from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.auth.domain.events import EmailVerificationRequestedEvent
-from animus.core.auth.domain.structures import Email
+from animus.core.auth.domain.structures import Email, Otp
 from animus.core.notification import SendAccountVerificationEmailUseCase
-from animus.core.shared.domain.structures import Text
 from animus.providers.notification import ResendEmailSenderProvider
 
 
 @dataclass(frozen=True)
 class _Payload:
     account_email: Email
-    account_email_verification_token: Text
+    account_email_otp: Otp
 
 
 class SendAccountVerificationEmailJob:
@@ -35,9 +34,7 @@ class SendAccountVerificationEmailJob:
             )
             payload = _Payload(
                 account_email=Email.create(str(normalized_data['account_email'])),
-                account_email_verification_token=Text.create(
-                    str(normalized_data['account_email_verification_token'])
-                ),
+                account_email_otp=Otp.create(str(normalized_data['account_email_otp'])),
             )
 
             await context.step.run(
@@ -52,9 +49,7 @@ class SendAccountVerificationEmailJob:
     async def _normalize_payload(data: dict[str, Any]) -> dict[str, str]:
         return {
             'account_email': str(data['account_email']),
-            'account_email_verification_token': str(
-                data['account_email_verification_token']
-            ),
+            'account_email_otp': str(data['account_email_otp']),
         }
 
     @staticmethod
@@ -64,5 +59,5 @@ class SendAccountVerificationEmailJob:
         )
         use_case.execute(
             account_email=payload.account_email.value,
-            verification_token=payload.account_email_verification_token.value,
+            otp=payload.account_email_otp.value,
         )

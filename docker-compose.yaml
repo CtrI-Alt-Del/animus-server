@@ -1,32 +1,86 @@
+---
 services:
   postgres:
     image: postgres:16-alpine
     container_name: animus_postgres
     restart: unless-stopped
-    env_file:
-      - .env
+    env_file: [.env]
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5433:5432"
-    volumes:
-      - animus_postgres_data:/var/lib/postgresql/data
+    ports: [5432:5432]
+    volumes: [animus_postgres_data:/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: [CMD-SHELL, "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: animus_qdrant
+    restart: unless-stopped
+    ports: [6333:6333, 6334:6334]
+    volumes: [animus_qdrant_data:/qdrant/storage]
+
   inngest:
     image: inngest/inngest:v0.27.0
     container_name: animus_inngest
-    command: "inngest dev -u http://host.docker.internal:8080/api/inngest"
-    ports:
-      - "8288:8288"
+    command: inngest dev -u http://host.docker.internal:8080/api/inngest
+    ports: [8288:8288]
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    extra_hosts: [host.docker.internal:host-gateway]
+
+  redis:
+    image: redis:7-alpine
+    container_name: animus_redis
+    restart: unless-stopped
+    command: [redis-server, --appendonly, yes]
+    ports: [6379:6379]
+    volumes: [animus_redis_data:/data]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  gcs:
+    image: fsouza/fake-gcs-server:latest@sha256:3730da0e31f7e5186a90ec4899dc2c336104e7599df400411392ef17e684c31f
+    container_name: animus_gcs
+    restart: unless-stopped
+    command: -scheme http -external-url http://localhost:4443
+    ports:
+      - "4443:4443"
+    volumes:
+      - animus_gcs_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4443/storage/v1/b"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  gcs_ui:
+    image: ghcr.io/drehelis/gcp-emulator-ui:main@sha256:13fee08c517fb07a4652a5852841f047d4fa09714c4d85a63b883ab7ea4d095e
+    container_name: animus_gcs_ui
+    restart: unless-stopped
+    ports:
+      - "9090:80"
+    environment:
+      STORAGE_EMULATOR_URL: gcs:4443
+      PUBSUB_EMULATOR_URL: gcs:4443
+      FIRESTORE_EMULATOR_URL: gcs:4443
+      DATASTORE_EMULATOR_URL: gcs:4443
+      DATASTORE_FILE_SERVER_URL: gcs:4443
+    depends_on:
+      - gcs
 
 volumes:
   animus_postgres_data:
+  animus_qdrant_data:
+  animus_redis_data:
+  animus_gcs_data:

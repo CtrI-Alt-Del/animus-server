@@ -115,3 +115,4 @@
   - Orquestracao de fluxo pertence ao `core` e as bordas de entrada.
   - Traducao para contrato HTTP pertence a `rest` e `validation`.
   - Publicacao de eventos e side effects externos pertencem a `pubsub` e `providers`.
+  - Lançar erro de dominio no repository para ausencia de registro (ex.: `find_by_id`/`find_by_email` levantando `AccountNotFoundError`), em vez de retornar `None` conforme contrato da interface.

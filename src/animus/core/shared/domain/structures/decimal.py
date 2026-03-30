@@ -9,9 +9,9 @@ class Decimal(Structure):
 
     @classmethod
     def create(cls, value: float) -> 'Decimal':
-        if value < 0.0 or value >= 1:
+        if not isinstance(value, float):
             raise ValidationError(
-                f'Valor deve ser maior ou igual a 0.0, recebido: {value}'
+                f'Valor deve ser um valor com ponto flutuante, recebido: {value}'
             )
 
         return cls(value=value)
