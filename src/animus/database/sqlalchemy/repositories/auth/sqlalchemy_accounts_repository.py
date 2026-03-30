@@ -14,7 +14,7 @@ class SqlalchemyAccountsRepository(AccountsRepository):
     def __init__(self, sqlalchemy: Session) -> None:
         self._sqlalchemy = sqlalchemy
 
-    def find_by_id(self, account_id: Id) -> Account | None:
+    def find_by_id(self, account_id: Id) -> Account:
         model = self._sqlalchemy.get(AccountModel, account_id.value)
         if model is None:
             raise AccountNotFoundError
