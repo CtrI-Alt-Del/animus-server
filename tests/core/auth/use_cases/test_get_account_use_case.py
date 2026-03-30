@@ -50,7 +50,7 @@ class TestGetAccountUseCase:
 
     def test_should_raise_not_found_error_when_account_does_not_exist(self) -> None:
         account_id = Id.create('01ARZ3NDEKTSV4RRFFQ69G5FAV')
-        self.accounts_repository_mock.find_by_id.side_effect = AccountNotFoundError()
+        self.accounts_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AccountNotFoundError):
             self.use_case.execute(account_id=account_id)
