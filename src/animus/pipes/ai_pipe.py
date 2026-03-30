@@ -8,6 +8,9 @@ from animus.core.intake.interfaces.petition_summaries_repository import (
 from animus.core.intake.interfaces.summarize_petition_workflow import (
     SummarizePetitionWorkflow,
 )
+from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
+    SynthesizeAnalysisPrecedentsWorkflow,
+)
 from animus.pipes.database_pipe import DatabasePipe
 
 
@@ -26,3 +29,11 @@ class AiPipe:
         return AgnoSummarizePetitionWorkflow(
             petition_summaries_repository=petition_summaries_repository,
         )
+
+    @staticmethod
+    def get_synthesize_analysis_precedents_workflow() -> SynthesizeAnalysisPrecedentsWorkflow:
+        from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
+            AgnoSynthesizeAnalysisPrecedentsWorkflow,
+        )
+
+        return AgnoSynthesizeAnalysisPrecedentsWorkflow()

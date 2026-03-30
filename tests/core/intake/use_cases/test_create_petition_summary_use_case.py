@@ -25,11 +25,19 @@ class TestCreatePetitionSummaryUseCase:
     ) -> None:
         petition_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
         dto = PetitionSummaryDto(
-            content='Resumo da peticao inicial com os fatos centrais.',
-            main_points=[
+            case_summary='Resumo da peticao inicial com os fatos centrais.',
+            legal_issue='Controvérsia sobre descumprimento contratual e indenização',
+            central_question='Há responsabilidade civil contratual da parte ré?',
+            relevant_laws=['Código Civil, Art. 389', 'Código Civil, Art. 927'],
+            key_facts=[
                 'A autora relata descumprimento contratual.',
                 'A peticao aponta fundamento no CDC.',
                 'Ha pedido de indenizacao por danos materiais.',
+            ],
+            search_terms=[
+                'descumprimento contratual',
+                'indenizacao danos materiais',
+                'responsabilidade civil contratual',
             ],
         )
         petition_id_entity = Id.create(petition_id)
@@ -58,11 +66,19 @@ class TestCreatePetitionSummaryUseCase:
     ) -> None:
         petition_id = '01B3EAF4Q2V7D9N8M6K5J4H3G2'
         dto = PetitionSummaryDto(
-            content='Novo resumo consolidado da peticao.',
-            main_points=[
+            case_summary='Novo resumo consolidado da peticao.',
+            legal_issue='Revisão de cláusula contratual e pedido de tutela de urgência',
+            central_question='A cláusula questionada é abusiva no caso concreto?',
+            relevant_laws=['CDC, Art. 6', 'CDC, Art. 51'],
+            key_facts=[
                 'Os fatos foram reorganizados cronologicamente.',
                 'O fundamento juridico foi reforcado com jurisprudencia.',
                 'O pedido principal foi mantido com tutela de urgencia.',
+            ],
+            search_terms=[
+                'clausula abusiva',
+                'tutela de urgencia',
+                'revisao contratual',
             ],
         )
         petition_id_entity = Id.create(petition_id)
@@ -93,8 +109,12 @@ class TestCreatePetitionSummaryUseCase:
 
     def test_should_raise_validation_error_when_petition_id_is_invalid(self) -> None:
         dto = PetitionSummaryDto(
-            content='Resumo valido.',
-            main_points=['Ponto principal.'],
+            case_summary='Resumo valido.',
+            legal_issue='Questão jurídica válida.',
+            central_question='Pergunta jurídica principal válida?',
+            relevant_laws=['Código Civil, Art. 421'],
+            key_facts=['Ponto principal.'],
+            search_terms=['autonomia privada'],
         )
 
         with pytest.raises(ValidationError):

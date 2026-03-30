@@ -1,9 +1,11 @@
 from fastapi import APIRouter
 
-from animus.rest.controllers.intake.create_petition_controller import (
+from animus.rest.controllers.intake import (
+    ChooseAnalysisPrecedentController,
     CreatePetitionController,
-)
-from animus.rest.controllers.intake.summarize_petition_controller import (
+    GetAnalysisStatusController,
+    ListAnalysisPrecedentsController,
+    SearchAnalysisPrecedentsController,
     SummarizePetitionController,
 )
 
@@ -15,5 +17,9 @@ class IntakeRouter:
 
         CreatePetitionController.handle(router)
         SummarizePetitionController.handle(router)
+        SearchAnalysisPrecedentsController.handle(router)
+        ListAnalysisPrecedentsController.handle(router)
+        GetAnalysisStatusController.handle(router)
+        ChooseAnalysisPrecedentController.handle(router)
 
         return router

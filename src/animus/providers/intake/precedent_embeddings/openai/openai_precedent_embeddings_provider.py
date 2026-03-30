@@ -23,7 +23,7 @@ class OpenAIPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
 
     def __init__(self) -> None:
         self._client = OpenAI(api_key=Env.OPENAI_API_KEY)
-        self._model = 'text-embedding-3-large'
+        self._model = "text-embedding-3-large"
 
     def generate(self, precedents: list[Precedent]) -> list[PrecedentEmbedding]:
         if not precedents:
@@ -37,18 +37,18 @@ class OpenAIPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
                 texts_to_embed.append(precedent.enunciation.value)
                 metadata_tracking.append(
                     {
-                        'precedent': precedent,
-                        'field': 'ENUNCIATION',
-                        'chunk': precedent.enunciation.value,
+                        "precedent": precedent,
+                        "field": "ENUNCIATION",
+                        "chunk": precedent.enunciation.value,
                     }
                 )
             if precedent.thesis.value:
                 texts_to_embed.append(precedent.thesis.value)
                 metadata_tracking.append(
                     {
-                        'precedent': precedent,
-                        'field': 'THESIS',
-                        'chunk': precedent.thesis.value,
+                        "precedent": precedent,
+                        "field": "THESIS",
+                        "chunk": precedent.thesis.value,
                     }
                 )
 
@@ -72,19 +72,19 @@ class OpenAIPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
 
         results: list[PrecedentEmbedding] = []
         for metadata, vector in zip(metadata_tracking, vectors):  # noqa: B905
-            prec: Precedent = metadata['precedent']
+            prec: Precedent = metadata["precedent"]
             results.append(
                 PrecedentEmbedding.create(
                     PrecedentEmbeddingDto(
                         score=1.0,
                         vector=vector,
-                        field=metadata['field'],
+                        field=metadata["field"],
                         identifier=PrecedentIdentifierDto(
                             court=prec.identifier.court.dto,
                             kind=prec.identifier.kind.dto,
                             number=prec.identifier.number.value,
                         ),
-                        chunk=metadata['chunk'],
+                        chunk=metadata["chunk"],
                     )
                 )
             )

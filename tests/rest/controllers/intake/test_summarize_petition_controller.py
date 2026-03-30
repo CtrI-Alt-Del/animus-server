@@ -106,10 +106,18 @@ class TestSummarizePetitionController:
         fake_pdf_provider = FakePdfProvider('Fatos e pedidos da peticao inicial')
         fake_workflow = FakeSummarizePetitionWorkflow(
             PetitionSummaryDto(
-                content='Resumo objetivo da peticao inicial',
-                main_points=[
+                case_summary='Resumo objetivo da peticao inicial',
+                legal_issue='Controvérsia sobre inadimplemento contratual',
+                central_question='Há inadimplemento apto a justificar condenação?',
+                relevant_laws=['Código Civil, Art. 389', 'Código Civil, Art. 395'],
+                key_facts=[
                     'Resumo dos fatos',
                     'Resumo dos fundamentos juridicos',
+                ],
+                search_terms=[
+                    'inadimplemento contratual',
+                    'obrigacao de pagar',
+                    'responsabilidade contratual',
                 ],
             )
         )
@@ -132,10 +140,21 @@ class TestSummarizePetitionController:
 
         assert response.status_code == 201
         assert response.json() == {
-            'content': 'Resumo objetivo da peticao inicial',
-            'main_points': [
+            'case_summary': 'Resumo objetivo da peticao inicial',
+            'legal_issue': 'Controvérsia sobre inadimplemento contratual',
+            'central_question': 'Há inadimplemento apto a justificar condenação?',
+            'relevant_laws': [
+                'Código Civil, Art. 389',
+                'Código Civil, Art. 395',
+            ],
+            'key_facts': [
                 'Resumo dos fatos',
                 'Resumo dos fundamentos juridicos',
+            ],
+            'search_terms': [
+                'inadimplemento contratual',
+                'obrigacao de pagar',
+                'responsabilidade contratual',
             ],
         }
         assert fake_pdf_provider.calls_count == 1
