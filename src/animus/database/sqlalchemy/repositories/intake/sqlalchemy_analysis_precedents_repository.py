@@ -13,7 +13,9 @@ class SqlalchemyAnalysisPrecedentsRepository(AnalysisPrecedentsRepository):
     def __init__(self, sqlalchemy: Session) -> None:
         self._sqlalchemy = sqlalchemy
 
-    def find_many_by_analysis_id(self, analysis_id: Id) -> ListResponse[AnalysisPrecedent]:
+    def find_many_by_analysis_id(
+        self, analysis_id: Id
+    ) -> ListResponse[AnalysisPrecedent]:
         models = self._sqlalchemy.scalars(
             select(AnalysisPrecedentModel)
             .options(joinedload(AnalysisPrecedentModel.precedent))

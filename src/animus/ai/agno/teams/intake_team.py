@@ -16,8 +16,8 @@ class IntakeTeam:
     @property
     def analysis_precedents_synthesizer_agent(self) -> Agent:
         return Agent(
-            name="Analysis Precedents Synthesis Agent",
-            description="An agent specialized in relating petition summaries to legal precedents in PT-BR",
+            name='Analysis Precedents Synthesis Agent',
+            description='An agent specialized in relating petition summaries to legal precedents in PT-BR',
             instructions=dedent(
                 """
                 Você é um especialista em correlacionar resumos de petições com precedentes jurídicos brasileiros.
@@ -34,15 +34,15 @@ class IntakeTeam:
                 - Retorne apenas o objeto estruturado no formato esperado.
                 """
             ),
-            model=Gemini(id="gemini-2.5-flash", api_key=Env.GEMINI_API_KEY, timeout=60),
+            model=Gemini(id='gemini-2.5-flash', api_key=Env.GEMINI_API_KEY, timeout=60),
             output_schema=AnalysisPrecedentsSynthesisOutput,
         )
 
     @property
     def petition_summarizer_agent(self) -> Agent:
         return Agent(
-            name="Petition Summarizer Agent",
-            description="An agent specialized in summarizing legal petitions in PT-BR",
+            name='Petition Summarizer Agent',
+            description='An agent specialized in summarizing legal petitions in PT-BR',
             instructions=dedent(
                 """
                 Você é um especialista em análise textual de petições judiciais brasileiras,
@@ -136,6 +136,6 @@ class IntakeTeam:
                 - Retorne apenas o objeto estruturado no formato esperado.
                 """
             ),
-            model=Gemini(id="gemini-2.5-flash", api_key=Env.GEMINI_API_KEY, timeout=60),
+            model=Gemini(id='gemini-2.5-flash', api_key=Env.GEMINI_API_KEY, timeout=60),
             output_schema=PetitionSummaryOutput,
         )

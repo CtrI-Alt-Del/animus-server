@@ -9,7 +9,9 @@ from animus.core.intake.use_cases.vectorize_all_precedents_use_case import (
 from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
     QdrantPrecedentsEmbeddingsRepository,
 )
-from animus.database.sqlalchemy.repositories.intake import SqlalchemyPrecedentsRepository
+from animus.database.sqlalchemy.repositories.intake import (
+    SqlalchemyPrecedentsRepository,
+)
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.intake.precedent_embeddings.openai.openai_precedent_embeddings_provider import (
     OpenAIPrecedentEmbeddingsProvider,

@@ -39,7 +39,7 @@ class PetitionSummariesFaker:
         search_terms: list[str] | None = None,
     ) -> PetitionSummaryDto:
         generated_relevant_laws = relevant_laws or [
-            f"Lei {PetitionSummariesFaker._faker.random_int(min=1000, max=99999)}"
+            f'Lei {PetitionSummariesFaker._faker.random_int(min=1000, max=99999)}'
             for _ in range(2)
         ]
         generated_key_facts = key_facts or [
@@ -54,8 +54,7 @@ class PetitionSummariesFaker:
                 case_summary or PetitionSummariesFaker._faker.paragraph(nb_sentences=4)
             ),
             legal_issue=(
-                legal_issue
-                or 'Controvérsia sobre cumprimento de obrigação contratual'
+                legal_issue or 'Controvérsia sobre cumprimento de obrigação contratual'
             ),
             central_question=(
                 central_question

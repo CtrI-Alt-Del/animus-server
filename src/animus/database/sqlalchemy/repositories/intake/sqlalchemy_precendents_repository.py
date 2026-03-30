@@ -58,7 +58,9 @@ class SqlalchemyPrecedentsRepository(PrecedentsRepository):
             )
         ).all()
 
-        return ListResponse(items=[PrecedentMapper.to_entity(model) for model in models])
+        return ListResponse(
+            items=[PrecedentMapper.to_entity(model) for model in models]
+        )
 
     def add_many(self, precedents: list[Precedent]) -> None:
         self._sqlalchemy.add_all(
@@ -81,7 +83,9 @@ class SqlalchemyPrecedentsRepository(PrecedentsRepository):
 
     def find_page(self, page: int, page_size: int) -> PagePaginationResponse[Precedent]:
         offset = (page - 1) * page_size
-        total = self._sqlalchemy.scalar(select(func.count()).select_from(PrecedentModel))
+        total = self._sqlalchemy.scalar(
+            select(func.count()).select_from(PrecedentModel)
+        )
 
         models = self._sqlalchemy.scalars(
             select(PrecedentModel)

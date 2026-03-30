@@ -18,27 +18,27 @@ class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider)
     _BATCH_DELAY = 6.0
 
     _ACCESSORY_MARKERS = (
-        "súmula 85",
-        "sumula 85",
-        "11.960",
-        "ipca-e",
-        "juros",
-        "correção monetária",
-        "correcao monetaria",
-        "prescrição",
-        "prescricao",
-        "quinquênio",
-        "quinquenio",
-        "parcelas vencidas",
-        "parcelas vincendas",
-        "honorários",
-        "honorarios",
-        "custas",
+        'súmula 85',
+        'sumula 85',
+        '11.960',
+        'ipca-e',
+        'juros',
+        'correção monetária',
+        'correcao monetaria',
+        'prescrição',
+        'prescricao',
+        'quinquênio',
+        'quinquenio',
+        'parcelas vencidas',
+        'parcelas vincendas',
+        'honorários',
+        'honorarios',
+        'custas',
     )
 
     def __init__(self) -> None:
         self._client = OpenAI(api_key=Env.OPENAI_API_KEY)
-        self._model = "text-embedding-3-large"
+        self._model = 'text-embedding-3-large'
 
     def generate(
         self,
@@ -58,7 +58,7 @@ class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider)
             if not self._is_accessory_text(item.value)
         ]
         if core_laws:
-            texts_to_embed.append("Fundamentos normativos: " + " | ".join(core_laws))
+            texts_to_embed.append('Fundamentos normativos: ' + ' | '.join(core_laws))
 
         # 3) Fatos relevantes
         for item in petition_summary.key_facts:
@@ -86,7 +86,7 @@ class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider)
                 vector=[Decimal.create(float(value)) for value in vector],
                 chunk=Text.create(chunk),
             )
-            for chunk, vector in zip(texts_to_embed, vectors)
+            for chunk, vector in zip(texts_to_embed, vectors, strict=True)
         ]
 
     def _is_accessory_text(self, text: str) -> bool:

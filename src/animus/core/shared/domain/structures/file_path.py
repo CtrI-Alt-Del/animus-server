@@ -15,14 +15,14 @@ class FilePath(Structure):
     value: str
 
     @classmethod
-    def create(cls, value: str) -> "FilePath":
+    def create(cls, value: str) -> 'FilePath':
         if _VALID_FILE_PATH_RE.fullmatch(value) is None:
             raise ValidationError(f'Caminho de arquivo invalido: {value}')
 
         return cls(value=value)
 
     def is_pdf_file(self) -> Logical:
-        return Logical.create(self.value.lower().endswith(".pdf"))
+        return Logical.create(self.value.lower().endswith('.pdf'))
 
     def is_docx_file(self) -> Logical:
-        return Logical.create(self.value.lower().endswith(".docx"))
+        return Logical.create(self.value.lower().endswith('.docx'))

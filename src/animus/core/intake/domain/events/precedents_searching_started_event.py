@@ -10,7 +10,7 @@ class _Payload:
 
 
 class PrecedentsSearchingStartedEvent(Event[_Payload]):
-    name = "intake/precedents.searching.started"
+    name = 'intake/precedents.searching.started'
 
     def __init__(self, analysis_id: Id) -> None:
         payload = _Payload(analysis_id=analysis_id)

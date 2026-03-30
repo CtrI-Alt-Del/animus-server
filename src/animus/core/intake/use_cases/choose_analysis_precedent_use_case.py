@@ -35,8 +35,10 @@ class ChooseAnalysisPrecedentUseCase:
     ) -> AnalysisStatusDto:
         analysis_id_entity = Id.create(analysis_id)
         precedent_identifier = PrecedentIdentifier.create(precedent_identifier_dto)
-        analysis_precedents = self._analysis_precedents_repository.find_many_by_analysis_id(
-            analysis_id=analysis_id_entity,
+        analysis_precedents = (
+            self._analysis_precedents_repository.find_many_by_analysis_id(
+                analysis_id=analysis_id_entity,
+            )
         )
 
         analysis_precedent = next(

@@ -12,7 +12,7 @@ class PetitionSummaryEmbedding(Structure):
     chunk: Text
 
     @classmethod
-    def create(cls, vector: list[Decimal], chunk: Text) -> "PetitionSummaryEmbedding":
+    def create(cls, vector: list[Decimal], chunk: Text) -> 'PetitionSummaryEmbedding':
         return cls(vector=vector, chunk=chunk)
 
     @property

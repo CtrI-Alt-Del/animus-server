@@ -16,7 +16,7 @@ class PetitionSummary(Structure):
     search_terms: list[Text]
 
     @classmethod
-    def create(cls, dto: PetitionSummaryDto) -> "PetitionSummary":
+    def create(cls, dto: PetitionSummaryDto) -> 'PetitionSummary':
         return cls(
             case_summary=Text.create(dto.case_summary),
             legal_issue=Text.create(dto.legal_issue),

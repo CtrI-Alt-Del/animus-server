@@ -24,10 +24,10 @@ class VectorizePrecedentsJob:
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
-            fn_id="vectorize-precedents",
+            fn_id='vectorize-precedents',
             trigger=[
-                TriggerCron(cron="0 2 * * 1"),
-                TriggerEvent(event="intake/vectorize-precedents.requested"),
+                TriggerCron(cron='0 2 * * 1'),
+                TriggerEvent(event='intake/vectorize-precedents.requested'),
             ],
         )
         async def _(context: Context) -> None:
@@ -35,7 +35,7 @@ class VectorizePrecedentsJob:
             page_size = 200
             while True:
                 has_next = await context.step.run(
-                    f"vectorize-page-{page}",
+                    f'vectorize-page-{page}',
                     lambda page=page, page_size=page_size: _vectorize_precedents(
                         page, page_size
                     ),

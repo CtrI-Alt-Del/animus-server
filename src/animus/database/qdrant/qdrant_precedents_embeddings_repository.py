@@ -44,7 +44,7 @@ class _GroupedPoint(TypedDict):
 class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
     def __init__(self) -> None:
         self._client = QdrantClient(url=Env.QDRANT_URL)
-        self._collection_name = f"{Env.MODE}_precedents"
+        self._collection_name = f'{Env.MODE}_precedents'
         self._ensure_collection_exists()
 
     def _ensure_collection_exists(self) -> None:
@@ -52,8 +52,8 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
             self._client.create_collection(
                 collection_name=self._collection_name,
                 vectors_config={
-                    "enunciation": VectorParams(size=3072, distance=Distance.COSINE),
-                    "thesis": VectorParams(size=3072, distance=Distance.COSINE),
+                    'enunciation': VectorParams(size=3072, distance=Distance.COSINE),
+                    'thesis': VectorParams(size=3072, distance=Distance.COSINE),
                 },
             )
 
@@ -64,37 +64,37 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         grouped_points: dict[str, _GroupedPoint] = {}
         for embedding in precedents_embeddings:
             composite_key = (
-                f"{embedding.identifier.court.dto}"
-                f"::{embedding.identifier.kind.dto}"
-                f"::{embedding.identifier.number.value}"
+                f'{embedding.identifier.court.dto}'
+                f'::{embedding.identifier.kind.dto}'
+                f'::{embedding.identifier.number.value}'
             )
 
             if composite_key not in grouped_points:
                 grouped_points[composite_key] = {
-                    "court": embedding.identifier.court.dto,
-                    "kind": embedding.identifier.kind.dto,
-                    "number": embedding.identifier.number.value,
-                    "vectors": {},
-                    "chunks": {},
+                    'court': embedding.identifier.court.dto,
+                    'kind': embedding.identifier.kind.dto,
+                    'number': embedding.identifier.number.value,
+                    'vectors': {},
+                    'chunks': {},
                 }
 
             field_name = embedding.field.dto.lower()
-            grouped_points[composite_key]["vectors"][field_name] = [
+            grouped_points[composite_key]['vectors'][field_name] = [
                 float(value.value) for value in embedding.vector
             ]
-            grouped_points[composite_key]["chunks"][field_name] = embedding.chunk.value
+            grouped_points[composite_key]['chunks'][field_name] = embedding.chunk.value
 
         points: list[PointStruct] = []
         for composite_key, data in grouped_points.items():
             points.append(
                 PointStruct(
                     id=str(uuid.uuid5(uuid.NAMESPACE_OID, composite_key)),
-                    vector=cast("dict[str, Any]", data["vectors"]),
+                    vector=cast('dict[str, Any]', data['vectors']),
                     payload={
-                        "court": data["court"],
-                        "kind": data["kind"],
-                        "number": data["number"],
-                        "chunks": data["chunks"],
+                        'court': data['court'],
+                        'kind': data['kind'],
+                        'number': data['number'],
+                        'chunks': data['chunks'],
                     },
                 )
             )
@@ -115,7 +115,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         for petition_embedding in petition_summary_embeddings:
             query_vector = [float(value.value) for value in petition_embedding.vector]
 
-            for target_field in ("enunciation", "thesis"):
+            for target_field in ('enunciation', 'thesis'):
                 query_response = self._client.query_points(
                     collection_name=self._collection_name,
                     query=query_vector,
@@ -127,11 +127,11 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
                 )
 
                 for point in query_response.points:
-                    payload = cast("dict[str, object]", point.payload or {})
+                    payload = cast('dict[str, object]', point.payload or {})
 
-                    court = payload.get("court")
-                    kind = payload.get("kind")
-                    number = payload.get("number")
+                    court = payload.get('court')
+                    kind = payload.get('kind')
+                    number = payload.get('number')
                     if not isinstance(court, str):
                         continue
                     if not isinstance(kind, str):
@@ -139,10 +139,10 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
                     if not isinstance(number, int):
                         continue
 
-                    chunk = ""
-                    chunks = payload.get("chunks")
+                    chunk = ''
+                    chunks = payload.get('chunks')
                     if isinstance(chunks, dict):
-                        chunks_dict = cast("dict[str, object]", chunks)
+                        chunks_dict = cast('dict[str, object]', chunks)
                         maybe_chunk = chunks_dict.get(target_field)
                         if isinstance(maybe_chunk, str):
                             chunk = maybe_chunk
@@ -174,7 +174,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         if filters.courts:
             conditions.append(
                 FieldCondition(
-                    key="court",
+                    key='court',
                     match=MatchAny(any=[court.dto for court in filters.courts]),
                 )
             )
@@ -182,7 +182,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         if filters.precedent_kinds:
             conditions.append(
                 FieldCondition(
-                    key="kind",
+                    key='kind',
                     match=MatchAny(
                         any=[
                             precedent_kind.dto

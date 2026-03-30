@@ -19,10 +19,10 @@ class AnalysisPrecedentsSearchFilters(Structure):
     def create(
         cls,
         dto: AnalysisPrecedentsSearchFiltersDto,
-    ) -> "AnalysisPrecedentsSearchFilters":
+    ) -> 'AnalysisPrecedentsSearchFilters':
         if dto.limit < 5 or dto.limit > 10:
             raise ValidationError(
-                f"Limite deve estar entre 5 e 10, recebido: {dto.limit}"
+                f'Limite deve estar entre 5 e 10, recebido: {dto.limit}'
             )
 
         return cls(

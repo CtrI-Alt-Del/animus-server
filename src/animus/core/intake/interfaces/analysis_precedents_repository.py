@@ -6,7 +6,9 @@ from animus.core.shared.responses import ListResponse
 
 
 class AnalysisPrecedentsRepository(Protocol):
-    def find_many_by_analysis_id(self, analysis_id: Id) -> ListResponse[AnalysisPrecedent]: ...
+    def find_many_by_analysis_id(
+        self, analysis_id: Id
+    ) -> ListResponse[AnalysisPrecedent]: ...
 
     def find_by_analysis_id_and_precedent_id(
         self,

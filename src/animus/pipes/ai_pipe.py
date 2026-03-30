@@ -31,7 +31,9 @@ class AiPipe:
         )
 
     @staticmethod
-    def get_synthesize_analysis_precedents_workflow() -> SynthesizeAnalysisPrecedentsWorkflow:
+    def get_synthesize_analysis_precedents_workflow() -> (
+        SynthesizeAnalysisPrecedentsWorkflow
+    ):
         from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
             AgnoSynthesizeAnalysisPrecedentsWorkflow,
         )

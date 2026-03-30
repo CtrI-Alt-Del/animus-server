@@ -10,7 +10,7 @@ class _Payload:
 
 
 class SynthesisGenerationEndedEvent(Event[_Payload]):
-    name = "intake/synthesis.generation.ended"
+    name = 'intake/synthesis.generation.ended'
 
     def __init__(self, analysis_id: Id) -> None:
         payload = _Payload(analysis_id=analysis_id)

@@ -15,8 +15,12 @@ class ListAnalysisPrecedentsUseCase:
         self._analysis_precedents_repository = analysis_precedents_repository
 
     def execute(self, analysis_id: str) -> list[AnalysisPrecedentDto]:
-        analysis_precedents = self._analysis_precedents_repository.find_many_by_analysis_id(
-            Id.create(analysis_id)
+        analysis_precedents = (
+            self._analysis_precedents_repository.find_many_by_analysis_id(
+                Id.create(analysis_id)
+            )
         )
 
-        return [analysis_precedent.dto for analysis_precedent in analysis_precedents.items]
+        return [
+            analysis_precedent.dto for analysis_precedent in analysis_precedents.items
+        ]

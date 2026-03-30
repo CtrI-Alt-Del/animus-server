@@ -16,26 +16,26 @@ class BertimbauPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvid
     _BATCH_SIZE = 64
 
     _ACCESSORY_MARKERS = (
-        "súmula 85",
-        "sumula 85",
-        "11.960",
-        "ipca-e",
-        "juros",
-        "correção monetária",
-        "correcao monetaria",
-        "prescrição",
-        "prescricao",
-        "quinquênio",
-        "quinquenio",
-        "parcelas vencidas",
-        "parcelas vincendas",
-        "honorários",
-        "honorarios",
-        "custas",
+        'súmula 85',
+        'sumula 85',
+        '11.960',
+        'ipca-e',
+        'juros',
+        'correção monetária',
+        'correcao monetaria',
+        'prescrição',
+        'prescricao',
+        'quinquênio',
+        'quinquenio',
+        'parcelas vencidas',
+        'parcelas vincendas',
+        'honorários',
+        'honorarios',
+        'custas',
     )
 
     def __init__(self) -> None:
-        self._model: Any = SentenceTransformer("rufimelo/Legal-BERTimbau-sts-large")
+        self._model: Any = SentenceTransformer('rufimelo/Legal-BERTimbau-sts-large')
 
     def generate(
         self,
@@ -55,7 +55,7 @@ class BertimbauPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvid
             if not self._is_accessory_text(item.value)
         ]
         if core_laws:
-            texts_to_embed.append("Fundamentos normativos: " + " | ".join(core_laws))
+            texts_to_embed.append('Fundamentos normativos: ' + ' | '.join(core_laws))
 
         # 3) Fatos relevantes — exclui apenas acessórios
         for item in petition_summary.key_facts:
@@ -73,14 +73,14 @@ class BertimbauPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvid
             convert_to_numpy=True,
             show_progress_bar=True,
         )
-        vectors = cast("list[list[float]]", raw_vectors.tolist())
+        vectors = cast('list[list[float]]', raw_vectors.tolist())
 
         return [
             PetitionSummaryEmbedding.create(
                 vector=[Decimal.create(float(value)) for value in vector],
                 chunk=Text.create(chunk),
             )
-            for chunk, vector in zip(texts_to_embed, vectors)
+            for chunk, vector in zip(texts_to_embed, vectors, strict=True)
         ]
 
     def _is_accessory_text(self, text: str) -> bool:

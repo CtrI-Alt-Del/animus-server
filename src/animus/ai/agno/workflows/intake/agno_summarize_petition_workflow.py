@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 
 
 class _StepNames(NamedTuple):
-    BUILD_SUMMARIZATION_INPUT: str = "build-summarization-input"
-    SUMMARIZE_PETITION: str = "summarize-petition"
+    BUILD_SUMMARIZATION_INPUT: str = 'build-summarization-input'
+    SUMMARIZE_PETITION: str = 'summarize-petition'
 
 
 class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
@@ -44,11 +44,11 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
         petition_document_content: Text,
     ) -> PetitionSummaryDto:
         workflow = Workflow(
-            name="summarize-petition",
+            name='summarize-petition',
             steps=[
                 Step(
                     name=self._step_names.BUILD_SUMMARIZATION_INPUT,
-                    executor=cast("StepExecutor", self._build_summarization_input_step),
+                    executor=cast('StepExecutor', self._build_summarization_input_step),
                 ),
                 Step(
                     name=self._step_names.SUMMARIZE_PETITION,
@@ -56,11 +56,11 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
                 ),
             ],
             session_state={
-                "petition_document_content": petition_document_content.value,
+                'petition_document_content': petition_document_content.value,
             },
         )
 
-        output = workflow.run(input="start")
+        output = workflow.run(input='start')
         summary_output = self._normalize_summary_output(output.content)
 
         return self._create_petition_summary_use_case.execute(
@@ -74,10 +74,10 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
         run_context: RunContext,
     ) -> StepOutput:
         if run_context.session_state is None:
-            raise AppError("Erro de sessão", "Session state is required")
+            raise AppError('Erro de sessão', 'Session state is required')
 
         petition_document_content = str(
-            run_context.session_state.get("petition_document_content", "")
+            run_context.session_state.get('petition_document_content', '')
         )
         prompt = dedent(
             f"""
@@ -103,5 +103,5 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
                 search_terms=output.search_terms,
             )
 
-        msg = "Invalid summary output type from petition summarizer workflow"
-        raise AppError("Erro de execução do workflow", msg)
+        msg = 'Invalid summary output type from petition summarizer workflow'
+        raise AppError('Erro de execução do workflow', msg)

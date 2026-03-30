@@ -9,17 +9,17 @@ from animus.core.storage.interfaces import FileStorageProvider
 
 
 class GcsFileStorageProvider(FileStorageProvider):
-    _PDFS_DIR = Path(__file__).resolve().parents[6] / "assets" / "pdfs"
+    _PDFS_DIR = Path(__file__).resolve().parents[6] / 'assets' / 'pdfs'
     client: Client
 
     def __init__(self) -> None:
-        if Env.STORAGE_EMULATOR_HOST or Env.MODE == "dev":
+        if Env.STORAGE_EMULATOR_HOST or Env.MODE == 'dev':
             self.client = Client.create_anonymous_client()
         else:
             self.client = Client()
 
     def generate_upload_url(self, file_path: FilePath) -> UploadUrl:
-        msg = f"generate_upload_url is not implemented for file: {file_path.value}"
+        msg = f'generate_upload_url is not implemented for file: {file_path.value}'
         raise NotImplementedError(msg)
 
     def get_file(self, file_path: FilePath) -> File:
@@ -30,7 +30,7 @@ class GcsFileStorageProvider(FileStorageProvider):
         mime_type = (
             blob.content_type
             if blob.content_type is not None
-            else "application/octet-stream"
+            else 'application/octet-stream'
         )
 
         return File.create(
@@ -50,7 +50,7 @@ class GcsFileStorageProvider(FileStorageProvider):
             if not local_file_path.exists():
                 local_file_path = self._PDFS_DIR / Path(file_path.value).name
                 if not local_file_path.exists():
-                    msg = f"File not found: {file_path.value}"
+                    msg = f'File not found: {file_path.value}'
                     raise FileNotFoundError(msg)
 
             blob = bucket.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]

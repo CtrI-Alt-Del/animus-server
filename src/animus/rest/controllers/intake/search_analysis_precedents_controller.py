@@ -32,7 +32,7 @@ class _Body(BaseModel):
 class SearchAnalysisPrecedentsController:
     @staticmethod
     def handle(router: APIRouter) -> None:
-        @router.post("/analyses/{analysis_id}/precedents/search", status_code=202)
+        @router.post('/analyses/{analysis_id}/precedents/search', status_code=202)
         def _(
             analysis_id: IdSchema,
             body: _Body,
