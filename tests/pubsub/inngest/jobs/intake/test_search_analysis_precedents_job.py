@@ -340,6 +340,11 @@ class TestSearchAnalysisPrecedentsJob:
             staticmethod(lambda: sqlalchemy_session_factory()),
         )
         monkeypatch.setattr(
+            job_module,
+            'QdrantPrecedentsEmbeddingsRepository',
+            lambda: object(),
+        )
+        monkeypatch.setattr(
             AgnoSynthesizeAnalysisPrecedentsWorkflow,
             '__init__',
             lambda *args, **kwargs: None,  # type: ignore
