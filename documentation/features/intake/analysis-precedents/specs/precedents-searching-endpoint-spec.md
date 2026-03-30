@@ -2,13 +2,13 @@
 title: Endpoint assincrono de busca de precedentes da analise
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/AYAMAQ
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-48
-status: open
+status: closed
 last_updated_at: 2026-03-29
 ---
 
 # 1. Objetivo
 
-Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, expondo o endpoint de requisicao da busca e o endpoint de leitura dos `AnalysisPrecedent`, aplicando filtros opcionais de `court` e `precedent_kind`, reutilizando o `PetitionSummary` ja gerado como entrada semantica, consultando o indice vetorial existente, calculando `applicability_percentage`, gerando `synthesis` via `Agno` + `Gemini`, persistindo os `AnalysisPrecedent` resultantes e atualizando `Analysis.status` ao longo do processamento sem mover regra de negocio para `controller`, `pipe`, repository ORM ou job.
+Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, expondo o endpoint de requisicao da busca, os endpoints de leitura dos `AnalysisPrecedent` e das `AnalysisPetition` da analise, aplicando filtros opcionais de `court` e `precedent_kind`, reutilizando o `PetitionSummary` ja gerado como entrada semantica, consultando o indice vetorial existente, calculando `applicability_percentage`, gerando `synthesis` via `Agno` + `Gemini`, persistindo os `AnalysisPrecedent` resultantes e atualizando `Analysis.status` ao longo do processamento sem mover regra de negocio para `controller`, `pipe`, repository ORM ou job.
 
 ---
 
@@ -18,6 +18,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 
 - Expor o endpoint HTTP que solicita a busca assincrona de precedentes para uma analise existente.
 - Expor o endpoint HTTP que retorna os `AnalysisPrecedent` persistidos de uma analise.
+- Expor o endpoint HTTP que retorna as `AnalysisPetition` da analise em formato `ListResponse`.
 - Expor o endpoint HTTP que retorna o `Analysis.status` atual para polling da analise.
 - Expor o endpoint HTTP que marca um `AnalysisPrecedent` como escolhido para a analise.
 - Validar autenticacao, ownership da `Analysis` e pre-condicao de existencia do `PetitionSummary` antes de publicar o job.
@@ -46,11 +47,12 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - O endpoint `POST /intake/analyses/{analysis_id}/precedents/search` deve aceitar `analysis_id` no path e body JSON com `courts`, `precedent_kinds` e `limit` opcionais.
 - O endpoint `POST /intake/analyses/{analysis_id}/precedents/search` deve retornar `202 Accepted` sem body e publicar um evento que dispara o job de busca.
 - O endpoint `GET /intake/analyses/{analysis_id}/precedents` deve retornar `200` com `list[AnalysisPrecedentDto]` dos precedentes persistidos da analise.
+- O endpoint `GET /intake/analyses/{analysis_id}/petitions` deve retornar `200` com `ListResponse[AnalysisPetition]` da analise.
 - O endpoint `GET /intake/analyses/{analysis_id}/status` deve retornar `200` com `AnalysisStatusDto` contendo o status atual da analise.
 - O endpoint `PATCH /intake/analyses/{analysis_id}/precedents/choose` deve marcar exatamente um `AnalysisPrecedent` da analise como escolhido, identificado por `court`, `kind` e `number` via query params.
 - O endpoint de escolha deve retornar `200` com o `AnalysisStatusDto` atualizado da analise.
-- Os quatro endpoints devem retornar `404` quando a `Analysis` nao existir.
-- Os quatro endpoints devem retornar `403` quando a `Analysis` nao pertencer a conta autenticada.
+- Os cinco endpoints devem retornar `404` quando a `Analysis` nao existir.
+- Os cinco endpoints devem retornar `403` quando a `Analysis` nao pertencer a conta autenticada.
 - O endpoint deve falhar antes da publicacao do job quando a analise ainda nao possuir `PetitionSummary` persistido.
 - O job deve usar o `PetitionSummary` da analise como entrada da busca semantica.
 - O job deve restringir a busca vetorial pelo universo definido por `courts` e `precedent_kinds` quando esses filtros forem informados.
@@ -59,7 +61,6 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - O endpoint de escolha deve limpar `is_chosen` dos demais precedentes da mesma analise e marcar apenas o precedente informado como `is_chosen = True`.
 - O endpoint de escolha deve atualizar `Analysis.status` para `PRECEDENT_CHOSED` apos a marcacao bem-sucedida.
 - O job deve atualizar `Analysis.status` para `SEARCHING_PRECEDENTS` antes da busca, `GENERATING_SYNTHESIS` antes do workflow de IA, `WAITING_PRECEDENT_CHOISE` ao concluir com sucesso e `FAILED` quando houver excecao nao tratada.
-- O job deve publicar os eventos de marco `PrecedentsSearchingStartedEvent`, `SynthesisGenerationStartedEvent` e `SynthesisGenerationEndedEvent` apos cada transicao de status bem-sucedida.
 - O workflow de sintese deve receber o resumo da peticao e a lista de precedentes candidatos, retornando a mesma colecao com `synthesis` preenchida por precedente.
 
 ## 3.2 Nao funcionais
@@ -68,7 +69,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **Seguranca:** o endpoint exige autenticacao por `Bearer access token` e ownership check por `account_id`.
 - **Idempotencia:** reexecucoes do mesmo job para a mesma analise nao podem duplicar linhas em `analysis_precedents`; o job deve limpar os registros atuais da analise e depois inserir o novo conjunto em chamadas explicitas separadas no mesmo escopo transacional.
 - **Resiliencia:** falha em embeddings, consulta vetorial, hidratacao de precedentes ou workflow de IA deve resultar em `Analysis.status = FAILED`.
-- **Observabilidade:** cada marco do job deve gerar um evento de dominio nomeado e uma transicao persistida em `Analysis.status`, permitindo polling pelo mobile.
+- **Observabilidade:** o job deve manter transicoes persistidas em `Analysis.status` para permitir polling pelo mobile, sem publicar eventos de marco intermediarios.
 - **Compatibilidade retroativa:** a busca continua usando o espaco vetorial atual (`thesis` + `enunciation/questao`) sem alterar o contrato publico dos endpoints ja existentes em `intake`.
 
 ---
@@ -83,13 +84,13 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **`AnalysisPrecedentDto`** (`src/animus/core/intake/domain/structures/dtos/analysis_precedent_dto.py`) - DTO ja existente e adequado para responder o endpoint de listagem dos precedentes persistidos.
 - **`PetitionSummary`** (`src/animus/core/intake/domain/structures/petition_summary.py`) - resumo textual ja persistido em `petition_summaries` e base natural para a busca semantica.
 - **`AnalysisPrecedent`** (`src/animus/core/intake/domain/structures/analysis_precedent.py`) - `Structure` ja modelada com `precedent`, `is_chosen`, `applicability_percentage` e `synthesis`.
+- **`AnalysisPetition`** (`src/animus/core/intake/domain/structures/analysis_petition.py`) - `Structure` do agregado de leitura por analise, contendo `petition` e `summary` (opcional quando ainda nao houver resumo).
 - **`AnalysisStatusValue.PRECEDENT_CHOSED`** (`src/animus/core/intake/domain/entities/analysis_status.py`) - estado final ja existente para representar a escolha concluida do precedente.
 - **`PetitionSummariesRepository`** (`src/animus/core/intake/interfaces/petition_summaries_repository.py`) - ja expoe `find_by_analysis_id(analysis_id: Id) -> PetitionSummary | None`.
 - **`PrecedentsEmbeddingsRepository`** (`src/animus/core/intake/interfaces/precedents_embeddings_repository.py`) - port atual da busca vetorial; hoje ainda sem filtros nem limite por universo de busca.
 - **`PrecedentsRepository`** (`src/animus/core/intake/interfaces/precedents_repository.py`) - port do catalogo de precedentes; hoje insuficiente para hidratacao em lote por identificador composto.
 - **`PetitionSummaryEmbeddingsProvider`** (`src/animus/core/intake/interfaces/petition_embeddings_provider.py`) - port ja esbocado para embeddings do resumo, mas sem implementacao concreta e com inconsistencias de naming/export.
 - **`SynthesizeAnalysisPrecedentsWorkflow`** (`src/animus/core/intake/interfaces/synthesize_analysis_precedents_workflow.py`) - port ja existente para sintese, mas hoje nao recebe `PetitionSummary`, o que impede explicar a relacao com o caso.
-- **`PrecedentsSearchingStartedEvent`**, **`SynthesisGenerationStartedEvent`** e **`SynthesisGenerationEndedEvent`** (`src/animus/core/intake/domain/events/*.py`) - eventos de marco ja existentes e alinhados ao fluxo desejado.
 
 ## Camada Database
 
@@ -118,7 +119,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 
 ## Camada PubSub
 
-- **`InngestBroker`** (`src/animus/pubsub/inngest/inngest_broker.py`) - broker concreto ja usado pelos fluxos de `auth`.
+- **`InngestBroker`** (`src/animus/pubsub/inngest/inngest_broker.py`) - broker concreto ja usado pelos fluxos de `auth`; nesta feature ele e usado apenas no endpoint para publicar o evento de requisicao do job.
 - **`VectorizePrecedentsJob`** (`src/animus/pubsub/inngest/jobs/intake/vectorize_precedents_job.py`) - referencia de job do contexto `intake` que monta repositories/providers concretos e usa `Sqlalchemy.session()`.
 - **`InngestPubSub`** (`src/animus/pubsub/inngest/inngest_pubsub.py`) - composition root atual dos jobs Inngest.
 
@@ -126,6 +127,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 
 - Nao existe endpoint para requisitar a busca de precedentes da analise.
 - Nao existe endpoint para listar os precedentes da analise apos o processamento.
+- Nao existe endpoint para listar as peticoes da analise com o resumo associado em uma resposta agregada.
 - Nao existe evento de requisicao do job de busca.
 - Nao existe persistencia de `AnalysisPrecedent` em SQLAlchemy.
 - Nao existe endpoint para marcar um `AnalysisPrecedent` como escolhido.
@@ -171,6 +173,11 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
   - `choose_by_analysis_id_and_precedent_id(analysis_id: Id, precedent_id: Id) -> None` - limpa a marcacao anterior da analise e marca apenas o precedente informado como escolhido.
 
 ## Camada Core (Use Cases)
+
+- **Localizacao:** `src/animus/core/intake/use_cases/list_analysis_petitions_use_case.py` (**novo arquivo**)
+- **Dependencias (ports injetados):** `PetitionsRepository`, `PetitionSummariesRepository`
+- **Metodo principal:** `execute(analysis_id: str) -> ListResponse[AnalysisPetition]` - lista peticoes da analise e agrega o resumo de cada peticao quando existir.
+- **Fluxo resumido:** `Id.create(analysis_id)` -> `PetitionsRepository.find_all_by_analysis_id_ordered_by_uploaded_at(...)` -> para cada peticao consultar `PetitionSummariesRepository.find_by_petition_id(...)` -> montar `AnalysisPetition` -> retornar `ListResponse`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/request_analysis_precedents_search_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `PetitionSummariesRepository`, `Broker`
@@ -255,6 +262,14 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **Dependencias injetadas via `Depends`:** `analysis: Analysis` via `IntakePipe.verify_analysis_by_account_from_request(...)`, `analysis_precedents_repository: AnalysisPrecedentsRepository` via `DatabasePipe`
 - **Fluxo:** `analysis` (resolvida por `IntakePipe.verify_analysis_by_account_from_request(...)`) -> controller instancia `ListAnalysisPrecedentsUseCase(...)` -> `execute(analysis.id.value)` -> `list[AnalysisPrecedentDto]`
 
+- **Localizacao:** `src/animus/rest/controllers/intake/list_analysis_petitions_controller.py` (**novo arquivo**)
+- **`*Body`:** **Nao aplicavel**.
+- **Metodo HTTP e path:** `GET /intake/analyses/{analysis_id}/petitions`
+- **`status_code`:** `200`
+- **`response_model`:** `ListResponse[AnalysisPetition]`
+- **Dependencias injetadas via `Depends`:** `analysis: Analysis` via `IntakePipe.verify_analysis_by_account_from_request(...)`, `petitions_repository: PetitionsRepository` via `DatabasePipe`, `petition_summaries_repository: PetitionSummariesRepository` via `DatabasePipe`
+- **Fluxo:** `analysis` (resolvida por `IntakePipe.verify_analysis_by_account_from_request(...)`) -> controller instancia `ListAnalysisPetitionsUseCase(...)` -> `execute(analysis.id.value)` -> `ListResponse[AnalysisPetition]`
+
 - **Localizacao:** `src/animus/rest/controllers/intake/choose_analysis_precedent_controller.py` (**novo arquivo**)
 - **`*Body`:** **Nao aplicavel**.
 - **Metodo HTTP e path:** `PATCH /intake/analyses/{analysis_id}/precedents/choose`
@@ -297,8 +312,8 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **Evento consumido:** `AnalysisPrecedentsSearchRequestedEvent.name`
 - **Dependencias:** repositories, providers, workflow e broker concretos montados no proprio job a partir do escopo transacional aberto para a execucao
 - **Passos (`step.run`):**
-  - `search_precedents` - instancia `UpdateAnalysisStatusUseCase(...)` e `SearchAnalysisPrecedentsUseCase(...)`, atualiza `Analysis.status` para `SEARCHING_PRECEDENTS`, publica `PrecedentsSearchingStartedEvent` e executa a busca
-  - `generate_syntheses_and_persist` - instancia `UpdateAnalysisStatusUseCase(...)`, atualiza `Analysis.status` para `GENERATING_SYNTHESIS`, publica `SynthesisGenerationStartedEvent`, executa o workflow de IA, limpa o conjunto atual com `AnalysisPrecedentsRepository.remove_many_by_analysis_id(...)`, persiste o novo conjunto com `AnalysisPrecedentsRepository.add_many_by_analysis_id(...)`, atualiza `Analysis.status` para `WAITING_PRECEDENT_CHOISE` e publica `SynthesisGenerationEndedEvent`
+  - `search_precedents` - instancia `UpdateAnalysisStatusUseCase(...)` e `SearchAnalysisPrecedentsUseCase(...)`, atualiza `Analysis.status` para `SEARCHING_PRECEDENTS` e executa a busca
+  - `generate_syntheses_and_persist` - instancia `UpdateAnalysisStatusUseCase(...)`, atualiza `Analysis.status` para `GENERATING_SYNTHESIS`, executa o workflow de IA, limpa o conjunto atual com `AnalysisPrecedentsRepository.remove_many_by_analysis_id(...)`, persiste o novo conjunto com `AnalysisPrecedentsRepository.add_many_by_analysis_id(...)` e atualiza `Analysis.status` para `WAITING_PRECEDENT_CHOISE`
 - **Idempotencia:** o job executa `remove_many_by_analysis_id(...)` e `add_many_by_analysis_id(...)` em chamadas separadas, mas dentro do mesmo escopo transacional; a formula de score e deterministica e o resultado final nao duplica linhas.
 
 ## Migracoes Alembic (se aplicavel)
@@ -342,7 +357,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **Justificativa:** tornar o DTO de filtros acessivel para controller, use cases e evento assinado.
 
 - **Arquivo:** `src/animus/core/intake/domain/events/__init__.py`
-- **Mudanca:** exportar `AnalysisPrecedentsSearchRequestedEvent` junto dos eventos de marco ja existentes.
+- **Mudanca:** exportar `AnalysisPrecedentsSearchRequestedEvent` no modulo de eventos do contexto.
 - **Justificativa:** manter o modulo publico de eventos do contexto consistente com o fluxo assincrono completo.
 
 - **Arquivo:** `src/animus/core/intake/domain/errors/__init__.py`
@@ -374,18 +389,18 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 ## Camada REST
 
 - **Arquivo:** `src/animus/rest/controllers/intake/__init__.py`
-- **Mudanca:** exportar `SearchAnalysisPrecedentsController`, `ListAnalysisPrecedentsController`, `GetAnalysisStatusController` e `ChooseAnalysisPrecedentController`.
+- **Mudanca:** exportar `SearchAnalysisPrecedentsController`, `ListAnalysisPrecedentsController`, `ListAnalysisPetitionsController`, `GetAnalysisStatusController` e `ChooseAnalysisPrecedentController`.
 - **Justificativa:** manter o pacote publico de controllers do contexto coerente com a nova superficie HTTP.
 
 - **Arquivo:** `src/animus/core/intake/use_cases/__init__.py`
-- **Mudanca:** exportar `ListAnalysisPrecedentsUseCase`.
+- **Mudanca:** exportar `ListAnalysisPrecedentsUseCase` e `ListAnalysisPetitionsUseCase`.
 - **Justificativa:** manter o barrel publico de casos de uso do contexto `intake` consistente com os fluxos de leitura e escrita da feature.
 
 ## Camada Routers
 
 - **Arquivo:** `src/animus/routers/intake/intake_router.py`
-- **Mudanca:** registrar `SearchAnalysisPrecedentsController`, `ListAnalysisPrecedentsController`, `GetAnalysisStatusController` e `ChooseAnalysisPrecedentController` no `IntakeRouter` existente.
-- **Justificativa:** expor a requisicao assincrona, a leitura dos precedentes persistidos, o polling de status e a confirmacao do precedente escolhido no mesmo contexto funcional que ja agrupa peticoes, resumo e busca de precedentes.
+- **Mudanca:** registrar `SearchAnalysisPrecedentsController`, `ListAnalysisPrecedentsController`, `ListAnalysisPetitionsController`, `GetAnalysisStatusController` e `ChooseAnalysisPrecedentController` no `IntakeRouter` existente.
+- **Justificativa:** expor a requisicao assincrona, a leitura dos precedentes e peticoes da analise, o polling de status e a confirmacao do precedente escolhido no mesmo contexto funcional que ja agrupa peticoes, resumo e busca de precedentes.
 
 ## Camada Pipes
 
@@ -486,6 +501,14 @@ GET /intake/analyses/{analysis_id}/precedents
        -> AnalysisPrecedentsRepository.find_many_by_analysis_id(...)
   -> 200 list[AnalysisPrecedentDto]
 
+GET /intake/analyses/{analysis_id}/petitions
+  -> AuthPipe.get_account_id_from_request()
+  -> IntakePipe.verify_analysis_by_account_from_request(...)
+  -> ListAnalysisPetitionsUseCase
+       -> PetitionsRepository.find_all_by_analysis_id_ordered_by_uploaded_at(...)
+       -> PetitionSummariesRepository.find_by_petition_id(...)
+  -> 200 ListResponse[AnalysisPetition]
+
 PATCH /intake/analyses/{analysis_id}/precedents/choose?court={court}&kind={kind}&number={number}
   -> AuthPipe.get_account_id_from_request()
   -> IntakePipe.verify_analysis_by_account_from_request(...)
@@ -512,7 +535,6 @@ AnalysisPrecedentsSearchRequestedEvent
             -> instancia UpdateAnalysisStatusUseCase(...)
             -> instancia SearchAnalysisPrecedentsUseCase(...)
             -> atualiza status SEARCHING_PRECEDENTS
-            -> Broker.publish(PrecedentsSearchingStartedEvent)
             -> PetitionSummariesRepository.find_by_analysis_id(...)
             -> PetitionSummaryEmbeddingsProvider.generate(...)
             -> PrecedentsEmbeddingsRepository.find_many(...)
@@ -521,13 +543,11 @@ AnalysisPrecedentsSearchRequestedEvent
        -> step.run('generate_syntheses_and_persist')
             -> instancia UpdateAnalysisStatusUseCase(...)
             -> atualiza status GENERATING_SYNTHESIS
-            -> Broker.publish(SynthesisGenerationStartedEvent)
             -> SynthesizeAnalysisPrecedentsWorkflow.run(...)
             -> AnalysisPrecedentsRepository.remove_many_by_analysis_id(...)
             -> AnalysisPrecedentsRepository.add_many_by_analysis_id(...)
             -> instancia UpdateAnalysisStatusUseCase(...)
             -> atualiza status WAITING_PRECEDENT_CHOISE
-            -> Broker.publish(SynthesisGenerationEndedEvent)
        -> except Exception
             -> instancia UpdateAnalysisStatusUseCase(...)
             -> atualiza status FAILED
@@ -556,9 +576,12 @@ PATCH choose endpoint
   - `src/animus/rest/controllers/intake/create_petition_controller.py`
   - `src/animus/rest/controllers/intake/summarize_petition_controller.py`
   - `src/animus/rest/controllers/intake/get_analysis_status_controller.py` (**novo arquivo**)
+  - `src/animus/rest/controllers/intake/list_analysis_petitions_controller.py` (**novo arquivo**)
   - `src/animus/rest/controllers/intake/list_analysis_precedents_controller.py` (**novo arquivo**)
   - `src/animus/rest/controllers/intake/choose_analysis_precedent_controller.py` (**novo arquivo**)
+  - `src/animus/core/intake/use_cases/list_analysis_petitions_use_case.py` (**novo arquivo**)
   - `src/animus/core/intake/use_cases/list_analysis_precedents_use_case.py` (**novo arquivo**)
+  - `src/animus/core/intake/domain/structures/analysis_petition.py`
   - `src/animus/routers/intake/intake_router.py`
   - `src/animus/pipes/intake_pipe.py`
   - `src/animus/pipes/pubsub_pipe.py`

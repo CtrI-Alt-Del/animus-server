@@ -42,6 +42,16 @@ Fluxos de autenticacao ja implementados:
 Fluxos de intake ja implementados:
 - `POST /intake/petitions` -> `CreatePetitionController` -> `AuthPipe` / `IntakePipe.verify_analysis_by_account(...)` -> `CreatePetitionUseCase` -> `PetitionsRepository` -> PostgreSQL (`petitions`) -> `PetitionDto`.
 - `POST /intake/petitions/{petition_id}/summary` -> `SummarizePetitionController` -> `AuthPipe` / `IntakePipe.verify_petition_document_path_by_account(...)` -> `StoragePipe` -> `GetDocumentContentUseCase` -> `FileStorageProvider` / `PdfProvider` / `DocxProvider` -> `SummarizePetitionWorkflow` -> `CreatePetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
+- `GET /intake/analyses/{analysis_id}/petitions` -> `ListAnalysisPetitionsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ListAnalysisPetitionsUseCase` -> `PetitionsRepository` / `PetitionSummariesRepository` -> PostgreSQL (`petitions`, `petition_summaries`) -> `ListResponse[AnalysisPetitionDto]`.
+- `POST /intake/analyses/{analysis_id}/precedents/search` -> `SearchAnalysisPrecedentsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `RequestAnalysisPrecedentsSearchUseCase` -> `Broker` -> `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob`.
+- `GET /intake/analyses/{analysis_id}/precedents` -> `ListAnalysisPrecedentsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ListAnalysisPrecedentsUseCase` -> `AnalysisPrecedentsRepository` -> PostgreSQL (`analysis_precedents`) -> `list[AnalysisPrecedentDto]`.
+- `GET /intake/analyses/{analysis_id}/status` -> `GetAnalysisStatusController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `Analysis.status` -> `AnalysisStatusDto`.
+- `PATCH /intake/analyses/{analysis_id}/precedents/choose` -> `ChooseAnalysisPrecedentController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ChooseAnalysisPrecedentUseCase` -> `AnalysisPrecedentsRepository` / `AnalisysesRepository` -> PostgreSQL (`analysis_precedents`, `analyses`) -> `AnalysisStatusDto`.
+
+Fluxo assincrono de precedentes:
+- `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratacao de precedentes.
+- O mesmo job segue para `GENERATING_SYNTHESIS`, executa o workflow de sintese, substitui os `analysis_precedents` persistidos e conclui em `WAITING_PRECEDENT_CHOISE`.
+- Em falhas nao tratadas, o job marca a `Analysis` como `FAILED`, preservando observabilidade por polling via status persistido.
 
 ## Padroes Principais
 
