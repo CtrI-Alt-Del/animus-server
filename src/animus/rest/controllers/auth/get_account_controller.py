@@ -19,7 +19,10 @@ class GetAccountController:
         )
         def _(
             account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
-            accounts_repository: Annotated[AccountsRepository, Depends(DatabasePipe.get_accounts_repository_from_request)],
+            accounts_repository: Annotated[
+                AccountsRepository,
+                Depends(DatabasePipe.get_accounts_repository_from_request),
+            ],
         ) -> AccountDto:
             use_case = GetAccountUseCase(accounts_repository)
             return use_case.execute(account_id)

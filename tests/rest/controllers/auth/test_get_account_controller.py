@@ -21,7 +21,8 @@ class TestGetAccountController:
         session = jwt_provider.encode(Text.create(account.id))
 
         response = client.get(
-            '/auth/me', headers={'Authorization': f'Bearer {session.access_token.value}'}
+            '/auth/me',
+            headers={'Authorization': f'Bearer {session.access_token.value}'},
         )
 
         assert response.status_code == 200

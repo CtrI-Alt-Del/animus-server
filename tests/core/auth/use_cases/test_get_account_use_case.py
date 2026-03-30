@@ -31,7 +31,7 @@ class TestGetAccountUseCase:
                 id=account_id.value,
                 name='Miojo',
                 email='miojo@example.com',
-                password='hashed',
+                password='hashed',  # noqa: S106
                 is_verified=True,
                 is_active=True,
                 social_accounts=[],
@@ -64,7 +64,7 @@ class TestGetAccountUseCase:
                 id=account_id.value,
                 name='Miojo',
                 email='miojo@example.com',
-                password='hashed',
+                password='hashed',  # noqa: S106
                 is_verified=True,
                 is_active=False,
                 social_accounts=[],
