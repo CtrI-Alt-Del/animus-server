@@ -38,13 +38,11 @@ class TestVectorizeAllPrecedentsUseCase:
     def test_should_vectorize_all_precedents_from_page(self) -> None:
         precedents = [MagicMock(), MagicMock(), MagicMock()]
         embeddings = [MagicMock(), MagicMock()]
-        self.precedents_repository_mock.find_page.return_value = (
-            PagePaginationResponse(
-                items=precedents,
-                total=3,
-                page=1,
-                page_size=10,
-            )
+        self.precedents_repository_mock.find_page.return_value = PagePaginationResponse(
+            items=precedents,
+            total=3,
+            page=1,
+            page_size=10,
         )
         self.precedent_embeddings_provider_mock.generate.return_value = embeddings
 
