@@ -19,6 +19,10 @@ Content-Type: application/json
 GET {{url}}/analyses/{{analysis_id}}/status
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Listar peticoes da analise (ListAnalysisPetitionsController)
+GET {{url}}/analyses/{{analysis_id}}/petitions
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Listar precedentes da analise (ListAnalysisPrecedentsController)
 GET {{url}}/analyses/{{analysis_id}}/precedents
 Authorization: Bearer {{ACCESS_TOKEN}}
