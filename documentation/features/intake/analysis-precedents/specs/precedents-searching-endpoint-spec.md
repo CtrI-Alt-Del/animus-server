@@ -3,12 +3,12 @@ title: Endpoint assincrono de busca de precedentes da analise
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/AYAMAQ
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-48
 status: open
-last_updated_at: 2026-03-28
+last_updated_at: 2026-03-29
 ---
 
 # 1. Objetivo
 
-Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, expondo o endpoint de requisicao da busca, aplicando filtros opcionais de `court` e `precedent_kind`, reutilizando o `PetitionSummary` ja gerado como entrada semantica, consultando o indice vetorial existente, calculando `applicability_percentage`, gerando `synthesis` via `Agno` + `Gemini`, persistindo os `AnalysisPrecedent` resultantes e atualizando `Analysis.status` ao longo do processamento sem mover regra de negocio para `controller`, `pipe`, repository ORM ou job.
+Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, expondo o endpoint de requisicao da busca e o endpoint de leitura dos `AnalysisPrecedent`, aplicando filtros opcionais de `court` e `precedent_kind`, reutilizando o `PetitionSummary` ja gerado como entrada semantica, consultando o indice vetorial existente, calculando `applicability_percentage`, gerando `synthesis` via `Agno` + `Gemini`, persistindo os `AnalysisPrecedent` resultantes e atualizando `Analysis.status` ao longo do processamento sem mover regra de negocio para `controller`, `pipe`, repository ORM ou job.
 
 ---
 
@@ -17,6 +17,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 ## 2.1 In-scope
 
 - Expor o endpoint HTTP que solicita a busca assincrona de precedentes para uma analise existente.
+- Expor o endpoint HTTP que retorna os `AnalysisPrecedent` persistidos de uma analise.
 - Expor o endpoint HTTP que retorna o `Analysis.status` atual para polling da analise.
 - Expor o endpoint HTTP que marca um `AnalysisPrecedent` como escolhido para a analise.
 - Validar autenticacao, ownership da `Analysis` e pre-condicao de existencia do `PetitionSummary` antes de publicar o job.
@@ -29,7 +30,6 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 
 ## 2.2 Out-of-scope
 
-- Endpoint de listagem/leitura dos precedentes da analise apos o processamento.
 - Exportacao do precedente escolhido para PDF (`RF 06`).
 - Filtro avancado para incluir precedentes sem status preenchido na base.
 - Persistencia explicita de um campo textual de classificacao (`Aplicavel`, `Possivelmente aplicavel`, `Nao aplicavel`); nesta task o backend persiste `applicability_percentage`, e o agrupamento podera ser derivado na superficie de leitura.
@@ -45,11 +45,12 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 
 - O endpoint `POST /intake/analyses/{analysis_id}/precedents/search` deve aceitar `analysis_id` no path e body JSON com `courts`, `precedent_kinds` e `limit` opcionais.
 - O endpoint `POST /intake/analyses/{analysis_id}/precedents/search` deve retornar `202 Accepted` sem body e publicar um evento que dispara o job de busca.
+- O endpoint `GET /intake/analyses/{analysis_id}/precedents` deve retornar `200` com `list[AnalysisPrecedentDto]` dos precedentes persistidos da analise.
 - O endpoint `GET /intake/analyses/{analysis_id}/status` deve retornar `200` com `AnalysisStatusDto` contendo o status atual da analise.
-- O endpoint `PATCH /intake/analyses/{analysis_id}/precedents/{precedent_id}/choose` deve marcar exatamente um `AnalysisPrecedent` da analise como escolhido.
+- O endpoint `PATCH /intake/analyses/{analysis_id}/precedents/choose` deve marcar exatamente um `AnalysisPrecedent` da analise como escolhido, identificado por `court`, `kind` e `number` via query params.
 - O endpoint de escolha deve retornar `200` com o `AnalysisStatusDto` atualizado da analise.
-- Os tres endpoints devem retornar `404` quando a `Analysis` nao existir.
-- Os tres endpoints devem retornar `403` quando a `Analysis` nao pertencer a conta autenticada.
+- Os quatro endpoints devem retornar `404` quando a `Analysis` nao existir.
+- Os quatro endpoints devem retornar `403` quando a `Analysis` nao pertencer a conta autenticada.
 - O endpoint deve falhar antes da publicacao do job quando a analise ainda nao possuir `PetitionSummary` persistido.
 - O job deve usar o `PetitionSummary` da analise como entrada da busca semantica.
 - O job deve restringir a busca vetorial pelo universo definido por `courts` e `precedent_kinds` quando esses filtros forem informados.
@@ -79,6 +80,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) - entidade da analise, ja usada no ownership check e com `status` persistido em `analyses`.
 - **`AnalysisStatus`** (`src/animus/core/intake/domain/entities/analysis_status.py`) - enum de estados do fluxo; ja contem `SEARCHING_PRECEDENTS`, `GENERATING_SYNTHESIS`, `WAITING_PRECEDENT_CHOISE` e `FAILED`.
 - **`AnalysisStatusDto`** (`src/animus/core/intake/domain/entities/dtos/analysis_status_dto.py`) - DTO ja existente e adequado para responder o endpoint de polling de status sem criar schema paralelo.
+- **`AnalysisPrecedentDto`** (`src/animus/core/intake/domain/structures/dtos/analysis_precedent_dto.py`) - DTO ja existente e adequado para responder o endpoint de listagem dos precedentes persistidos.
 - **`PetitionSummary`** (`src/animus/core/intake/domain/structures/petition_summary.py`) - resumo textual ja persistido em `petition_summaries` e base natural para a busca semantica.
 - **`AnalysisPrecedent`** (`src/animus/core/intake/domain/structures/analysis_precedent.py`) - `Structure` ja modelada com `precedent`, `is_chosen`, `applicability_percentage` e `synthesis`.
 - **`AnalysisStatusValue.PRECEDENT_CHOSED`** (`src/animus/core/intake/domain/entities/analysis_status.py`) - estado final ja existente para representar a escolha concluida do precedente.
@@ -101,11 +103,11 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 ## Camada REST / Routers / Pipes
 
 - **`CreatePetitionController`** (`src/animus/rest/controllers/intake/create_petition_controller.py`) - melhor referencia de controller fino no contexto `intake`, com `_Body`, `Depends(...)` e uso de `IntakePipe`.
-- **`IntakePipe.verify_analysis_by_account(...)`** (`src/animus/pipes/intake_pipe.py`) - verificacao reutilizavel de ownership e existencia da analise, adequada tanto para o endpoint de busca quanto para o endpoint de status.
+- **`IntakePipe.verify_analysis_by_account_from_request(...)`** (`src/animus/pipes/intake_pipe.py`) - verificacao reutilizavel de ownership e existencia da analise, adequada tanto para o endpoint de busca quanto para o endpoint de status.
 - **`SummarizePetitionController`** (`src/animus/rest/controllers/intake/summarize_petition_controller.py`) - referencia do padrao de wiring de AI e storage via pipes.
 - **`IntakeRouter`** (`src/animus/routers/intake/intake_router.py`) - router agregador atual com prefixo `/intake`.
 - **`AuthPipe`** (`src/animus/pipes/auth_pipe.py`) - guard ja pronto para autenticar a conta via `Authorization: Bearer`.
-- **`IntakePipe`** (`src/animus/pipes/intake_pipe.py`) - ja possui `verify_analysis_by_account(...)`, reutilizavel no novo endpoint.
+- **`IntakePipe`** (`src/animus/pipes/intake_pipe.py`) - ja possui `verify_analysis_by_account_from_request(...)`, reutilizavel no novo endpoint.
 - **`PubSubPipe`** (`src/animus/pipes/pubsub_pipe.py`) - ja expone `Broker` para publicacao de eventos a partir de `request.state.inngest_client`.
 
 ## Camada AI
@@ -123,6 +125,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 ## Lacunas identificadas na codebase
 
 - Nao existe endpoint para requisitar a busca de precedentes da analise.
+- Nao existe endpoint para listar os precedentes da analise apos o processamento.
 - Nao existe evento de requisicao do job de busca.
 - Nao existe persistencia de `AnalysisPrecedent` em SQLAlchemy.
 - Nao existe endpoint para marcar um `AnalysisPrecedent` como escolhido.
@@ -186,8 +189,13 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 
 - **Localizacao:** `src/animus/core/intake/use_cases/choose_analysis_precedent_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `AnalysisPrecedentsRepository`, `AnalisysesRepository`
-- **Metodo principal:** `execute(analysis_id: str, precedent_id: str) -> AnalysisStatusDto` - valida a existencia do `AnalysisPrecedent`, marca apenas ele como escolhido e atualiza a analise para `PRECEDENT_CHOSED`.
-- **Fluxo resumido:** `Id.create(analysis_id)` -> `Id.create(precedent_id)` -> `AnalysisPrecedentsRepository.find_by_analysis_id_and_precedent_id(...)` -> `AnalysisPrecedentsRepository.choose_by_analysis_id_and_precedent_id(...)` -> atualizar `Analysis.status` para `PRECEDENT_CHOSED` -> retornar `analysis.status.dto`.
+- **Metodo principal:** `execute(analysis_id: str, precedent_identifier_dto: PrecedentIdentifierDto) -> AnalysisStatusDto` - valida a existencia do `AnalysisPrecedent` pelo identificador composto (`court`, `kind`, `number`), marca apenas ele como escolhido e atualiza a analise para `PRECEDENT_CHOSED`.
+- **Fluxo resumido:** `Id.create(analysis_id)` -> `PrecedentIdentifier.create(...)` -> `AnalysisPrecedentsRepository.find_many_by_analysis_id(...)` -> localizar item por `precedent.identifier` -> `AnalysisPrecedentsRepository.choose_by_analysis_id_and_precedent_id(...)` -> `AnalisysesRepository.find_by_id(...)` -> recriar `Analysis` com status `PRECEDENT_CHOSED` -> `AnalisysesRepository.replace(...)` -> retornar `analysis.status.dto`.
+
+- **Localizacao:** `src/animus/core/intake/use_cases/list_analysis_precedents_use_case.py` (**novo arquivo**)
+- **Dependencias (ports injetados):** `AnalysisPrecedentsRepository`
+- **Metodo principal:** `execute(analysis_id: str) -> list[AnalysisPrecedentDto]` - lista os `AnalysisPrecedent` persistidos da analise e devolve DTOs ordenados conforme o repository.
+- **Fluxo resumido:** `Id.create(analysis_id)` -> `AnalysisPrecedentsRepository.find_many_by_analysis_id(...)` -> mapear `AnalysisPrecedent.dto` -> retornar `list[AnalysisPrecedentDto]`.
 
 ## Camada Database (Models SQLAlchemy)
 
@@ -227,24 +235,34 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **Metodo HTTP e path:** `POST /intake/analyses/{analysis_id}/precedents/search`
 - **`status_code`:** `202`
 - **`response_model`:** **Nao aplicavel** (`202` sem body)
+- **Path params:** `analysis_id: IdSchema`
 - **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe`, `analisyses_repository: AnalisysesRepository` via `DatabasePipe`, `petition_summaries_repository: PetitionSummariesRepository` via `DatabasePipe`, `broker: Broker` via `PubSubPipe`
-- **Fluxo:** `_Body.to_dto()` -> `IntakePipe.verify_analysis_by_account(...)` -> controller instancia `RequestAnalysisPrecedentsSearchUseCase(...)` com ports/provedores ja resolvidos -> `execute(...)` -> `Response(status_code=202)`.
+- **Fluxo:** `analysis_id: IdSchema` + `_Body.to_dto()` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> controller instancia `RequestAnalysisPrecedentsSearchUseCase(...)` com ports/provedores ja resolvidos -> `execute(...)` -> `Response(status_code=202)`.
 
 - **Localizacao:** `src/animus/rest/controllers/intake/get_analysis_status_controller.py` (**novo arquivo**)
 - **`*Body`:** **Nao aplicavel**.
 - **Metodo HTTP e path:** `GET /intake/analyses/{analysis_id}/status`
 - **`status_code`:** `200`
 - **`response_model`:** `AnalysisStatusDto`
-- **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe`, `analisyses_repository: AnalisysesRepository` via `DatabasePipe`
-- **Fluxo:** `analysis_id` -> `IntakePipe.verify_analysis_by_account(...)` -> `analysis.status.dto` -> `AnalysisStatusDto`
+- **Dependencias injetadas via `Depends`:** `analysis: Analysis` via `IntakePipe.verify_analysis_by_account_from_request(...)`
+- **Fluxo:** `analysis` (resolvida por `IntakePipe.verify_analysis_by_account_from_request(...)`) -> `analysis.status.dto` -> `AnalysisStatusDto`
+
+- **Localizacao:** `src/animus/rest/controllers/intake/list_analysis_precedents_controller.py` (**novo arquivo**)
+- **`*Body`:** **Nao aplicavel**.
+- **Metodo HTTP e path:** `GET /intake/analyses/{analysis_id}/precedents`
+- **`status_code`:** `200`
+- **`response_model`:** `list[AnalysisPrecedentDto]`
+- **Dependencias injetadas via `Depends`:** `analysis: Analysis` via `IntakePipe.verify_analysis_by_account_from_request(...)`, `analysis_precedents_repository: AnalysisPrecedentsRepository` via `DatabasePipe`
+- **Fluxo:** `analysis` (resolvida por `IntakePipe.verify_analysis_by_account_from_request(...)`) -> controller instancia `ListAnalysisPrecedentsUseCase(...)` -> `execute(analysis.id.value)` -> `list[AnalysisPrecedentDto]`
 
 - **Localizacao:** `src/animus/rest/controllers/intake/choose_analysis_precedent_controller.py` (**novo arquivo**)
 - **`*Body`:** **Nao aplicavel**.
-- **Metodo HTTP e path:** `PATCH /intake/analyses/{analysis_id}/precedents/{precedent_id}/choose`
+- **Metodo HTTP e path:** `PATCH /intake/analyses/{analysis_id}/precedents/choose`
 - **`status_code`:** `200`
 - **`response_model`:** `AnalysisStatusDto`
 - **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe`, `analisyses_repository: AnalisysesRepository` via `DatabasePipe`, `analysis_precedents_repository: AnalysisPrecedentsRepository` via `DatabasePipe`
-- **Fluxo:** `analysis_id` + `precedent_id` -> `IntakePipe.verify_analysis_by_account(...)` -> controller instancia `ChooseAnalysisPrecedentUseCase(...)` -> `execute(...)` -> `AnalysisStatusDto`
+- **Query params:** `court: str`, `kind: str`, `number: int`
+- **Fluxo:** `analysis_id` + (`court`, `kind`, `number`) -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> controller instancia `ChooseAnalysisPrecedentUseCase(...)` -> `execute(...)` -> `AnalysisStatusDto`
 
 ## Camada AI (Workflows Agno)
 
@@ -265,7 +283,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **Interface implementada (port):** `PetitionSummaryEmbeddingsProvider`
 - **Biblioteca/SDK utilizado:** `sentence-transformers`
 - **Metodos:**
-  - `generate(petition_summary: PetitionSummary) -> list[PetitionSummaryEmbedding]` - gera embeddings do `content` e de um chunk derivado de `main_points`, usando o mesmo modelo `rufimelo/Legal-BERTimbau-sts-large` do pipeline de precedentes.
+  - `generate(petition_summary: PetitionSummary) -> list[PetitionSummaryEmbedding]` - gera embeddings a partir dos campos estruturados (`case_summary`, `legal_issue`, `central_question`, `relevant_laws`, `key_facts`, `search_terms`), usando o mesmo modelo `rufimelo/Legal-BERTimbau-sts-large` do pipeline de precedentes.
 
 ## Camada PubSub (Eventos de Dominio)
 
@@ -356,14 +374,18 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 ## Camada REST
 
 - **Arquivo:** `src/animus/rest/controllers/intake/__init__.py`
-- **Mudanca:** exportar `SearchAnalysisPrecedentsController`, `GetAnalysisStatusController` e `ChooseAnalysisPrecedentController`.
+- **Mudanca:** exportar `SearchAnalysisPrecedentsController`, `ListAnalysisPrecedentsController`, `GetAnalysisStatusController` e `ChooseAnalysisPrecedentController`.
 - **Justificativa:** manter o pacote publico de controllers do contexto coerente com a nova superficie HTTP.
+
+- **Arquivo:** `src/animus/core/intake/use_cases/__init__.py`
+- **Mudanca:** exportar `ListAnalysisPrecedentsUseCase`.
+- **Justificativa:** manter o barrel publico de casos de uso do contexto `intake` consistente com os fluxos de leitura e escrita da feature.
 
 ## Camada Routers
 
 - **Arquivo:** `src/animus/routers/intake/intake_router.py`
-- **Mudanca:** registrar `SearchAnalysisPrecedentsController`, `GetAnalysisStatusController` e `ChooseAnalysisPrecedentController` no `IntakeRouter` existente.
-- **Justificativa:** expor a requisicao assincrona, o polling de status e a confirmacao do precedente escolhido no mesmo contexto funcional que ja agrupa peticoes, resumo e busca de precedentes.
+- **Mudanca:** registrar `SearchAnalysisPrecedentsController`, `ListAnalysisPrecedentsController`, `GetAnalysisStatusController` e `ChooseAnalysisPrecedentController` no `IntakeRouter` existente.
+- **Justificativa:** expor a requisicao assincrona, a leitura dos precedentes persistidos, o polling de status e a confirmacao do precedente escolhido no mesmo contexto funcional que ja agrupa peticoes, resumo e busca de precedentes.
 
 ## Camada Pipes
 
@@ -453,22 +475,30 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 ```text
 GET /intake/analyses/{analysis_id}/status
   -> AuthPipe.get_account_id_from_request()
-  -> IntakePipe.verify_analysis_by_account(...)
+  -> IntakePipe.verify_analysis_by_account_from_request(...)
   -> analysis.status.dto
   -> 200 AnalysisStatusDto
 
-PATCH /intake/analyses/{analysis_id}/precedents/{precedent_id}/choose
+GET /intake/analyses/{analysis_id}/precedents
   -> AuthPipe.get_account_id_from_request()
-  -> IntakePipe.verify_analysis_by_account(...)
+  -> IntakePipe.verify_analysis_by_account_from_request(...)
+  -> ListAnalysisPrecedentsUseCase
+       -> AnalysisPrecedentsRepository.find_many_by_analysis_id(...)
+  -> 200 list[AnalysisPrecedentDto]
+
+PATCH /intake/analyses/{analysis_id}/precedents/choose?court={court}&kind={kind}&number={number}
+  -> AuthPipe.get_account_id_from_request()
+  -> IntakePipe.verify_analysis_by_account_from_request(...)
   -> ChooseAnalysisPrecedentUseCase
-       -> AnalysisPrecedentsRepository.find_by_analysis_id_and_precedent_id(...)
+       -> AnalysisPrecedentsRepository.find_many_by_analysis_id(...)
        -> AnalysisPrecedentsRepository.choose_by_analysis_id_and_precedent_id(...)
-       -> UpdateAnalysisStatusUseCase(PRECEDENT_CHOSED)
+       -> AnalisysesRepository.find_by_id(...)
+       -> AnalisysesRepository.replace(..., status=PRECEDENT_CHOSED)
   -> 200 AnalysisStatusDto
 
 POST /intake/analyses/{analysis_id}/precedents/search
   -> AuthPipe.get_account_id_from_request()
-  -> IntakePipe.verify_analysis_by_account(...)
+  -> IntakePipe.verify_analysis_by_account_from_request(...)
   -> RequestAnalysisPrecedentsSearchUseCase
        -> PetitionSummariesRepository.find_by_analysis_id(...)
        -> AnalysisPrecedentsSearchFilters.create(...)
@@ -526,7 +556,9 @@ PATCH choose endpoint
   - `src/animus/rest/controllers/intake/create_petition_controller.py`
   - `src/animus/rest/controllers/intake/summarize_petition_controller.py`
   - `src/animus/rest/controllers/intake/get_analysis_status_controller.py` (**novo arquivo**)
+  - `src/animus/rest/controllers/intake/list_analysis_precedents_controller.py` (**novo arquivo**)
   - `src/animus/rest/controllers/intake/choose_analysis_precedent_controller.py` (**novo arquivo**)
+  - `src/animus/core/intake/use_cases/list_analysis_precedents_use_case.py` (**novo arquivo**)
   - `src/animus/routers/intake/intake_router.py`
   - `src/animus/pipes/intake_pipe.py`
   - `src/animus/pipes/pubsub_pipe.py`

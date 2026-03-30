@@ -78,6 +78,11 @@
 - Nao criar `UseCase` apenas para repassar dados sem decisao ou orquestracao relevante.
 - Nao mover validacao de transporte ou serializacao para tipos de dominio.
 - Nao transformar `shared/` em deposito de utilitarios genericos sem fronteira clara.
+- Nao importar um `UseCase` dentro de outro `UseCase`; compartilhe logica por `Entity`/`Structure`/servico de dominio ou replique a orquestracao minima no proprio caso de uso.
+
+### Exemplo pratico
+
+- Se `ChooseAnalysisPrecedentUseCase` precisa atualizar `Analysis.status`, ele deve usar os ports de dominio necessarios (`AnalisysesRepository`) no proprio fluxo, sem instanciar `UpdateAnalysisStatusUseCase` internamente.
 
 ## Regras de Integracao com Outras Camadas
 
@@ -118,6 +123,7 @@
 - `Interfaces` estaveis para repositorios, providers, `brokers` e `workflows`.
 - `Events`, `responses` e `errors` alinhados ao comportamento real do dominio.
 - Nomes consistentes como `*UseCase`, `*Dto`, `*Error`, `*Repository`, `*Provider` e `*Event`.
+- `UseCase` deve orquestrar diretamente seus ports de dominio quando precisar compor passos (ex.: em `src/animus/core/intake/use_cases/choose_analysis_precedent_use_case.py`, atualizar status via `AnalisysesRepository` sem encadear outro caso de uso).
 
 ## ❌ O que NUNCA deve conter
 
@@ -125,3 +131,4 @@
 - `SQL`, `commit`, `rollback`, leitura de `request.state` ou acesso direto a `Env`.
 - Serializacao HTTP, controle de `status code` ou detalhes de transporte.
 - `DTO` com comportamento de dominio complexo ou `entity` atuando como `schema` de borda.
+- Import de um `UseCase` concreto dentro de outro `UseCase` no `core` (ex.: `ChooseAnalysisPrecedentUseCase` instanciando `UpdateAnalysisStatusUseCase`).
