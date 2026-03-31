@@ -1,3 +1,17 @@
+# [1.9.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.8.0...v1.9.0) (2026-03-31)
+
+
+### Bug Fixes
+
+* ANI-53 handle missing account in GetAccountUseCase ([c9fc75c](https://github.com/CtrI-Alt-Del/animus-server/commit/c9fc75ce9b8fef22fce0b15cfcb3cb93fa60fe45))
+* ANI-53 resolve copilot review issues on account endpoint ([7b4842f](https://github.com/CtrI-Alt-Del/animus-server/commit/7b4842f954cc40ffa14d2db26527c91fe0f463b0))
+* **auth:** ANI-53 align repository contract and remove unused import ([d0ee6c1](https://github.com/CtrI-Alt-Del/animus-server/commit/d0ee6c1cfa4f09a48c7913e080c1af29bc537ed0))
+
+
+### Features
+
+* **auth:** ANI-53 add auth/me endpoint to retrieve user details ([3956b38](https://github.com/CtrI-Alt-Del/animus-server/commit/3956b38c8f450a8b9ae4ddb6ec1b499f5392d5bb))
+
 # [1.8.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.7.0...v1.8.0) (2026-03-31)
 
 
