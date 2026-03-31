@@ -60,10 +60,21 @@ class IntakeSeeder:
 
         petition_summary = PetitionSummary.create(
             PetitionSummaryDto(
-                content='Resumo de seed da peticao inicial',
-                main_points=[
+                case_summary='Resumo de seed da peticao inicial',
+                legal_issue='Controvérsia sobre cobrança em contrato de prestação de serviço',
+                central_question='Há inadimplemento contratual apto a justificar a cobrança requerida?',
+                relevant_laws=[
+                    'Código Civil, Art. 389',
+                    'Código Civil, Art. 395',
+                ],
+                key_facts=[
                     'Dados de exemplo para fluxo de resumo',
-                    'Peticao vinculada a uma analise existente',
+                    'Petição vinculada a uma análise existente',
+                ],
+                search_terms=[
+                    'inadimplemento contratual',
+                    'cobrança de obrigação',
+                    'responsabilidade civil contratual',
                 ],
             )
         )

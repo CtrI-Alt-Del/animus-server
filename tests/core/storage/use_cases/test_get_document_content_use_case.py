@@ -7,7 +7,7 @@ from animus.core.intake.domain.errors import (
     UnreadablePetitionDocumentError,
     UnsupportedPetitionDocumentTypeError,
 )
-from animus.core.shared.domain.structures import Decimal, Text
+from animus.core.shared.domain.structures import Decimal, FilePath, Text
 from animus.core.storage.domain.structures import File
 from animus.core.storage.interfaces import (
     DocxProvider,
@@ -55,31 +55,27 @@ class TestGetDocumentContentUseCase:
         )
 
     def test_should_return_pdf_content_when_file_is_pdf(self) -> None:
-        file_path = 'petitions/sample.pdf'
+        file_path = FilePath.create('petitions/sample.pdf')
         expected_content = Text.create('Conteudo da peticao em PDF')
         self.file_storage_provider_mock.get_file.return_value = self.pdf_file
         self.pdf_provider_mock.extract_content.return_value = expected_content
 
         result = self.use_case.execute(file_path=file_path)
 
-        self.file_storage_provider_mock.get_file.assert_called_once_with(
-            Text.create(file_path)
-        )
+        self.file_storage_provider_mock.get_file.assert_called_once_with(file_path)
         self.pdf_provider_mock.extract_content.assert_called_once_with(self.pdf_file)
         self.docx_provider_mock.extract_content.assert_not_called()
         assert result == expected_content
 
     def test_should_return_docx_content_when_file_is_docx(self) -> None:
-        file_path = 'petitions/sample.docx'
+        file_path = FilePath.create('petitions/sample.docx')
         expected_content = Text.create('Conteudo da peticao em DOCX')
         self.file_storage_provider_mock.get_file.return_value = self.docx_file
         self.docx_provider_mock.extract_content.return_value = expected_content
 
         result = self.use_case.execute(file_path=file_path)
 
-        self.file_storage_provider_mock.get_file.assert_called_once_with(
-            Text.create(file_path)
-        )
+        self.file_storage_provider_mock.get_file.assert_called_once_with(file_path)
         self.docx_provider_mock.extract_content.assert_called_once_with(self.docx_file)
         self.pdf_provider_mock.extract_content.assert_not_called()
         assert result == expected_content
@@ -88,7 +84,7 @@ class TestGetDocumentContentUseCase:
         self,
     ) -> None:
         with pytest.raises(UnsupportedPetitionDocumentTypeError):
-            self.use_case.execute(file_path='petitions/sample.txt')
+            self.use_case.execute(file_path=FilePath.create('petitions/sample.txt'))
 
         self.file_storage_provider_mock.get_file.assert_not_called()
         self.pdf_provider_mock.extract_content.assert_not_called()
@@ -100,7 +96,7 @@ class TestGetDocumentContentUseCase:
         self.file_storage_provider_mock.get_file.side_effect = NotFoundWithCodeError()
 
         with pytest.raises(PetitionDocumentNotFoundError):
-            self.use_case.execute(file_path='petitions/missing.pdf')
+            self.use_case.execute(file_path=FilePath.create('petitions/missing.pdf'))
 
         self.pdf_provider_mock.extract_content.assert_not_called()
         self.docx_provider_mock.extract_content.assert_not_called()
@@ -111,7 +107,7 @@ class TestGetDocumentContentUseCase:
         self.file_storage_provider_mock.get_file.side_effect = NotFound()
 
         with pytest.raises(PetitionDocumentNotFoundError):
-            self.use_case.execute(file_path='petitions/missing.docx')
+            self.use_case.execute(file_path=FilePath.create('petitions/missing.docx'))
 
         self.pdf_provider_mock.extract_content.assert_not_called()
         self.docx_provider_mock.extract_content.assert_not_called()
@@ -123,7 +119,7 @@ class TestGetDocumentContentUseCase:
         self.pdf_provider_mock.extract_content.side_effect = RuntimeError('corrupted')
 
         with pytest.raises(UnreadablePetitionDocumentError):
-            self.use_case.execute(file_path='petitions/corrupted.pdf')
+            self.use_case.execute(file_path=FilePath.create('petitions/corrupted.pdf'))
 
         self.pdf_provider_mock.extract_content.assert_called_once_with(self.pdf_file)
         self.docx_provider_mock.extract_content.assert_not_called()
@@ -135,7 +131,7 @@ class TestGetDocumentContentUseCase:
         self.docx_provider_mock.extract_content.return_value = Text.create('   ')
 
         with pytest.raises(UnreadablePetitionDocumentError):
-            self.use_case.execute(file_path='petitions/blank.docx')
+            self.use_case.execute(file_path=FilePath.create('petitions/blank.docx'))
 
         self.docx_provider_mock.extract_content.assert_called_once_with(self.docx_file)
         self.pdf_provider_mock.extract_content.assert_not_called()

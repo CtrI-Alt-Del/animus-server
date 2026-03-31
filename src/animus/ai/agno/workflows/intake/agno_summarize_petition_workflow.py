@@ -52,7 +52,7 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
                 ),
                 Step(
                     name=self._step_names.SUMMARIZE_PETITION,
-                    agent=self._team.summarize_petition_agent,
+                    agent=self._team.petition_summarizer_agent,
                 ),
             ],
             session_state={
@@ -82,7 +82,8 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
         prompt = dedent(
             f"""
             Resuma a petição a seguir em português brasileiro.
-            Entregue a saída estruturada contendo `content` e `main_points`.
+            Entregue a saída estruturada contendo `case_summary`, `legal_issue`,
+            `central_question`, `relevant_laws`, `key_facts` e `search_terms`.
 
             Conteúdo da petição:
             {petition_document_content}
@@ -94,8 +95,12 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
     def _normalize_summary_output(self, output: object) -> PetitionSummaryDto:
         if isinstance(output, PetitionSummaryOutput):
             return PetitionSummaryDto(
-                content=output.content,
-                main_points=output.main_points,
+                case_summary=output.case_summary,
+                legal_issue=output.legal_issue,
+                central_question=output.central_question,
+                relevant_laws=output.relevant_laws,
+                key_facts=output.key_facts,
+                search_terms=output.search_terms,
             )
 
         msg = 'Invalid summary output type from petition summarizer workflow'

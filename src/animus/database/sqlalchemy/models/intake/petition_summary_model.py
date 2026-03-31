@@ -16,7 +16,11 @@ class PetitionSummaryModel(Model):
         ForeignKey('petitions.id'),
         primary_key=True,
     )
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-    main_points: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    case_summary: Mapped[str] = mapped_column(Text, nullable=False)
+    legal_issue: Mapped[str] = mapped_column(Text, nullable=False)
+    central_question: Mapped[str] = mapped_column(Text, nullable=False)
+    relevant_laws: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    key_facts: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    search_terms: Mapped[list[str]] = mapped_column(JSON, nullable=False)
 
     petition: Mapped[Any] = relationship('PetitionModel', back_populates='summary')

@@ -1,4 +1,4 @@
-    # <h1 align="center">Animus Server</h1>
+# <h1 align="center">Animus Server</h1>
 
 Backend da plataforma **Animus**, uma aplicacao de analise de precedentes juridicos que transforma peticoes iniciais em insumos objetivos para advogados e juizes. Este servico foi desenvolvido em **Python** com **FastAPI**, com foco em regras de negocio desacopladas, arquitetura em camadas e integracoes robustas para autenticacao, processamento com IA, armazenamento de analises e notificacoes assincronas.
 
@@ -69,7 +69,7 @@ src/animus/
 - Python 3.13+
 - [uv](https://github.com/astral-sh/uv)
 - PostgreSQL local ou acessivel via `DATABASE_URL`
-- Node.js/npm apenas se voce for executar o ambiente local do Inngest ou executar alterações no código
+- Node.js/npm apenas se voce for executar o ambiente local do Inngest
 
 ### Passo a passo
 
@@ -92,12 +92,6 @@ src/animus/
 
    ```bash
    uv sync
-   ```
-
-   #### Apenas se for desenvolver
-
-   ```bash
-   npm i
    ```
 
 4. **Prepare o banco de dados:**
@@ -157,3 +151,7 @@ uv run poe codecheck
 ## 📝 Licenca
 
 Este projeto esta licenciado sob a licenca [MIT](LICENSE).
+
+
+
+Esta Ação Ordinária de Cobrança c/c Obrigação de Fazer foi ajuizada por um(a) servidor(a) público(a) federal contra a União Federal. O(A) autor(a) pleiteia o recebimento da indenização de R$ 91,00 por jornada de 8 horas efetivamente trabalhadas, instituída pela Lei nº 12.855/2013 e regulamentada pelo Decreto nº 8.216/2014. Alega que, apesar de exercer suas funções em município de fronteira e preencher todos os requisitos legais desde antes da vigência da norma, jamais lhe foi concedida a verba. A petição fundamenta o pedido na natureza indenizatória da verba e na omissão administrativa, buscando o reconhecimento do direito e a condenação da União ao pagamento das parcelas retroativas (respeitada a prescrição quinquenal) e futuras, com correção monetária e juros, além de honorários advocatícios e custas.

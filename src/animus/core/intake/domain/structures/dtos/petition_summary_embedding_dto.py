@@ -2,6 +2,6 @@ from animus.core.shared.domain.decorators import dto
 
 
 @dto
-class PetitionEmbeddingDto:
+class PetitionSummaryEmbeddingDto:
     vector: list[float]
     chunk: str

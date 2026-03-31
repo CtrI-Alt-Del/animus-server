@@ -1,0 +1,32 @@
+@url = {{BASE_URL}}/intake
+@analysis_id = 01KMQTN9YCHWG20ZZEPNBRYW87
+@precedent_court = STJ
+@precedent_kind = RR
+@precedent_number = 974
+
+### Solicitar busca assincrona de precedentes (SearchAnalysisPrecedentsController)
+POST {{url}}/analyses/{{analysis_id}}/precedents/search
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "courts": [],
+  "precedent_kinds": [],
+  "limit": 5
+}
+
+### Consultar status da analise (GetAnalysisStatusController)
+GET {{url}}/analyses/{{analysis_id}}/status
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Listar peticoes da analise (ListAnalysisPetitionsController)
+GET {{url}}/analyses/{{analysis_id}}/petitions
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Listar precedentes da analise (ListAnalysisPrecedentsController)
+GET {{url}}/analyses/{{analysis_id}}/precedents
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Escolher precedente da analise (ChooseAnalysisPrecedentController)
+PATCH {{url}}/analyses/{{analysis_id}}/precedents/choose?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
+Authorization: Bearer {{ACCESS_TOKEN}}

@@ -13,8 +13,12 @@ class PetitionSummaryMapper:
     def to_entity(model: PetitionSummaryModel) -> PetitionSummary:
         return PetitionSummary.create(
             PetitionSummaryDto(
-                content=model.content,
-                main_points=model.main_points,
+                case_summary=model.case_summary,
+                legal_issue=model.legal_issue,
+                central_question=model.central_question,
+                relevant_laws=model.relevant_laws,
+                key_facts=model.key_facts,
+                search_terms=model.search_terms,
             )
         )
 
@@ -25,6 +29,10 @@ class PetitionSummaryMapper:
     ) -> PetitionSummaryModel:
         return PetitionSummaryModel(
             petition_id=petition_id.value,
-            content=petition_summary.content.value,
-            main_points=[point.value for point in petition_summary.main_points],
+            case_summary=petition_summary.case_summary.value,
+            legal_issue=petition_summary.legal_issue.value,
+            central_question=petition_summary.central_question.value,
+            relevant_laws=[item.value for item in petition_summary.relevant_laws],
+            key_facts=[item.value for item in petition_summary.key_facts],
+            search_terms=[item.value for item in petition_summary.search_terms],
         )

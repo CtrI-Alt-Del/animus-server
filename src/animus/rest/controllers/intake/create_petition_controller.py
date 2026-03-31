@@ -46,7 +46,7 @@ class CreatePetitionController:
                 Depends(DatabasePipe.get_petitions_repository_from_request),
             ],
         ) -> PetitionDto:
-            IntakePipe.verify_analysis_by_account(
+            IntakePipe.verify_analysis_by_account_from_request(
                 analysis_id=body.analysis_id,
                 account_id=account_id,
                 analisyses_repository=analisyses_repository,
