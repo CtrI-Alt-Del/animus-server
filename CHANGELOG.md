@@ -1,3 +1,11 @@
+# [1.7.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.6.0...v1.7.0) (2026-03-31)
+
+
+### Features
+
+* ANI-48 add analysis petitions intake endpoint ([079d050](https://github.com/CtrI-Alt-Del/animus-server/commit/079d0507e61fea2c55335e4e8923225d467a2e90))
+* ANI-48 implement intake precedents search and summary contracts ([758f3e7](https://github.com/CtrI-Alt-Del/animus-server/commit/758f3e7f44256e01ef31ae503d97ce9e7bb742f7))
+
 # [1.6.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.5.0...v1.6.0) (2026-03-28)
 
 
