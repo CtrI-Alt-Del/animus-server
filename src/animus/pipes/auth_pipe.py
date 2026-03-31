@@ -12,14 +12,14 @@ from animus.pipes.providers_pipe import ProvidersPipe
 class AuthPipe:
     @staticmethod
     def get_account_id_from_request(
-        authorization: Annotated[str, Header(alias='Authorization')],
+        authorization: Annotated[str | None, Header(alias='Authorization')],
         jwt_provider: Annotated[JwtProvider, Depends(ProvidersPipe.get_jwt_provider)],
         accounts_repository: Annotated[
             AccountsRepository,
             Depends(DatabasePipe.get_accounts_repository_from_request),
         ],
     ) -> Id:
-        if not authorization.startswith('Bearer '):
+        if authorization is None or not authorization.startswith('Bearer '):
             raise AuthError('Header Authorization invalido')
 
         token = authorization.removeprefix('Bearer ').strip()

@@ -28,8 +28,12 @@ Esta funcionalidade controla o acesso ao aplicativo Animus. O usuario consegue c
 - [ ] Redefinicao de senha por e-mail
   - Pendente de implementacao.
 
-- [ ] Edicao de perfil
-  - Pendente de implementacao.
+- [x] Edicao de perfil
+  - Valor entregue: o backend permite ao usuario autenticado atualizar seu nome de exibicao via `PATCH /auth/account`.
+  - Regras de negocio refletidas na entrega:
+    - o nome deve ter no minimo 2 caracteres;
+    - apenas o campo `name` e editavel neste endpoint;
+    - a identificacao do usuario e feita automaticamente pelo token de sessao.
 
 - [ ] Solicitacao de exclusao de conta pelo proprio usuario
   - Pendente de implementacao.
