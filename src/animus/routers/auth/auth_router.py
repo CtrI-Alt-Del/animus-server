@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from animus.rest.controllers.auth import (
+    GetAccountController,
     ResendVerificationEmailController,
     SignInController,
     SignUpController,
@@ -21,5 +22,6 @@ class AuthRouter:
         VerifyEmailController.handle(router)
         ResendVerificationEmailController.handle(router)
         SignInWithGoogleController.handle(router)
+        GetAccountController.handle(router)
 
         return router
