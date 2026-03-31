@@ -5,6 +5,7 @@ from google.cloud.storage import Client
 from animus.constants import Env
 from animus.core.shared.domain.structures import Decimal, FilePath, Text
 from animus.core.storage.domain.structures import File, UploadUrl
+from animus.core.storage.domain.structures.url import Url
 from animus.core.storage.interfaces import FileStorageProvider
 
 
@@ -19,8 +20,15 @@ class GcsFileStorageProvider(FileStorageProvider):
             self.client = Client()
 
     def generate_upload_url(self, file_path: FilePath) -> UploadUrl:
-        msg = f'generate_upload_url is not implemented for file: {file_path.value}'
-        raise NotImplementedError(msg)
+        bucket_obj = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
+        blob = bucket_obj.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
+        signed_url_str = blob.generate_signed_url(  # pyright: ignore[reportUnknownMemberType]
+            method='PUT', version='v4'
+        )
+        url_obj = Url.create(signed_url_str)
+        token_obj = Text.create('')
+
+        return UploadUrl.create(url=url_obj, token=token_obj, file_path=file_path)
 
     def get_file(self, file_path: FilePath) -> File:
         bucket = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
