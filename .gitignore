@@ -175,6 +175,11 @@ pyrightconfig.json
 # Node
 node_modules/
 
+# Database
+*.db
+*.sql
+*.dump
+
 # AI Agents
 .agent
 .agents

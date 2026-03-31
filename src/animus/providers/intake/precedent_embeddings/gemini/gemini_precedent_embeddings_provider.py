@@ -1,5 +1,5 @@
 import time
-from typing import Any
+from typing import Any, cast
 
 import google.genai as genai
 from google.genai.types import ContentEmbedding  # noqa: TC002
@@ -65,7 +65,7 @@ class GeminiPrecedentEmbeddingsProvider(PrecedentEmbeddingsProvider):
             ]
             response = self._client.models.embed_content(  # type:ignore
                 model=self._model,
-                contents=batch,
+                contents=cast('Any', batch),
             )
             embeddings.extend(response.embeddings)  # type:ignore
             if i + GeminiPrecedentEmbeddingsProvider._BATCH_SIZE < len(texts_to_embed):

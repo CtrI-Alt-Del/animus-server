@@ -1,6 +1,6 @@
 from animus.core.shared.domain.abstracts import Structure
 from animus.core.shared.domain.decorators import structure
-from animus.core.shared.domain.structures import Text
+from animus.core.shared.domain.structures import FilePath, Text
 from animus.core.storage.domain.structures.dtos import UploadUrlDto
 from animus.core.storage.domain.structures.url import Url
 
@@ -9,10 +9,10 @@ from animus.core.storage.domain.structures.url import Url
 class UploadUrl(Structure):
     url: Url
     token: Text
-    file_path: Text
+    file_path: FilePath
 
     @classmethod
-    def create(cls, url: Url, token: Text, file_path: Text) -> 'UploadUrl':
+    def create(cls, url: Url, token: Text, file_path: FilePath) -> 'UploadUrl':
         return cls(url=url, token=token, file_path=file_path)
 
     @property

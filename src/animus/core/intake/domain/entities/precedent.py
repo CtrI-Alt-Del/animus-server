@@ -30,6 +30,7 @@ class Precedent(Entity):
     @property
     def dto(self) -> PrecedentDto:
         return PrecedentDto(
+            id=self.id.value,
             identifier=self.identifier.dto,
             status=self.status.dto,
             enunciation=self.enunciation.value,
