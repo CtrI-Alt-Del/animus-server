@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query
 
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
@@ -18,7 +20,7 @@ class ListAnalysesController:
             response_model=CursorPaginationResponseSchema[AnalysisDto],
         )
         def _(
-            limit: int,
+            limit: Annotated[int, Query(ge=1)],
             search: str = '',
             cursor: str | None = None,
             is_archived: bool = False,

@@ -1,4 +1,5 @@
-from sqlalchemy import select
+from sqlalchemy import Integer as SqlalchemyInteger
+from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.analysis import Analysis
@@ -53,20 +54,25 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
 
     def find_next_generated_name_number(self, account_id: Id) -> Integer:
         generated_name_prefix = 'Nova analise #'
-        generated_names = self._sqlalchemy.scalars(
-            select(AnalysisModel.name).where(
+        generated_name_start_index = len(generated_name_prefix) + 1
+        last_generated_number = self._sqlalchemy.scalar(
+            select(
+                func.max(
+                    cast(
+                        func.substring(
+                            AnalysisModel.name,
+                            generated_name_start_index,
+                        ),
+                        SqlalchemyInteger,
+                    )
+                )
+            ).where(
                 AnalysisModel.account_id == account_id.value,
-                AnalysisModel.name.like(f'{generated_name_prefix}%'),
+                AnalysisModel.name.op('~')(r'^Nova analise #[0-9]+$'),
             )
-        ).all()
+        )
 
-        generated_numbers = [
-            int(name.removeprefix(generated_name_prefix))
-            for name in generated_names
-            if name.removeprefix(generated_name_prefix).isdigit()
-        ]
-
-        return Integer.create(max(generated_numbers, default=0) + 1)
+        return Integer.create((last_generated_number or 0) + 1)
 
     def add(self, analysis: Analysis) -> None:
         self._sqlalchemy.add(AnalysisMapper.to_model(analysis))

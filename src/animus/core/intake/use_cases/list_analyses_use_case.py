@@ -1,5 +1,6 @@
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
 
@@ -16,6 +17,11 @@ class ListAnalysesUseCase:
         limit: int,
         is_archived: bool,
     ) -> CursorPaginationResponse[AnalysisDto]:
+        if limit < 1:
+            raise ValidationError(
+                f'Valor deve ser maior ou igual a 1, recebido: {limit}'
+            )
+
         normalized_account_id = Id.create(account_id)
         normalized_search = Text.create(search)
         normalized_cursor = Id.create(cursor) if cursor is not None else None

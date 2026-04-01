@@ -79,3 +79,18 @@ class TestListAnalysesUseCase:
             )
 
         self.analisyses_repository_mock.find_many.assert_not_called()
+
+    def test_should_raise_validation_error_when_limit_is_not_positive(self) -> None:
+        with pytest.raises(
+            ValidationError,
+            match='Valor deve ser maior ou igual a 1, recebido: 0',
+        ):
+            self.use_case.execute(
+                account_id='01BX5ZZKBKACTAV9WEVGEMMVRZ',
+                search='',
+                cursor=None,
+                limit=0,
+                is_archived=False,
+            )
+
+        self.analisyses_repository_mock.find_many.assert_not_called()

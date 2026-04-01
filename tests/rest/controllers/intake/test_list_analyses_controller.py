@@ -84,3 +84,19 @@ class TestListAnalysesController:
         )
 
         assert response.status_code == 422
+
+    def test_should_return_422_when_limit_is_zero(
+        self,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+    ) -> None:
+        account = create_account(is_verified=True, is_active=True)
+
+        response = client.get(
+            '/intake/analyses',
+            params={'limit': 0},
+            headers=build_auth_headers(account.id),
+        )
+
+        assert response.status_code == 422
