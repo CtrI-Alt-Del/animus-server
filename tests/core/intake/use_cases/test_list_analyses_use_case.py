@@ -2,34 +2,12 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.use_cases.list_analyses_use_case import ListAnalysesUseCase
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
-
-
-def _make_analysis(
-    *,
-    analysis_id: str = '01ARZ3NDEKTSV4RRFFQ69G5FAV',
-    account_id: str = '01BX5ZZKBKACTAV9WEVGEMMVRZ',
-    name: str = 'Analise inicial',
-    is_archived: bool = False,
-) -> Analysis:
-    return Analysis.create(
-        AnalysisDto(
-            id=analysis_id,
-            name=name,
-            folder_id=None,
-            account_id=account_id,
-            status=AnalysisStatusValue.WAITING_PETITION.value,
-            is_archived=is_archived,
-            created_at='2026-03-31T10:30:00+00:00',
-        )
-    )
+from animus.fakers.intake.entities.analyses_faker import AnalysesFaker
 
 
 class TestListAnalysesUseCase:
@@ -44,7 +22,11 @@ class TestListAnalysesUseCase:
         )
 
     def test_should_list_analyses_from_repository_and_return_dtos(self) -> None:
-        analysis = _make_analysis(name='Analise trabalhista')
+        analysis = AnalysesFaker.fake(
+            analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            account_id='01BX5ZZKBKACTAV9WEVGEMMVRZ',
+            name='Analise trabalhista',
+        )
         next_cursor = Id.create('01BX5ZZKBKACTAV9WEVGEMMVS0')
         self.analisyses_repository_mock.find_many.return_value = (
             CursorPaginationResponse(items=[analysis], next_cursor=next_cursor)

@@ -17,11 +17,6 @@ class GetAccountController:
             response_model=AccountDto,
             status_code=200,
         )
-        @router.get(
-            '/me',
-            response_model=AccountDto,
-            status_code=200,
-        )
         def _(
             account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
             accounts_repository: Annotated[

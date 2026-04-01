@@ -2,9 +2,6 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
 )
@@ -13,25 +10,7 @@ from animus.core.intake.use_cases.archive_analysis_use_case import (
     ArchiveAnalysisUseCase,
 )
 from animus.core.shared.domain.structures import Id
-
-
-def _make_analysis(
-    *,
-    analysis_id: str = '01ARZ3NDEKTSV4RRFFQ69G5FAV',
-    account_id: str = '01BX5ZZKBKACTAV9WEVGEMMVRZ',
-    is_archived: bool = False,
-) -> Analysis:
-    return Analysis.create(
-        AnalysisDto(
-            id=analysis_id,
-            name='Analise inicial',
-            folder_id=None,
-            account_id=account_id,
-            status=AnalysisStatusValue.WAITING_PETITION.value,
-            is_archived=is_archived,
-            created_at='2026-03-31T10:30:00+00:00',
-        )
-    )
+from animus.fakers.intake.entities.analyses_faker import AnalysesFaker
 
 
 class TestArchiveAnalysisUseCase:
@@ -46,7 +25,11 @@ class TestArchiveAnalysisUseCase:
         )
 
     def test_should_archive_analysis_idempotently_and_persist_it(self) -> None:
-        analysis = _make_analysis(is_archived=True)
+        analysis = AnalysesFaker.fake(
+            analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            account_id='01BX5ZZKBKACTAV9WEVGEMMVRZ',
+            is_archived=True,
+        )
         self.analisyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(
@@ -63,8 +46,9 @@ class TestArchiveAnalysisUseCase:
     def test_should_raise_analysis_not_found_error_when_analysis_belongs_to_another_account(
         self,
     ) -> None:
-        self.analisyses_repository_mock.find_by_id.return_value = _make_analysis(
-            account_id='01BX5ZZKBKACTAV9WEVGEMMVS0'
+        self.analisyses_repository_mock.find_by_id.return_value = AnalysesFaker.fake(
+            analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            account_id='01BX5ZZKBKACTAV9WEVGEMMVS0',
         )
 
         with pytest.raises(AnalysisNotFoundError):

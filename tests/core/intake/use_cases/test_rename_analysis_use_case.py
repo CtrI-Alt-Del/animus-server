@@ -2,34 +2,13 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
 )
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.use_cases.rename_analysis_use_case import RenameAnalysisUseCase
 from animus.core.shared.domain.structures import Id
-
-
-def _make_analysis(
-    *,
-    analysis_id: str = '01ARZ3NDEKTSV4RRFFQ69G5FAV',
-    account_id: str = '01BX5ZZKBKACTAV9WEVGEMMVRZ',
-    name: str = 'Analise inicial',
-) -> Analysis:
-    return Analysis.create(
-        AnalysisDto(
-            id=analysis_id,
-            name=name,
-            folder_id=None,
-            account_id=account_id,
-            status=AnalysisStatusValue.WAITING_PETITION.value,
-            is_archived=False,
-            created_at='2026-03-31T10:30:00+00:00',
-        )
-    )
+from animus.fakers.intake.entities.analyses_faker import AnalysesFaker
 
 
 class TestRenameAnalysisUseCase:
@@ -44,7 +23,10 @@ class TestRenameAnalysisUseCase:
         )
 
     def test_should_rename_analysis_and_persist_it(self) -> None:
-        analysis = _make_analysis()
+        analysis = AnalysesFaker.fake(
+            analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            account_id='01BX5ZZKBKACTAV9WEVGEMMVRZ',
+        )
         self.analisyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(

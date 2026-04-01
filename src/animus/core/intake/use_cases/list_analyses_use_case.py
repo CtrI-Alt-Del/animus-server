@@ -36,7 +36,4 @@ class ListAnalysesUseCase:
             is_archived=normalized_is_archived,
         )
 
-        return CursorPaginationResponse(
-            items=[analysis.dto for analysis in analyses.items],
-            next_cursor=analyses.next_cursor,
-        )
+        return analyses.mapItems(lambda analysis: analysis.dto)
