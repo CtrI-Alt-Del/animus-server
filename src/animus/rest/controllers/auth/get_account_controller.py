@@ -13,7 +13,7 @@ class GetAccountController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/me',
+            '/account',
             response_model=AccountDto,
             status_code=200,
         )
