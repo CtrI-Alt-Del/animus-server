@@ -14,6 +14,7 @@ from animus.core.shared.domain.errors import (
 class AppErrorHandler:
     @staticmethod
     def _build_response(status_code: int, error: Exception) -> JSONResponse:
+        print(error)
         if isinstance(error, AppError):
             return JSONResponse(
                 status_code=status_code,

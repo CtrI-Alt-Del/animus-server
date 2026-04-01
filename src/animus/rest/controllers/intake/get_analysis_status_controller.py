@@ -11,7 +11,7 @@ class GetAnalysisStatusController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/analyses/{analysis_id}/status',
+            "/analyses/{analysis_id}/status",
             status_code=200,
             response_model=AnalysisStatusDto,
         )
