@@ -1,4 +1,6 @@
+from datetime import datetime, timedelta, UTC
 from pathlib import Path
+from urllib.parse import quote, urlencode
 
 from google.cloud.storage import Client
 
@@ -14,17 +16,25 @@ class GcsFileStorageProvider(FileStorageProvider):
     client: Client
 
     def __init__(self) -> None:
-        if Env.STORAGE_EMULATOR_HOST or Env.MODE == 'dev':
+        self._is_emulator = bool(Env.STORAGE_EMULATOR_HOST) or Env.MODE == 'dev'
+
+        if self._is_emulator:
             self.client = Client.create_anonymous_client()
         else:
             self.client = Client()
 
     def generate_upload_url(self, file_path: FilePath) -> UploadUrl:
-        bucket_obj = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
-        blob = bucket_obj.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
-        signed_url_str = blob.generate_signed_url(  # pyright: ignore[reportUnknownMemberType]
-            method='PUT', version='v4'
-        )
+        if self._is_emulator:
+            signed_url_str = self._generate_fake_emulator_signed_upload_url(file_path)
+        else:
+            bucket_obj = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
+            blob = bucket_obj.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
+            signed_url_str = blob.generate_signed_url(  # pyright: ignore[reportUnknownMemberType]
+                method='PUT',
+                version='v4',
+                expiration=timedelta(minutes=15),
+            )
+
         url_obj = Url.create(signed_url_str)
         token_obj = Text.create('')
 
@@ -63,3 +73,42 @@ class GcsFileStorageProvider(FileStorageProvider):
 
             blob = bucket.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
             blob.upload_from_filename(str(local_file_path))  # pyright: ignore[reportUnknownMemberType]
+
+    def _generate_fake_emulator_signed_upload_url(self, file_path: FilePath) -> str:
+        base_url = self._normalize_emulator_base_url(Env.STORAGE_EMULATOR_HOST)
+        object_path = quote(file_path.value.lstrip('/'), safe='/')
+
+        now = datetime.now(UTC)
+        expires_at = now + timedelta(minutes=15)
+        datestamp = now.strftime('%Y%m%d')
+        timestamp = now.strftime('%Y%m%dT%H%M%SZ')
+
+        query = urlencode(
+            {
+                'X-Goog-Algorithm': 'GOOG4-RSA-SHA256',
+                'X-Goog-Credential': (
+                    f'fake-sa@local-dev.iam.gserviceaccount.com/'
+                    f'{datestamp}/auto/storage/goog4_request'
+                ),
+                'X-Goog-Date': timestamp,
+                'X-Goog-Expires': int((expires_at - now).total_seconds()),
+                'X-Goog-SignedHeaders': 'host',
+                'X-Goog-Signature': 'fake-signature',
+            }
+        )
+
+        return f'{base_url}/{Env.GCS_BUCKET_NAME}/{object_path}?{query}'
+
+    @staticmethod
+    def _normalize_emulator_base_url(host: str | None) -> str:
+        if not host:
+            return 'http://localhost:4443'
+
+        normalized_host = host.strip().rstrip('/')
+
+        if normalized_host.startswith('http://') or normalized_host.startswith(
+            'https://'
+        ):
+            return normalized_host
+
+        return f'http://{normalized_host}'
