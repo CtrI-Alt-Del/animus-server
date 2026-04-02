@@ -2,8 +2,8 @@
 title: Leitura de Peticao e Summary por analise
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/CID5
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-61
-status: open
-last_updated_at: 2026-04-01T12:00:00Z
+status: closed
+last_updated_at: 2026-04-02
 ---
 
 # 1. Objetivo
@@ -160,15 +160,15 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## REST
 
 - **Arquivo:** `src/animus/rest/controllers/intake/create_petition_controller.py`
-- **Mudanca:** injetar `broker: Broker` via `Depends(PubSubPipe.get_broker_from_request)` e instanciar `CreatePetitionUseCase` com `petitions_repository` + `broker`, sem alterar o `*Body` nem o `response_model`.
-- **Justificativa:** o controller continua fino e passa a fornecer ao use case a dependencia necessaria para publicacao do evento.
+- **Mudanca:** injetar `broker: Broker` via `Depends(PubSubPipe.get_broker_from_request)` e instanciar `CreatePetitionUseCase` com `petitions_repository`, `analisyses_repository` e `broker`, sem alterar o `*Body` nem o `response_model`.
+- **Justificativa:** o controller continua fino e passa a fornecer ao use case as dependencias necessarias para publicacao do evento e atualizacao de status da analise.
 
 - **Arquivo:** `src/animus/rest/controllers/intake/get_analysis_petition_controller.py` (**novo arquivo**)
 - **Mudanca:** criar controller `GET /analyses/{analysis_id}/petition`, `status_code=200`, `response_model=PetitionDto`, usando `IntakePipe.verify_analysis_by_account_from_request(...)` e `GetAnalysisPetitionUseCase`.
 - **Justificativa:** a API ainda nao possui um endpoint singular para recuperar a peticao atual da analise; o fluxo precisa existir sem reaproveitar a listagem.
 
 - **Arquivo:** `src/animus/rest/controllers/intake/get_petition_summary_controller.py` (**novo arquivo**)
-- **Mudanca:** criar controller `GET /petitions/{petition_id}/summary`, `status_code=200`, `response_model=PetitionSummaryDto`, usando `StoragePipe`/`IntakePipe`-like guard por ownership da peticao e `GetPetitionSummaryUseCase`.
+- **Mudanca:** criar controller `GET /petitions/{petition_id}/summary`, `status_code=200`, `response_model=PetitionSummaryDto`, usando guard por ownership da peticao e `GetPetitionSummaryUseCase`.
 - **Justificativa:** hoje so existe `POST /petitions/{petition_id}/summary`; falta o endpoint de consulta do resumo persistido.
 
 - **Arquivo:** `src/animus/rest/controllers/intake/__init__.py`
@@ -196,8 +196,6 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/__init__.py`
 - **Mudanca:** exportar `RemovePetitionDocumentFileJob`.
 - **Justificativa:** manter o padrao de agregacao publica dos jobs do contexto.
-
-> Se nao houver alteracoes em codigo existente, escrever: **Nao aplicavel**.
 
 ---
 
@@ -308,17 +306,31 @@ CreatePetitionUseCase
 
 - **Referencias:**
 
-  - `src/animus/core/intake/use_cases/request_analysis_precedents_search_use_case.py` — exemplo de publicacao de evento a partir de use case.
-  - `src/animus/core/intake/use_cases/list_analysis_petitions_use_case.py` — exemplo de endpoint `GET` delegado a um `UseCase` de leitura.
-  - `src/animus/pubsub/inngest/jobs/auth/send_account_verification_email_job.py` — exemplo de job Inngest sem dependencia de banco.
-  - `src/animus/pubsub/inngest/jobs/intake/search_analysis_precedents_job.py` — exemplo de registro de job no contexto `intake`.
-  - `src/animus/database/sqlalchemy/models/intake/petition_model.py` — evidencia do cascade ORM entre `Petition` e `PetitionSummary`.
-  - `src/animus/rest/controllers/intake/create_petition_controller.py` — endpoint que aciona o caso de uso de criacao/substituicao.
-  - `src/animus/rest/controllers/intake/list_analysis_petitions_controller.py` — referencia de controller `GET` com guard de ownership da analise.
-  - `src/animus/rest/controllers/storage/generate_petition_upload_url_controller.py` — etapa anterior do fluxo de upload com path unico para a nova peticao.
+- `src/animus/core/intake/use_cases/request_analysis_precedents_search_use_case.py` — exemplo de publicacao de evento a partir de use case.
+- `src/animus/core/intake/use_cases/list_analysis_petitions_use_case.py` — exemplo de endpoint `GET` delegado a um `UseCase` de leitura.
+- `src/animus/pubsub/inngest/jobs/auth/send_account_verification_email_job.py` — exemplo de job Inngest sem dependencia de banco.
+- `src/animus/pubsub/inngest/jobs/intake/search_analysis_precedents_job.py` — exemplo de registro de job no contexto `intake`.
+- `src/animus/database/sqlalchemy/models/intake/petition_model.py` — evidencia do cascade ORM entre `Petition` e `PetitionSummary`.
+- `src/animus/rest/controllers/intake/create_petition_controller.py` — endpoint que aciona o caso de uso de criacao/substituicao.
+- `src/animus/rest/controllers/intake/list_analysis_petitions_controller.py` — referencia de controller `GET` com guard de ownership da analise.
+- `src/animus/rest/controllers/storage/generate_petition_upload_url_controller.py` — etapa anterior do fluxo de upload com path unico para a nova peticao.
 
 ---
 
 # 10. Pendencias / Duvidas
 
 **Sem pendencias**.
+
+---
+
+## Restricoes
+
+- **Nao inclua testes automatizados na spec.**
+- O `core` nao deve depender de `FastAPI`, `SQLAlchemy`, `Redis`, `Inngest` ou qualquer detalhe de infraestrutura — se a spec violar isso, corrija antes de escrever.
+- Todos os caminhos citados devem existir no projeto **ou** estar explicitamente marcados como **novo arquivo**.
+- **Nao invente** arquivos, metodos, contratos, schemas ou integracoes sem evidencia no PRD ou na codebase.
+- Quando faltar informacao suficiente, registrar em **Pendencias / Duvidas** e usar a tool `question` se necessario.
+- Toda referencia a codigo existente deve incluir caminho relativo real (`src/animus/...`).
+- Se uma secao nao se aplicar, preencher explicitamente com **Nao aplicavel**.
+- A spec deve ser consistente com os padroes da codebase (nomenclatura, organizacao de modulos, contratos e convencoes por camada).
+- Schemas `*Body` de entrada sao sempre definidos **no arquivo do controller** que os utiliza — nunca em `validation/`. O repasse ao `UseCase` e via **named params** ou **`to_dto()`**, nunca conversao espalhada no corpo do endpoint.

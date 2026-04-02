@@ -12,6 +12,8 @@ from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
 )
+from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
 from animus.core.intake.interfaces.summarize_petition_workflow import (
     SummarizePetitionWorkflow,
 )
@@ -30,10 +32,15 @@ class _StepNames(NamedTuple):
 
 class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
     def __init__(
-        self, petition_summaries_repository: PetitionSummariesRepository
+        self,
+        petition_summaries_repository: PetitionSummariesRepository,
+        petitions_repository: PetitionsRepository,
+        analisyses_repository: AnalisysesRepository,
     ) -> None:
         self._create_petition_summary_use_case = CreatePetitionSummaryUseCase(
             petition_summaries_repository=petition_summaries_repository,
+            petitions_repository=petitions_repository,
+            analisyses_repository=analisyses_repository,
         )
         self._team = IntakeTeam()
         self._step_names = _StepNames()

@@ -11,6 +11,7 @@ from .list_analysis_precedents_controller import ListAnalysisPrecedentsControlle
 from .rename_analysis_controller import RenameAnalysisController
 from .search_analysis_precedents_controller import SearchAnalysisPrecedentsController
 from .summarize_petition_controller import SummarizePetitionController
+from .get_petition_summary_controller import GetPetitionSummaryController
 
 __all__ = [
     'ArchiveAnalysisController',
