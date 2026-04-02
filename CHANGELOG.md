@@ -1,3 +1,17 @@
+# [1.10.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.9.0...v1.10.0) (2026-04-01)
+
+
+### Bug Fixes
+
+* **auth:** ANI-29 restore legacy account profile route ([15690a6](https://github.com/CtrI-Alt-Del/animus-server/commit/15690a61d2685b6450fd5cfab71a303aacdb1988))
+
+
+### Features
+
+* **intake:** ANI-29 add analysis management endpoints ([d40c4db](https://github.com/CtrI-Alt-Del/animus-server/commit/d40c4dbdc5ec20383621a413674270018635766f))
+* **intake:** ANI-29 add validation for limit parameter in analysis listing ([18ec896](https://github.com/CtrI-Alt-Del/animus-server/commit/18ec896c8005f0ce5c92823bd6eb339d7f2e3570))
+* **intake:** ANI-29 implement analysis management endpoints and update pagination response handling ([7b49c5a](https://github.com/CtrI-Alt-Del/animus-server/commit/7b49c5ae25bc346269c593231d20f3f7ae27cd73))
+
 # [1.9.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.8.0...v1.9.0) (2026-03-31)
 
 

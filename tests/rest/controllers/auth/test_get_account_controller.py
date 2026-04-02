@@ -21,7 +21,7 @@ class TestGetAccountController:
         session = jwt_provider.encode(Text.create(account.id))
 
         response = client.get(
-            '/auth/me',
+            '/auth/account',
             headers={'Authorization': f'Bearer {session.access_token.value}'},
         )
 
@@ -37,7 +37,8 @@ class TestGetAccountController:
 
     def test_should_return_401_when_token_is_invalid(self, client: TestClient) -> None:
         response = client.get(
-            '/auth/me', headers={'Authorization': 'Bearer invalid-token'}
+            '/auth/account',
+            headers={'Authorization': 'Bearer invalid-token'},
         )
 
         assert response.status_code == 401
@@ -47,6 +48,6 @@ class TestGetAccountController:
         }
 
     def test_should_return_422_when_no_token_provided(self, client: TestClient) -> None:
-        response = client.get('/auth/me')
+        response = client.get('/auth/account')
 
         assert response.status_code == 422

@@ -42,3 +42,9 @@ class Analysis(Entity):
             is_archived=self.is_archived.value,
             created_at=self.created_at.value.isoformat(),
         )
+
+    def rename(self, name: str) -> None:
+        self.name = Name.create(name)
+
+    def archive(self) -> None:
+        self.is_archived = Logical.create_true()

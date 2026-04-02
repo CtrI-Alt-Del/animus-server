@@ -40,6 +40,11 @@ Fluxos de autenticacao ja implementados:
 - `POST /auth/sign-in` -> `SignInController` -> `SignInUseCase` -> `AccountsRepository` / `HashProvider` / `JwtProvider` -> `SessionDto`.
 
 Fluxos de intake ja implementados:
+- `POST /intake/analyses` -> `CreateAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `CreateAnalysisUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.
+- `GET /intake/analyses` -> `ListAnalysesController` -> `AuthPipe` / `DatabasePipe` -> `ListAnalysesUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `CursorPaginationResponseSchema[AnalysisDto]`.
+- `GET /intake/analyses/{analysis_id}` -> `GetAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `GetAnalysisUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.
+- `PATCH /intake/analyses/{analysis_id}/name` -> `RenameAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `RenameAnalysisUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.
+- `PATCH /intake/analyses/{analysis_id}/archive` -> `ArchiveAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `ArchiveAnalysisUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.
 - `POST /intake/petitions` -> `CreatePetitionController` -> `AuthPipe` / `IntakePipe.verify_analysis_by_account(...)` -> `CreatePetitionUseCase` -> `PetitionsRepository` -> PostgreSQL (`petitions`) -> `PetitionDto`.
 - `POST /intake/petitions/{petition_id}/summary` -> `SummarizePetitionController` -> `AuthPipe` / `IntakePipe.verify_petition_document_path_by_account(...)` -> `StoragePipe` -> `GetDocumentContentUseCase` -> `FileStorageProvider` / `PdfProvider` / `DocxProvider` -> `SummarizePetitionWorkflow` -> `CreatePetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
 - `GET /intake/analyses/{analysis_id}/petitions` -> `ListAnalysisPetitionsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ListAnalysisPetitionsUseCase` -> `PetitionsRepository` / `PetitionSummariesRepository` -> PostgreSQL (`petitions`, `petition_summaries`) -> `ListResponse[AnalysisPetitionDto]`.
