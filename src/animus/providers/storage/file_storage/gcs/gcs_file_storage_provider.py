@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from urllib.parse import quote, urlencode
 
+from google.api_core.exceptions import NotFound
 from google.cloud.storage import Client
 
 from animus.constants import Env
@@ -73,6 +74,17 @@ class GcsFileStorageProvider(FileStorageProvider):
 
             blob = bucket.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
             blob.upload_from_filename(str(local_file_path))  # pyright: ignore[reportUnknownMemberType]
+
+    def remove_files(self, file_paths: list[FilePath]) -> None:
+        bucket = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
+
+        for file_path in file_paths:
+            blob = bucket.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
+
+            try:
+                blob.delete()  # pyright: ignore[reportUnknownMemberType]
+            except NotFound:
+                continue
 
     def _generate_fake_emulator_signed_upload_url(self, file_path: FilePath) -> str:
         base_url = self._normalize_emulator_base_url(Env.STORAGE_EMULATOR_HOST)
