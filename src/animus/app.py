@@ -12,7 +12,7 @@ from animus.rest.middlewares import (
 from animus.routers.auth.auth_router import AuthRouter
 from animus.routers.docs.docs_router import DocsRouter
 from animus.routers.intake.intake_router import IntakeRouter
-from animus.routers.storage.storage_router import StorageRouter
+from animus.routers.storage import StorageRouter
 
 
 class FastAPIApp:

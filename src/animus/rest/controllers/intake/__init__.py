@@ -22,7 +22,6 @@ __all__ = [
     'GetPetitionSummaryController',
     'GetAnalysisStatusController',
     'GetAnalysisController',
-    'GetAnalysisStatusController',
     'ListAnalysesController',
     'ListAnalysisPetitionsController',
     'ListAnalysisPrecedentsController',
