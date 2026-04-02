@@ -1,3 +1,20 @@
+# [1.11.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.10.0...v1.11.0) (2026-04-02)
+
+
+### Bug Fixes
+
+* ANI-61 address PR review follow-ups ([3bd0e3d](https://github.com/CtrI-Alt-Del/animus-server/commit/3bd0e3df2e7c62c2efe79d3bf534112743f00dd0))
+* ANI-61 align account endpoint path with auth controller contract ([fef1430](https://github.com/CtrI-Alt-Del/animus-server/commit/fef143029d630df9ad27c5c03c5295507d5b0ae4))
+
+
+### Features
+
+* ANI-61 add analysis report structure ([0c833f2](https://github.com/CtrI-Alt-Del/animus-server/commit/0c833f2fa0574f63cbbaa49a9bd82bf2458eea67))
+* ANI-61 add intake analysis management endpoints ([7baa067](https://github.com/CtrI-Alt-Del/animus-server/commit/7baa06720d48f07fc0795107ae208c7d14be864f))
+* ANI-61 add storage router with petition upload url endpoint ([c1f0100](https://github.com/CtrI-Alt-Del/animus-server/commit/c1f01006bf719b9a4e1020ec4f31c265c263409e))
+* ANI-61 finalize petition replacement and summary flows ([aed3afe](https://github.com/CtrI-Alt-Del/animus-server/commit/aed3afec80e49ae5ae91138006ada610e920303a))
+* ANI-61 implement petition replacement flow and intake read endpoints ([1e4a93a](https://github.com/CtrI-Alt-Del/animus-server/commit/1e4a93ab72d88003616f6ad4d5f4e519c4197925))
+
 # [1.10.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.9.0...v1.10.0) (2026-04-01)
 
 
