@@ -2,11 +2,25 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.dtos.petition_document_dto import (
+    PetitionDocumentDto,
+)
+from animus.core.intake.domain.errors import (
+    AnalysisNotFoundError,
+    PetitionNotFoundError,
+)
 from animus.core.intake.domain.structures.dtos import PetitionSummaryDto
-from animus.core.intake.interfaces import PetitionSummariesRepository
+from animus.core.intake.interfaces import (
+    AnalisysesRepository,
+    PetitionSummariesRepository,
+    PetitionsRepository,
+)
 from animus.core.intake.use_cases import CreatePetitionSummaryUseCase
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id
+from animus.fakers.intake.entities.analyses_faker import AnalysesFaker
+from animus.fakers.intake.entities.petitions_faker import PetitionsFaker
 
 
 class TestCreatePetitionSummaryUseCase:
@@ -16,8 +30,18 @@ class TestCreatePetitionSummaryUseCase:
             PetitionSummariesRepository,
             instance=True,
         )
+        self.petitions_repository_mock = create_autospec(
+            PetitionsRepository,
+            instance=True,
+        )
+        self.analisyses_repository_mock = create_autospec(
+            AnalisysesRepository,
+            instance=True,
+        )
         self.use_case = CreatePetitionSummaryUseCase(
             petition_summaries_repository=self.petition_summaries_repository_mock,
+            petitions_repository=self.petitions_repository_mock,
+            analisyses_repository=self.analisyses_repository_mock,
         )
 
     def test_should_add_petition_summary_when_petition_does_not_have_summary(
@@ -41,8 +65,22 @@ class TestCreatePetitionSummaryUseCase:
             ],
         )
         petition_id_entity = Id.create(petition_id)
+        petition = PetitionsFaker.fake(
+            petition_id=petition_id,
+            analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+            document=PetitionDocumentDto(
+                file_path='petitions/initial-petition.pdf',
+                name='Initial Petition.pdf',
+            ),
+        )
+        analysis = AnalysesFaker.fake(
+            analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+            status=AnalysisStatusValue.ANALYZING_PETITION.value,
+        )
 
         self.petition_summaries_repository_mock.find_by_petition_id.return_value = None
+        self.petitions_repository_mock.find_by_id.return_value = petition
+        self.analisyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(petition_id=petition_id, dto=dto)
 
@@ -51,14 +89,17 @@ class TestCreatePetitionSummaryUseCase:
         )
         self.petition_summaries_repository_mock.add.assert_called_once()
         self.petition_summaries_repository_mock.replace.assert_not_called()
+        self.analisyses_repository_mock.replace.assert_called_once()
         petition_summary = self.petition_summaries_repository_mock.add.call_args.kwargs[
             'petition_summary'
         ]
+        updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
         assert (
             self.petition_summaries_repository_mock.add.call_args.kwargs['petition_id']
             == petition_id_entity
         )
         assert petition_summary.dto == dto
+        assert updated_analysis.status.value == AnalysisStatusValue.PETITION_ANALYZED
         assert result == dto
 
     def test_should_replace_petition_summary_when_petition_already_has_summary(
@@ -82,9 +123,23 @@ class TestCreatePetitionSummaryUseCase:
             ],
         )
         petition_id_entity = Id.create(petition_id)
+        petition = PetitionsFaker.fake(
+            petition_id=petition_id,
+            analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            document=PetitionDocumentDto(
+                file_path='petitions/updated-petition.pdf',
+                name='Updated Petition.pdf',
+            ),
+        )
+        analysis = AnalysesFaker.fake(
+            analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            status=AnalysisStatusValue.ANALYZING_PETITION.value,
+        )
         self.petition_summaries_repository_mock.find_by_petition_id.return_value = (
             object()
         )
+        self.petitions_repository_mock.find_by_id.return_value = petition
+        self.analisyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(petition_id=petition_id, dto=dto)
 
@@ -93,11 +148,13 @@ class TestCreatePetitionSummaryUseCase:
         )
         self.petition_summaries_repository_mock.add.assert_not_called()
         self.petition_summaries_repository_mock.replace.assert_called_once()
+        self.analisyses_repository_mock.replace.assert_called_once()
         petition_summary = (
             self.petition_summaries_repository_mock.replace.call_args.kwargs[
                 'petition_summary'
             ]
         )
+        updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
         assert (
             self.petition_summaries_repository_mock.replace.call_args.kwargs[
                 'petition_id'
@@ -105,6 +162,7 @@ class TestCreatePetitionSummaryUseCase:
             == petition_id_entity
         )
         assert petition_summary.dto == dto
+        assert updated_analysis.status.value == AnalysisStatusValue.PETITION_ANALYZED
         assert result == dto
 
     def test_should_raise_validation_error_when_petition_id_is_invalid(self) -> None:
@@ -123,3 +181,58 @@ class TestCreatePetitionSummaryUseCase:
         self.petition_summaries_repository_mock.find_by_petition_id.assert_not_called()
         self.petition_summaries_repository_mock.add.assert_not_called()
         self.petition_summaries_repository_mock.replace.assert_not_called()
+        self.petitions_repository_mock.find_by_id.assert_not_called()
+        self.analisyses_repository_mock.find_by_id.assert_not_called()
+        self.analisyses_repository_mock.replace.assert_not_called()
+
+    def test_should_raise_petition_not_found_error_when_petition_does_not_exist(
+        self,
+    ) -> None:
+        petition_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
+        dto = PetitionSummaryDto(
+            case_summary='Resumo valido.',
+            legal_issue='Questão jurídica válida.',
+            central_question='Pergunta jurídica principal válida?',
+            relevant_laws=['Código Civil, Art. 421'],
+            key_facts=['Ponto principal.'],
+            search_terms=['autonomia privada'],
+        )
+
+        self.petition_summaries_repository_mock.find_by_petition_id.return_value = None
+        self.petitions_repository_mock.find_by_id.return_value = None
+
+        with pytest.raises(PetitionNotFoundError):
+            self.use_case.execute(petition_id=petition_id, dto=dto)
+
+        self.analisyses_repository_mock.find_by_id.assert_not_called()
+        self.analisyses_repository_mock.replace.assert_not_called()
+
+    def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
+        self,
+    ) -> None:
+        petition_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
+        dto = PetitionSummaryDto(
+            case_summary='Resumo valido.',
+            legal_issue='Questão jurídica válida.',
+            central_question='Pergunta jurídica principal válida?',
+            relevant_laws=['Código Civil, Art. 421'],
+            key_facts=['Ponto principal.'],
+            search_terms=['autonomia privada'],
+        )
+        petition = PetitionsFaker.fake(
+            petition_id=petition_id,
+            analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+            document=PetitionDocumentDto(
+                file_path='petitions/analysis-petition.pdf',
+                name='Analysis Petition.pdf',
+            ),
+        )
+
+        self.petition_summaries_repository_mock.find_by_petition_id.return_value = None
+        self.petitions_repository_mock.find_by_id.return_value = petition
+        self.analisyses_repository_mock.find_by_id.return_value = None
+
+        with pytest.raises(AnalysisNotFoundError):
+            self.use_case.execute(petition_id=petition_id, dto=dto)
+
+        self.analisyses_repository_mock.replace.assert_not_called()

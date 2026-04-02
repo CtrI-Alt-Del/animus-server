@@ -7,6 +7,7 @@ from inngest import Inngest, fast_api
 
 from animus.pubsub.inngest.jobs.auth import SendAccountVerificationEmailJob
 from animus.pubsub.inngest.jobs.intake import (
+    RemovePetitionDocumentFileJob,
     SearchAnalysisPrecedentsJob,
     VectorizeAllPrecedentsJob,
     VectorizePrecedentsJob,
@@ -45,6 +46,7 @@ class InngestPubSub:
     @staticmethod
     def register_intake_jobs(inngest: Inngest) -> list[Any]:
         return [
+            RemovePetitionDocumentFileJob.handle(inngest),
             SearchAnalysisPrecedentsJob.handle(inngest),
             VectorizeAllPrecedentsJob.handle(inngest),
             VectorizePrecedentsJob.handle(inngest),

@@ -6,8 +6,10 @@ from animus.rest.controllers.intake import (
     CreateAnalysisController,
     CreatePetitionController,
     GetAnalysisController,
+    GetAnalysisPetitionController,
     GetAnalysisStatusController,
     ListAnalysesController,
+    GetPetitionSummaryController,
     ListAnalysisPetitionsController,
     ListAnalysisPrecedentsController,
     RenameAnalysisController,
@@ -27,7 +29,9 @@ class IntakeRouter:
         RenameAnalysisController.handle(router)
         ArchiveAnalysisController.handle(router)
         CreatePetitionController.handle(router)
+        GetAnalysisPetitionController.handle(router)
         ListAnalysisPetitionsController.handle(router)
+        GetPetitionSummaryController.handle(router)
         SummarizePetitionController.handle(router)
         SearchAnalysisPrecedentsController.handle(router)
         ListAnalysisPrecedentsController.handle(router)

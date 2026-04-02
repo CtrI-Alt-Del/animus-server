@@ -1,5 +1,6 @@
 @url = {{BASE_URL}}/intake
 @analysis_id = 01KMQTN9YCHWG20ZZEPNBRYW87
+@petition_id = 01KN59VDDZ20HJ76RDG4V02GJ5
 @precedent_court = STJ
 @precedent_kind = RR
 @precedent_number = 974
@@ -23,8 +24,16 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 GET {{url}}/analyses/{{analysis_id}}/petitions
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Obter peticao atual da analise (GetAnalysisPetitionController)
+GET {{url}}/analyses/{{analysis_id}}/petition
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Listar precedentes da analise (ListAnalysisPrecedentsController)
 GET {{url}}/analyses/{{analysis_id}}/precedents
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Obter resumo da peticao (GetPetitionSummaryController)
+GET {{url}}/petitions/{{petition_id}}/summary
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Escolher precedente da analise (ChooseAnalysisPrecedentController)

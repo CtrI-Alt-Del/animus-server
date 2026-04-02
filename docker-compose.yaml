@@ -52,7 +52,7 @@ services:
     image: fsouza/fake-gcs-server:latest@sha256:3730da0e31f7e5186a90ec4899dc2c336104e7599df400411392ef17e684c31f
     container_name: animus_gcs
     restart: unless-stopped
-    command: -scheme http -external-url http://localhost:4443
+    command: -scheme http -external-url http://localhost:4443 -public-host localhost:4443
     ports:
       - "4443:4443"
     volumes:
