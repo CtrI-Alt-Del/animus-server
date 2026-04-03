@@ -45,6 +45,9 @@ class Account(Entity):
             social_accounts=[item.dto for item in self.social_accounts],
         )
 
+    def rename(self, name: Name) -> None:
+        self.name = name
+
     def verify(self) -> None:
         self.is_verified = Logical.create_true()
 
