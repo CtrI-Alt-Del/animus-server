@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from animus.core.shared.domain.structures import Text
+from animus.core.shared.domain.structures import FilePath, Text
 from animus.core.storage.interfaces import (
     DocxProvider,
     FileStorageProvider,
@@ -19,7 +19,7 @@ class StoragePipe:
     @staticmethod
     def get_document_content(
         file_path: Annotated[
-            Text,
+            FilePath,
             Depends(IntakePipe.verify_petition_document_path_by_account),
         ],
         file_storage_provider: Annotated[
@@ -37,4 +37,4 @@ class StoragePipe:
             pdf_provider=pdf_provider,
             docx_provider=docx_provider,
         )
-        return use_case.execute(file_path.value)
+        return use_case.execute(file_path)

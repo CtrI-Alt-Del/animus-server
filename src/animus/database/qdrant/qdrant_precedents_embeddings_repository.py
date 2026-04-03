@@ -2,20 +2,34 @@ import uuid
 from typing import Any, TypedDict, cast
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import (
+    Condition,
+    Distance,
+    FieldCondition,
+    Filter,
+    MatchAny,
+    PointStruct,
+    VectorParams,
+)
 
 from animus.constants.env import Env
+from animus.core.intake.domain.structures.analysis_precedents_search_filters import (
+    AnalysisPrecedentsSearchFilters,
+)
 from animus.core.intake.domain.structures.dtos.precedent_embedding_dto import (
     PrecedentEmbeddingDto,
 )
 from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
     PrecedentIdentifierDto,
 )
-from animus.core.intake.domain.structures.petition_embedding import PetitionEmbedding
+from animus.core.intake.domain.structures.petition_summary_embedding import (
+    PetitionSummaryEmbedding,
+)
 from animus.core.intake.domain.structures.precedent_embedding import PrecedentEmbedding
 from animus.core.intake.interfaces.precedents_embeddings_repository import (
     PrecedentsEmbeddingsRepository,
 )
+from animus.core.shared.domain.structures import Integer
 from animus.core.shared.responses.list_response import ListResponse
 
 
@@ -38,8 +52,8 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
             self._client.create_collection(
                 collection_name=self._collection_name,
                 vectors_config={
-                    'enunciation': VectorParams(size=1024, distance=Distance.COSINE),
-                    'thesis': VectorParams(size=1024, distance=Distance.COSINE),
+                    'enunciation': VectorParams(size=3072, distance=Distance.COSINE),
+                    'thesis': VectorParams(size=3072, distance=Distance.COSINE),
                 },
             )
 
@@ -88,13 +102,17 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         self._client.upsert(collection_name=self._collection_name, points=points)
 
     def find_many(
-        self, petition_embeddings: list[PetitionEmbedding]
+        self,
+        petition_summary_embeddings: list[PetitionSummaryEmbedding],
+        filters: AnalysisPrecedentsSearchFilters,
+        limit: Integer,
     ) -> ListResponse[PrecedentEmbedding]:
-        if not petition_embeddings:
+        if not petition_summary_embeddings:
             return ListResponse(items=[])
 
+        query_filter = self._build_query_filter(filters)
         results: list[PrecedentEmbedding] = []
-        for petition_embedding in petition_embeddings:
+        for petition_embedding in petition_summary_embeddings:
             query_vector = [float(value.value) for value in petition_embedding.vector]
 
             for target_field in ('enunciation', 'thesis'):
@@ -102,7 +120,8 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
                     collection_name=self._collection_name,
                     query=query_vector,
                     using=target_field,
-                    limit=10,
+                    query_filter=query_filter,
+                    limit=limit.value,
                     with_payload=True,
                     with_vectors=False,
                 )
@@ -145,3 +164,35 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
                     )
 
         return ListResponse(items=results)
+
+    @staticmethod
+    def _build_query_filter(
+        filters: AnalysisPrecedentsSearchFilters,
+    ) -> Filter | None:
+        conditions: list[Condition] = []
+
+        if filters.courts:
+            conditions.append(
+                FieldCondition(
+                    key='court',
+                    match=MatchAny(any=[court.dto for court in filters.courts]),
+                )
+            )
+
+        if filters.precedent_kinds:
+            conditions.append(
+                FieldCondition(
+                    key='kind',
+                    match=MatchAny(
+                        any=[
+                            precedent_kind.dto
+                            for precedent_kind in filters.precedent_kinds
+                        ]
+                    ),
+                )
+            )
+
+        if not conditions:
+            return None
+
+        return Filter(must=conditions)

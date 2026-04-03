@@ -3,7 +3,7 @@ title: Endpoints de peticoes e resumo da peticao
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/CID5
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-45
 status: closed
-last_updated_at: 2026-03-27
+last_updated_at: 2026-04-02
 ---
 
 # 1. Objetivo
@@ -41,7 +41,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - `POST /intake/petitions` deve validar que a `Analysis` informada pertence ao usuario autenticado antes de persistir a peticao.
 - `POST /intake/petitions/{petition_id}/summary` deve validar ownership da peticao a partir da `Analysis` relacionada antes de acessar o documento no storage.
 - O resumo deve ser gerado a partir do conteudo textual do documento armazenado, com suporte a arquivos `PDF` e `DOCX`.
-- O `workflow` de AI deve retornar `PetitionSummaryDto { content, main_points }` e persistir o resumo associado a `petition_id`.
+- O `workflow` de AI deve retornar `PetitionSummaryDto { case_summary, legal_issue, central_question, relevant_laws, key_facts, search_terms }`, persistir o resumo associado a `petition_id` e atualizar a `Analysis` relacionada para status `PETITION_ANALYZED`.
 - O resumo deve refletir os elementos centrais da peticao descritos no PRD: fatos, fundamento juridico e pedido, sem impor campos fixos ao usuario da API.
 - Falhas de leitura de arquivo corrompido ou ilegivel devem interromper o fluxo antes da chamada ao `workflow` de AI.
 - O fluxo de resumo deve permanecer manual e sincrono: a analise so acontece quando o endpoint de `summary` e chamado.
@@ -64,7 +64,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **`Petition`** (`src/animus/core/intake/domain/entities/petition.py`) - entidade de peticao ja pronta, com `analysis_id`, `uploaded_at` e `document`.
 - **`PetitionDocument`** (`src/animus/core/intake/domain/structures/petition_document.py`) - `Structure` do documento associado a peticao com `file_path` e `name`.
 - **`PetitionDto`** (`src/animus/core/intake/domain/entities/dtos/petition_dto.py`) - DTO de saida da peticao, com `id` opcional para suportar criacao.
-- **`PetitionSummary`** (`src/animus/core/intake/domain/structures/petition_summary.py`) - `Structure` do resumo da peticao ja existente, com `content` e `main_points`.
+- **`PetitionSummary`** (`src/animus/core/intake/domain/structures/petition_summary.py`) - `Structure` do resumo da peticao ja existente, com `case_summary`, `legal_issue`, `central_question`, `relevant_laws`, `key_facts` e `search_terms`.
 - **`PetitionSummaryDto`** (`src/animus/core/intake/domain/structures/dtos/petition_summary_dto.py`) - DTO do resumo ja existente.
 - **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) - port ja existente para persistencia de peticoes; hoje so expoe listagem por `analysis_id` e escrita.
 - **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) - port ja existente para consultas de `Analysis`; ainda sem adaptador concreto na branch atual.
@@ -158,9 +158,9 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Fluxo resumido:** validar/converter `analysis_id`, `uploaded_at` e `document` -> `Petition.create(PetitionDto(...))` -> `PetitionsRepository.add(...)` -> retornar `petition.dto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/create_petition_summary_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `PetitionSummariesRepository`
-- **Metodo principal:** `execute(petition_id: str, dto: PetitionSummaryDto) -> PetitionSummaryDto` - converte o DTO em `PetitionSummary`, decide entre criar/substituir e devolve o DTO normalizado.
-- **Fluxo resumido:** `PetitionSummary.create(dto)` -> `find_by_petition_id(...)` -> `add(...)` quando ausente / `replace(...)` quando existente -> retornar `petition_summary.dto`.
+- **Dependencias (ports injetados):** `PetitionSummariesRepository`, `PetitionsRepository`, `AnalisysesRepository`
+- **Metodo principal:** `execute(petition_id: str, dto: PetitionSummaryDto) -> PetitionSummaryDto` - converte o DTO em `PetitionSummary`, decide entre criar/substituir, atualiza o status da analise para `PETITION_ANALYZED` e devolve o DTO normalizado.
+- **Fluxo resumido:** `PetitionSummary.create(dto)` -> `find_by_petition_id(...)` -> `add(...)` quando ausente / `replace(...)` quando existente -> `PetitionsRepository.find_by_id(...)` -> `AnalisysesRepository.find_by_id(...)` -> `AnalisysesRepository.replace(analysis.status=PETITION_ANALYZED)` -> retornar `petition_summary.dto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/__init__.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** nao aplicavel
@@ -184,7 +184,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 - **Localizacao:** `src/animus/database/sqlalchemy/models/intake/petition_summary_model.py` (**novo arquivo**)
 - **Tabela:** `petition_summaries`
-- **Colunas:** `petition_id` (`String(26)`, `ForeignKey('petitions.id')`, `primary_key=True`), `content` (`Text`, `nullable=False`), `main_points` (`JSON`, `nullable=False`)
+- **Colunas:** `petition_id` (`String(26)`, `ForeignKey('petitions.id')`, `primary_key=True`), `case_summary` (`Text`, `nullable=False`), `legal_issue` (`Text`, `nullable=False`), `central_question` (`Text`, `nullable=False`), `relevant_laws` (`JSON`, `nullable=False`), `key_facts` (`JSON`, `nullable=False`), `search_terms` (`JSON`, `nullable=False`)
 - **Relacionamentos:** `petition` 1:1 com `PetitionModel`.
 
 ## Camada Database (Mappers)
@@ -300,13 +300,13 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Interface implementada (port):** nao aplicavel
 - **Biblioteca/SDK utilizado:** `agno`, `agno.models.google.Gemini`
 - **Metodos:**
-  - `summarize_petition_agent -> Agent` - agente especializado em resumir peticoes em PT-BR, com `output_schema` estruturado para `PetitionSummaryDto`.
+  - `petition_summarizer_agent -> Agent` - agente especializado em resumir peticoes em PT-BR, com `output_schema` estruturado para `PetitionSummaryDto`.
 
 - **Localizacao:** `src/animus/ai/agno/outputs/intake/petition_summary_output.py` (**novo arquivo**)
 - **Interface implementada (port):** nao aplicavel
 - **Biblioteca/SDK utilizado:** `pydantic`
 - **Classe:**
-  - `PetitionSummaryOutput` - schema estruturado com `content` e `main_points` consumido pelo agente e pelo workflow.
+  - `PetitionSummaryOutput` - schema estruturado com `case_summary`, `legal_issue`, `central_question`, `relevant_laws`, `key_facts` e `search_terms` consumido pelo agente e pelo workflow.
 
 - **Localizacao:** `src/animus/ai/agno/workflows/intake/agno_summarize_petition_workflow.py` (**novo arquivo**)
 - **Interface implementada (port):** `SummarizePetitionWorkflow`

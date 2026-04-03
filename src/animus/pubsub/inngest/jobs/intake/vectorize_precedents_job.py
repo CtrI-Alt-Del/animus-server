@@ -13,8 +13,8 @@ from animus.database.sqlalchemy.repositories.intake.sqlalchemy_precendents_repos
     SqlalchemyPrecedentsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
-from animus.providers.intake.precedent_embeddings.bertimbau.bertimbau_precedent_embeddings_provider import (
-    BertimbauPrecedentEmbeddingsProvider,
+from animus.providers.intake.precedent_embeddings.openai.openai_precedent_embeddings_provider import (
+    OpenAIPrecedentEmbeddingsProvider,
 )
 from animus.rest.httpx.httpx_rest_client import HttpxRestClient
 from animus.rest.pangea.services.pangea_bnp_service import PangeaBnpService
@@ -49,7 +49,7 @@ class VectorizePrecedentsJob:
                 use_case = VectorizePrecedentsUseCase(
                     pangea_service=PangeaBnpService(client=HttpxRestClient()),
                     precedents_repository=SqlalchemyPrecedentsRepository(session),
-                    embeddings_provider=BertimbauPrecedentEmbeddingsProvider(),
+                    embeddings_provider=OpenAIPrecedentEmbeddingsProvider(),
                     embeddings_repository=QdrantPrecedentsEmbeddingsRepository(),
                 )
                 loop = asyncio.get_event_loop()

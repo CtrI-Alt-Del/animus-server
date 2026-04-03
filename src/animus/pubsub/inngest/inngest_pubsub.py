@@ -6,7 +6,10 @@ from fastapi import FastAPI
 from inngest import Inngest, fast_api
 
 from animus.pubsub.inngest.jobs.auth import SendAccountVerificationEmailJob
-from animus.pubsub.inngest.jobs.intake.vectorize_precedents_job import (
+from animus.pubsub.inngest.jobs.intake import (
+    RemovePetitionDocumentFileJob,
+    SearchAnalysisPrecedentsJob,
+    VectorizeAllPrecedentsJob,
     VectorizePrecedentsJob,
 )
 
@@ -28,7 +31,7 @@ class InngestPubSub:
             client=inngest,
             functions=[
                 *InngestPubSub.register_notification_jobs(inngest),
-                *InngestPubSub.register_vectorize_precedents_job(inngest),
+                *InngestPubSub.register_intake_jobs(inngest),
             ],
         )
 
@@ -41,5 +44,10 @@ class InngestPubSub:
         ]
 
     @staticmethod
-    def register_vectorize_precedents_job(inngest: Inngest) -> list[Any]:
-        return [VectorizePrecedentsJob.handle(inngest)]
+    def register_intake_jobs(inngest: Inngest) -> list[Any]:
+        return [
+            RemovePetitionDocumentFileJob.handle(inngest),
+            SearchAnalysisPrecedentsJob.handle(inngest),
+            VectorizeAllPrecedentsJob.handle(inngest),
+            VectorizePrecedentsJob.handle(inngest),
+        ]

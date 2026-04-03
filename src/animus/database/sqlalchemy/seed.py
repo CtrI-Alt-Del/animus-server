@@ -12,13 +12,18 @@ from animus.database.sqlalchemy.repositories.intake.sqlalchemy_petitions_reposit
     SqlalchemyPetitionsRepository,
 )
 from animus.database.sqlalchemy.repositories.auth import SqlalchemyAccountsRepository
-from animus.database.sqlalchemy.seeders import AuthSeeder, IntakeSeeder
+from animus.database.sqlalchemy.seeders import AuthSeeder, IntakeSeeder, StorageSeeder
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.auth import Argon2idHashProvider
 
 
 def _clear_database(session: Session) -> None:
+    ignored_tables = {'precedents'}
+
     for table in reversed(models.Model.metadata.sorted_tables):
+        if table.name in ignored_tables:
+            continue
+
         session.execute(delete(table))
 
 
@@ -38,4 +43,9 @@ def seed() -> None:
                 session
             ),
         )
-        intake_seeder.seed(account_ids)
+        intake_seed = intake_seeder.seed(account_ids)
+        if intake_seed is None:
+            return
+
+        storage_seeder = StorageSeeder()
+        storage_seeder.seed(intake_seed['analysis_id'])

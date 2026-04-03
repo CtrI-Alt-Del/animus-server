@@ -40,8 +40,29 @@ Fluxos de autenticacao ja implementados:
 - `POST /auth/sign-in` -> `SignInController` -> `SignInUseCase` -> `AccountsRepository` / `HashProvider` / `JwtProvider` -> `SessionDto`.
 
 Fluxos de intake ja implementados:
-- `POST /intake/petitions` -> `CreatePetitionController` -> `AuthPipe` / `IntakePipe.verify_analysis_by_account(...)` -> `CreatePetitionUseCase` -> `PetitionsRepository` -> PostgreSQL (`petitions`) -> `PetitionDto`.
+- `POST /intake/analyses` -> `CreateAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `CreateAnalysisUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.
+- `GET /intake/analyses` -> `ListAnalysesController` -> `AuthPipe` / `DatabasePipe` -> `ListAnalysesUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `CursorPaginationResponseSchema[AnalysisDto]`.
+- `GET /intake/analyses/{analysis_id}` -> `GetAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `GetAnalysisUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.
+- `PATCH /intake/analyses/{analysis_id}/name` -> `RenameAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `RenameAnalysisUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.
+- `PATCH /intake/analyses/{analysis_id}/archive` -> `ArchiveAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `ArchiveAnalysisUseCase` -> `AnalisysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.
+- `POST /intake/petitions` -> `CreatePetitionController` -> `AuthPipe` / `IntakePipe.verify_analysis_by_account(...)` -> `CreatePetitionUseCase` -> `PetitionsRepository` / `AnalisysesRepository` / `Broker` -> PostgreSQL (`petitions`, `petition_summaries`, `analyses`) -> `PetitionDto`.
+- `GET /intake/analyses/{analysis_id}/petition` -> `GetAnalysisPetitionController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `GetAnalysisPetitionUseCase` -> `PetitionsRepository` -> PostgreSQL (`petitions`) -> `PetitionDto`.
 - `POST /intake/petitions/{petition_id}/summary` -> `SummarizePetitionController` -> `AuthPipe` / `IntakePipe.verify_petition_document_path_by_account(...)` -> `StoragePipe` -> `GetDocumentContentUseCase` -> `FileStorageProvider` / `PdfProvider` / `DocxProvider` -> `SummarizePetitionWorkflow` -> `CreatePetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
+- `GET /intake/petitions/{petition_id}/summary` -> `GetPetitionSummaryController` -> `IntakePipe.verify_petition_by_account(...)` -> `GetPetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
+- `GET /intake/analyses/{analysis_id}/petitions` -> `ListAnalysisPetitionsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ListAnalysisPetitionsUseCase` -> `PetitionsRepository` / `PetitionSummariesRepository` -> PostgreSQL (`petitions`, `petition_summaries`) -> `ListResponse[AnalysisPetitionDto]`.
+- `POST /intake/analyses/{analysis_id}/precedents/search` -> `SearchAnalysisPrecedentsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `RequestAnalysisPrecedentsSearchUseCase` -> `Broker` -> `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob`.
+- `GET /intake/analyses/{analysis_id}/precedents` -> `ListAnalysisPrecedentsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ListAnalysisPrecedentsUseCase` -> `AnalysisPrecedentsRepository` -> PostgreSQL (`analysis_precedents`) -> `list[AnalysisPrecedentDto]`.
+- `GET /intake/analyses/{analysis_id}/status` -> `GetAnalysisStatusController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `Analysis.status` -> `AnalysisStatusDto`.
+- `PATCH /intake/analyses/{analysis_id}/precedents/choose` -> `ChooseAnalysisPrecedentController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ChooseAnalysisPrecedentUseCase` -> `AnalysisPrecedentsRepository` / `AnalisysesRepository` -> PostgreSQL (`analysis_precedents`, `analyses`) -> `AnalysisStatusDto`.
+
+Fluxo assincrono de precedentes:
+- `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratacao de precedentes.
+- O mesmo job segue para `GENERATING_SYNTHESIS`, executa o workflow de sintese, substitui os `analysis_precedents` persistidos e conclui em `WAITING_PRECEDENT_CHOISE`.
+- Em falhas nao tratadas, o job marca a `Analysis` como `FAILED`, preservando observabilidade por polling via status persistido.
+
+Fluxo assincrono de substituicao de peticao:
+- `CreatePetitionUseCase` detecta peticao anterior, publica `PetitionReplacedEvent`, remove a peticao antiga com cascade do `PetitionSummary` e atualiza a `Analysis` para `PETITION_UPLOADED` antes de persistir a nova peticao.
+- `PetitionReplacedEvent` -> `RemovePetitionDocumentFileJob` -> `GcsFileStorageProvider.remove_files(...)`, tratando blob inexistente como no-op para manter idempotencia.
 
 ## Padroes Principais
 

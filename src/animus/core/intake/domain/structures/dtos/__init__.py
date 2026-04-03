@@ -4,10 +4,23 @@ from typing import Any
 
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
-        'PetitionEmbeddingDto': ('.petition_embedding_dto', 'PetitionEmbeddingDto'),
+        'AnalysisReportDto': ('.analysis_report_dto', 'AnalysisReportDto'),
+        'PetitionSummaryEmbeddingDto': (
+            '.petition_summary_embedding_dto',
+            'PetitionSummaryEmbeddingDto',
+        ),
         'PrecedentEmbeddingDto': ('.precedent_embedding_dto', 'PrecedentEmbeddingDto'),
         'AnalysisPrecedentDto': ('.analysis_precedent_dto', 'AnalysisPrecedentDto'),
+        'AnalysisPetitionDto': ('.analysis_petition_dto', 'AnalysisPetitionDto'),
+        'AnalysisPrecedentsSearchFiltersDto': (
+            '.analysis_precedents_search_filters_dto',
+            'AnalysisPrecedentsSearchFiltersDto',
+        ),
         'PetitionSummaryDto': ('.petition_summary_dto', 'PetitionSummaryDto'),
+        'PrecedentIdentifierDto': (
+            '.precedent_identifier_dto',
+            'PrecedentIdentifierDto',
+        ),
     }
 
     export = exports.get(name)

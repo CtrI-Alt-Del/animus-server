@@ -11,9 +11,11 @@ from animus.core.intake.interfaces.analisyses_repository import AnalisysesReposi
 from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
 from animus.core.intake.use_cases.create_petition_use_case import CreatePetitionUseCase
 from animus.core.shared.domain.structures import Id
+from animus.core.shared.interfaces import Broker
 from animus.pipes.auth_pipe import AuthPipe
 from animus.pipes.database_pipe import DatabasePipe
 from animus.pipes.intake_pipe import IntakePipe
+from animus.pipes.pubsub_pipe import PubSubPipe
 
 
 class _DocumentBody(BaseModel):
@@ -45,14 +47,19 @@ class CreatePetitionController:
                 PetitionsRepository,
                 Depends(DatabasePipe.get_petitions_repository_from_request),
             ],
+            broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
         ) -> PetitionDto:
-            IntakePipe.verify_analysis_by_account(
+            IntakePipe.verify_analysis_by_account_from_request(
                 analysis_id=body.analysis_id,
                 account_id=account_id,
                 analisyses_repository=analisyses_repository,
             )
 
-            use_case = CreatePetitionUseCase(petitions_repository=petitions_repository)
+            use_case = CreatePetitionUseCase(
+                petitions_repository=petitions_repository,
+                analisyses_repository=analisyses_repository,
+                broker=broker,
+            )
 
             return use_case.execute(
                 analysis_id=body.analysis_id,

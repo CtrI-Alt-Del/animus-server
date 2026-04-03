@@ -1,0 +1,50 @@
+@baseUrl = http://localhost:8080
+@email = maria@example.com
+@password = Password123
+@analysisId = 01ARZ3NDEKTSV4RRFFQ69G5FAV
+
+###
+# @name signIn
+POST {{baseUrl}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+@accessToken = {{signIn.response.body.$.access_token.value}}
+
+GET {{baseUrl}}/auth/account
+Authorization: Bearer {{accessToken}}
+
+###
+POST {{baseUrl}}/intake/analyses
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "folder_id": null
+}
+
+###
+GET {{baseUrl}}/intake/analyses?limit=10&search=&is_archived=false
+Authorization: Bearer {{accessToken}}
+
+###
+GET {{baseUrl}}/intake/analyses/{{analysisId}}
+Authorization: Bearer {{accessToken}}
+
+###
+PATCH {{baseUrl}}/intake/analyses/{{analysisId}}/name
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Analise renomeada manualmente"
+}
+
+###
+PATCH {{baseUrl}}/intake/analyses/{{analysisId}}/archive
+Authorization: Bearer {{accessToken}}

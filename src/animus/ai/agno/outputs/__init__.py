@@ -1,3 +1,3 @@
-from .intake import PetitionSummaryOutput
+from .intake import AnalysisPrecedentsSynthesisOutput, PetitionSummaryOutput
 
-__all__ = ['PetitionSummaryOutput']
+__all__ = ['AnalysisPrecedentsSynthesisOutput', 'PetitionSummaryOutput']

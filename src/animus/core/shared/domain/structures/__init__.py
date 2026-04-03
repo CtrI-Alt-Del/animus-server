@@ -1,4 +1,5 @@
 from .id import Id
+from .file_path import FilePath
 from .name import Name
 from .text import Text
 from .integer import Integer
@@ -11,6 +12,7 @@ from .ttl import Ttl
 
 __all__ = [
     'Id',
+    'FilePath',
     'Name',
     'Text',
     'Integer',

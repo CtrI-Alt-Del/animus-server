@@ -3,7 +3,7 @@ from animus.core.intake.domain.errors import (
     UnreadablePetitionDocumentError,
     UnsupportedPetitionDocumentTypeError,
 )
-from animus.core.shared.domain.structures import Text
+from animus.core.shared.domain.structures import FilePath, Text
 from animus.core.storage.interfaces.docx_provider import DocxProvider
 from animus.core.storage.interfaces.file_storage_provider import FileStorageProvider
 from animus.core.storage.interfaces.pdf_provider import PdfProvider
@@ -28,13 +28,13 @@ class GetDocumentContentUseCase:
 
         return error.__class__.__name__ == 'NotFound'
 
-    def execute(self, file_path: str) -> Text:
-        file_extension = file_path.lower()
+    def execute(self, file_path: FilePath) -> Text:
+        file_extension = file_path.value.lower()
         if not file_extension.endswith(('.pdf', '.docx')):
             raise UnsupportedPetitionDocumentTypeError
 
         try:
-            file = self._file_storage_provider.get_file(Text.create(file_path))
+            file = self._file_storage_provider.get_file(file_path)
 
             if file_extension.endswith('.pdf'):
                 content = self._pdf_provider.extract_content(file)
