@@ -24,5 +24,6 @@ class AuthRouter:
         ResendVerificationEmailController.handle(router)
         SignInWithGoogleController.handle(router)
         GetAccountController.handle(router)
+        UpdateAccountController.handle(router)
 
         return router
