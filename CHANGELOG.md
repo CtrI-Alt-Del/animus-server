@@ -1,3 +1,17 @@
+# [1.12.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.11.0...v1.12.0) (2026-04-03)
+
+
+### Bug Fixes
+
+* **auth:** ANI-38 register UpdateAccountController in auth router ([728e833](https://github.com/CtrI-Alt-Del/animus-server/commit/728e833ba1be0e03022a7dc339e759a97c30fe98))
+* **auth:** ANI-38 Remove prd.md ([49080c6](https://github.com/CtrI-Alt-Del/animus-server/commit/49080c6a673e7b8d92cdf47c3020742f47e9f747))
+* **auth:** ANI-38 restore GetAccountController and resolve router conflict ([fb01fe8](https://github.com/CtrI-Alt-Del/animus-server/commit/fb01fe88019493930a52d6d67c730d36a891dbec))
+
+
+### Features
+
+* **auth:** ANI-38 implement update account name endpoint ([de68428](https://github.com/CtrI-Alt-Del/animus-server/commit/de68428b64e40dc2446c8884ab4a022ed817f53e))
+
 # [1.11.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.10.0...v1.11.0) (2026-04-02)
 
 
