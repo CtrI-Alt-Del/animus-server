@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from animus.core.intake.domain.entities.analysis import Analysis
+from animus.core.intake.domain.entities import Analysis, Petition
 from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     PetitionNotFoundError,
@@ -48,6 +48,28 @@ class IntakePipe:
             Depends(DatabasePipe.get_analisyses_repository_from_request),
         ],
     ) -> FilePath:
+        petition = IntakePipe.verify_petition_by_account(
+            petition_id=petition_id,
+            account_id=account_id,
+            petitions_repository=petitions_repository,
+            analisyses_repository=analisyses_repository,
+        )
+
+        return petition.document.file_path
+
+    @staticmethod
+    def verify_petition_by_account(
+        petition_id: IdSchema,
+        account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
+        petitions_repository: Annotated[
+            PetitionsRepository,
+            Depends(DatabasePipe.get_petitions_repository_from_request),
+        ],
+        analisyses_repository: Annotated[
+            AnalisysesRepository,
+            Depends(DatabasePipe.get_analisyses_repository_from_request),
+        ],
+    ) -> Petition:
         petition = petitions_repository.find_by_id(Id.create(petition_id))
         if petition is None:
             raise PetitionNotFoundError
@@ -59,4 +81,4 @@ class IntakePipe:
         if analysis.account_id.value != account_id.value:
             raise ForbiddenError('Peticao nao pertence a conta autenticada')
 
-        return petition.document.file_path
+        return petition

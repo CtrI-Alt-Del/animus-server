@@ -1,3 +1,48 @@
+# [1.12.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.11.0...v1.12.0) (2026-04-03)
+
+
+### Bug Fixes
+
+* **auth:** ANI-38 register UpdateAccountController in auth router ([728e833](https://github.com/CtrI-Alt-Del/animus-server/commit/728e833ba1be0e03022a7dc339e759a97c30fe98))
+* **auth:** ANI-38 Remove prd.md ([49080c6](https://github.com/CtrI-Alt-Del/animus-server/commit/49080c6a673e7b8d92cdf47c3020742f47e9f747))
+* **auth:** ANI-38 restore GetAccountController and resolve router conflict ([fb01fe8](https://github.com/CtrI-Alt-Del/animus-server/commit/fb01fe88019493930a52d6d67c730d36a891dbec))
+
+
+### Features
+
+* **auth:** ANI-38 implement update account name endpoint ([de68428](https://github.com/CtrI-Alt-Del/animus-server/commit/de68428b64e40dc2446c8884ab4a022ed817f53e))
+
+# [1.11.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.10.0...v1.11.0) (2026-04-02)
+
+
+### Bug Fixes
+
+* ANI-61 address PR review follow-ups ([3bd0e3d](https://github.com/CtrI-Alt-Del/animus-server/commit/3bd0e3df2e7c62c2efe79d3bf534112743f00dd0))
+* ANI-61 align account endpoint path with auth controller contract ([fef1430](https://github.com/CtrI-Alt-Del/animus-server/commit/fef143029d630df9ad27c5c03c5295507d5b0ae4))
+
+
+### Features
+
+* ANI-61 add analysis report structure ([0c833f2](https://github.com/CtrI-Alt-Del/animus-server/commit/0c833f2fa0574f63cbbaa49a9bd82bf2458eea67))
+* ANI-61 add intake analysis management endpoints ([7baa067](https://github.com/CtrI-Alt-Del/animus-server/commit/7baa06720d48f07fc0795107ae208c7d14be864f))
+* ANI-61 add storage router with petition upload url endpoint ([c1f0100](https://github.com/CtrI-Alt-Del/animus-server/commit/c1f01006bf719b9a4e1020ec4f31c265c263409e))
+* ANI-61 finalize petition replacement and summary flows ([aed3afe](https://github.com/CtrI-Alt-Del/animus-server/commit/aed3afec80e49ae5ae91138006ada610e920303a))
+* ANI-61 implement petition replacement flow and intake read endpoints ([1e4a93a](https://github.com/CtrI-Alt-Del/animus-server/commit/1e4a93ab72d88003616f6ad4d5f4e519c4197925))
+
+# [1.10.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.9.0...v1.10.0) (2026-04-01)
+
+
+### Bug Fixes
+
+* **auth:** ANI-29 restore legacy account profile route ([15690a6](https://github.com/CtrI-Alt-Del/animus-server/commit/15690a61d2685b6450fd5cfab71a303aacdb1988))
+
+
+### Features
+
+* **intake:** ANI-29 add analysis management endpoints ([d40c4db](https://github.com/CtrI-Alt-Del/animus-server/commit/d40c4dbdc5ec20383621a413674270018635766f))
+* **intake:** ANI-29 add validation for limit parameter in analysis listing ([18ec896](https://github.com/CtrI-Alt-Del/animus-server/commit/18ec896c8005f0ce5c92823bd6eb339d7f2e3570))
+* **intake:** ANI-29 implement analysis management endpoints and update pagination response handling ([7b49c5a](https://github.com/CtrI-Alt-Del/animus-server/commit/7b49c5ae25bc346269c593231d20f3f7ae27cd73))
+
 # [1.9.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.8.0...v1.9.0) (2026-03-31)
 
 

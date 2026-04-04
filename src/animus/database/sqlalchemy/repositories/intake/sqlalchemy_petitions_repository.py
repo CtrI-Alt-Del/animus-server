@@ -20,6 +20,15 @@ class SqlalchemyPetitionsRepository(PetitionsRepository):
 
         return PetitionMapper.to_entity(model)
 
+    def find_by_analysis_id(self, analysis_id: Id) -> Petition | None:
+        model = self._sqlalchemy.scalar(
+            select(PetitionModel).where(PetitionModel.analysis_id == analysis_id.value)
+        )
+        if model is None:
+            return None
+
+        return PetitionMapper.to_entity(model)
+
     def find_all_by_analysis_id_ordered_by_uploaded_at(
         self,
         analysis_id: Id,
@@ -39,3 +48,10 @@ class SqlalchemyPetitionsRepository(PetitionsRepository):
         self._sqlalchemy.add_all(
             [PetitionMapper.to_model(petition) for petition in petitions]
         )
+
+    def remove(self, petition_id: Id) -> None:
+        model = self._sqlalchemy.get(PetitionModel, petition_id.value)
+        if model is None:
+            return
+
+        self._sqlalchemy.delete(model)

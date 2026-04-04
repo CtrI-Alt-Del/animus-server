@@ -5,6 +5,7 @@ from animus.rest.controllers.auth import (
     ResendVerificationEmailController,
     SignInController,
     SignUpController,
+    UpdateAccountController,
     VerifyEmailController,
 )
 from animus.rest.controllers.auth.forgot_password_controller import ForgotPasswordController
@@ -29,5 +30,6 @@ class AuthRouter:
         ForgotPasswordController.handle(router)
         VerifyResetTokenController.handle(router)
         ResetPasswordController.handle(router)
+        UpdateAccountController.handle(router)
 
         return router
