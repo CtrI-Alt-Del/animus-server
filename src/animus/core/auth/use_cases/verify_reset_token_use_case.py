@@ -13,7 +13,7 @@ class VerifyResetTokenUseCase:
         self,
         email_verification_provider: EmailVerificationProvider,
         accounts_repository: AccountsRepository,
-    ):
+    )->None:
         self._accounts_repository = accounts_repository
         self._email_verification_provider = email_verification_provider
 

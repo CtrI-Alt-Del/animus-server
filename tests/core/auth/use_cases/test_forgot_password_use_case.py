@@ -53,7 +53,7 @@ class TestForgotPasswordUseCase:
         self.accounts_repository_mock.find_by_email.assert_called_once_with(
             expected_email_vo
         )
-        
+
         self.broker_mock.publish.assert_not_called()
 
     def _create_account(self) -> Account:

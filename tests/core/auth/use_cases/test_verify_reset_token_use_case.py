@@ -52,7 +52,7 @@ class TestVerifyResetTokenUseCase:
         result = self.use_case.execute(token=token_str)
 
         expected_token_vo = Text.create(token_str)
-        
+
         self.email_verification_provider_mock.verify_verification_token.assert_called_once_with(
             expected_token_vo
         )

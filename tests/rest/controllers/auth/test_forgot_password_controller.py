@@ -35,22 +35,22 @@ class TestForgotPasswordController:
         assert response.content == b''
 
     def test_should_return_422_when_email_is_missing_in_body(
-        self, 
+        self,
         client: TestClient
     ) -> None:
         response = client.post(
             '/auth/password/forgot',
-            json={},  
+            json={},
         )
 
         assert response.status_code == 422
 
     def test_should_return_422_when_email_is_invalid_type(
-        self, 
+        self,
         client: TestClient
     ) -> None:
         response = client.post(
             '/auth/password/forgot',
-            json={'email': 12345},  
+            json={'email': 12345},
         )
         assert response.status_code == 422

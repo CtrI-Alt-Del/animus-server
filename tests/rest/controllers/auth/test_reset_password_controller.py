@@ -22,7 +22,7 @@ class TestResetPasswordController:
                 'new_password': 'StrongPassword123'
             },
         )
-        assert response.status_code == 200 
+        assert response.status_code == 200
 
     def test_should_return_404_when_account_does_not_exist(
         self,
