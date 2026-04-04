@@ -13,7 +13,7 @@ class PetitionSummaryModel(Model):
 
     petition_id: Mapped[str] = mapped_column(
         String(26),
-        ForeignKey('petitions.id'),
+        ForeignKey('petitions.id', ondelete='CASCADE'),
         primary_key=True,
     )
     case_summary: Mapped[str] = mapped_column(Text, nullable=False)
