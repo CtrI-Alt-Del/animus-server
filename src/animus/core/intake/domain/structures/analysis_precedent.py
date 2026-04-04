@@ -14,6 +14,7 @@ class AnalysisPrecedent(Structure):
     is_chosen: Logical
     applicability_percentage: Percentage | None
     synthesis: Text | None
+    classification_level: Text | None = None
 
     @classmethod
     def create(cls, dto: AnalysisPrecedentDto) -> 'AnalysisPrecedent':
@@ -27,6 +28,11 @@ class AnalysisPrecedent(Structure):
             ),
             is_chosen=Logical.create(dto.is_chosen),
             synthesis=Text.create(dto.synthesis) if dto.synthesis is not None else None,
+            classification_level=(
+                Text.create(dto.classification_level)
+                if dto.classification_level is not None
+                else None
+            ),
         )
 
     @property
@@ -41,4 +47,9 @@ class AnalysisPrecedent(Structure):
                 else None
             ),
             is_chosen=self.is_chosen.value,
+            classification_level=(
+                self.classification_level.value
+                if self.classification_level is not None
+                else None
+            ),
         )

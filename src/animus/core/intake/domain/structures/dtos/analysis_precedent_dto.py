@@ -9,3 +9,4 @@ class AnalysisPrecedentDto:
     is_chosen: bool = False
     applicability_percentage: float | None = None
     synthesis: str | None = None
+    classification_level: str | None = None
