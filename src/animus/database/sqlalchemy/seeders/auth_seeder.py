@@ -12,10 +12,11 @@ class AuthSeeder:
         self._hash_provider = hash_provider
 
     def seed(self) -> list[Id]:
-        account_email = 'animus.ctrlaltdel@gmail.com'
-        account_password = 'Senha@123'
+        account_email = "animus.ctrlaltdel@gmail.com"
+        account_password = "Senha@123"
 
         account = AccountsFaker.fake(
+            name="Juan Hassam",
             email=account_email,
             password=account_password,
             is_verified=True,

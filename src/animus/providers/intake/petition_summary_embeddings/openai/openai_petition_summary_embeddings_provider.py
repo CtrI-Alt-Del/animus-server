@@ -18,27 +18,27 @@ class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider)
     _BATCH_DELAY = 6.0
 
     _ACCESSORY_MARKERS = (
-        'súmula 85',
-        'sumula 85',
-        '11.960',
-        'ipca-e',
-        'juros',
-        'correção monetária',
-        'correcao monetaria',
-        'prescrição',
-        'prescricao',
-        'quinquênio',
-        'quinquenio',
-        'parcelas vencidas',
-        'parcelas vincendas',
-        'honorários',
-        'honorarios',
-        'custas',
+        "súmula 85",
+        "sumula 85",
+        "11.960",
+        "ipca-e",
+        "juros",
+        "correção monetária",
+        "correcao monetaria",
+        "prescrição",
+        "prescricao",
+        "quinquênio",
+        "quinquenio",
+        "parcelas vencidas",
+        "parcelas vincendas",
+        "honorários",
+        "honorarios",
+        "custas",
     )
 
     def __init__(self) -> None:
         self._client = OpenAI(api_key=Env.OPENAI_API_KEY)
-        self._model = 'text-embedding-3-large'
+        self._model = "text-embedding-3-large"
 
     def generate(
         self,
@@ -46,26 +46,22 @@ class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider)
     ) -> list[PetitionSummaryEmbedding]:
         texts_to_embed: list[str] = []
 
-        # 1) Controvérsia central
         texts_to_embed.append(petition_summary.case_summary.value)
         texts_to_embed.append(petition_summary.legal_issue.value)
         texts_to_embed.append(petition_summary.central_question.value)
 
-        # 2) Leis relevantes
         core_laws = [
             item.value
             for item in petition_summary.relevant_laws
             if not self._is_accessory_text(item.value)
         ]
         if core_laws:
-            texts_to_embed.append('Fundamentos normativos: ' + ' | '.join(core_laws))
+            texts_to_embed.append("Fundamentos normativos: " + " | ".join(core_laws))
 
-        # 3) Fatos relevantes
         for item in petition_summary.key_facts:
             if not self._is_accessory_text(item.value):
                 texts_to_embed.append(item.value)
 
-        # 4) Search terms — cada termo vira um chunk individual
         for item in petition_summary.search_terms:
             if not self._is_accessory_text(item.value):
                 texts_to_embed.append(item.value)

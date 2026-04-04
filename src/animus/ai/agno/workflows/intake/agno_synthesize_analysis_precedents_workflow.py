@@ -1,3 +1,4 @@
+from textwrap import dedent
 from typing import TYPE_CHECKING, NamedTuple, cast
 
 from agno.run.base import RunContext
@@ -21,8 +22,8 @@ if TYPE_CHECKING:
 
 
 class _StepNames(NamedTuple):
-    BUILD_SYNTHESIS_INPUT: str = 'build-synthesis-input'
-    SYNTHESIZE_ANALYSIS_PRECEDENTS: str = 'synthesize-analysis-precedents'
+    BUILD_SYNTHESIS_INPUT: str = "build-synthesis-input"
+    SYNTHESIZE_ANALYSIS_PRECEDENTS: str = "synthesize-analysis-precedents"
 
 
 class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkflow):
@@ -35,27 +36,34 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
         petition_summary: PetitionSummary,
         analysis_precedents: list[AnalysisPrecedentDto],
     ) -> ListResponse[AnalysisPrecedent]:
+        return ListResponse(
+            items=[AnalysisPrecedent.create(dto) for dto in analysis_precedents]
+        )
         if not analysis_precedents:
             return ListResponse(items=[])
 
         workflow = Workflow(
-            name='synthesize-analysis-precedents',
+            name="synthesize-analysis-precedents",
             steps=[
                 Step(
                     name=self._step_names.BUILD_SYNTHESIS_INPUT,
-                    executor=cast('StepExecutor', self._build_synthesis_input_step),
+                    executor=cast("StepExecutor", self._build_synthesis_input_step),
+                ),
+                Step(
+                    name=self._step_names.SYNTHESIZE_ANALYSIS_PRECEDENTS,
+                    agent=self._team.analysis_precedents_synthesizer_agent,
                 ),
             ],
             session_state={
-                'petition_summary': petition_summary,
-                'analysis_precedents': analysis_precedents,
+                "petition_summary": petition_summary,
+                "analysis_precedents": analysis_precedents,
             },
         )
 
-        output = workflow.run(input='start')
-        analysis_precedents_entities = cast('list[AnalysisPrecedent]', output.content)
+        output = workflow.run(input="start")
+        synthesis_output = self._normalize_synthesis_output(output.content)
 
-        return ListResponse(items=analysis_precedents_entities)
+        return self._merge_syntheses(analysis_precedents, synthesis_output)
 
     def _build_synthesis_input_step(
         self,
@@ -63,37 +71,63 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
         run_context: RunContext,
     ) -> StepOutput:
         if run_context.session_state is None:
-            raise AppError('Erro de sessão', 'Session state is required')
+            raise AppError("Erro de sessão", "Session state is required")
 
-        petition_summary = run_context.session_state.get('petition_summary')
-        analysis_precedents = run_context.session_state.get('analysis_precedents')
+        petition_summary = run_context.session_state.get("petition_summary")
+        analysis_precedents = run_context.session_state.get("analysis_precedents")
 
         if not isinstance(petition_summary, PetitionSummary):
-            msg = 'Petition summary is required to build precedents synthesis input'
-            raise AppError('Erro de execução do workflow', msg)
+            msg = "Petition summary is required to build precedents synthesis input"
+            raise AppError("Erro de execução do workflow", msg)
 
         if not isinstance(analysis_precedents, list):
-            msg = 'Analysis precedents are required to build precedents synthesis input'
-            raise AppError('Erro de execução do workflow', msg)
+            msg = "Analysis precedents are required to build precedents synthesis input"
+            raise AppError("Erro de execução do workflow", msg)
 
         analysis_precedents_dto = cast(
-            'list[AnalysisPrecedentDto]', analysis_precedents
+            "list[AnalysisPrecedentDto]", analysis_precedents
         )
 
-        result: list[AnalysisPrecedent] = [
-            AnalysisPrecedent.create(
-                AnalysisPrecedentDto(
-                    analysis_id=dto.analysis_id,
-                    precedent=dto.precedent,
-                    is_chosen=dto.is_chosen,
-                    applicability_percentage=dto.applicability_percentage,
-                    synthesis='',
+        petition_summary_dto = petition_summary.dto
+        precedents_input = "\n".join(
+            [
+                dedent(
+                    f"""
+                    {index}. court: {analysis_precedent.precedent.identifier.court}
+                       kind: {analysis_precedent.precedent.identifier.kind}
+                       number: {analysis_precedent.precedent.identifier.number}
+                       applicability_percentage: {analysis_precedent.applicability_percentage}
+                       status: {analysis_precedent.precedent.status}
+                       enunciation: {analysis_precedent.precedent.enunciation}
+                       thesis: {analysis_precedent.precedent.thesis}
+                    """
+                ).strip()
+                for index, analysis_precedent in enumerate(
+                    analysis_precedents_dto,
+                    start=1,
                 )
-            )
-            for dto in analysis_precedents_dto
-        ]
+            ]
+        )
 
-        return StepOutput(content=result)
+        prompt = dedent(
+            f"""
+            Relacione os precedentes candidatos com a peticao e retorne uma sintese
+            para cada precedente no formato estruturado esperado.
+
+            Resumo da peticao:
+            - case_summary: {petition_summary_dto.case_summary}
+            - legal_issue: {petition_summary_dto.legal_issue}
+            - central_question: {petition_summary_dto.central_question}
+            - relevant_laws: {", ".join(petition_summary_dto.relevant_laws)}
+            - key_facts: {", ".join(petition_summary_dto.key_facts)}
+            - search_terms: {", ".join(petition_summary_dto.search_terms)}
+
+            Precedentes candidatos:
+            {precedents_input}
+            """
+        ).strip()
+
+        return StepOutput(content=prompt)
 
     def _normalize_synthesis_output(
         self,
@@ -102,8 +136,8 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
         if isinstance(output, AnalysisPrecedentsSynthesisOutput):
             return output
 
-        msg = 'Invalid synthesis output type from analysis precedents workflow'
-        raise AppError('Erro de execução do workflow', msg)
+        msg = "Invalid synthesis output type from analysis precedents workflow"
+        raise AppError("Erro de execução do workflow", msg)
 
     def _merge_syntheses(
         self,
@@ -114,8 +148,8 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
         for item in synthesis_output.items:
             identifier_key = (item.court, item.kind, item.number)
             if identifier_key in syntheses_by_identifier:
-                msg = 'Duplicate precedent identifier returned by synthesis workflow'
-                raise AppError('Erro de execução do workflow', msg)
+                msg = "Duplicate precedent identifier returned by synthesis workflow"
+                raise AppError("Erro de execução do workflow", msg)
 
             syntheses_by_identifier[identifier_key] = item.synthesis.strip()
 
@@ -129,8 +163,8 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
             )
             synthesis = syntheses_by_identifier.get(identifier_key)
             if not synthesis:
-                msg = 'Missing synthesis for at least one precedent identifier'
-                raise AppError('Erro de execução do workflow', msg)
+                msg = "Missing synthesis for at least one precedent identifier"
+                raise AppError("Erro de execução do workflow", msg)
 
             analysis_precedent_entities.append(
                 AnalysisPrecedent.create(

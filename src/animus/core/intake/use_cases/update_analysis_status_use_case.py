@@ -11,6 +11,7 @@ class UpdateAnalysisStatusUseCase:
         self._analisyses_repository = analisyses_repository
 
     def execute(self, analysis_id: str, status: str) -> None:
+        print("update analysis status", status)
         analysis_id_entity = Id.create(analysis_id)
         analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
 
