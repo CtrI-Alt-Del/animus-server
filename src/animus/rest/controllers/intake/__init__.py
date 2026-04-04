@@ -3,6 +3,7 @@ from .choose_analysis_precedent_controller import ChooseAnalysisPrecedentControl
 from .create_analysis_controller import CreateAnalysisController
 from .create_petition_controller import CreatePetitionController
 from .get_analysis_controller import GetAnalysisController
+from .get_analysis_report_controller import GetAnalysisReportController
 from .get_analysis_status_controller import GetAnalysisStatusController
 from .list_analyses_controller import ListAnalysesController
 from .get_analysis_petition_controller import GetAnalysisPetitionController
@@ -22,6 +23,7 @@ __all__ = [
     'GetPetitionSummaryController',
     'GetAnalysisStatusController',
     'GetAnalysisController',
+    'GetAnalysisReportController',
     'ListAnalysesController',
     'ListAnalysisPetitionsController',
     'ListAnalysisPrecedentsController',
