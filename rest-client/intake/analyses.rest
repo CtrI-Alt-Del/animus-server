@@ -1,6 +1,6 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KMQTN9YCHWG20ZZEPNBRYW87
-@petition_id = 01KN59VDDZ20HJ76RDG4V02GJ5
+@analysis_id = 01KNCRS2GYE4YDC16BZNG661M2
+@petition_id = 01KNCDNWDAHD1H3A3DD1NFDPR9
 @precedent_court = STJ
 @precedent_kind = RR
 @precedent_number = 974
@@ -18,10 +18,6 @@ Content-Type: application/json
 
 ### Consultar status da analise (GetAnalysisStatusController)
 GET {{url}}/analyses/{{analysis_id}}/status
-Authorization: Bearer {{ACCESS_TOKEN}}
-
-### Listar peticoes da analise (ListAnalysisPetitionsController)
-GET {{url}}/analyses/{{analysis_id}}/petitions
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Obter peticao atual da analise (GetAnalysisPetitionController)
