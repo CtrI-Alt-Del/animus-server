@@ -17,4 +17,6 @@ class GetAccountUseCase:
         if account.is_active.is_false:
             raise AccountInactiveError
 
-        return account.dto
+        dto = account.dto
+        dto.password = None
+        return dto
