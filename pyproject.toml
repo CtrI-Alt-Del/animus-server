@@ -89,7 +89,7 @@ shell = "ruff check --fix src tests && ruff format --check src tests"
 
 [tool.ruff]
 line-length = 88
-target-version = "1.12.0"
+target-version = "py313"
 fix = true
 show-fixes = true
 indent-width = 4
