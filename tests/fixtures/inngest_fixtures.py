@@ -1,4 +1,5 @@
 import json
+import random
 import socket
 import threading
 import time
@@ -28,7 +29,8 @@ class InngestTestRuntime:
                 data=payload,
                 headers={'Content-Type': 'application/json'},
                 method='POST',
-            )
+            ),
+            timeout=10,
         )
         return cast('HTTPResponse', response)
 
@@ -49,6 +51,27 @@ def _find_free_port() -> int:
         sock.bind(('127.0.0.1', 0))
         sock.listen(1)
         return int(sock.getsockname()[1])
+
+
+def _find_free_port_in_range(
+    *,
+    host: str = '127.0.0.1',
+    start: int = 20000,
+    end: int = 40000,
+    attempts: int = 50,
+) -> int:
+    for _ in range(attempts):
+        candidate = random.randint(start, end)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.bind((host, candidate))
+                sock.listen(1)
+                return candidate
+            except OSError:
+                continue
+
+    msg = 'could not find free port in allowed range'
+    raise RuntimeError(msg)
 
 
 def _wait_until(
@@ -81,7 +104,7 @@ def inngest_runtime(
     sqlalchemy_session_factory: SessionFactory,
 ) -> Iterator[InngestTestRuntime]:
     app_port = _find_free_port()
-    inngest_port = _find_free_port()
+    inngest_port = _find_free_port_in_range()
 
     def _get_session() -> Session:
         return sqlalchemy_session_factory()

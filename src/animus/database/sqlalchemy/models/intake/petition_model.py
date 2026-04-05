@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime  # noqa: TC003
 from typing import Any
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from animus.database.sqlalchemy.models.model import Model
@@ -13,7 +13,12 @@ class PetitionModel(Model):
     __tablename__ = 'petitions'
 
     id: Mapped[str] = mapped_column(String(26), primary_key=True)
-    analysis_id: Mapped[str] = mapped_column(String(26), nullable=False, index=True)
+    analysis_id: Mapped[str] = mapped_column(
+        String(26),
+        ForeignKey('analyses.id', ondelete='CASCADE'),
+        nullable=False,
+        index=True,
+    )
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
@@ -26,3 +31,4 @@ class PetitionModel(Model):
         uselist=False,
         cascade='all, delete-orphan',
     )
+    analysis: Mapped[Any] = relationship('AnalysisModel', back_populates='petitions')

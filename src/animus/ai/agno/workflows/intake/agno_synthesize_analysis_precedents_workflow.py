@@ -36,9 +36,6 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
         petition_summary: PetitionSummary,
         analysis_precedents: list[AnalysisPrecedentDto],
     ) -> ListResponse[AnalysisPrecedent]:
-        return ListResponse(
-            items=[AnalysisPrecedent.create(dto) for dto in analysis_precedents]
-        )
         if not analysis_precedents:
             return ListResponse(items=[])
 

@@ -9,6 +9,7 @@ from animus.pubsub.inngest.jobs.auth import SendAccountVerificationEmailJob
 from animus.pubsub.inngest.jobs.intake import (
     RemovePetitionDocumentFileJob,
     SearchAnalysisPrecedentsJob,
+    SummarizePetitionJob,
     VectorizeAllPrecedentsJob,
     VectorizePrecedentsJob,
 )
@@ -48,6 +49,7 @@ class InngestPubSub:
         return [
             RemovePetitionDocumentFileJob.handle(inngest),
             SearchAnalysisPrecedentsJob.handle(inngest),
+            SummarizePetitionJob.handle(inngest),
             VectorizeAllPrecedentsJob.handle(inngest),
             VectorizePrecedentsJob.handle(inngest),
         ]

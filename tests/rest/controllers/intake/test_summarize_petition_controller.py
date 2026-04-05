@@ -2,13 +2,11 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.entities.dtos.petition_document_dto import (
     PetitionDocumentDto,
 )
-from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
-    PetitionSummaryDto,
-)
-from animus.core.shared.domain.structures import Text
+from animus.core.shared.domain.structures import Id, Text
 from animus.database.sqlalchemy.repositories.intake.sqlalchemy_analisyses_repository import (
     SqlalchemyAnalisysesRepository,
 )
@@ -17,42 +15,9 @@ from animus.database.sqlalchemy.repositories.intake.sqlalchemy_petitions_reposit
 )
 from animus.fakers.intake.entities.analyses_faker import AnalysesFaker
 from animus.fakers.intake.entities.petitions_faker import PetitionsFaker
-from animus.pipes.ai_pipe import AiPipe
-from animus.pipes.providers_pipe import ProvidersPipe
 from animus.providers.auth.jwt.jose.jose_jwt_provider import JoseJwtProvider
 from tests.fixtures.auth_fixtures import CreateAccountFixture
-from tests.fixtures.gcs_fixtures import UploadGcsFileFixture
-
-
-class FakePdfProvider:
-    def __init__(self, content: str) -> None:
-        self.content = content
-        self.calls_count = 0
-
-    def extract_content(self, pdf_file: object) -> Text:
-        self.calls_count += 1
-        return Text.create(self.content)
-
-
-class FakeDocxProvider:
-    def extract_content(self, docx_file: object) -> Text:
-        raise AssertionError('DOCX provider should not be used in this scenario')
-
-
-class FakeSummarizePetitionWorkflow:
-    def __init__(self, response: PetitionSummaryDto) -> None:
-        self.response = response
-        self.received_petition_id: str | None = None
-        self.received_document_content: Text | None = None
-
-    def run(
-        self,
-        petition_id: str,
-        petition_document_content: Text,
-    ) -> PetitionSummaryDto:
-        self.received_petition_id = petition_id
-        self.received_document_content = petition_document_content
-        return self.response
+from tests.fixtures.inngest_fixtures import FakeInngestClient
 
 
 def _make_access_token(account_id: str) -> str:
@@ -85,88 +50,47 @@ def _create_analysis_and_petition(
 
 
 class TestSummarizePetitionController:
-    def test_should_return_201_and_petition_summary_when_petition_exists(
+    def test_should_return_202_publish_event_and_update_analysis_status(
         self,
         client: TestClient,
         create_account: CreateAccountFixture,
         sqlalchemy_session_factory: sessionmaker[Session],
-        upload_gcs_file: UploadGcsFileFixture,
+        fake_inngest_client: FakeInngestClient,
     ) -> None:
         account = create_account(is_verified=True, is_active=True)
         access_token = _make_access_token(account.id)
-        _, _, petition_id = _create_analysis_and_petition(
+        _, analysis_id, petition_id = _create_analysis_and_petition(
             sqlalchemy_session_factory,
             account.id,
         )
-        upload_gcs_file(
-            'intake/analyses/01TEST/petitions/petition.pdf',
-            b'%PDF-1.4 fake petition bytes',
-            'application/pdf',
-        )
-        fake_pdf_provider = FakePdfProvider('Fatos e pedidos da peticao inicial')
-        fake_workflow = FakeSummarizePetitionWorkflow(
-            PetitionSummaryDto(
-                case_summary='Resumo objetivo da peticao inicial',
-                legal_issue='Controvérsia sobre inadimplemento contratual',
-                central_question='Há inadimplemento apto a justificar condenação?',
-                relevant_laws=['Código Civil, Art. 389', 'Código Civil, Art. 395'],
-                key_facts=[
-                    'Resumo dos fatos',
-                    'Resumo dos fundamentos juridicos',
-                ],
-                search_terms=[
-                    'inadimplemento contratual',
-                    'obrigacao de pagar',
-                    'responsabilidade contratual',
-                ],
-            )
-        )
         app = client.app
         assert isinstance(app, FastAPI)
-        app.dependency_overrides[ProvidersPipe.get_pdf_provider] = lambda: (
-            fake_pdf_provider
-        )
-        app.dependency_overrides[ProvidersPipe.get_docx_provider] = lambda: (
-            FakeDocxProvider()
-        )
-        app.dependency_overrides[AiPipe.get_summarize_petition_workflow] = lambda: (
-            fake_workflow
-        )
 
         response = client.post(
             f'/intake/petitions/{petition_id}/summary',
             headers={'Authorization': f'Bearer {access_token}'},
         )
 
-        assert response.status_code == 201
-        assert response.json() == {
-            'case_summary': 'Resumo objetivo da peticao inicial',
-            'legal_issue': 'Controvérsia sobre inadimplemento contratual',
-            'central_question': 'Há inadimplemento apto a justificar condenação?',
-            'relevant_laws': [
-                'Código Civil, Art. 389',
-                'Código Civil, Art. 395',
-            ],
-            'key_facts': [
-                'Resumo dos fatos',
-                'Resumo dos fundamentos juridicos',
-            ],
-            'search_terms': [
-                'inadimplemento contratual',
-                'obrigacao de pagar',
-                'responsabilidade contratual',
-            ],
-        }
-        assert fake_pdf_provider.calls_count == 1
-        assert fake_workflow.received_petition_id == petition_id
-        assert fake_workflow.received_document_content == Text.create(
-            'Fatos e pedidos da peticao inicial'
+        assert response.status_code == 202
+        assert len(fake_inngest_client.sent_events) == 1
+        assert (
+            fake_inngest_client.sent_events[0].name
+            == 'intake/petition.summary.requested'
         )
+        assert fake_inngest_client.sent_events[0].data['petition_id'] == petition_id
+
+        session = sqlalchemy_session_factory()
+        analysis = SqlalchemyAnalisysesRepository(session).find_by_id(Id.create(analysis_id))
+        session.close()
+
+        assert analysis is not None
+        assert analysis.status.value == AnalysisStatusValue.ANALYZING_PETITION
 
     def test_should_return_404_when_petition_does_not_exist(
         self,
         client: TestClient,
         create_account: CreateAccountFixture,
+        fake_inngest_client: FakeInngestClient,
     ) -> None:
         account = create_account(is_verified=True, is_active=True)
         access_token = _make_access_token(account.id)
@@ -181,3 +105,4 @@ class TestSummarizePetitionController:
             'title': 'Not Found Error',
             'message': 'Peticao nao encontrada',
         }
+        assert len(fake_inngest_client.sent_events) == 0

@@ -41,7 +41,7 @@ class TestRemovePetitionDocumentFileJob:
 
         assert response.status == 200
 
-        deadline = time.monotonic() + 90
+        deadline = time.monotonic() + 20
         while time.monotonic() < deadline:
             if len(captured_calls) == 1:
                 break

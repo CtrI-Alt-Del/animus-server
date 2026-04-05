@@ -13,6 +13,7 @@ from .rename_analysis_use_case import RenameAnalysisUseCase
 from .request_analysis_precedents_search_use_case import (
     RequestAnalysisPrecedentsSearchUseCase,
 )
+from .request_petition_summary_use_case import RequestPetitionSummaryUseCase
 from .search_analysis_precedents_use_case import SearchAnalysisPrecedentsUseCase
 from .update_analysis_status_use_case import UpdateAnalysisStatusUseCase
 from .vectorize_all_precedents_use_case import VectorizeAllPrecedentsUseCase
@@ -31,6 +32,7 @@ __all__ = [
     'ListAnalysisPrecedentsUseCase',
     'RenameAnalysisUseCase',
     'RequestAnalysisPrecedentsSearchUseCase',
+    'RequestPetitionSummaryUseCase',
     'SearchAnalysisPrecedentsUseCase',
     'UpdateAnalysisStatusUseCase',
     'VectorizeAllPrecedentsUseCase',
