@@ -51,5 +51,4 @@ class SearchAnalysisPrecedentsController:
                 broker=broker,
             )
             use_case.execute(analysis_id=analysis_id, dto=body.to_dto())
-
             return Response(status_code=202)

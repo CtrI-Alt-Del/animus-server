@@ -46,12 +46,10 @@ class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider)
     ) -> list[PetitionSummaryEmbedding]:
         texts_to_embed: list[str] = []
 
-        # 1) Controvérsia central
         texts_to_embed.append(petition_summary.case_summary.value)
         texts_to_embed.append(petition_summary.legal_issue.value)
         texts_to_embed.append(petition_summary.central_question.value)
 
-        # 2) Leis relevantes
         core_laws = [
             item.value
             for item in petition_summary.relevant_laws
@@ -60,12 +58,10 @@ class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider)
         if core_laws:
             texts_to_embed.append('Fundamentos normativos: ' + ' | '.join(core_laws))
 
-        # 3) Fatos relevantes
         for item in petition_summary.key_facts:
             if not self._is_accessory_text(item.value):
                 texts_to_embed.append(item.value)
 
-        # 4) Search terms — cada termo vira um chunk individual
         for item in petition_summary.search_terms:
             if not self._is_accessory_text(item.value):
                 texts_to_embed.append(item.value)

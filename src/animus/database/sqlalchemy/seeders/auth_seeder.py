@@ -16,6 +16,7 @@ class AuthSeeder:
         account_password = 'Senha@123'
 
         account = AccountsFaker.fake(
+            name='Juan Hassam',
             email=account_email,
             password=account_password,
             is_verified=True,

@@ -1,10 +1,12 @@
 import json
+import secrets
 import socket
 import threading
 import time
 from collections.abc import Callable, Iterator
 from http.client import HTTPResponse
 from typing import Any, cast
+from urllib.error import URLError
 from urllib import request
 
 import pytest
@@ -28,7 +30,8 @@ class InngestTestRuntime:
                 data=payload,
                 headers={'Content-Type': 'application/json'},
                 method='POST',
-            )
+            ),
+            timeout=10,
         )
         return cast('HTTPResponse', response)
 
@@ -49,6 +52,28 @@ def _find_free_port() -> int:
         sock.bind(('127.0.0.1', 0))
         sock.listen(1)
         return int(sock.getsockname()[1])
+
+
+def _find_free_port_in_range(
+    *,
+    host: str = '127.0.0.1',
+    start: int = 20000,
+    end: int = 40000,
+    attempts: int = 50,
+) -> int:
+    for _ in range(attempts):
+        candidate = start + secrets.randbelow(end - start + 1)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.bind((host, candidate))
+                sock.listen(1)
+            except OSError:
+                continue
+            else:
+                return candidate
+
+    msg = 'could not find free port in allowed range'
+    raise RuntimeError(msg)
 
 
 def _wait_until(
@@ -75,13 +100,25 @@ def _can_connect(*, host: str, port: int) -> bool:
         return True
 
 
+def _is_inngest_http_ready(*, base_url: str) -> bool:
+    try:
+        request.urlopen(  # noqa: S310
+            request.Request(url=f'{base_url}/health', method='GET'),  # noqa: S310
+            timeout=1,
+        )
+    except (URLError, OSError, TimeoutError):
+        return False
+
+    return True
+
+
 @pytest.fixture
 def inngest_runtime(
     monkeypatch: pytest.MonkeyPatch,
     sqlalchemy_session_factory: SessionFactory,
 ) -> Iterator[InngestTestRuntime]:
     app_port = _find_free_port()
-    inngest_port = _find_free_port()
+    inngest_port = _find_free_port_in_range()
 
     def _get_session() -> Session:
         return sqlalchemy_session_factory()
@@ -119,13 +156,18 @@ def inngest_runtime(
             .with_bind_ports(8288, inngest_port)
             .with_kwargs(extra_hosts={'host.docker.internal': 'host-gateway'})
         ) as _inngest_container:
+            base_url = f'http://127.0.0.1:{inngest_port}'
             _wait_until(
                 lambda: _can_connect(host='127.0.0.1', port=inngest_port),
                 timeout_seconds=30,
             )
+            _wait_until(
+                lambda: _is_inngest_http_ready(base_url=base_url),
+                timeout_seconds=30,
+            )
             time.sleep(5)
 
-            yield InngestTestRuntime(base_url=f'http://127.0.0.1:{inngest_port}')
+            yield InngestTestRuntime(base_url=base_url)
     finally:
         server.should_exit = True
         server_thread.join(timeout=10)

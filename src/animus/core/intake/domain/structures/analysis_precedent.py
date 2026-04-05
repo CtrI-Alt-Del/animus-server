@@ -1,4 +1,7 @@
 from animus.core.intake.domain.entities.precedent import Precedent
+from animus.core.intake.domain.structures.analysis_precedent_classification_level import (
+    AnalysisPrecedentClassificationLevel,
+)
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
 )
@@ -14,6 +17,7 @@ class AnalysisPrecedent(Structure):
     is_chosen: Logical
     applicability_percentage: Percentage | None
     synthesis: Text | None
+    classification_level: AnalysisPrecedentClassificationLevel
 
     @classmethod
     def create(cls, dto: AnalysisPrecedentDto) -> 'AnalysisPrecedent':
@@ -27,6 +31,9 @@ class AnalysisPrecedent(Structure):
             ),
             is_chosen=Logical.create(dto.is_chosen),
             synthesis=Text.create(dto.synthesis) if dto.synthesis is not None else None,
+            classification_level=AnalysisPrecedentClassificationLevel.create(
+                dto.applicability_percentage
+            ),
         )
 
     @property
@@ -41,4 +48,5 @@ class AnalysisPrecedent(Structure):
                 else None
             ),
             is_chosen=self.is_chosen.value,
+            classification_level=self.classification_level.dto,
         )

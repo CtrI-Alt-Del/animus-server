@@ -125,7 +125,7 @@ def _get_analysis_precedents(
         session.close()
 
 
-def _wait_until(predicate: Any, *, timeout_seconds: float = 60) -> None:
+def _wait_until(predicate: Any, *, timeout_seconds: float = 20) -> None:
     deadline = time.monotonic() + timeout_seconds
     while time.monotonic() < deadline:
         if predicate():
@@ -218,7 +218,7 @@ class TestSearchAnalysisPrecedentsJob:
 
         assert response.status == 200
 
-        _wait_until(lambda: len(captured_steps) == 2)
+        _wait_until(lambda: len(captured_steps) == 2, timeout_seconds=20)
 
         assert captured_steps == [
             {

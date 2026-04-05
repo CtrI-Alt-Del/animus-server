@@ -1,16 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 
-from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
-    PetitionSummaryDto,
-)
-from animus.core.intake.interfaces.summarize_petition_workflow import (
-    SummarizePetitionWorkflow,
-)
-from animus.core.shared.domain.structures import Text
-from animus.pipes.ai_pipe import AiPipe
-from animus.pipes.storage_pipe import StoragePipe
+from animus.core.intake.domain.entities import Petition
+from animus.core.intake.interfaces import AnalisysesRepository, PetitionsRepository
+from animus.core.intake.use_cases import RequestPetitionSummaryUseCase
+from animus.core.shared.interfaces import Broker
+from animus.pipes.database_pipe import DatabasePipe
+from animus.pipes.intake_pipe import IntakePipe
+from animus.pipes.pubsub_pipe import PubSubPipe
 
 
 class SummarizePetitionController:
@@ -18,21 +16,28 @@ class SummarizePetitionController:
     def handle(router: APIRouter) -> None:
         @router.post(
             '/petitions/{petition_id}/summary',
-            status_code=201,
-            response_model=PetitionSummaryDto,
+            status_code=202,
         )
         def _(
             petition_id: str,
-            document_content: Annotated[
-                Text,
-                Depends(StoragePipe.get_document_content),
+            _petition: Annotated[
+                Petition,
+                Depends(IntakePipe.verify_petition_by_account),
             ],
-            workflow: Annotated[
-                SummarizePetitionWorkflow,
-                Depends(AiPipe.get_summarize_petition_workflow),
+            petitions_repository: Annotated[
+                PetitionsRepository,
+                Depends(DatabasePipe.get_petitions_repository_from_request),
             ],
-        ) -> PetitionSummaryDto:
-            return workflow.run(
-                petition_id=petition_id,
-                petition_document_content=document_content,
+            analisyses_repository: Annotated[
+                AnalisysesRepository,
+                Depends(DatabasePipe.get_analisyses_repository_from_request),
+            ],
+            broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
+        ) -> Response:
+            use_case = RequestPetitionSummaryUseCase(
+                petitions_repository=petitions_repository,
+                analisyses_repository=analisyses_repository,
+                broker=broker,
             )
+            use_case.execute(petition_id=petition_id)
+            return Response(status_code=202)

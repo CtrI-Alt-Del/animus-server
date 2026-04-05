@@ -44,10 +44,10 @@ def gcs_emulator_url(gcs_container: DockerContainer) -> str:
 
 @pytest.fixture(scope='session')
 def gcs_client(gcs_emulator_url: str) -> Iterator[Client]:
-    previous_host = Env.STORAGE_EMULATOR_HOST
-    previous_env_host = os.environ.get('STORAGE_EMULATOR_HOST')
-    Env.STORAGE_EMULATOR_HOST = gcs_emulator_url
-    os.environ['STORAGE_EMULATOR_HOST'] = gcs_emulator_url
+    previous_host = Env.GCS_EMULATOR_HOST
+    previous_env_host = os.environ.get('GCS_EMULATOR_HOST')
+    Env.GCS_EMULATOR_HOST = gcs_emulator_url
+    os.environ['GCS_EMULATOR_HOST'] = gcs_emulator_url
 
     try:
         for _ in range(100):
@@ -61,11 +61,11 @@ def gcs_client(gcs_emulator_url: str) -> Iterator[Client]:
         client = Client.create_anonymous_client()
         yield client
     finally:
-        Env.STORAGE_EMULATOR_HOST = previous_host
+        Env.GCS_EMULATOR_HOST = previous_host
         if previous_env_host is None:
-            os.environ.pop('STORAGE_EMULATOR_HOST', None)
+            os.environ.pop('GCS_EMULATOR_HOST', None)
         else:
-            os.environ['STORAGE_EMULATOR_HOST'] = previous_env_host
+            os.environ['GCS_EMULATOR_HOST'] = previous_env_host
 
 
 @pytest.fixture(scope='session')
@@ -76,8 +76,8 @@ def create_gcs_bucket(gcs_client: Client) -> None:
 
 @pytest.fixture
 def patch_gcs_env(monkeypatch: pytest.MonkeyPatch, gcs_emulator_url: str) -> None:
-    monkeypatch.setattr(Env, 'STORAGE_EMULATOR_HOST', gcs_emulator_url)
-    monkeypatch.setenv('STORAGE_EMULATOR_HOST', gcs_emulator_url)
+    monkeypatch.setattr(Env, 'GCS_EMULATOR_HOST', gcs_emulator_url)
+    monkeypatch.setenv('GCS_EMULATOR_HOST', gcs_emulator_url)
 
 
 @pytest.fixture

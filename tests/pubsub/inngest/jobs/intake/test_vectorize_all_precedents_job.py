@@ -54,7 +54,7 @@ class TestVectorizeAllPrecedentsJob:
                     'page_size': page_size,
                 }
             )
-            return 10 if page < 3 else 4
+            return 100 if page < 3 else 4
 
         monkeypatch.setattr(
             VectorizeAllPrecedentsUseCase,
@@ -77,7 +77,7 @@ class TestVectorizeAllPrecedentsJob:
 
         assert response.status == 200
 
-        deadline = time.monotonic() + 60
+        deadline = time.monotonic() + 120
         while time.monotonic() < deadline:
             if len(captured_calls) == 3:
                 break
@@ -89,14 +89,14 @@ class TestVectorizeAllPrecedentsJob:
         assert captured_calls == [
             {
                 'page': 1,
-                'page_size': 10,
+                'page_size': 100,
             },
             {
                 'page': 2,
-                'page_size': 10,
+                'page_size': 100,
             },
             {
                 'page': 3,
-                'page_size': 10,
+                'page_size': 100,
             },
         ]

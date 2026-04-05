@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from urllib.parse import quote, urlencode
@@ -17,11 +18,15 @@ class GcsFileStorageProvider(FileStorageProvider):
     client: Client
 
     def __init__(self) -> None:
-        self._is_emulator = bool(Env.STORAGE_EMULATOR_HOST) or Env.MODE == 'dev'
+        self._is_emulator = bool(Env.GCS_EMULATOR_HOST) or Env.MODE == 'dev'
 
         if self._is_emulator:
+            os.environ['STORAGE_EMULATOR_HOST'] = self._normalize_emulator_base_url(
+                Env.GCS_EMULATOR_HOST
+            )
             self.client = Client.create_anonymous_client()
         else:
+            os.environ.pop('STORAGE_EMULATOR_HOST', None)
             self.client = Client()
 
     def generate_upload_url(self, file_path: FilePath) -> UploadUrl:
@@ -87,7 +92,7 @@ class GcsFileStorageProvider(FileStorageProvider):
                 continue
 
     def _generate_fake_emulator_signed_upload_url(self, file_path: FilePath) -> str:
-        base_url = self._normalize_emulator_base_url(Env.STORAGE_EMULATOR_HOST)
+        base_url = self._normalize_emulator_base_url(Env.GCS_EMULATOR_HOST)
         object_path = quote(file_path.value.lstrip('/'), safe='/')
 
         now = datetime.now(UTC)

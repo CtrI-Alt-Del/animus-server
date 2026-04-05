@@ -13,12 +13,12 @@ class AnalysisPrecedentModel(Model):
 
     analysis_id: Mapped[str] = mapped_column(
         String(26),
-        ForeignKey('analyses.id'),
+        ForeignKey('analyses.id', ondelete='CASCADE'),
         primary_key=True,
     )
     precedent_id: Mapped[str] = mapped_column(
         String(26),
-        ForeignKey('precedents.id'),
+        ForeignKey('precedents.id', ondelete='CASCADE'),
         primary_key=True,
     )
     is_chosen: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

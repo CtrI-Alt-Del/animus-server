@@ -68,6 +68,7 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
                 )
             ).where(
                 AnalysisModel.account_id == account_id.value,
+                AnalysisModel.is_archived.is_(False),
                 AnalysisModel.name.op('~')(r'^Nova analise #[0-9]+$'),
             )
         )

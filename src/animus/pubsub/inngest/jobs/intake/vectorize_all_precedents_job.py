@@ -19,7 +19,7 @@ from animus.providers.intake.precedent_embeddings.openai.openai_precedent_embedd
 
 
 class VectorizeAllPrecedentsJob:
-    _PAGE_SIZE = 10
+    _PAGE_SIZE = 100
 
     @staticmethod
     def handle(inngest: Inngest) -> Any:

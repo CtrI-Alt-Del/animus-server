@@ -1,3 +1,4 @@
+from textwrap import dedent
 from typing import TYPE_CHECKING, NamedTuple, cast
 
 from agno.run.base import RunContext
@@ -45,6 +46,10 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
                     name=self._step_names.BUILD_SYNTHESIS_INPUT,
                     executor=cast('StepExecutor', self._build_synthesis_input_step),
                 ),
+                Step(
+                    name=self._step_names.SYNTHESIZE_ANALYSIS_PRECEDENTS,
+                    agent=self._team.analysis_precedents_synthesizer_agent,
+                ),
             ],
             session_state={
                 'petition_summary': petition_summary,
@@ -53,9 +58,9 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
         )
 
         output = workflow.run(input='start')
-        analysis_precedents_entities = cast('list[AnalysisPrecedent]', output.content)
+        synthesis_output = self._normalize_synthesis_output(output.content)
 
-        return ListResponse(items=analysis_precedents_entities)
+        return self._merge_syntheses(analysis_precedents, synthesis_output)
 
     def _build_synthesis_input_step(
         self,
@@ -80,20 +85,46 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
             'list[AnalysisPrecedentDto]', analysis_precedents
         )
 
-        result: list[AnalysisPrecedent] = [
-            AnalysisPrecedent.create(
-                AnalysisPrecedentDto(
-                    analysis_id=dto.analysis_id,
-                    precedent=dto.precedent,
-                    is_chosen=dto.is_chosen,
-                    applicability_percentage=dto.applicability_percentage,
-                    synthesis='',
+        petition_summary_dto = petition_summary.dto
+        precedents_input = '\n'.join(
+            [
+                dedent(
+                    f"""
+                    {index}. court: {analysis_precedent.precedent.identifier.court}
+                       kind: {analysis_precedent.precedent.identifier.kind}
+                       number: {analysis_precedent.precedent.identifier.number}
+                       applicability_percentage: {analysis_precedent.applicability_percentage}
+                       status: {analysis_precedent.precedent.status}
+                       enunciation: {analysis_precedent.precedent.enunciation}
+                       thesis: {analysis_precedent.precedent.thesis}
+                    """
+                ).strip()
+                for index, analysis_precedent in enumerate(
+                    analysis_precedents_dto,
+                    start=1,
                 )
-            )
-            for dto in analysis_precedents_dto
-        ]
+            ]
+        )
 
-        return StepOutput(content=result)
+        prompt = dedent(
+            f"""
+            Relacione os precedentes candidatos com a peticao e retorne uma sintese
+            para cada precedente no formato estruturado esperado.
+
+            Resumo da peticao:
+            - case_summary: {petition_summary_dto.case_summary}
+            - legal_issue: {petition_summary_dto.legal_issue}
+            - central_question: {petition_summary_dto.central_question}
+            - relevant_laws: {', '.join(petition_summary_dto.relevant_laws)}
+            - key_facts: {', '.join(petition_summary_dto.key_facts)}
+            - search_terms: {', '.join(petition_summary_dto.search_terms)}
+
+            Precedentes candidatos:
+            {precedents_input}
+            """
+        ).strip()
+
+        return StepOutput(content=prompt)
 
     def _normalize_synthesis_output(
         self,

@@ -1,14 +1,20 @@
 import uuid
-from typing import Any, TypedDict, cast
+from typing import Any, Protocol, TypedDict, cast
 
+from fastembed import SparseTextEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Condition,
     Distance,
     FieldCondition,
     Filter,
+    Fusion,
+    FusionQuery,
     MatchAny,
+    Prefetch,
     PointStruct,
+    SparseVector,
+    SparseVectorParams,
     VectorParams,
 )
 
@@ -38,13 +44,20 @@ class _GroupedPoint(TypedDict):
     kind: str
     number: int
     vectors: dict[str, list[float]]
+    sparse_vectors: dict[str, SparseVector]
     chunks: dict[str, str]
+
+
+class _SparseEmbeddingLike(Protocol):
+    indices: list[int]
+    values: list[float]
 
 
 class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
     def __init__(self) -> None:
-        self._client = QdrantClient(url=Env.QDRANT_URL)
+        self._client = QdrantClient(url=Env.QDRANT_URL, api_key=Env.QDRANT_API_KEY)
         self._collection_name = f'{Env.MODE}_precedents'
+        self._sparse_model = SparseTextEmbedding(model_name='Qdrant/bm25')
         self._ensure_collection_exists()
 
     def _ensure_collection_exists(self) -> None:
@@ -55,7 +68,22 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
                     'enunciation': VectorParams(size=3072, distance=Distance.COSINE),
                     'thesis': VectorParams(size=3072, distance=Distance.COSINE),
                 },
+                sparse_vectors_config={
+                    'enunciation_sparse': SparseVectorParams(),
+                    'thesis_sparse': SparseVectorParams(),
+                },
             )
+
+    def _encode_sparse(self, text: str) -> SparseVector:
+        sparse_results = list(self._sparse_model.embed([text]))
+        if not sparse_results:
+            return SparseVector(indices=[], values=[])
+
+        result = cast('_SparseEmbeddingLike', sparse_results[0])
+        return SparseVector(
+            indices=[int(index) for index in result.indices],
+            values=[float(value) for value in result.values],
+        )
 
     def add_many(self, precedents_embeddings: list[PrecedentEmbedding]) -> None:
         if not precedents_embeddings:
@@ -75,6 +103,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
                     'kind': embedding.identifier.kind.dto,
                     'number': embedding.identifier.number.value,
                     'vectors': {},
+                    'sparse_vectors': {},
                     'chunks': {},
                 }
 
@@ -84,12 +113,18 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
             ]
             grouped_points[composite_key]['chunks'][field_name] = embedding.chunk.value
 
+            if embedding.chunk.value:
+                grouped_points[composite_key]['sparse_vectors'][
+                    f'{field_name}_sparse'
+                ] = self._encode_sparse(embedding.chunk.value)
+
         points: list[PointStruct] = []
         for composite_key, data in grouped_points.items():
+            all_vectors: dict[str, Any] = {**data['vectors'], **data['sparse_vectors']}
             points.append(
                 PointStruct(
                     id=str(uuid.uuid5(uuid.NAMESPACE_OID, composite_key)),
-                    vector=cast('dict[str, Any]', data['vectors']),
+                    vector=all_vectors,
                     payload={
                         'court': data['court'],
                         'kind': data['kind'],
@@ -112,15 +147,31 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
 
         query_filter = self._build_query_filter(filters)
         results: list[PrecedentEmbedding] = []
+
         for petition_embedding in petition_summary_embeddings:
-            query_vector = [float(value.value) for value in petition_embedding.vector]
+            dense_vector = [
+                float(decimal.value) for decimal in petition_embedding.vector
+            ]
+            sparse_vector = self._encode_sparse(petition_embedding.chunk.value)
 
             for target_field in ('enunciation', 'thesis'):
                 query_response = self._client.query_points(
                     collection_name=self._collection_name,
-                    query=query_vector,
-                    using=target_field,
-                    query_filter=query_filter,
+                    prefetch=[
+                        Prefetch(
+                            query=dense_vector,
+                            using=target_field,
+                            filter=query_filter,
+                            limit=limit.value,
+                        ),
+                        Prefetch(
+                            query=sparse_vector,
+                            using=f'{target_field}_sparse',
+                            filter=query_filter,
+                            limit=limit.value,
+                        ),
+                    ],
+                    query=FusionQuery(fusion=Fusion.RRF),
                     limit=limit.value,
                     with_payload=True,
                     with_vectors=False,

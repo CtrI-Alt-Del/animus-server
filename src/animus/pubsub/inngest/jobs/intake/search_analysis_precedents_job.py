@@ -141,6 +141,7 @@ class SearchAnalysisPrecedentsJob:
                 analysis_id=payload.analysis_id,
                 status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
             )
+            session.commit()
 
             analysis_precedents = SearchAnalysisPrecedentsUseCase(
                 petition_summaries_repository=petition_summaries_repository,
@@ -154,9 +155,9 @@ class SearchAnalysisPrecedentsJob:
                 dto=payload.filters_dto,
             )
 
-            return [
-                asdict(analysis_precedent) for analysis_precedent in analysis_precedents
-            ]
+        return [
+            asdict(analysis_precedent) for analysis_precedent in analysis_precedents
+        ]
 
     @staticmethod
     async def _generate_syntheses_and_persist(
@@ -191,6 +192,7 @@ class SearchAnalysisPrecedentsJob:
                 analysis_id=payload.analysis_id,
                 status=AnalysisStatusValue.GENERATING_SYNTHESIS.value,
             )
+            session.commit()
 
             petition_summary = petition_summaries_repository.find_by_analysis_id(
                 analysis_id=analysis_id,
@@ -219,6 +221,7 @@ class SearchAnalysisPrecedentsJob:
                 analysis_id=payload.analysis_id,
                 status=AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value,
             )
+            session.commit()
 
     @staticmethod
     async def _mark_analysis_as_failed(payload: _Payload) -> None:
