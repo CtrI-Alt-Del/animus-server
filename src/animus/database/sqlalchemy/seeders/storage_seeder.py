@@ -10,12 +10,12 @@ class StorageSeeder:
     _PDFS_DIR = Path(__file__).resolve().parents[5] / 'assets' / 'pdfs'
 
     def __init__(self, storage_provider: GcsFileStorageProvider | None = None) -> None:
-        storage_emulator_host = Env.STORAGE_EMULATOR_HOST
-        if Env.MODE == 'dev' and not storage_emulator_host:
-            storage_emulator_host = 'http://localhost:4443'
+        emulator_host = Env.GCS_EMULATOR_HOST
+        if Env.MODE == 'dev' and not emulator_host:
+            emulator_host = 'http://localhost:4443'
 
-        if storage_emulator_host:
-            os.environ['STORAGE_EMULATOR_HOST'] = storage_emulator_host
+        if emulator_host:
+            os.environ['GCS_EMULATOR_HOST'] = emulator_host
 
         self._storage_provider = storage_provider or GcsFileStorageProvider()
 
