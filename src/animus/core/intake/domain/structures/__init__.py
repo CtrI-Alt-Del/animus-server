@@ -4,6 +4,10 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from .analysis_report import AnalysisReport
     from .analysis_precedent import AnalysisPrecedent
+    from .analysis_precedent_classification_level import (
+        AnalysisPrecedentClassificationLevel,
+        AnalysisPrecedentClassificationLevelValue,
+    )
     from .analysis_petition import AnalysisPetition
     from .analysis_precedents_search_filters import AnalysisPrecedentsSearchFilters
     from .court import Court, CourtValue
@@ -21,6 +25,8 @@ if TYPE_CHECKING:
 __all__ = [
     'AnalysisReport',
     'AnalysisPrecedent',
+    'AnalysisPrecedentClassificationLevel',
+    'AnalysisPrecedentClassificationLevelValue',
     'AnalysisPetition',
     'AnalysisPrecedentsSearchFilters',
     'Court',
@@ -42,6 +48,14 @@ def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
         'AnalysisReport': ('.analysis_report', 'AnalysisReport'),
         'AnalysisPrecedent': ('.analysis_precedent', 'AnalysisPrecedent'),
+        'AnalysisPrecedentClassificationLevel': (
+            '.analysis_precedent_classification_level',
+            'AnalysisPrecedentClassificationLevel',
+        ),
+        'AnalysisPrecedentClassificationLevelValue': (
+            '.analysis_precedent_classification_level',
+            'AnalysisPrecedentClassificationLevelValue',
+        ),
         'AnalysisPetition': ('.analysis_petition', 'AnalysisPetition'),
         'AnalysisPrecedentsSearchFilters': (
             '.analysis_precedents_search_filters',

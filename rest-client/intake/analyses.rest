@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KNCRS2GYE4YDC16BZNG661M2
+@analysis_id = 01KNDAZ1EYNG6DDECF2ZD93T46
 @petition_id = 01KNCDNWDAHD1H3A3DD1NFDPR9
 @precedent_court = STJ
 @precedent_kind = RR
@@ -34,4 +34,8 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Escolher precedente da analise (ChooseAnalysisPrecedentController)
 PATCH {{url}}/analyses/{{analysis_id}}/precedents/choose?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Obter relatorio completo da analise (GetAnalysisReportController)
+GET {{url}}/analyses/{{analysis_id}}/report
 Authorization: Bearer {{ACCESS_TOKEN}}

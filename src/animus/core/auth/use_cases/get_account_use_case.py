@@ -14,17 +14,9 @@ class GetAccountUseCase:
         if account is None:
             raise AccountNotFoundError
 
-        if not account.is_active.value:
+        if account.is_active.is_false:
             raise AccountInactiveError
 
-        return AccountDto(
-            id=account.id.value if account.id else None,
-            name=account.name.value,
-            email=account.email.value,
-            password=None,
-            is_verified=account.is_verified.value,
-            is_active=account.is_active.value,
-            social_accounts=[social.dto for social in account.social_accounts]
-            if account.social_accounts
-            else [],
-        )
+        dto = account.dto
+        dto.password = None
+        return dto

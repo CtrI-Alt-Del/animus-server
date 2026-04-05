@@ -54,6 +54,7 @@ Fluxos de intake ja implementados:
 - `GET /intake/analyses/{analysis_id}/precedents` -> `ListAnalysisPrecedentsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ListAnalysisPrecedentsUseCase` -> `AnalysisPrecedentsRepository` -> PostgreSQL (`analysis_precedents`) -> `list[AnalysisPrecedentDto]`.
 - `GET /intake/analyses/{analysis_id}/status` -> `GetAnalysisStatusController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `Analysis.status` -> `AnalysisStatusDto`.
 - `PATCH /intake/analyses/{analysis_id}/precedents/choose` -> `ChooseAnalysisPrecedentController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ChooseAnalysisPrecedentUseCase` -> `AnalysisPrecedentsRepository` / `AnalisysesRepository` -> PostgreSQL (`analysis_precedents`, `analyses`) -> `AnalysisStatusDto`.
+- `GET /intake/analyses/{analysis_id}/report` -> `GetAnalysisReportController` -> `AuthPipe` / `DatabasePipe` -> `GetAnalysisReportUseCase` -> `AnalisysesRepository` / `PetitionsRepository` / `PetitionSummariesRepository` / `AnalysisPrecedentsRepository` -> PostgreSQL (`analyses`, `petitions`, `petition_summaries`, `analysis_precedents`) -> `AnalysisReportDto`.
 
 Fluxo assincrono de precedentes:
 - `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratacao de precedentes.
