@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.12.1...v1.13.0) (2026-04-05)
+
+
+### Features
+
+* **auth:** ANI-54 implement GET /auth/account endpoint ([d263ec6](https://github.com/CtrI-Alt-Del/animus-server/commit/d263ec6f4e76c421181271799c21bdfd72f3fe2a))
+
 ## [1.12.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.12.0...v1.12.1) (2026-04-05)
 
 
