@@ -1,5 +1,3 @@
-import re
-import unicodedata
 from collections.abc import Iterable
 from typing import ClassVar, TypedDict
 
@@ -14,7 +12,6 @@ from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
 from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
     AnalysisPrecedentsSearchFiltersDto,
 )
-from animus.core.intake.domain.structures.petition_summary import PetitionSummary
 from animus.core.intake.domain.structures.precedent_embedding import PrecedentEmbedding
 from animus.core.intake.domain.structures.precedent_embedding_field import (
     PrecedentEmbeddingFieldValue,
@@ -28,7 +25,7 @@ from animus.core.intake.interfaces import (
     PrecedentsEmbeddingsRepository,
     PrecedentsRepository,
 )
-from animus.core.shared.domain.structures import Id, Integer, Text
+from animus.core.shared.domain.structures import Id, Integer
 
 
 class _IdentifierScore(TypedDict):
@@ -39,65 +36,56 @@ class _IdentifierScore(TypedDict):
     total_hits: int
 
 
-class _PetitionLexicalProfile(TypedDict):
-    issue_anchors: set[str]
-    law_anchors: set[str]
-    context_anchors: set[str]
-    accessory_terms: set[str]
-    core_terms: set[str]
-    domain_anchors: set[str]
-
-
 class SearchAnalysisPrecedentsUseCase:
     _GENERIC_NEGATIVE_TERMS: ClassVar[set[str]] = {
-        "fgts",
-        "urv",
-        "imposto de renda",
-        "contribuicao previdenciaria",
-        "prestacao previdenciaria",
-        "insalubridade",
-        "periculosidade",
-        "ajuda de custo",
-        "rescisao indireta",
+        'fgts',
+        'urv',
+        'imposto de renda',
+        'contribuicao previdenciaria',
+        'prestacao previdenciaria',
+        'insalubridade',
+        'periculosidade',
+        'ajuda de custo',
+        'rescisao indireta',
     }
 
     _ACCESSORY_MARKERS: ClassVar[set[str]] = {
-        "juros",
-        "correcao monetaria",
-        "correção monetária",
-        "honorarios",
-        "honorários",
-        "custas",
-        "prescricao",
-        "prescrição",
-        "ipca-e",
-        "parcelas vencidas",
-        "parcelas vincendas",
-        "quinquenio",
-        "quinquênio",
-        "sumula 85",
-        "súmula 85",
-        "11.960/09",
+        'juros',
+        'correcao monetaria',
+        'correção monetária',
+        'honorarios',
+        'honorários',
+        'custas',
+        'prescricao',
+        'prescrição',
+        'ipca-e',
+        'parcelas vencidas',
+        'parcelas vincendas',
+        'quinquenio',
+        'quinquênio',
+        'sumula 85',
+        'súmula 85',
+        '11.960/09',
     }
 
     _SPECIALIZATION_TERMS: ClassVar[set[str]] = {
-        "ferias",
-        "férias",
-        "aposentadoria",
-        "aposentado",
-        "aposentado antes",
-        "licenca-premio",
-        "licença-prêmio",
-        "licença premio",
-        "conversao em pecunia",
-        "conversão em pecúnia",
-        "renuncia",
-        "renúncia",
-        "piso salarial",
-        "rsc",
-        "retribuicao por titulacao",
-        "retribuição por titulação",
-        "ferrovia",
+        'ferias',
+        'férias',
+        'aposentadoria',
+        'aposentado',
+        'aposentado antes',
+        'licenca-premio',
+        'licença-prêmio',
+        'licença premio',
+        'conversao em pecunia',
+        'conversão em pecúnia',
+        'renuncia',
+        'renúncia',
+        'piso salarial',
+        'rsc',
+        'retribuicao por titulacao',
+        'retribuição por titulação',
+        'ferrovia',
     }
 
     def __init__(
@@ -162,9 +150,9 @@ class SearchAnalysisPrecedentsUseCase:
                 continue
 
             applicability_percentage = self._calculate_applicability_percentage(
-                thesis_score=scores["thesis_max"],
-                enunciation_score=scores["enunciation_max"],
-                total_hits=scores["total_hits"],
+                thesis_score=scores['thesis_max'],
+                enunciation_score=scores['enunciation_max'],
+                total_hits=scores['total_hits'],
             )
 
             analysis_precedents.append(
@@ -200,31 +188,31 @@ class SearchAnalysisPrecedentsUseCase:
         for precedent_embedding in precedent_embeddings:
             if precedent_embedding.identifier not in scores_by_identifier:
                 scores_by_identifier[precedent_embedding.identifier] = {
-                    "thesis_max": 0.0,
-                    "enunciation_max": 0.0,
-                    "thesis_hits": 0,
-                    "enunciation_hits": 0,
-                    "total_hits": 0,
+                    'thesis_max': 0.0,
+                    'enunciation_max': 0.0,
+                    'thesis_hits': 0,
+                    'enunciation_hits': 0,
+                    'total_hits': 0,
                 }
 
             score_data = scores_by_identifier[precedent_embedding.identifier]
-            score_data["total_hits"] += 1
+            score_data['total_hits'] += 1
 
             field_name = precedent_embedding.field.value
             if field_name is PrecedentEmbeddingFieldValue.THESIS:
-                score_data["thesis_max"] = max(
-                    score_data["thesis_max"],
+                score_data['thesis_max'] = max(
+                    score_data['thesis_max'],
                     precedent_embedding.score.value,
                 )
-                score_data["thesis_hits"] += 1
+                score_data['thesis_hits'] += 1
                 continue
 
             if field_name is PrecedentEmbeddingFieldValue.ENUNCIATION:
-                score_data["enunciation_max"] = max(
-                    score_data["enunciation_max"],
+                score_data['enunciation_max'] = max(
+                    score_data['enunciation_max'],
                     precedent_embedding.score.value,
                 )
-                score_data["enunciation_hits"] += 1
+                score_data['enunciation_hits'] += 1
 
         return scores_by_identifier
 
