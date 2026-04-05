@@ -19,8 +19,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     op.execute(
-        'ALTER TABLE petitions '
-        'DROP CONSTRAINT IF EXISTS petitions_analysis_id_fkey'
+        'ALTER TABLE petitions DROP CONSTRAINT IF EXISTS petitions_analysis_id_fkey'
     )
     op.execute(
         'ALTER TABLE petitions '
@@ -31,6 +30,10 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.execute(
+        'ALTER TABLE petitions DROP CONSTRAINT IF EXISTS petitions_analysis_id_fkey'
+    )
+    op.execute(
         'ALTER TABLE petitions '
-        'DROP CONSTRAINT IF EXISTS petitions_analysis_id_fkey'
+        'ADD CONSTRAINT petitions_analysis_id_fkey '
+        'FOREIGN KEY (analysis_id) REFERENCES analyses (id)'
     )

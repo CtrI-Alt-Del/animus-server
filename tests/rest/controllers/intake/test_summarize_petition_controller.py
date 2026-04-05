@@ -80,7 +80,9 @@ class TestSummarizePetitionController:
         assert fake_inngest_client.sent_events[0].data['petition_id'] == petition_id
 
         session = sqlalchemy_session_factory()
-        analysis = SqlalchemyAnalisysesRepository(session).find_by_id(Id.create(analysis_id))
+        analysis = SqlalchemyAnalisysesRepository(session).find_by_id(
+            Id.create(analysis_id)
+        )
         session.close()
 
         assert analysis is not None

@@ -53,7 +53,7 @@ class SearchAnalysisPrecedentsJob:
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
-            fn_id="search-analysis-precedents",
+            fn_id='search-analysis-precedents',
             trigger=TriggerEvent(
                 event=AnalysisPrecedentsSearchRequestedEvent.name,
             ),
@@ -62,20 +62,20 @@ class SearchAnalysisPrecedentsJob:
             data = dict(context.event.data)
 
             normalized_data = await context.step.run(
-                "normalize_payload",
+                'normalize_payload',
                 SearchAnalysisPrecedentsJob._normalize_payload,
                 data,
             )
             payload = _Payload(
-                analysis_id=str(normalized_data["analysis_id"]),
-                courts=list(normalized_data["courts"]),
-                precedent_kinds=list(normalized_data["precedent_kinds"]),
-                limit=int(normalized_data["limit"]),
+                analysis_id=str(normalized_data['analysis_id']),
+                courts=list(normalized_data['courts']),
+                precedent_kinds=list(normalized_data['precedent_kinds']),
+                limit=int(normalized_data['limit']),
             )
 
             try:
                 analysis_precedents_data = await context.step.run(
-                    "search_precedents",
+                    'search_precedents',
                     lambda payload=payload: (
                         SearchAnalysisPrecedentsJob._search_precedents(
                             payload,
@@ -84,7 +84,7 @@ class SearchAnalysisPrecedentsJob:
                 )
 
                 await context.step.run(
-                    "generate_syntheses_and_persist",
+                    'generate_syntheses_and_persist',
                     lambda payload=payload, analysis_precedents_data=analysis_precedents_data: (
                         SearchAnalysisPrecedentsJob._generate_syntheses_and_persist(
                             payload,
@@ -94,7 +94,7 @@ class SearchAnalysisPrecedentsJob:
                 )
             except Exception:
                 await context.step.run(
-                    "mark_analysis_as_failed",
+                    'mark_analysis_as_failed',
                     lambda payload=payload: (
                         SearchAnalysisPrecedentsJob._mark_analysis_as_failed(
                             payload,
@@ -108,13 +108,13 @@ class SearchAnalysisPrecedentsJob:
     @staticmethod
     async def _normalize_payload(data: dict[str, Any]) -> dict[str, Any]:
         return {
-            "analysis_id": str(data["analysis_id"]),
-            "courts": [str(court) for court in list(data.get("courts", []))],
-            "precedent_kinds": [
+            'analysis_id': str(data['analysis_id']),
+            'courts': [str(court) for court in list(data.get('courts', []))],
+            'precedent_kinds': [
                 str(precedent_kind)
-                for precedent_kind in list(data.get("precedent_kinds", []))
+                for precedent_kind in list(data.get('precedent_kinds', []))
             ],
-            "limit": int(data["limit"]),
+            'limit': int(data['limit']),
         }
 
     @staticmethod
@@ -131,28 +131,29 @@ class SearchAnalysisPrecedentsJob:
     def _search_precedents_sync(
         payload: _Payload,
     ) -> list[dict[str, Any]]:
-        session = Sqlalchemy.get_session()
+        with Sqlalchemy.session() as session:
+            analisyses_repository = SqlalchemyAnalisysesRepository(session)
+            petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
+                session
+            )
+            precedents_repository = SqlalchemyPrecedentsRepository(session)
+            UpdateAnalysisStatusUseCase(analisyses_repository).execute(
+                analysis_id=payload.analysis_id,
+                status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
+            )
+            session.commit()
 
-        analisyses_repository = SqlalchemyAnalisysesRepository(session)
-        petition_summaries_repository = SqlalchemyPetitionSummariesRepository(session)
-        precedents_repository = SqlalchemyPrecedentsRepository(session)
-        UpdateAnalysisStatusUseCase(analisyses_repository).execute(
-            analysis_id=payload.analysis_id,
-            status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
-        )
-        session.commit()
-
-        analysis_precedents = SearchAnalysisPrecedentsUseCase(
-            petition_summaries_repository=petition_summaries_repository,
-            petition_summary_embeddings_provider=(
-                OpenAIPetitionSummaryEmbeddingsProvider()
-            ),
-            precedents_embeddings_repository=QdrantPrecedentsEmbeddingsRepository(),
-            precedents_repository=precedents_repository,
-        ).execute(
-            analysis_id=payload.analysis_id,
-            dto=payload.filters_dto,
-        )
+            analysis_precedents = SearchAnalysisPrecedentsUseCase(
+                petition_summaries_repository=petition_summaries_repository,
+                petition_summary_embeddings_provider=(
+                    OpenAIPetitionSummaryEmbeddingsProvider()
+                ),
+                precedents_embeddings_repository=QdrantPrecedentsEmbeddingsRepository(),
+                precedents_repository=precedents_repository,
+            ).execute(
+                analysis_id=payload.analysis_id,
+                dto=payload.filters_dto,
+            )
 
         return [
             asdict(analysis_precedent) for analysis_precedent in analysis_precedents
@@ -177,46 +178,50 @@ class SearchAnalysisPrecedentsJob:
         payload: _Payload,
         analysis_precedents_data: list[dict[str, Any]],
     ) -> None:
-        session = Sqlalchemy.get_session()
-        analisyses_repository = SqlalchemyAnalisysesRepository(session)
-        petition_summaries_repository = SqlalchemyPetitionSummariesRepository(session)
-        analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(session)
-        analysis_id = Id.create(payload.analysis_id)
+        with Sqlalchemy.session() as session:
+            analisyses_repository = SqlalchemyAnalisysesRepository(session)
+            petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
+                session
+            )
+            analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
+                session
+            )
+            analysis_id = Id.create(payload.analysis_id)
 
-        UpdateAnalysisStatusUseCase(analisyses_repository).execute(
-            analysis_id=payload.analysis_id,
-            status=AnalysisStatusValue.GENERATING_SYNTHESIS.value,
-        )
-        session.commit()
+            UpdateAnalysisStatusUseCase(analisyses_repository).execute(
+                analysis_id=payload.analysis_id,
+                status=AnalysisStatusValue.GENERATING_SYNTHESIS.value,
+            )
+            session.commit()
 
-        petition_summary = petition_summaries_repository.find_by_analysis_id(
-            analysis_id=analysis_id,
-        )
-        if petition_summary is None:
-            raise PetitionSummaryUnavailableError
+            petition_summary = petition_summaries_repository.find_by_analysis_id(
+                analysis_id=analysis_id,
+            )
+            if petition_summary is None:
+                raise PetitionSummaryUnavailableError
 
-        from animus.pipes.ai_pipe import AiPipe
+            from animus.pipes.ai_pipe import AiPipe
 
-        workflow = AiPipe.get_synthesize_analysis_precedents_workflow()
-        analysis_precedents = workflow.run(
-            petition_summary=petition_summary,
-            analysis_precedents=[
-                AnalysisPrecedentDto(**analysis_precedent_data)
-                for analysis_precedent_data in analysis_precedents_data
-            ],
-        )
+            workflow = AiPipe.get_synthesize_analysis_precedents_workflow()
+            analysis_precedents = workflow.run(
+                petition_summary=petition_summary,
+                analysis_precedents=[
+                    AnalysisPrecedentDto(**analysis_precedent_data)
+                    for analysis_precedent_data in analysis_precedents_data
+                ],
+            )
 
-        analysis_precedents_repository.remove_many_by_analysis_id(analysis_id)
-        analysis_precedents_repository.add_many_by_analysis_id(
-            analysis_id=analysis_id,
-            analysis_precedents=analysis_precedents.items,
-        )
+            analysis_precedents_repository.remove_many_by_analysis_id(analysis_id)
+            analysis_precedents_repository.add_many_by_analysis_id(
+                analysis_id=analysis_id,
+                analysis_precedents=analysis_precedents.items,
+            )
 
-        UpdateAnalysisStatusUseCase(analisyses_repository).execute(
-            analysis_id=payload.analysis_id,
-            status=AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value,
-        )
-        session.commit()
+            UpdateAnalysisStatusUseCase(analisyses_repository).execute(
+                analysis_id=payload.analysis_id,
+                status=AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value,
+            )
+            session.commit()
 
     @staticmethod
     async def _mark_analysis_as_failed(payload: _Payload) -> None:

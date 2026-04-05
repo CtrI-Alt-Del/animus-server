@@ -1,7 +1,10 @@
 from animus.core.intake.domain.entities.analysis import Analysis
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatus
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
-from animus.core.intake.domain.errors import AnalysisNotFoundError, PetitionNotFoundError
+from animus.core.intake.domain.errors import (
+    AnalysisNotFoundError,
+    PetitionNotFoundError,
+)
 from animus.core.intake.domain.events import PetitionSummaryRequestedEvent
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.interfaces.petitions_repository import PetitionsRepository

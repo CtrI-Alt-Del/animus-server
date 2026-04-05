@@ -12,7 +12,7 @@ class _Env(BaseSettings):
     )
 
     MODE: Literal['dev', 'stg', 'prod']
-    HOST: str = '0.0.0.0'
+    HOST: str = '127.0.0.1'
     PORT: int = 8080
 
     DATABASE_URL: str
@@ -49,7 +49,7 @@ class _Env(BaseSettings):
 
     @field_validator('GCS_EMULATOR_HOST')
     @classmethod
-    def validate_GCS_EMULATOR_HOST(cls, value: str, info: Any) -> str:
+    def validate_gcs_emulator_host(cls, value: str, info: Any) -> str:
         mode = str(info.data.get('MODE', 'dev'))
 
         if value and mode != 'dev':

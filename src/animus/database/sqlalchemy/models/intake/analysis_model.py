@@ -18,4 +18,6 @@ class AnalysisModel(Model):
     status: Mapped[str] = mapped_column(String, nullable=False)
     is_archived: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
-    petitions: Mapped[list[Any]] = relationship('PetitionModel', back_populates='analysis')
+    petitions: Mapped[list[Any]] = relationship(
+        'PetitionModel', back_populates='analysis'
+    )

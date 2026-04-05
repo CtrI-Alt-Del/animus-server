@@ -32,7 +32,7 @@ class _Body(BaseModel):
 class SearchAnalysisPrecedentsController:
     @staticmethod
     def handle(router: APIRouter) -> None:
-        @router.post("/analyses/{analysis_id}/precedents/search", status_code=202)
+        @router.post('/analyses/{analysis_id}/precedents/search', status_code=202)
         def _(
             analysis_id: IdSchema,
             body: _Body,
@@ -46,11 +46,9 @@ class SearchAnalysisPrecedentsController:
             ],
             broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
         ) -> Response:
-            print()
             use_case = RequestAnalysisPrecedentsSearchUseCase(
                 petition_summaries_repository=petition_summaries_repository,
                 broker=broker,
             )
-            print(body.to_dto())
             use_case.execute(analysis_id=analysis_id, dto=body.to_dto())
             return Response(status_code=202)

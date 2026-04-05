@@ -7,7 +7,10 @@ from animus.core.intake.domain.entities.dtos.petition_document_dto import (
     PetitionDocumentDto,
 )
 from animus.core.intake.domain.events import PetitionSummaryRequestedEvent
-from animus.core.intake.domain.errors import AnalysisNotFoundError, PetitionNotFoundError
+from animus.core.intake.domain.errors import (
+    AnalysisNotFoundError,
+    PetitionNotFoundError,
+)
 from animus.core.intake.interfaces import AnalisysesRepository, PetitionsRepository
 from animus.core.intake.use_cases import RequestPetitionSummaryUseCase
 from animus.core.shared.domain.errors import ValidationError

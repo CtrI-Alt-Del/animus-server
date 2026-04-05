@@ -79,7 +79,7 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
         if not sparse_results:
             return SparseVector(indices=[], values=[])
 
-        result = cast(_SparseEmbeddingLike, sparse_results[0])
+        result = cast('_SparseEmbeddingLike', sparse_results[0])
         return SparseVector(
             indices=[int(index) for index in result.indices],
             values=[float(value) for value in result.values],

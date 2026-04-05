@@ -24,15 +24,15 @@ class VectorizeAllPrecedentsJob:
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
-            fn_id="vectorize-all-precedents",
-            trigger=TriggerEvent(event="intake/vectorize-all-precedents.requested"),
+            fn_id='vectorize-all-precedents',
+            trigger=TriggerEvent(event='intake/vectorize-all-precedents.requested'),
         )
         async def _(context: Context) -> None:
             page = 1
 
             while True:
                 vectorized_count = await context.step.run(
-                    f"vectorize-all-precedents-page-{page}",
+                    f'vectorize-all-precedents-page-{page}',
                     lambda page=page: VectorizeAllPrecedentsJob._vectorize_page(page),
                 )
 

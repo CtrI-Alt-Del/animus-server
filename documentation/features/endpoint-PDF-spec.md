@@ -145,16 +145,16 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 ## Core
 
 - **Arquivo:** `src/animus/core/intake/domain/structures/dtos/analysis_report_dto.py`
-- **Mudanca:** substituir `precedents: list[PrecedentDto]` e `chosen_precedent: PrecedentDto | None` por `precedents: list[AnalysisPrecedentDto]`.
-- **Justificativa:** alinhar o contrato de resposta ao ticket ANI-50, eliminando duplicidade entre `chosen_precedent` e `is_chosen` do proprio item.
+- **Mudanca:** substituir `precedents: list[PrecedentDto]` por `precedents: list[AnalysisPrecedentDto]`, mantendo `chosen_precedent: AnalysisPrecedentDto | None` no contrato atual.
+- **Justificativa:** alinhar o contrato documentado a implementacao atual do endpoint, adicionando `classification_level` por item sem remover o campo agregado ja exposto pela API.
 
 - **Arquivo:** `src/animus/core/intake/domain/structures/dtos/analysis_precedent_dto.py`
 - **Mudanca:** adicionar `classification_level: str | None = None`.
 - **Justificativa:** permitir transportar o nivel de classificacao no endpoint de relatorio sem quebrar os fluxos atuais que ainda nao preenchem esse campo.
 
 - **Arquivo:** `src/animus/core/intake/domain/structures/analysis_report.py`
-- **Mudanca:** ajustar a `Structure` para refletir o novo DTO (`precedents` como `AnalysisPrecedent`), removendo o campo `chosen_precedent`.
-- **Justificativa:** manter coerencia tipada entre `AnalysisReport` e `AnalysisReportDto`.
+- **Mudanca:** ajustar a `Structure` para refletir o novo DTO (`precedents` como `AnalysisPrecedent`), mantendo o campo `chosen_precedent`.
+- **Justificativa:** manter coerencia tipada entre `AnalysisReport` e `AnalysisReportDto` conforme o contrato implementado.
 
 - **Arquivo:** `src/animus/core/intake/use_cases/__init__.py`
 - **Mudanca:** exportar `GetAnalysisReportUseCase`.
@@ -188,10 +188,10 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 
 # 8. Decisoes Tecnicas e Trade-offs
 
-- **Decisao:** retornar `precedents` como `list[AnalysisPrecedentDto]` no `AnalysisReportDto`.
-- **Alternativas consideradas:** manter `list[PrecedentDto]` e expor `chosen_precedent` separado.
-- **Motivo da escolha:** o ticket exige `is_chosen` e nivel de classificacao por item; isso ja pertence ao agregado `AnalysisPrecedent`.
-- **Impactos / trade-offs:** exige ajuste no DTO/structure de relatorio, mas reduz duplicidade e simplifica consumo no mobile.
+- **Decisao:** retornar `precedents` como `list[AnalysisPrecedentDto]` no `AnalysisReportDto`, mantendo `chosen_precedent` por compatibilidade do contrato atual.
+- **Alternativas consideradas:** remover `chosen_precedent` e depender apenas de `is_chosen` em cada item.
+- **Motivo da escolha:** o endpoint atual ainda expoe `chosen_precedent`; manter o campo evita quebra de contrato enquanto adiciona `classification_level` por item.
+- **Impactos / trade-offs:** mantem duplicidade temporaria entre `is_chosen` e `chosen_precedent`, em troca de compatibilidade com consumidores existentes.
 
 - **Decisao:** derivar `classification_level` no `GetAnalysisReportUseCase`, sem persistir novo campo em banco.
 - **Alternativas consideradas:** persistir classificacao na tabela `analysis_precedents`; calcular no controller.

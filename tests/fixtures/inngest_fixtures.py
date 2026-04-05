@@ -1,5 +1,5 @@
 import json
-import random
+import secrets
 import socket
 import threading
 import time
@@ -61,14 +61,15 @@ def _find_free_port_in_range(
     attempts: int = 50,
 ) -> int:
     for _ in range(attempts):
-        candidate = random.randint(start, end)
+        candidate = start + secrets.randbelow(end - start + 1)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             try:
                 sock.bind((host, candidate))
                 sock.listen(1)
-                return candidate
             except OSError:
                 continue
+            else:
+                return candidate
 
     msg = 'could not find free port in allowed range'
     raise RuntimeError(msg)

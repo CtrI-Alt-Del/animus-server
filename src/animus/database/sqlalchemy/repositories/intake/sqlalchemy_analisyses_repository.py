@@ -32,7 +32,7 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         statement = select(AnalysisModel).where(
             AnalysisModel.account_id == account_id.value,
             AnalysisModel.is_archived == is_archived.value,
-            AnalysisModel.name.ilike(f"%{search.value}%"),
+            AnalysisModel.name.ilike(f'%{search.value}%'),
         )
 
         if cursor is not None:
@@ -53,7 +53,7 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         return CursorPaginationResponse(items=items, next_cursor=next_cursor)
 
     def find_next_generated_name_number(self, account_id: Id) -> Integer:
-        generated_name_prefix = "Nova analise #"
+        generated_name_prefix = 'Nova analise #'
         generated_name_start_index = len(generated_name_prefix) + 1
         last_generated_number = self._sqlalchemy.scalar(
             select(
@@ -69,7 +69,7 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
             ).where(
                 AnalysisModel.account_id == account_id.value,
                 AnalysisModel.is_archived.is_(False),
-                AnalysisModel.name.op("~")(r"^Nova analise #[0-9]+$"),
+                AnalysisModel.name.op('~')(r'^Nova analise #[0-9]+$'),
             )
         )
 
