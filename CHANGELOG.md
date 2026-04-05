@@ -1,3 +1,25 @@
+# [1.14.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.13.0...v1.14.0) (2026-04-05)
+
+
+### Bug Fixes
+
+* ANI-62 add cascade delete to intake foreign keys ([90395d2](https://github.com/CtrI-Alt-Del/animus-server/commit/90395d2c71e8e49425750d4630b2a65b290865c8))
+* ANI-62 add env example fallback for CI settings loading ([da1c6a5](https://github.com/CtrI-Alt-Del/animus-server/commit/da1c6a5a0526120f87650537e0e13b81662870bf))
+* ANI-62 add missing inngest event key to env example ([d8590fa](https://github.com/CtrI-Alt-Del/animus-server/commit/d8590fa9e3d05d7ee5e9868a0e5f4cd82fbcfd32))
+* ANI-62 align analysis report precedent types ([ba14b42](https://github.com/CtrI-Alt-Del/animus-server/commit/ba14b42990e12d8d0ad7204239470c74f4beced2))
+* ANI-62 align emulator env wiring for storage and qdrant ([da9acac](https://github.com/CtrI-Alt-Del/animus-server/commit/da9acacadc28ae93cb8444f7c3d6c1f955a5cdbe))
+* ANI-62 narrow inngest readiness exception handling ([2f9a2c7](https://github.com/CtrI-Alt-Del/animus-server/commit/2f9a2c7fa506222f9269c2ccc71669dd24945217))
+* ANI-62 resolve PR review issues across intake flows ([27e85e7](https://github.com/CtrI-Alt-Del/animus-server/commit/27e85e755fd62794f2841be15d15cdc0025095e3))
+* ANI-62 stabilize inngest runtime readiness in integration tests ([14655e6](https://github.com/CtrI-Alt-Del/animus-server/commit/14655e652f77035aaa8c3a55f6e1a69dcb0c7ffa))
+
+
+### Features
+
+* ANI-50 add REST endpoint for PDF report generation ([ee9d39e](https://github.com/CtrI-Alt-Del/animus-server/commit/ee9d39e58f7aa09e8a0ecf38759a44be40a28c4f))
+* ANI-50 implement core logic for PDF analysis report ([4389174](https://github.com/CtrI-Alt-Del/animus-server/commit/4389174069638e4044982b48b15be8398cf8dd1b))
+* ANI-62 implement password reset and analysis report flows ([6d48b9c](https://github.com/CtrI-Alt-Del/animus-server/commit/6d48b9c9b90e8f15273f75fcdd0e1bc9244208f0))
+* ANI-62 make petition summary request asynchronous ([ce2ebef](https://github.com/CtrI-Alt-Del/animus-server/commit/ce2ebef0acebc90a1b6e7978a5ff162447fba80b))
+
 # [1.13.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.12.1...v1.13.0) (2026-04-05)
 
 
