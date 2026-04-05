@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class _Env(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file='.env',
+        env_file=('.env', '.env.example'),
         extra='ignore',
         env_file_encoding='utf-8',
     )
