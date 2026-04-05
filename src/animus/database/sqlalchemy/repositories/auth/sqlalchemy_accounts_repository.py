@@ -57,3 +57,7 @@ class SqlalchemyAccountsRepository(AccountsRepository):
         model.name = account.name.value
         model.is_verified = account.is_verified.value
         model.is_active = account.is_active.value
+        if account.password:
+            model.password_hash = account.password.value
+        if account.email:
+            model.email = account.email.value

@@ -5,6 +5,8 @@ from .sign_in_with_google_use_case import SignInWithGoogleUseCase
 from .sign_up_use_case import SignUpUseCase
 from .update_account_use_case import UpdateAccountUseCase
 from .verify_email_use_case import VerifyEmailUseCase
+from .forgot_password_use_case import ForgotPasswordUseCase
+from .verify_reset_token_use_case import VerifyResetTokenUseCase
 
 __all__ = [
     'GetAccountUseCase',
@@ -13,5 +15,7 @@ __all__ = [
     'VerifyEmailUseCase',
     'ResendVerificationEmailUseCase',
     'SignInWithGoogleUseCase',
+    'ForgotPasswordUseCase',
+    'VerifyResetTokenUseCase',
     'UpdateAccountUseCase',
 ]
