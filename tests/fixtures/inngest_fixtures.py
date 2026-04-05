@@ -99,6 +99,18 @@ def _can_connect(*, host: str, port: int) -> bool:
         return True
 
 
+def _is_inngest_http_ready(*, base_url: str) -> bool:
+    try:
+        request.urlopen(  # noqa: S310
+            request.Request(url=f'{base_url}/health', method='GET'),  # noqa: S310
+            timeout=1,
+        )
+    except Exception:
+        return False
+
+    return True
+
+
 @pytest.fixture
 def inngest_runtime(
     monkeypatch: pytest.MonkeyPatch,
@@ -143,13 +155,18 @@ def inngest_runtime(
             .with_bind_ports(8288, inngest_port)
             .with_kwargs(extra_hosts={'host.docker.internal': 'host-gateway'})
         ) as _inngest_container:
+            base_url = f'http://127.0.0.1:{inngest_port}'
             _wait_until(
                 lambda: _can_connect(host='127.0.0.1', port=inngest_port),
                 timeout_seconds=30,
             )
+            _wait_until(
+                lambda: _is_inngest_http_ready(base_url=base_url),
+                timeout_seconds=30,
+            )
             time.sleep(5)
 
-            yield InngestTestRuntime(base_url=f'http://127.0.0.1:{inngest_port}')
+            yield InngestTestRuntime(base_url=base_url)
     finally:
         server.should_exit = True
         server_thread.join(timeout=10)
