@@ -87,11 +87,19 @@ src/animus/
    ```
 
    Preencha os valores necessarios no arquivo `.env`.
+   Consulte a secao `Variaveis de Ambiente` abaixo para o detalhamento completo de cada chave.
 
 3. **Instale as dependencias do projeto:**
 
    ```bash
    uv sync
+   ```
+
+   O `uv sync` cria/atualiza automaticamente o ambiente virtual local em `.venv`.
+   Se quiser ativar manualmente no shell:
+
+   ```bash
+   source .venv/bin/activate
    ```
 
 4. **Prepare o banco de dados:**
@@ -105,7 +113,7 @@ src/animus/
 5. **Execute a API em desenvolvimento:**
 
    ```bash
-   uv run dev
+   uv run poe dev
    ```
 
 6. **(Opcional) Execute o ambiente local de eventos:**
@@ -119,6 +127,135 @@ src/animus/
    ```bash
    uv run poe db:seed
    ```
+
+### Infra local com Docker Compose
+
+Para subir os servicos locais (PostgreSQL, Redis, Qdrant, Inngest e emulador de GCS):
+
+```bash
+docker compose up -d
+```
+
+Para derrubar os servicos:
+
+```bash
+docker compose down
+```
+
+## 🔐 Variaveis de Ambiente
+
+### Minimo para rodar local
+
+- Obrigatorias para o fluxo principal local: `MODE`, `DATABASE_URL`, `JWT_SECRET_KEY`, `REDIS_URL`, `QDRANT_URL`, `GCS_BUCKET_NAME`, `STORAGE_EMULATOR_HOST`.
+- Recomendadas para testar IA/end-to-end: `OPENAI_API_KEY` e/ou `GEMINI_API_KEY`, `INNGEST_SIGNING_KEY`, `RESEND_API_KEY`, `RESEND_SENDER_EMAIL`.
+
+### Produção
+
+- Em `prod`, nao use `STORAGE_EMULATOR_HOST`; use bucket real no GCS.
+- Mantenha segredos (`*_KEY`, `*_SECRET`, credenciais e URLs com auth) em gerenciador de segredos.
+
+### Detalhamento por variavel
+
+- `HOST`
+  - O que e: host onde a API vai escutar localmente.
+  - Como obter: defina manualmente (`127.0.0.1` para desenvolvimento local).
+
+- `PORT`
+  - O que e: porta HTTP da API.
+  - Como obter: defina manualmente (`8080` no ambiente local).
+
+- `ANIMUS_SERVER_URL`
+  - O que e: URL publica/base da API usada em fluxos que precisam de callback/link absoluto.
+  - Como obter: local `http://localhost:8080`; em cloud, use a URL publica do servico.
+
+- `MODE`
+  - O que e: modo de execucao (`dev`, `stg`, `prod`).
+  - Como obter: defina conforme ambiente de deploy.
+
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+  - O que e: dados auxiliares para ambiente local de banco.
+  - Como obter: defina manualmente para o banco local (ou os valores do seu container/servico PostgreSQL).
+
+- `DATABASE_URL`
+  - O que e: string de conexao principal do PostgreSQL.
+  - Como obter: no formato `postgresql://<user>:<password>@<host>:<port>/<db>`.
+    - Local: use os valores do seu Postgres local.
+    - Gerenciado (ex.: Supabase): copie a connection string no painel do provider.
+
+- `GCS_BUCKET_NAME`
+  - O que e: nome do bucket usado para arquivos.
+  - Como obter:
+    - Local (emulador): defina um nome fixo, ex. `animus`.
+    - Producao: crie bucket no Google Cloud Storage e use o nome exato.
+
+- `STORAGE_EMULATOR_HOST`
+  - O que e: endpoint do emulador de storage.
+  - Como obter: em dev local, use algo como `http://localhost:4443`.
+    - Importante: essa variavel so deve ser usada com `MODE=dev`.
+
+- `GEMINI_API_KEY`
+  - O que e: chave da API Gemini (Google AI Studio).
+  - Como obter: gere em Google AI Studio e copie para o `.env`.
+
+- `OPENAI_API_KEY`
+  - O que e: chave da API OpenAI.
+  - Como obter: gere no painel da OpenAI e copie para o `.env`.
+
+- `GOOGLE_CLIENT_ID`
+  - O que e: client id OAuth usado no login com Google.
+  - Como obter: crie credencial OAuth 2.0 no Google Cloud Console (tipo Web application) e copie o Client ID.
+
+- `PANGEA_SERVICE_URL`
+  - O que e: URL base do servico Pangea consumido pelo backend.
+  - Como obter: usar a URL oficial do ambiente alvo; em geral manter `https://pangeabnp.pdpj.jus.br`.
+
+- `QDRANT_URL`
+  - O que e: endpoint HTTP do Qdrant.
+  - Como obter:
+    - Local: `http://localhost:6333`.
+    - Cloud: copie a URL/endpoint do cluster Qdrant.
+
+- `INNGEST_DEV`
+  - O que e: flag para modo de desenvolvimento do Inngest.
+  - Como obter: use `1` localmente; em ambientes nao-dev normalmente remova/ajuste conforme configuracao do Inngest.
+
+- `INNGEST_SIGNING_KEY`
+  - O que e: chave de assinatura/validacao de eventos Inngest.
+  - Como obter: copie no dashboard/projeto do Inngest (environment keys).
+
+- `JWT_SECRET_KEY`
+  - O que e: segredo usado para assinar tokens JWT.
+  - Como obter: gere uma string aleatoria forte (ex.: 32+ bytes) e armazene em cofre de segredos.
+
+- `JWT_ALGORITHM`
+  - O que e: algoritmo de assinatura JWT.
+  - Como obter: definir manualmente (`HS256` padrao do projeto).
+
+- `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS`
+  - O que e: expiracao do access token em segundos.
+  - Como obter: definir manualmente (ex.: `3600`).
+
+- `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS`
+  - O que e: expiracao do refresh token em segundos.
+  - Como obter: definir manualmente (ex.: `86400`).
+
+- `REDIS_URL`
+  - O que e: URL de conexao ao Redis.
+  - Como obter:
+    - Local: `redis://localhost:6379/0`.
+    - Gerenciado (ex.: Upstash): copie endpoint e credenciais no painel do provider.
+
+- `EMAIL_VERIFICATION_OTP_TTL_SECONDS`
+  - O que e: tempo de vida do OTP de verificacao de email (em segundos).
+  - Como obter: definir manualmente entre 60 e 86400 (padrao recomendado: `3600`).
+
+- `RESEND_API_KEY`
+  - O que e: chave da API Resend para envio de emails.
+  - Como obter: gere no dashboard da Resend.
+
+- `RESEND_SENDER_EMAIL`
+  - O que e: remetente dos emails transacionais.
+  - Como obter: use um endereco de dominio verificado na Resend.
 
 ## 📖 Dominios do Produto
 
@@ -151,7 +288,3 @@ uv run poe codecheck
 ## 📝 Licenca
 
 Este projeto esta licenciado sob a licenca [MIT](LICENSE).
-
-
-
-Esta Ação Ordinária de Cobrança c/c Obrigação de Fazer foi ajuizada por um(a) servidor(a) público(a) federal contra a União Federal. O(A) autor(a) pleiteia o recebimento da indenização de R$ 91,00 por jornada de 8 horas efetivamente trabalhadas, instituída pela Lei nº 12.855/2013 e regulamentada pelo Decreto nº 8.216/2014. Alega que, apesar de exercer suas funções em município de fronteira e preencher todos os requisitos legais desde antes da vigência da norma, jamais lhe foi concedida a verba. A petição fundamenta o pedido na natureza indenizatória da verba e na omissão administrativa, buscando o reconhecimento do direito e a condenação da União ao pagamento das parcelas retroativas (respeitada a prescrição quinquenal) e futuras, com correção monetária e juros, além de honorários advocatícios e custas.
