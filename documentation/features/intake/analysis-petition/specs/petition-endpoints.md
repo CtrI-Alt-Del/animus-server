@@ -429,11 +429,11 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 ## Camada Providers
 
 - **Arquivo:** `src/animus/constants/env.py`
-- **Mudanca:** adicionar configuracao minima para `storage` e `Gemini`, ao menos `MODE` (`dev|stg|prod`), `GCS_BUCKET_NAME`, `STORAGE_EMULATOR_HOST` e `GEMINI_API_KEY`; o uso de `STORAGE_EMULATOR_HOST` deve ficar restrito a `MODE=dev`.
+- **Mudanca:** adicionar configuracao minima para `storage` e `Gemini`, ao menos `MODE` (`dev|stg|prod`), `GCS_BUCKET_NAME`, `GCS_EMULATOR_HOST` e `GEMINI_API_KEY`; o uso de `GCS_EMULATOR_HOST` deve ficar restrito a `MODE=dev`.
 - **Justificativa:** os novos adapters de `storage` e `AI` precisam de configuracao centralizada e validada, com separacao explicita entre ambiente local e ambiente produtivo.
 
 - **Arquivo:** `.env.example`
-- **Mudanca:** documentar `MODE`, as novas variaveis de bucket/emulador e `GEMINI_API_KEY`, deixando claro que `STORAGE_EMULATOR_HOST` e apenas para desenvolvimento local.
+- **Mudanca:** documentar `MODE`, as novas variaveis de bucket/emulador e `GEMINI_API_KEY`, deixando claro que `GCS_EMULATOR_HOST` e apenas para desenvolvimento local.
 - **Justificativa:** manter bootstrap local coerente com o novo wiring e reduzir risco de configuracao incorreta em `stg`/`prod`.
 
 - **Arquivo:** `pyproject.toml`

@@ -3,7 +3,7 @@
 @uploaded_at = 2026-03-27T12:00:00Z
 @file_path = intake/analises/{{analysis_id}}/petitions/Ação Cobrança Lei 12855 Tema Repetitivo 974 SIRDR 3 STJ.pdf/exemplo-peticao.pdf
 @file_name = peticao-inicial.pdf
-@petition_id = 01KNCDNWDAHD1H3A3DD1NFDPR9
+@petition_id = 01KNFAPYAQC9NYFD3NYQC2GSXS
 
 ### Criar petição (CreatePetitionController)
 POST {{url}}/petitions

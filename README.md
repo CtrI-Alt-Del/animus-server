@@ -146,12 +146,12 @@ docker compose down
 
 ### Minimo para rodar local
 
-- Obrigatorias para o fluxo principal local: `MODE`, `DATABASE_URL`, `JWT_SECRET_KEY`, `REDIS_URL`, `QDRANT_URL`, `GCS_BUCKET_NAME`, `STORAGE_EMULATOR_HOST`.
+- Obrigatorias para o fluxo principal local: `MODE`, `DATABASE_URL`, `JWT_SECRET_KEY`, `REDIS_URL`, `QDRANT_URL`, `GCS_BUCKET_NAME`, `GCS_EMULATOR_HOST`.
 - Recomendadas para testar IA/end-to-end: `OPENAI_API_KEY` e/ou `GEMINI_API_KEY`, `INNGEST_SIGNING_KEY`, `RESEND_API_KEY`, `RESEND_SENDER_EMAIL`.
 
 ### Produção
 
-- Em `prod`, nao use `STORAGE_EMULATOR_HOST`; use bucket real no GCS.
+- Em `prod`, nao use `GCS_EMULATOR_HOST`; use bucket real no GCS.
 - Mantenha segredos (`*_KEY`, `*_SECRET`, credenciais e URLs com auth) em gerenciador de segredos.
 
 ### Detalhamento por variavel
@@ -188,7 +188,7 @@ docker compose down
     - Local (emulador): defina um nome fixo, ex. `animus`.
     - Producao: crie bucket no Google Cloud Storage e use o nome exato.
 
-- `STORAGE_EMULATOR_HOST`
+- `GCS_EMULATOR_HOST`
   - O que e: endpoint do emulador de storage.
   - Como obter: em dev local, use algo como `http://localhost:4443`.
     - Importante: essa variavel so deve ser usada com `MODE=dev`.
