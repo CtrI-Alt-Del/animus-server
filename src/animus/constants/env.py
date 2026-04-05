@@ -42,9 +42,9 @@ class _Env(BaseSettings):
         env_file_encoding='utf-8',
     )
 
-    EMAIL_VERIFICATION_SECRET_KEY:str = 'change_this'
-    EMAIL_VERIFICATION_SALT:str = 'change_this'
-    EMAIL_VERIFICATION_TOKEN_MAX_AGE_SECONDS:int = 3600
+    EMAIL_VERIFICATION_SECRET_KEY: str = 'change_this'
+    EMAIL_VERIFICATION_SALT: str = 'change_this'
+    EMAIL_VERIFICATION_TOKEN_MAX_AGE_SECONDS: int = 3600
 
     @field_validator('EMAIL_VERIFICATION_OTP_TTL_SECONDS', mode='before')
     @classmethod

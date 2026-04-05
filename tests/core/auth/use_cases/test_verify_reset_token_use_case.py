@@ -12,10 +12,11 @@ from animus.core.auth.interfaces.accounts_repository import AccountsRepository
 from animus.core.auth.interfaces.email_verification_provider import (
     EmailVerificationProvider,
 )
-from animus.core.auth.use_cases.verify_reset_token_use_case import VerifyResetTokenUseCase
+from animus.core.auth.use_cases.verify_reset_token_use_case import (
+    VerifyResetTokenUseCase,
+)
 from animus.core.shared.domain.structures import Logical
 from animus.core.shared.domain.structures.text import Text
-
 
 
 class TestVerifyResetTokenUseCase:

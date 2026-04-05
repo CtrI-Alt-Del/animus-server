@@ -3,7 +3,9 @@ from animus.core.auth.interfaces import (
     HashProvider,
     JwtProvider,
 )
-from animus.core.auth.interfaces.email_verification_provider import EmailVerificationProvider
+from animus.core.auth.interfaces.email_verification_provider import (
+    EmailVerificationProvider,
+)
 from animus.core.notification.interfaces import EmailSenderProvider
 from animus.core.shared.interfaces import CacheProvider, OtpProvider
 from animus.core.storage.interfaces import (
@@ -11,7 +13,9 @@ from animus.core.storage.interfaces import (
     FileStorageProvider,
     PdfProvider,
 )
-from animus.providers.auth.email_verification.itsdangerous_email_provider import ItsdangerousEmailVerificationProvider
+from animus.providers.auth.email_verification.itsdangerous_email_provider import (
+    ItsdangerousEmailVerificationProvider,
+)
 from animus.providers.auth.hash.argon2id_hash_provider import Argon2idHashProvider
 from animus.providers.auth.jwt.jose.jose_jwt_provider import JoseJwtProvider
 from animus.providers.auth.otp.secrets.secrets_otp_provider import SecretsOtpProvider
@@ -65,6 +69,7 @@ class ProvidersPipe:
     @staticmethod
     def get_docx_provider() -> DocxProvider:
         return PythonDocxProvider()
+
     @staticmethod
-    def get_email_verification_provider()->EmailVerificationProvider:
+    def get_email_verification_provider() -> EmailVerificationProvider:
         return ItsdangerousEmailVerificationProvider()

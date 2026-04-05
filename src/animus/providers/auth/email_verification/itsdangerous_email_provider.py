@@ -5,7 +5,9 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from animus.constants import Env
 from animus.core.auth.domain.errors import InvalidEmailVerificationTokenError
 from animus.core.auth.domain.structures.email import Email
-from animus.core.auth.interfaces.email_verification_provider import EmailVerificationProvider
+from animus.core.auth.interfaces.email_verification_provider import (
+    EmailVerificationProvider,
+)
 from animus.core.shared.domain.structures import Logical, Text
 
 

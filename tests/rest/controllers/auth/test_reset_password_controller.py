@@ -17,10 +17,7 @@ class TestResetPasswordController:
         )
         response = client.post(
             '/auth/password/reset',
-            json={
-                'account_id': account.id,
-                'new_password': 'StrongPassword123'
-            },
+            json={'account_id': account.id, 'new_password': 'StrongPassword123'},
         )
         assert response.status_code == 200
 
@@ -32,7 +29,7 @@ class TestResetPasswordController:
             '/auth/password/reset',
             json={
                 'account_id': 'non-existent-account-id',
-                'new_password': 'StrongPassword123'
+                'new_password': 'StrongPassword123',
             },
         )
         assert response.status_code == 400
@@ -43,9 +40,7 @@ class TestResetPasswordController:
     ) -> None:
         response = client.post(
             '/auth/password/reset',
-            json={
-                'new_password': 'StrongPassword123'
-            },
+            json={'new_password': 'StrongPassword123'},
         )
         assert response.status_code == 422
 
@@ -62,8 +57,6 @@ class TestResetPasswordController:
         )
         response = client.post(
             '/auth/password/reset',
-            json={
-                'account_id': account.id
-            },
+            json={'account_id': account.id},
         )
         assert response.status_code == 422

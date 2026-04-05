@@ -12,7 +12,6 @@ from animus.core.shared.domain.structures.id import Id
 from animus.core.shared.domain.structures.text import Text
 
 
-
 class TestResetPasswordUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
@@ -41,14 +40,10 @@ class TestResetPasswordUseCase:
         )
 
         expected_id_vo = Id.create(account_id_str)
-        self.accounts_repository_mock.find_by_id.assert_called_once_with(
-            expected_id_vo
-        )
+        self.accounts_repository_mock.find_by_id.assert_called_once_with(expected_id_vo)
 
         expected_password_vo = Text.create(new_password_str)
-        self.hash_provider_mock.generate.assert_called_once_with(
-            expected_password_vo
-        )
+        self.hash_provider_mock.generate.assert_called_once_with(expected_password_vo)
 
         assert account.password == hashed_password
         self.accounts_repository_mock.replace.assert_called_once_with(account)
@@ -68,9 +63,7 @@ class TestResetPasswordUseCase:
             )
 
         expected_id_vo = Id.create(account_id_str)
-        self.accounts_repository_mock.find_by_id.assert_called_once_with(
-            expected_id_vo
-        )
+        self.accounts_repository_mock.find_by_id.assert_called_once_with(expected_id_vo)
 
         self.hash_provider_mock.generate.assert_not_called()
         self.accounts_repository_mock.replace.assert_not_called()

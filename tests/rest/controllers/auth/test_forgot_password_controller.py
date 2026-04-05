@@ -35,8 +35,7 @@ class TestForgotPasswordController:
         assert response.content == b''
 
     def test_should_return_422_when_email_is_missing_in_body(
-        self,
-        client: TestClient
+        self, client: TestClient
     ) -> None:
         response = client.post(
             '/auth/password/forgot',
@@ -46,8 +45,7 @@ class TestForgotPasswordController:
         assert response.status_code == 422
 
     def test_should_return_422_when_email_is_invalid_type(
-        self,
-        client: TestClient
+        self, client: TestClient
     ) -> None:
         response = client.post(
             '/auth/password/forgot',
