@@ -1,3 +1,12 @@
+## [1.12.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.12.0...v1.12.1) (2026-04-05)
+
+
+### Bug Fixes
+
+* **auth:** ANI-36 add last fixes to reset flow ([5f7a34a](https://github.com/CtrI-Alt-Del/animus-server/commit/5f7a34ac0f90dbbc886da628474af73889d26bc8))
+* **auth:** ANI-36 fix linter errors ([7004bf3](https://github.com/CtrI-Alt-Del/animus-server/commit/7004bf3498bac750bfd4dab3e4179fd61ed693fd))
+* **auth:** ANI-36 fix linter problems ([bc65d67](https://github.com/CtrI-Alt-Del/animus-server/commit/bc65d6713f5011acdd01609d7a91d0c6ad3d91c3))
+
 # [1.12.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.11.0...v1.12.0) (2026-04-03)
 
 

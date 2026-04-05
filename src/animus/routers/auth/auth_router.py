@@ -8,8 +8,17 @@ from animus.rest.controllers.auth import (
     UpdateAccountController,
     VerifyEmailController,
 )
+from animus.rest.controllers.auth.forgot_password_controller import (
+    ForgotPasswordController,
+)
+from animus.rest.controllers.auth.reset_password_controller import (
+    ResetPasswordController,
+)
 from animus.rest.controllers.auth.sign_in_with_google_controller import (
     SignInWithGoogleController,
+)
+from animus.rest.controllers.auth.verify_reset_token_controller import (
+    VerifyResetTokenController,
 )
 
 
@@ -24,6 +33,9 @@ class AuthRouter:
         ResendVerificationEmailController.handle(router)
         SignInWithGoogleController.handle(router)
         GetAccountController.handle(router)
+        ForgotPasswordController.handle(router)
+        VerifyResetTokenController.handle(router)
+        ResetPasswordController.handle(router)
         UpdateAccountController.handle(router)
 
         return router
