@@ -6,6 +6,7 @@ import time
 from collections.abc import Callable, Iterator
 from http.client import HTTPResponse
 from typing import Any, cast
+from urllib.error import URLError
 from urllib import request
 
 import pytest
@@ -105,7 +106,7 @@ def _is_inngest_http_ready(*, base_url: str) -> bool:
             request.Request(url=f'{base_url}/health', method='GET'),  # noqa: S310
             timeout=1,
         )
-    except Exception:
+    except (URLError, OSError, TimeoutError):
         return False
 
     return True
