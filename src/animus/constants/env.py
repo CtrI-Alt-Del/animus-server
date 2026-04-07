@@ -6,19 +6,23 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class _Env(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=('.env', '.env.example'),
-        extra='ignore',
-        env_file_encoding='utf-8',
+        env_file=(".env", ".env.example"),
+        extra="ignore",
+        env_file_encoding="utf-8",
     )
 
-    MODE: Literal['dev', 'stg', 'prod']
-    HOST: str = '127.0.0.1'
+    MODE: Literal["dev", "stg", "prod"]
+    HOST: str = "127.0.0.1"
     PORT: int = 8080
 
     DATABASE_URL: str
 
     GCS_BUCKET_NAME: str
     GCS_EMULATOR_HOST: str | None = None
+
+    SUPABASE_URL: str
+    SUPABASE_KEY: str
+    SUPABASE_STORAGE_BUCKET: str
 
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
@@ -47,13 +51,13 @@ class _Env(BaseSettings):
     EMAIL_VERIFICATION_TOKEN_MAX_AGE_SECONDS: int
     EMAIL_VERIFICATION_OTP_TTL_SECONDS: int
 
-    @field_validator('GCS_EMULATOR_HOST')
+    @field_validator("GCS_EMULATOR_HOST")
     @classmethod
     def validate_gcs_emulator_host(cls, value: str, info: Any) -> str:
-        mode = str(info.data.get('MODE', 'dev'))
+        mode = str(info.data.get("MODE", "dev"))
 
-        if value and mode != 'dev':
-            msg = 'GCS_EMULATOR_HOST can only be used when MODE is dev'
+        if value and mode != "dev":
+            msg = "GCS_EMULATOR_HOST can only be used when MODE is dev"
             raise ValueError(msg)
 
         return value

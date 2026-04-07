@@ -10,7 +10,7 @@ class GeneratePetitionUploadUrlUseCase:
 
     def execute(self, analysis_id: str, document_type: str) -> UploadUrlDto:
         file_id = Id.create().value
-        raw_file_path = f'analyses/{analysis_id}/petitions/{file_id}.{document_type}'
+        raw_file_path = f"analyses/{analysis_id}/petitions/{file_id}.{document_type}"
         file_path = FilePath.create(value=raw_file_path)
         upload_url = self._file_storage_provider.generate_upload_url(
             file_path=file_path

@@ -28,8 +28,8 @@ from animus.providers.storage.document.docx.python_docx_provider import (
     PythonDocxProvider,
 )
 from animus.providers.storage.document.pdf.pypdf_pdf_provider import PypdfPdfProvider
-from animus.providers.storage.file_storage.gcs.gcs_file_storage_provider import (
-    GcsFileStorageProvider,
+from animus.providers.storage.file_storage.supabase.supabase_file_storage_provider import (
+    SupabaseFileStorageProvider,
 )
 
 
@@ -60,7 +60,7 @@ class ProvidersPipe:
 
     @staticmethod
     def get_file_storage_provider() -> FileStorageProvider:
-        return GcsFileStorageProvider()
+        return SupabaseFileStorageProvider()
 
     @staticmethod
     def get_pdf_provider() -> PdfProvider:
