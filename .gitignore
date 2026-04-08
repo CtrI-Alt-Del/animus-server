@@ -195,6 +195,7 @@ CLAUDE.md
 GEMINI.md
 opencode.jsonc
 prompt.md
+gha-creds-*.json
 
 # Terminal Paste Image folder
 .cp-images/

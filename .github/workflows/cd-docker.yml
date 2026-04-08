@@ -1,0 +1,138 @@
+name: Docker CD
+
+on:
+  workflow_run:
+    workflows:
+      - Continuous Integration
+    types:
+      - completed
+    branches:
+      - main
+      - production
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish Docker Image
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'production') }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.workflow_run.head_branch == 'production' && 'production' || 'staging' }}
+    timeout-minutes: 20
+    env:
+      IMAGE_NAME: ${{ vars.IMAGE_NAME != '' && vars.IMAGE_NAME || 'animus-server' }}
+      GAR_REGION: ${{ vars.GCP_ARTIFACT_REGISTRY_REGION }}
+      GAR_REPOSITORY: ${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}
+      CLOUD_RUN_REGION: ${{ vars.GCP_CLOUD_RUN_REGION }}
+      CLOUD_RUN_SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Validate required variables
+        shell: bash
+        run: |
+          missing=0
+
+          for variable in GCP_PROJECT_ID GAR_REGION GAR_REPOSITORY CLOUD_RUN_REGION CLOUD_RUN_SERVICE; do
+            if [ -z "${!variable}" ]; then
+              echo "Missing required repository/environment variable: $variable"
+              missing=1
+            fi
+          done
+
+          if [ -z "${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ]; then
+            echo "Missing required repository/environment variable: GCP_WORKLOAD_IDENTITY_PROVIDER"
+            missing=1
+          fi
+
+          if [ -z "${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}" ]; then
+            echo "Missing required repository/environment variable: GCP_SERVICE_ACCOUNT_EMAIL"
+            missing=1
+          fi
+
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Resolve publish context
+        id: context
+        shell: bash
+        run: |
+          branch="${{ github.event.workflow_run.head_branch }}"
+          head_sha="${{ github.event.workflow_run.head_sha }}"
+          short_sha="${head_sha::7}"
+          registry="${GAR_REGION}-docker.pkg.dev"
+          image="${registry}/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/${IMAGE_NAME}"
+
+          if [ "$branch" = 'main' ]; then
+            environment='staging'
+            deploy_tag="staging-${short_sha}"
+            tags="${image}:staging,${image}:${deploy_tag}"
+          elif [ "$branch" = 'production' ]; then
+            environment='production'
+            deploy_tag="prod-${short_sha}"
+            tags="${image}:prod,${image}:${deploy_tag},${image}:latest"
+          else
+            echo "Unsupported branch: $branch"
+            exit 1
+          fi
+
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "deploy_tag=$deploy_tag" >> "$GITHUB_OUTPUT"
+          echo "deploy_image=${image}:${deploy_tag}" >> "$GITHUB_OUTPUT"
+          echo "environment=$environment" >> "$GITHUB_OUTPUT"
+          echo "registry=$registry" >> "$GITHUB_OUTPUT"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}
+          token_format: access_token
+          create_credentials_file: true
+
+      - name: Log in to Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ steps.context.outputs.registry }}
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          provenance: false
+          tags: ${{ steps.context.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service: ${{ env.CLOUD_RUN_SERVICE }}
+          region: ${{ env.CLOUD_RUN_REGION }}
+          image: ${{ steps.context.outputs.deploy_image }}
+
+      - name: Output deployed service URL
+        shell: bash
+        run: |
+          echo "Cloud Run URL: ${{ steps.deploy.outputs.url }}"
