@@ -87,10 +87,9 @@ cmd = "basedpyright"
 [tool.poe.tasks.codecheck]
 shell = "ruff check --fix src tests && ruff format --check src tests"
 
-
 [tool.ruff]
 line-length = 88
-target-version = "1.14.0"
+target-version = "py313"
 fix = true
 show-fixes = true
 indent-width = 4
@@ -162,7 +161,6 @@ ignore = [
   "RUF006",
   "S105",
 ]
-
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ANN201", "S101"]
