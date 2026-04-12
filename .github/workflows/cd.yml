@@ -23,7 +23,7 @@ jobs:
       cancel-in-progress: true
     runs-on: ubuntu-latest
     environment: ${{ github.event.workflow_run.head_branch == 'production' && 'production' || 'staging' }}
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       IMAGE_NAME: ${{ vars.IMAGE_NAME != '' && vars.IMAGE_NAME || 'animus-server' }}
       GAR_REGION: ${{ vars.GCP_ARTIFACT_REGISTRY_REGION }}
