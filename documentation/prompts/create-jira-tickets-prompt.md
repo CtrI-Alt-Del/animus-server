@@ -1,5 +1,5 @@
 ---
-description: Sugerir issues para o projeto baseado em um PRD
+description: Criar um ticket do zero para o projeto baseado em um PRD ou contexto tecnico
 ---
 
 ## Objetivo
@@ -45,9 +45,6 @@ Ler um PRD do projeto ou um contexto tecnico do projeto e propor um ticket do ze
 ## Formato de saida
 
 Para cada ticket, gere um corpo seguindo exatamente esta estrutura base:
-
-### Titulo
-<!-- Titulo curto e objetivo -->
 
 ## Objetivo
 
@@ -115,6 +112,7 @@ DoD - Verificar antes de mover para Concluido:
 
 - O conteudo deve sair pronto para colar no Jira.
 - Nao resuma em excesso; detalhe o suficiente para orientar implementacao.
+- Nao inclua secao `Titulo` nem comentarios HTML com titulo no corpo do ticket.
 - Para tickets do tipo `task`, sempre carregue e considere primeiro os PRDs publicados no Confluence antes de redigir os tickets.
 - Para tickets do tipo `task`, sempre inclua os links reais dos PRDs usados como referencia, priorizando o link publicado no Confluence em vez de rascunhos ou links de edicao.
 - Para tickets do tipo `logico` ou `bug`, nao invente PRD nem mantenha a secao `Requisitos de Produto` por padrao; omita essa secao quando nao houver documento funcional associado.
