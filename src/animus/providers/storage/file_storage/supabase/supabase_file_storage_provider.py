@@ -1,5 +1,8 @@
 from pathlib import Path
-from typing import Mapping, cast
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 from supabase import Client, create_client
 
@@ -30,7 +33,7 @@ class SupabaseFileStorageProvider(FileStorageProvider):
             path=normalized_file_path,
         )
 
-        payload = cast(Mapping[str, object], signed_upload_url)
+        payload = cast("Mapping[str, object]", signed_upload_url)
         signed_url = str(
             payload.get("signed_url")
             or payload.get("signedUrl")
