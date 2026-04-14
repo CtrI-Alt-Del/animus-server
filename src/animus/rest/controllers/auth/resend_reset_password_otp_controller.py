@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from animus.constants.env import Env
 from animus.core.auth.interfaces import AccountsRepository
-from animus.core.auth.use_cases import ForgotPasswordUseCase
+from animus.core.auth.use_cases import ResendResetPasswordOtpUseCase
 from animus.core.shared.domain.structures import Ttl
 from animus.core.shared.interfaces import Broker, CacheProvider, OtpProvider
 from animus.pipes import DatabasePipe, ProvidersPipe, PubSubPipe
@@ -15,13 +15,10 @@ class _Body(BaseModel):
     email: str
 
 
-class ForgotPasswordController:
+class ResendResetPasswordOtpController:
     @staticmethod
     def handle(router: APIRouter) -> None:
-        @router.post(
-            '/password/forgot',
-            status_code=204,
-        )
+        @router.post('/password/resend-reset-otp', status_code=204)
         def _(
             body: _Body,
             accounts_repository: Annotated[
@@ -37,7 +34,7 @@ class ForgotPasswordController:
             ],
             broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
         ) -> Response:
-            use_case = ForgotPasswordUseCase(
+            use_case = ResendResetPasswordOtpUseCase(
                 accounts_repository=accounts_repository,
                 otp_provider=otp_provider,
                 cache_provider=cache_provider,
