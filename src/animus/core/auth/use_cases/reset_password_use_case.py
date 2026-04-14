@@ -37,7 +37,9 @@ class ResetPasswordUseCase:
             raise InvalidResetPasswordContextError
 
         account_password = Password.create(new_password)
-        hashed_password = self._hash_provider.generate(Text.create(account_password.value))
+        hashed_password = self._hash_provider.generate(
+            Text.create(account_password.value)
+        )
         account.password = hashed_password
         self._accounts_repository.replace(account)
         self._cache_provider.delete(reset_password_context_cache_key)

@@ -10,9 +10,15 @@ from animus.rest.controllers.auth import (
     VerifyEmailController,
     VerifyResetPasswordOtpController,
 )
-from animus.rest.controllers.auth.forgot_password_controller import ForgotPasswordController
-from animus.rest.controllers.auth.reset_password_controller import ResetPasswordController
-from animus.rest.controllers.auth.sign_in_with_google_controller import SignInWithGoogleController
+from animus.rest.controllers.auth.forgot_password_controller import (
+    ForgotPasswordController,
+)
+from animus.rest.controllers.auth.reset_password_controller import (
+    ResetPasswordController,
+)
+from animus.rest.controllers.auth.sign_in_with_google_controller import (
+    SignInWithGoogleController,
+)
 
 
 class AuthRouter:

@@ -48,7 +48,9 @@ class VerifyResetPasswordOtpUseCase:
         reset_password_otp_cache_key = CacheKeys().get_reset_password_otp(
             account_email.value
         )
-        cached_account_email_otp = self._cache_provider.get(reset_password_otp_cache_key)
+        cached_account_email_otp = self._cache_provider.get(
+            reset_password_otp_cache_key
+        )
         if cached_account_email_otp is None:
             raise InvalidResetPasswordOtpError
 

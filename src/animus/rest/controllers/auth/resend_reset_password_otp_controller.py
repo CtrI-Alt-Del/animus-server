@@ -39,9 +39,7 @@ class ResendResetPasswordOtpController:
                 otp_provider=otp_provider,
                 cache_provider=cache_provider,
                 broker=broker,
-                reset_password_otp_ttl=Ttl.create(
-                    Env.RESET_PASSWORD_OTP_TTL_SECONDS
-                ),
+                reset_password_otp_ttl=Ttl.create(Env.RESET_PASSWORD_OTP_TTL_SECONDS),
                 reset_password_otp_resend_cooldown_ttl=Ttl.create(
                     Env.RESET_PASSWORD_OTP_RESEND_COOLDOWN_SECONDS
                 ),
