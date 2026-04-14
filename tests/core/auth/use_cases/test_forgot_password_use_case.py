@@ -49,6 +49,7 @@ class TestForgotPasswordUseCase:
         account = self._create_account()
 
         self.accounts_repository_mock.find_by_email.return_value = account
+        self.cache_provider_mock.get.return_value = None
         self.otp_provider_mock.generate.return_value = Otp.create('123456')
 
         self.use_case.execute(email=email_str)
@@ -56,6 +57,9 @@ class TestForgotPasswordUseCase:
         expected_email_vo = Email.create(email_str)
         self.accounts_repository_mock.find_by_email.assert_called_once_with(
             expected_email_vo
+        )
+        self.cache_provider_mock.get.assert_called_once_with(
+            CacheKeys().get_reset_password_otp_resend_cooldown(email_str)
         )
         self.otp_provider_mock.generate.assert_called_once_with()
         self.cache_provider_mock.set_with_ttl.assert_has_calls(
@@ -95,6 +99,26 @@ class TestForgotPasswordUseCase:
             expected_email_vo
         )
 
+        self.otp_provider_mock.generate.assert_not_called()
+        self.cache_provider_mock.get.assert_not_called()
+        self.cache_provider_mock.set.assert_not_called()
+        self.cache_provider_mock.set_with_ttl.assert_not_called()
+        self.broker_mock.publish.assert_not_called()
+
+    def test_should_return_silently_when_reset_password_cooldown_is_active(
+        self,
+    ) -> None:
+        email_str = 'maria@example.com'
+        account = self._create_account()
+
+        self.accounts_repository_mock.find_by_email.return_value = account
+        self.cache_provider_mock.get.return_value = Text.create('123456')
+
+        self.use_case.execute(email=email_str)
+
+        self.cache_provider_mock.get.assert_called_once_with(
+            CacheKeys().get_reset_password_otp_resend_cooldown(email_str)
+        )
         self.otp_provider_mock.generate.assert_not_called()
         self.cache_provider_mock.set.assert_not_called()
         self.cache_provider_mock.set_with_ttl.assert_not_called()

@@ -39,15 +39,18 @@ class ForgotPasswordUseCase:
         if account is None:
             return
 
+        reset_password_otp_resend_cooldown_cache_key = (
+            CacheKeys().get_reset_password_otp_resend_cooldown(account.email.value)
+        )
+        if self._cache_provider.get(reset_password_otp_resend_cooldown_cache_key):
+            return
+
         account_email_otp = self._otp_provider.generate()
         reset_password_otp_cache_key = CacheKeys().get_reset_password_otp(
             account.email.value
         )
         reset_password_otp_attempts_cache_key = (
             CacheKeys().get_reset_password_otp_attempts(account.email.value)
-        )
-        reset_password_otp_resend_cooldown_cache_key = (
-            CacheKeys().get_reset_password_otp_resend_cooldown(account.email.value)
         )
 
         self._cache_provider.set_with_ttl(
