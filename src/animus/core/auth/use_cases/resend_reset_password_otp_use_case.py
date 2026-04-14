@@ -1,14 +1,12 @@
 from animus.constants.cache_keys import CacheKeys
-from animus.core.auth.domain.events.password_reset_request_event import (
-    PasswordResetRequestEvent,
-)
+from animus.core.auth.domain.events import PasswordResetRequestEvent
 from animus.core.auth.domain.structures import Email, Otp
-from animus.core.auth.interfaces.accounts_repository import AccountsRepository
+from animus.core.auth.interfaces import AccountsRepository
 from animus.core.shared.domain.structures import Text, Ttl
 from animus.core.shared.interfaces import Broker, CacheProvider, OtpProvider
 
 
-class ForgotPasswordUseCase:
+class ResendResetPasswordOtpUseCase:
     def __init__(
         self,
         accounts_repository: AccountsRepository,
@@ -39,15 +37,21 @@ class ForgotPasswordUseCase:
         if account is None:
             return
 
+        reset_password_otp_resend_cooldown_cache_key = (
+            CacheKeys().get_reset_password_otp_resend_cooldown(account_email.value)
+        )
+        cached_cooldown = self._cache_provider.get(
+            reset_password_otp_resend_cooldown_cache_key
+        )
+        if cached_cooldown is not None:
+            return
+
         account_email_otp = self._otp_provider.generate()
         reset_password_otp_cache_key = CacheKeys().get_reset_password_otp(
-            account.email.value
+            account_email.value
         )
         reset_password_otp_attempts_cache_key = (
-            CacheKeys().get_reset_password_otp_attempts(account.email.value)
-        )
-        reset_password_otp_resend_cooldown_cache_key = (
-            CacheKeys().get_reset_password_otp_resend_cooldown(account.email.value)
+            CacheKeys().get_reset_password_otp_attempts(account_email.value)
         )
 
         self._cache_provider.set_with_ttl(
