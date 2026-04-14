@@ -15,7 +15,7 @@ from animus.core.storage.interfaces import FileStorageProvider
 
 
 class SupabaseFileStorageProvider(FileStorageProvider):
-    _PDFS_DIR = Path(__file__).resolve().parents[6] / "assets" / "pdfs"
+    _PDFS_DIR = Path(__file__).resolve().parents[6] / 'assets' / 'pdfs'
     _supabase: Client
 
     def __init__(self) -> None:
@@ -33,17 +33,17 @@ class SupabaseFileStorageProvider(FileStorageProvider):
             path=normalized_file_path,
         )
 
-        payload = cast("Mapping[str, object]", signed_upload_url)
+        payload = cast('Mapping[str, object]', signed_upload_url)
         signed_url = str(
-            payload.get("signed_url")
-            or payload.get("signedUrl")
-            or payload.get("signedURL")
-            or ""
+            payload.get('signed_url')
+            or payload.get('signedUrl')
+            or payload.get('signedURL')
+            or ''
         )
-        token = str(payload.get("token") or "")
+        token = str(payload.get('token') or '')
 
         if not signed_url:
-            msg = f"Failed to generate upload url for file path: {file_path.value}"
+            msg = f'Failed to generate upload url for file path: {file_path.value}'
             raise ValueError(msg)
 
         return UploadUrl.create(
@@ -60,14 +60,14 @@ class SupabaseFileStorageProvider(FileStorageProvider):
             )
         except Exception as error:
             if self._is_not_found_error(error):
-                raise NotFoundError(f"File not found: {file_path.value}") from error
+                raise NotFoundError(f'File not found: {file_path.value}') from error
             raise
 
         return File.create(
             value=file_content,
             key=Text.create(file_path.value),
             size_in_bytes=Decimal(value=float(len(file_content))),
-            mime_type=Text.create("application/octet-stream"),
+            mime_type=Text.create('application/octet-stream'),
         )
 
     def upload_files(self, file_paths: list[FilePath]) -> None:
@@ -76,14 +76,14 @@ class SupabaseFileStorageProvider(FileStorageProvider):
             if not local_file_path.exists():
                 local_file_path = self._PDFS_DIR / Path(file_path.value).name
                 if not local_file_path.exists():
-                    msg = f"File not found: {file_path.value}"
+                    msg = f'File not found: {file_path.value}'
                     raise FileNotFoundError(msg)
 
             normalized_file_path = self._normalize_file_path(file_path.value)
             self._supabase.storage.from_(self._bucket).upload(
                 path=normalized_file_path,
                 file=local_file_path,
-                file_options={"upsert": "true"},
+                file_options={'upsert': 'true'},
             )
 
     def remove_files(self, file_paths: list[FilePath]) -> None:
@@ -100,20 +100,20 @@ class SupabaseFileStorageProvider(FileStorageProvider):
 
     @staticmethod
     def _is_not_found_error(error: Exception) -> bool:
-        code = getattr(error, "code", None)
+        code = getattr(error, 'code', None)
         if code == 404:
             return True
 
-        status_code = getattr(error, "status_code", None)
+        status_code = getattr(error, 'status_code', None)
         if status_code == 404:
             return True
 
-        status_code = getattr(error, "statusCode", None)
-        if status_code == "404" or status_code == 404:
+        status_code = getattr(error, 'statusCode', None)
+        if status_code == '404' or status_code == 404:
             return True
 
-        return error.__class__.__name__ == "NotFound"
+        return error.__class__.__name__ == 'NotFound'
 
     @staticmethod
     def _normalize_file_path(file_path: str) -> str:
-        return file_path.lstrip("/")
+        return file_path.lstrip('/')
