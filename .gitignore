@@ -196,6 +196,8 @@ GEMINI.md
 opencode.jsonc
 prompt.md
 gha-creds-*.json
+jira-ticket.md
 
 # Terminal Paste Image folder
 .cp-images/
+
