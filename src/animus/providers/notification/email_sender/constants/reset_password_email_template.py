@@ -56,7 +56,7 @@ RESET_PASSWORD_EMAIL_TEMPLATE = """<!doctype html>
                 <p
                   style="margin:0 0 28px 0; font-size:14px; line-height:1.7; color:#4a4a50;"
                 >
-                  Recebemos uma solicitação para redefinir a senha da sua conta no Animus. Clique no botão abaixo para cadastrar uma nova senha. Este link é válido por 30 minutos.
+                  Recebemos uma solicitação para redefinir a senha da sua conta no Animus. Use o código numérico abaixo para continuar o processo no aplicativo. Este código é válido por tempo limitado.
                 </p>
 
                 <table
@@ -68,12 +68,11 @@ RESET_PASSWORD_EMAIL_TEMPLATE = """<!doctype html>
                 >
                   <tr>
                     <td align="center" style="padding:10px 0 30px 0;">
-                      <a
-                        href="{{RESET_LINK}}"
-                        style="display:inline-block; background-color:#1a1a1e; color:#ffffff; font-family:Arial, Helvetica, sans-serif; font-size:15px; font-weight:600; text-decoration:none; padding:16px 32px; border-radius:8px;"
+                      <div
+                        style="display:inline-block; background-color:#1a1a1e; color:#ffffff; font-family:Arial, Helvetica, sans-serif; font-size:32px; font-weight:700; letter-spacing:8px; text-decoration:none; padding:16px 32px; border-radius:8px;"
                       >
-                        Redefinir Senha
-                      </a>
+                        {{OTP_CODE}}
+                      </div>
                     </td>
                   </tr>
                 </table>
@@ -81,7 +80,7 @@ RESET_PASSWORD_EMAIL_TEMPLATE = """<!doctype html>
                 <p
                   style="margin:0 0 24px 0; font-size:12px; line-height:1.6; text-align:center; color:#8e8e93;"
                 >
-                  Se o link expirar, você precisará solicitar a redefinição novamente no aplicativo.
+                  Se o código expirar, você precisará solicitar uma nova redefinição no aplicativo.
                 </p>
 
                 <hr
