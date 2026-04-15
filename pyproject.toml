@@ -1,6 +1,6 @@
 [project]
 name = "animus"
-version = "1.16.1"
+version = "1.17.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -90,7 +90,7 @@ shell = "ruff check --fix src tests && ruff format --check src tests"
 
 [tool.ruff]
 line-length = 88
-target-version = "py313"
+target-version = "1.17.0"
 fix = true
 show-fixes = true
 indent-width = 4

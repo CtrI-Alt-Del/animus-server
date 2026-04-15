@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.16.1...v1.17.0) (2026-04-15)
+
+
+### Features
+
+* ANI-84 add push notification provider interface ([c84cea7](https://github.com/CtrI-Alt-Del/animus-server/commit/c84cea76bd1cf3ab94dfe0d42c9eb06e02d38a37))
+
 ## [1.16.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.16.0...v1.16.1) (2026-04-15)
 
 
