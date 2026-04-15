@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/storage
-@analysis_id = 01KMQTN9YCHWG20ZZEPNBRYW87
+@analysis_id = 01KNK1MDTRWJ867FEYFPB6AMSF
 
 ### Gerar URL de upload para peticao PDF (GeneratePetitionUploadUrlController)
 POST {{url}}/analyses/{{analysis_id}}/petitions/upload?document_type=pdf

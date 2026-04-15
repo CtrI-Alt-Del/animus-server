@@ -20,6 +20,10 @@ class _Env(BaseSettings):
     GCS_BUCKET_NAME: str
     GCS_EMULATOR_HOST: str | None = None
 
+    SUPABASE_URL: str
+    SUPABASE_KEY: str
+    SUPABASE_STORAGE_BUCKET: str
+
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
     JWT_ACCESS_TOKEN_EXPIRATION_SECONDS: int
