@@ -1,3 +1,16 @@
+# [1.15.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.14.0...v1.15.0) (2026-04-15)
+
+
+### Bug Fixes
+
+* ANI-99 format files and correct ruff target version ([5240935](https://github.com/CtrI-Alt-Del/animus-server/commit/524093580b9bf0cef75460fa23a7350a61c5de61))
+* ANI-99 move supabase Mapping import to type checking ([f7be45a](https://github.com/CtrI-Alt-Del/animus-server/commit/f7be45a3906b7b9ec0948b279cdc2bb346f24712))
+
+
+### Features
+
+* ANI-99 migrate file storage provider to supabase ([3137ef5](https://github.com/CtrI-Alt-Del/animus-server/commit/3137ef568d76ec685c26c87f34e11dd5c0031a3c))
+
 # [1.14.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.13.0...v1.14.0) (2026-04-05)
 
 
