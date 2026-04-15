@@ -1,6 +1,5 @@
 from .analysis_precedents_repository import AnalysisPrecedentsRepository
 from .analisyses_repository import AnalisysesRepository
-from .folders_repository import FoldersRepository
 from .petition_embeddings_provider import PetitionSummaryEmbeddingsProvider
 from .petition_summaries_repository import PetitionSummariesRepository
 from .petitions_repository import PetitionsRepository
@@ -14,16 +13,15 @@ from .synthesize_analysis_precedents_workflow import (
 )
 
 __all__ = [
-    'AnalysisPrecedentsRepository',
-    'PetitionsRepository',
-    'PrecedentsRepository',
-    'PrecedentsEmbeddingsRepository',
-    'AnalisysesRepository',
-    'FoldersRepository',
-    'PetitionSummaryEmbeddingsProvider',
-    'PrecedentEmbeddingsProvider',
-    'PetitionSummariesRepository',
-    'SummarizePetitionWorkflow',
-    'SynthesizeAnalysisPrecedentsWorkflow',
-    'PangeaService',
+    "AnalysisPrecedentsRepository",
+    "PetitionsRepository",
+    "PrecedentsRepository",
+    "PrecedentsEmbeddingsRepository",
+    "AnalisysesRepository",
+    "PetitionSummaryEmbeddingsProvider",
+    "PrecedentEmbeddingsProvider",
+    "PetitionSummariesRepository",
+    "SummarizePetitionWorkflow",
+    "SynthesizeAnalysisPrecedentsWorkflow",
+    "PangeaService",
 ]
