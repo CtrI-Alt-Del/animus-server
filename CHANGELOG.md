@@ -1,3 +1,10 @@
+## [1.16.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.16.0...v1.16.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* ANI-83 update FolderDto to include 'id' attribute initialization ([4d2ce1c](https://github.com/CtrI-Alt-Del/animus-server/commit/4d2ce1c948fc212d1db6b19aa7c7d540f590e400))
+
 # [1.16.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.15.0...v1.16.0) (2026-04-15)
 
 
