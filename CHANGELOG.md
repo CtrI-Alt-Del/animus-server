@@ -1,3 +1,19 @@
+# [1.16.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.15.0...v1.16.0) (2026-04-15)
+
+
+### Bug Fixes
+
+* **auth:** ANI-70 format code for better readability ([f612be9](https://github.com/CtrI-Alt-Del/animus-server/commit/f612be9ff708895fe6458dd12049769d7bee7089))
+* **auth:** ANI-70 honor reset password cooldown on forgot ([7e5c9f4](https://github.com/CtrI-Alt-Del/animus-server/commit/7e5c9f4150633b22a17b17befee5724ebe16868d))
+* **migrations:** ANI-70 resolve analysis migration branch conflict ([e5073e1](https://github.com/CtrI-Alt-Del/animus-server/commit/e5073e15d257635703ccad7313e82d6fac14a4bc))
+
+
+### Features
+
+* **auth:** ANI-70 add reset password otp core flow ([1fb5cda](https://github.com/CtrI-Alt-Del/animus-server/commit/1fb5cda90ba13eabf5cd712ae267bab87b72b204))
+* **auth:** ANI-70 expose otp reset password endpoints ([ca2f3f9](https://github.com/CtrI-Alt-Del/animus-server/commit/ca2f3f9ebfb1e4f0e7dd71b8b781f5ce4bf39a39))
+* **notification:** ANI-70 send password reset emails with otp ([ac5ef5d](https://github.com/CtrI-Alt-Del/animus-server/commit/ac5ef5df654cd0bef725b4a37c4a89c0adb6af18))
+
 # [1.15.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.14.0...v1.15.0) (2026-04-15)
 
 
