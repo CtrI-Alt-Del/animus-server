@@ -5,7 +5,10 @@ from typing import Any
 from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.core.intake.domain.errors import PetitionSummaryUnavailableError
+from animus.core.intake.domain.errors import (
+    AnalysisNotFoundError,
+    PetitionSummaryUnavailableError,
+)
 from animus.core.intake.domain.events import (
     AnalysisPrecedentsSearchRequestedEvent,
 )
@@ -217,10 +220,13 @@ class SearchAnalysisPrecedentsJob:
                 analysis_precedents=analysis_precedents.items,
             )
 
-            UpdateAnalysisStatusUseCase(analisyses_repository).execute(
-                analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value,
-            )
+            analysis = analisyses_repository.find_by_id(analysis_id)
+            if analysis is None:
+                raise AnalysisNotFoundError
+
+            analysis.set_precedents_search_filters(payload.filters_dto)
+            analysis.set_status(AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value)
+            analisyses_repository.replace(analysis)
             session.commit()
 
     @staticmethod

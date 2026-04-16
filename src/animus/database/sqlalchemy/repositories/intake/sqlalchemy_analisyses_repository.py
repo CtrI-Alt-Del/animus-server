@@ -96,3 +96,19 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         model.account_id = analysis.account_id.value
         model.status = analysis.status.value.value
         model.is_archived = analysis.is_archived.value
+
+        if analysis.precedents_search_filters is None:
+            model.precedents_search_courts = None
+            model.precedents_search_precedent_kinds = None
+            model.precedents_search_limit = None
+        else:
+            model.precedents_search_courts = [
+                court.dto for court in analysis.precedents_search_filters.courts
+            ]
+            model.precedents_search_precedent_kinds = [
+                precedent_kind.dto
+                for precedent_kind in analysis.precedents_search_filters.precedent_kinds
+            ]
+            model.precedents_search_limit = (
+                analysis.precedents_search_filters.limit.value
+            )

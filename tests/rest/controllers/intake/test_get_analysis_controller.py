@@ -34,6 +34,7 @@ class TestGetAnalysisController:
             'account_id': account.id,
             'status': analysis.status,
             'is_archived': analysis.is_archived,
+            'precedents_search_filters': None,
             'created_at': analysis.created_at.replace(tzinfo=UTC).isoformat(),
         }
 
