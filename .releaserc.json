@@ -1,5 +1,7 @@
 {
-  "branches": ["main"],
+  "branches": [
+    "main"
+  ],
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -14,9 +16,11 @@
       {
         "replacements": [
           {
-            "files": ["pyproject.toml"],
-            "from": "version = \".*\"",
-            "to": "version = \"${nextRelease.version}\"",
+            "files": [
+              "pyproject.toml"
+            ],
+            "from": "(^|\\n)version = \".*\"",
+            "to": "$1version = \"${nextRelease.version}\"",
             "countMatches": true
           }
         ]
@@ -25,7 +29,10 @@
     [
       "@semantic-release/git",
       {
-        "assets": ["pyproject.toml", "CHANGELOG.md"],
+        "assets": [
+          "pyproject.toml",
+          "CHANGELOG.md"
+        ],
         "message": "chore(release): Update to version ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
