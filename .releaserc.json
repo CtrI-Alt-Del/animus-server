@@ -27,11 +27,18 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "uv lock"
+      }
+    ],
+    [
       "@semantic-release/git",
       {
         "assets": [
           "pyproject.toml",
-          "CHANGELOG.md"
+          "CHANGELOG.md",
+          "uv.lock"
         ],
         "message": "chore(release): Update to version ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
