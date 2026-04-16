@@ -107,7 +107,7 @@ Implementar a persistencia do ultimo conjunto de filtros aplicados na busca de p
     - `precedents_search_courts` (`JSON`)
     - `precedents_search_precedent_kinds` (`JSON`)
     - `precedents_search_limit` (`Integer`)
-  - aplicar defaults seguros para registros legados (listas vazias e limite valido) e garantir consistencia de nullability conforme decisao de contrato.
+  - manter registros legados com `NULL` nos novos campos ate a primeira busca concluida com sucesso, preservando o significado de "filtros ainda nao aplicados".
 - **Operacoes (downgrade):** remover as 3 colunas adicionadas.
 - **Reversibilidade:** downgrade e tecnicamente reversivel, com perda dos dados de filtros persistidos apos rollback.
 

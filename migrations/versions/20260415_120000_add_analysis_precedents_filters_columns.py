@@ -32,18 +32,6 @@ def upgrade() -> None:
         sa.Column('precedents_search_limit', sa.Integer(), nullable=True),
     )
 
-    op.execute(
-        sa.text(
-            """
-            UPDATE analyses
-            SET
-                precedents_search_courts = '[]'::json,
-                precedents_search_precedent_kinds = '[]'::json,
-                precedents_search_limit = 10
-            """
-        )
-    )
-
 
 def downgrade() -> None:
     op.drop_column('analyses', 'precedents_search_limit')
