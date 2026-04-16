@@ -13,15 +13,15 @@ from .synthesize_analysis_precedents_workflow import (
 )
 
 __all__ = [
-    "AnalysisPrecedentsRepository",
-    "PetitionsRepository",
-    "PrecedentsRepository",
-    "PrecedentsEmbeddingsRepository",
-    "AnalisysesRepository",
-    "PetitionSummaryEmbeddingsProvider",
-    "PrecedentEmbeddingsProvider",
-    "PetitionSummariesRepository",
-    "SummarizePetitionWorkflow",
-    "SynthesizeAnalysisPrecedentsWorkflow",
-    "PangeaService",
+    'AnalysisPrecedentsRepository',
+    'PetitionsRepository',
+    'PrecedentsRepository',
+    'PrecedentsEmbeddingsRepository',
+    'AnalisysesRepository',
+    'PetitionSummaryEmbeddingsProvider',
+    'PrecedentEmbeddingsProvider',
+    'PetitionSummariesRepository',
+    'SummarizePetitionWorkflow',
+    'SynthesizeAnalysisPrecedentsWorkflow',
+    'PangeaService',
 ]

@@ -4,9 +4,9 @@ from .petition import Petition
 from .precedent import Precedent
 
 __all__ = [
-    "AnalysisStatus",
-    "AnalysisStatusValue",
-    "Petition",
-    "Precedent",
-    "Analysis",
+    'AnalysisStatus',
+    'AnalysisStatusValue',
+    'Petition',
+    'Precedent',
+    'Analysis',
 ]

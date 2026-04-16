@@ -5,9 +5,9 @@ from .petition_dto import PetitionDto
 from .precedent_dto import PrecedentDto
 
 __all__ = [
-    "AnalysisStatusDto",
-    "PetitionDocumentDto",
-    "PetitionDto",
-    "PrecedentDto",
-    "AnalysisDto",
+    'AnalysisStatusDto',
+    'PetitionDocumentDto',
+    'PetitionDto',
+    'PrecedentDto',
+    'AnalysisDto',
 ]

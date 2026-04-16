@@ -12,7 +12,7 @@ class Folder(Entity):
     is_archived: Logical
 
     @classmethod
-    def create(cls, dto: FolderDto) -> "Folder":
+    def create(cls, dto: FolderDto) -> 'Folder':
         return cls(
             id=Id.create(dto.id),
             name=Name.create(dto.name),
