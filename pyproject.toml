@@ -175,7 +175,7 @@ known-first-party = ["animus"]
 
 [tool.pyright]
 typeCheckingMode = "strict"
-pythonVersion = "3.13"
+pythonVersion = "py313"
 include = ["src", "tests"]
 stubPath = "stubs"
 reportMissingTypeStubs = false
