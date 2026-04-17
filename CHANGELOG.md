@@ -1,3 +1,15 @@
+# [1.18.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.17.0...v1.18.0) (2026-04-17)
+
+
+### Bug Fixes
+
+* ANI-77 manter filtros de precedentes nulos em analises legadas ([ed1b827](https://github.com/CtrI-Alt-Del/animus-server/commit/ed1b8276ac6fffca9461a21d6d39b441199d3e34))
+
+
+### Features
+
+* ANI-77 persist precedent search filters ([f203b17](https://github.com/CtrI-Alt-Del/animus-server/commit/f203b17027fe2fc8d552ccc03d792a3cf61149ea))
+
 # [1.17.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.16.1...v1.17.0) (2026-04-15)
 
 
