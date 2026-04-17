@@ -1,7 +1,5 @@
-from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatus
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.core.intake.domain.entities.dtos import AnalysisDto, AnalysisStatusDto
+from animus.core.intake.domain.entities.dtos import AnalysisStatusDto
 from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
 )
@@ -62,22 +60,7 @@ class ChooseAnalysisPrecedentUseCase:
         if analysis is None:
             raise AnalysisNotFoundError
 
-        analysis_status = AnalysisStatus.create(
-            AnalysisStatusDto(value=AnalysisStatusValue.PRECEDENT_CHOSED.value)
-        )
-        updated_analysis = Analysis.create(
-            AnalysisDto(
-                id=analysis.id.value,
-                name=analysis.name.value,
-                folder_id=(
-                    analysis.folder_id.value if analysis.folder_id is not None else None
-                ),
-                account_id=analysis.account_id.value,
-                status=analysis_status.value.value,
-                is_archived=analysis.is_archived.value,
-                created_at=analysis.created_at.value.isoformat(),
-            )
-        )
-        self._analisyses_repository.replace(updated_analysis)
+        analysis.set_status(AnalysisStatusValue.PRECEDENT_CHOSED.value)
+        self._analisyses_repository.replace(analysis)
 
-        return updated_analysis.status.dto
+        return analysis.status.dto
