@@ -108,6 +108,19 @@ def _get_analysis_status(
         session.close()
 
 
+def _get_analysis(
+    sqlalchemy_session_factory: sessionmaker[Session],
+    analysis_id: str,
+) -> AnalysisModel:
+    session = sqlalchemy_session_factory()
+    try:
+        model = session.get(AnalysisModel, analysis_id)
+        assert model is not None
+        return model
+    finally:
+        session.close()
+
+
 def _get_analysis_precedents(
     sqlalchemy_session_factory: sessionmaker[Session],
     analysis_id: str,
@@ -375,10 +388,17 @@ class TestSearchAnalysisPrecedentsJob:
             )
             == AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value
         )
+        analysis = _get_analysis(
+            sqlalchemy_session_factory,
+            seeded_data['analysis_id'],
+        )
         assert len(analysis_precedents) == 1
         assert analysis_precedents[0].precedent_id == seeded_data['precedent_id']
         assert analysis_precedents[0].synthesis == 'Sintese final do precedente'
         assert analysis_precedents[0].is_chosen is False
+        assert analysis.precedents_search_courts == ['STF']
+        assert analysis.precedents_search_precedent_kinds == ['RG']
+        assert analysis.precedents_search_limit == 5
 
     def test_should_persist_failed_status_when_sync_failure_handler_runs(
         self,

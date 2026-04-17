@@ -62,6 +62,7 @@ class TestListAnalysesController:
                     'account_id': account.id,
                     'status': 'WAITING_PETITION',
                     'is_archived': False,
+                    'precedents_search_filters': None,
                     'created_at': first_analysis.created_at.replace(
                         tzinfo=UTC
                     ).isoformat(),
