@@ -15,8 +15,8 @@
         "replacements": [
           {
             "files": ["pyproject.toml"],
-            "from": "version = \".*\"",
-            "to": "version = \"${nextRelease.version}\"",
+            "from": "(^|\\n)version = \".*\"",
+            "to": "$1version = \"${nextRelease.version}\"",
             "countMatches": true
           }
         ]
