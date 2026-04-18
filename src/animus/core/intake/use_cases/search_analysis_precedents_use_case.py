@@ -141,7 +141,7 @@ class SearchAnalysisPrecedentsUseCase:
             for precedent in precedents.items
         }
 
-        analysis_precedents: list[AnalysisPrecedent] = []
+        scored_precedents: list[tuple[float, AnalysisPrecedentDto]] = []
         for identifier, scores in scored_identifiers.items():
             precedent = precedents_by_identifier.get(
                 self._get_identifier_key(identifier)
@@ -149,33 +149,50 @@ class SearchAnalysisPrecedentsUseCase:
             if precedent is None:
                 continue
 
-            applicability_percentage = self._calculate_applicability_percentage(
+            similarity_percentage = self._calculate_similarity_percentage(
                 thesis_score=scores['thesis_max'],
                 enunciation_score=scores['enunciation_max'],
                 total_hits=scores['total_hits'],
             )
 
-            analysis_precedents.append(
-                AnalysisPrecedent.create(
+            scored_precedents.append(
+                (
+                    similarity_percentage,
                     AnalysisPrecedentDto(
                         analysis_id=analysis_id_entity.value,
                         precedent=precedent.dto,
-                        applicability_percentage=applicability_percentage,
+                        similarity_percentage=similarity_percentage,
                         synthesis=None,
                         is_chosen=False,
-                    )
+                        thesis_similarity_score=scores['thesis_max'],
+                        enunciation_similarity_score=scores['enunciation_max'],
+                        total_search_hits=scores['total_hits'],
+                    ),
                 )
             )
 
-        sorted_analysis_precedents = sorted(
-            analysis_precedents,
-            key=lambda item: (
-                item.applicability_percentage.value
-                if item.applicability_percentage is not None
-                else 0.0
-            ),
+        sorted_precedents = sorted(
+            scored_precedents,
+            key=lambda item: item[0],
             reverse=True,
         )
+
+        sorted_analysis_precedents = [
+            AnalysisPrecedent.create(
+                AnalysisPrecedentDto(
+                    analysis_id=item.analysis_id,
+                    precedent=item.precedent,
+                    similarity_percentage=item.similarity_percentage,
+                    synthesis=item.synthesis,
+                    is_chosen=item.is_chosen,
+                    thesis_similarity_score=item.thesis_similarity_score,
+                    enunciation_similarity_score=item.enunciation_similarity_score,
+                    total_search_hits=item.total_search_hits,
+                    similarity_rank=index,
+                )
+            )
+            for index, (_, item) in enumerate(sorted_precedents, start=1)
+        ]
 
         return [item.dto for item in sorted_analysis_precedents[: filters.limit.value]]
 
@@ -216,7 +233,7 @@ class SearchAnalysisPrecedentsUseCase:
 
         return scores_by_identifier
 
-    def _calculate_applicability_percentage(
+    def _calculate_similarity_percentage(
         self,
         thesis_score: float,
         enunciation_score: float,

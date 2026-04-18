@@ -21,7 +21,7 @@ class SqlalchemyAnalysisPrecedentsRepository(AnalysisPrecedentsRepository):
             .options(joinedload(AnalysisPrecedentModel.precedent))
             .where(AnalysisPrecedentModel.analysis_id == analysis_id.value)
             .order_by(
-                desc(AnalysisPrecedentModel.applicability_percentage),
+                desc(AnalysisPrecedentModel.similarity_percentage),
                 AnalysisPrecedentModel.precedent_id.asc(),
             )
         ).all()

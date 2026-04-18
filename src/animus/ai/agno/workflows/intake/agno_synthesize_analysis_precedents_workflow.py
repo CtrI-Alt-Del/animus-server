@@ -93,7 +93,7 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
                     {index}. court: {analysis_precedent.precedent.identifier.court}
                        kind: {analysis_precedent.precedent.identifier.kind}
                        number: {analysis_precedent.precedent.identifier.number}
-                       applicability_percentage: {analysis_precedent.applicability_percentage}
+                       similarity_percentage: {analysis_precedent.similarity_percentage}
                        status: {analysis_precedent.precedent.status}
                        enunciation: {analysis_precedent.precedent.enunciation}
                        thesis: {analysis_precedent.precedent.thesis}
@@ -169,9 +169,18 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
                         analysis_id=analysis_precedent.analysis_id,
                         precedent=analysis_precedent.precedent,
                         is_chosen=analysis_precedent.is_chosen,
-                        applicability_percentage=(
-                            analysis_precedent.applicability_percentage
+                        similarity_percentage=(
+                            analysis_precedent.similarity_percentage
                         ),
+                        thesis_similarity_score=(
+                            analysis_precedent.thesis_similarity_score
+                        ),
+                        enunciation_similarity_score=(
+                            analysis_precedent.enunciation_similarity_score
+                        ),
+                        total_search_hits=analysis_precedent.total_search_hits,
+                        similarity_rank=analysis_precedent.similarity_rank,
+                        applicability_level=analysis_precedent.applicability_level,
                         synthesis=synthesis,
                     )
                 )

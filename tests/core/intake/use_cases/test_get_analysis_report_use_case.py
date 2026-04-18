@@ -81,7 +81,7 @@ class TestGetAnalysisReportUseCase:
                     thesis='T1',
                     last_updated_in_pangea_at='2026-04-04T10:00:00Z',
                 ),
-                applicability_percentage=90.0,
+                similarity_percentage=90.0,
                 is_chosen=True,
                 synthesis='S1',
             )
@@ -97,7 +97,7 @@ class TestGetAnalysisReportUseCase:
                     thesis='T2',
                     last_updated_in_pangea_at='2026-04-04T10:00:00Z',
                 ),
-                applicability_percentage=75.0,
+                similarity_percentage=75.0,
                 is_chosen=False,
                 synthesis='S2',
             )
@@ -120,8 +120,8 @@ class TestGetAnalysisReportUseCase:
         assert result.petition == petition.dto
         assert result.summary == summary.dto
         assert len(result.precedents) == 2
-        assert result.precedents[0].classification_level == 'APPLICABLE'
-        assert result.precedents[1].classification_level == 'POSSIBLY_APPLICABLE'
+        assert result.precedents[0].applicability_level == 2
+        assert result.precedents[1].applicability_level == 1
 
         self.analisyses_repository_mock.find_by_id.assert_called_once_with(
             Id.create(analysis_id)
@@ -187,7 +187,7 @@ class TestGetAnalysisReportUseCase:
                         thesis='T',
                         last_updated_in_pangea_at='2026-04-04T10:00:00Z',
                     ),
-                    applicability_percentage=percentage,
+                    similarity_percentage=percentage,
                     is_chosen=False,
                     synthesis='S',
                 )
@@ -214,12 +214,12 @@ class TestGetAnalysisReportUseCase:
         result = self.use_case.execute(analysis_id=analysis_id, account_id=account_id)
 
         # Assert
-        assert result.precedents[0].classification_level == 'APPLICABLE'  # 85.0
+        assert result.precedents[0].applicability_level == 2  # 85.0
         assert (
-            result.precedents[1].classification_level == 'POSSIBLY_APPLICABLE'
+            result.precedents[1].applicability_level == 1
         )  # 84.9
         assert (
-            result.precedents[2].classification_level == 'POSSIBLY_APPLICABLE'
+            result.precedents[2].applicability_level == 1
         )  # 70.0
-        assert result.precedents[3].classification_level == 'NOT_APPLICABLE'  # 69.9
-        assert result.precedents[4].classification_level == 'NOT_APPLICABLE'  # None
+        assert result.precedents[3].applicability_level == 0  # 69.9
+        assert result.precedents[4].applicability_level == 0  # None

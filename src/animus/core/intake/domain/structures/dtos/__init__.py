@@ -11,6 +11,14 @@ def __getattr__(name: str) -> Any:
         ),
         'PrecedentEmbeddingDto': ('.precedent_embedding_dto', 'PrecedentEmbeddingDto'),
         'AnalysisPrecedentDto': ('.analysis_precedent_dto', 'AnalysisPrecedentDto'),
+        'AnalysisPrecedentDatasetDto': (
+            '.analysis_precedent_dataset_dto',
+            'AnalysisPrecedentDatasetDto',
+        ),
+        'AnalysisPrecedentApplicabilityFeedbackDto': (
+            '.analysis_precedent_applicability_feedback_dto',
+            'AnalysisPrecedentApplicabilityFeedbackDto',
+        ),
         'AnalysisPetitionDto': ('.analysis_petition_dto', 'AnalysisPetitionDto'),
         'AnalysisPrecedentsSearchFiltersDto': (
             '.analysis_precedents_search_filters_dto',

@@ -190,7 +190,7 @@ class TestSearchAnalysisPrecedentsJob:
                         'thesis': 'Tese do precedente',
                         'last_updated_in_pangea_at': datetime.now(UTC).isoformat(),
                     },
-                    'applicability_percentage': 84.5,
+                    'similarity_percentage': 84.5,
                     'synthesis': None,
                     'is_chosen': False,
                 }
@@ -261,7 +261,7 @@ class TestSearchAnalysisPrecedentsJob:
                                 'analysis_precedents_data'
                             ][0]['precedent']['last_updated_in_pangea_at'],
                         },
-                        'applicability_percentage': 84.5,
+                        'similarity_percentage': 84.5,
                         'synthesis': None,
                         'is_chosen': False,
                     }
@@ -317,7 +317,7 @@ class TestSearchAnalysisPrecedentsJob:
                         thesis='Tese do precedente',
                         last_updated_in_pangea_at=datetime.now(UTC).isoformat(),
                     ),
-                    applicability_percentage=84.5,
+                    similarity_percentage=84.5,
                     synthesis=None,
                     is_chosen=False,
                 )
@@ -335,8 +335,8 @@ class TestSearchAnalysisPrecedentsJob:
                         AnalysisPrecedentDto(
                             analysis_id=analysis_precedent.analysis_id,
                             precedent=analysis_precedent.precedent,
-                            applicability_percentage=(
-                                analysis_precedent.applicability_percentage
+                            similarity_percentage=(
+                                analysis_precedent.similarity_percentage
                             ),
                             synthesis='Sintese final do precedente',
                             is_chosen=analysis_precedent.is_chosen,
