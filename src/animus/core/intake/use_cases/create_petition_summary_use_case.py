@@ -1,6 +1,5 @@
 from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatus
-from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     PetitionNotFoundError,
@@ -62,18 +61,5 @@ class CreatePetitionSummaryUseCase:
 
     @staticmethod
     def _create_analysis_with_petition_analyzed_status(analysis: Analysis) -> Analysis:
-        status = AnalysisStatus.create_as_petition_analyzed()
-
-        return Analysis.create(
-            AnalysisDto(
-                id=analysis.id.value,
-                name=analysis.name.value,
-                folder_id=analysis.folder_id.value
-                if analysis.folder_id is not None
-                else None,
-                account_id=analysis.account_id.value,
-                status=status.value.value,
-                is_archived=analysis.is_archived.value,
-                created_at=analysis.created_at.value.isoformat(),
-            )
-        )
+        analysis.set_status(AnalysisStatusValue.PETITION_ANALYZED.value)
+        return analysis
