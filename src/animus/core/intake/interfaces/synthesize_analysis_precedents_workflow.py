@@ -1,16 +1,17 @@
 from typing import Protocol
 
-from animus.core.intake.domain.structures import AnalysisPrecedent
-from animus.core.intake.domain.structures.petition_summary import PetitionSummary
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
 )
-from animus.core.shared.responses import ListResponse
+from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
+    AnalysisPrecedentsSearchFiltersDto,
+)
 
 
 class SynthesizeAnalysisPrecedentsWorkflow(Protocol):
     def run(
         self,
-        petition_summary: PetitionSummary,
+        analysis_id: str,
+        filters_dto: AnalysisPrecedentsSearchFiltersDto,
         analysis_precedents: list[AnalysisPrecedentDto],
-    ) -> ListResponse[AnalysisPrecedent]: ...
+    ) -> None: ...

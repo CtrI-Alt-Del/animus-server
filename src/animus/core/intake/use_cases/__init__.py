@@ -1,6 +1,7 @@
 from .archive_analysis_use_case import ArchiveAnalysisUseCase
 from .choose_analysis_precedent_use_case import ChooseAnalysisPrecedentUseCase
 from .create_analysis_use_case import CreateAnalysisUseCase
+from .create_analysis_precedents_use_case import CreateAnalysisPrecedentsUseCase
 from .create_petition_summary_use_case import CreatePetitionSummaryUseCase
 from .create_petition_use_case import CreatePetitionUseCase
 from .get_analysis_petition_use_case import GetAnalysisPetitionUseCase
@@ -23,6 +24,7 @@ __all__ = [
     'ArchiveAnalysisUseCase',
     'ChooseAnalysisPrecedentUseCase',
     'CreateAnalysisUseCase',
+    'CreateAnalysisPrecedentsUseCase',
     'CreatePetitionUseCase',
     'CreatePetitionSummaryUseCase',
     'GetAnalysisPetitionUseCase',
