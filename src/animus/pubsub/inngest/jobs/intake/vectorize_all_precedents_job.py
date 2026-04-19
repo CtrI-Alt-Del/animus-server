@@ -13,8 +13,8 @@ from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyPrecedentsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
-from animus.providers.intake.precedent_embeddings.openai.openai_precedent_embeddings_provider import (
-    OpenAIPrecedentEmbeddingsProvider,
+from animus.providers.intake.precedent_embeddings.bertimbau.bertimbau_precedent_embeddings_provider import (
+    BertimbauPrecedentEmbeddingsProvider,
 )
 
 
@@ -48,7 +48,7 @@ class VectorizeAllPrecedentsJob:
         with Sqlalchemy.session() as session:
             use_case = VectorizeAllPrecedentsUseCase(
                 precedents_repository=SqlalchemyPrecedentsRepository(session),
-                precedent_embeddings_provider=OpenAIPrecedentEmbeddingsProvider(),
+                precedent_embeddings_provider=BertimbauPrecedentEmbeddingsProvider(),
                 precedents_embeddings_repository=QdrantPrecedentsEmbeddingsRepository(),
             )
             loop = asyncio.get_running_loop()
