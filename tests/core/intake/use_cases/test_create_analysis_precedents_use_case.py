@@ -70,9 +70,7 @@ class TestCreateAnalysisPrecedentsUseCase:
             analysis_id_entity
         )
         self.analysis_precedents_repository_mock.add_many_by_analysis_id.assert_called_once()
-        add_call = (
-            self.analysis_precedents_repository_mock.add_many_by_analysis_id.call_args.kwargs
-        )
+        add_call = self.analysis_precedents_repository_mock.add_many_by_analysis_id.call_args.kwargs
         saved_precedents = add_call['analysis_precedents']
         assert add_call['analysis_id'] == analysis_id_entity
         assert len(saved_precedents) == 1
@@ -81,7 +79,9 @@ class TestCreateAnalysisPrecedentsUseCase:
         assert saved_precedents[0].similarity_percentage.value == 84.5
         assert saved_precedents[0].synthesis is None
 
-        self.analisyses_repository_mock.find_by_id.assert_called_once_with(analysis_id_entity)
+        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+            analysis_id_entity
+        )
         self.analisyses_repository_mock.replace.assert_called_once()
         updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
         assert (
@@ -117,8 +117,8 @@ class TestCreateAnalysisPrecedentsUseCase:
                 )
             ]
         )
-        self.analisyses_repository_mock.find_by_id.return_value = self._create_analysis_entity(
-            analysis_id
+        self.analisyses_repository_mock.find_by_id.return_value = (
+            self._create_analysis_entity(analysis_id)
         )
 
         self.use_case.execute(
@@ -128,11 +128,9 @@ class TestCreateAnalysisPrecedentsUseCase:
             synthesis_output=synthesis_output,
         )
 
-        saved_precedents = (
-            self.analysis_precedents_repository_mock.add_many_by_analysis_id.call_args.kwargs[
-                'analysis_precedents'
-            ]
-        )
+        saved_precedents = self.analysis_precedents_repository_mock.add_many_by_analysis_id.call_args.kwargs[
+            'analysis_precedents'
+        ]
         assert len(saved_precedents) == 1
         assert saved_precedents[0].synthesis is not None
         assert saved_precedents[0].synthesis.value == 'Sintese final'
@@ -166,7 +164,9 @@ class TestCreateAnalysisPrecedentsUseCase:
         self.analysis_precedents_repository_mock.add_many_by_analysis_id.assert_called_once()
         self.analisyses_repository_mock.replace.assert_not_called()
 
-    def test_should_raise_app_error_when_synthesis_for_precedent_is_missing(self) -> None:
+    def test_should_raise_app_error_when_synthesis_for_precedent_is_missing(
+        self,
+    ) -> None:
         analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
         filters_dto = AnalysisPrecedentsSearchFiltersDto(limit=10)
         analysis_precedents = [
@@ -198,7 +198,8 @@ class TestCreateAnalysisPrecedentsUseCase:
             )
 
         assert (
-            error.value.message == 'Missing synthesis for at least one precedent identifier'
+            error.value.message
+            == 'Missing synthesis for at least one precedent identifier'
         )
         self.analysis_precedents_repository_mock.remove_many_by_analysis_id.assert_not_called()
         self.analysis_precedents_repository_mock.add_many_by_analysis_id.assert_not_called()
@@ -217,7 +218,9 @@ class TestCreateAnalysisPrecedentsUseCase:
             analysis_id=analysis_id,
             precedent=PrecedentDto(
                 id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
-                identifier=PrecedentIdentifierDto(court='STF', kind='RG', number=number),
+                identifier=PrecedentIdentifierDto(
+                    court='STF', kind='RG', number=number
+                ),
                 status='vigente',
                 enunciation='Enunciado do precedente',
                 thesis='Tese do precedente',
