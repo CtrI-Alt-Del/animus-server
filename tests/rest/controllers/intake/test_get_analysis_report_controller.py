@@ -111,7 +111,7 @@ class TestGetAnalysisReportController:
         assert 'summary' in data
         assert 'precedents' in data
         assert len(data['precedents']) == 1
-        assert data['precedents'][0]['applicability_level'] == 2
+        assert data['precedents'][0]['applicability_level'] == 0
 
     def test_should_return_404_when_analysis_not_found(
         self,

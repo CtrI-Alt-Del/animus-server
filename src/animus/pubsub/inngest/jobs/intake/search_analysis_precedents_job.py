@@ -82,9 +82,9 @@ class SearchAnalysisPrecedentsJob:
                 )
 
                 await context.step.run(
-                    'synthesize_snalysis_precedents',
+                    'synthesize_analysis_precedents',
                     lambda payload=payload, analysis_precedents_data=analysis_precedents_data: (
-                        SearchAnalysisPrecedentsJob._synthesize_snalysis_precedents(
+                        SearchAnalysisPrecedentsJob._synthesize_analysis_precedents(
                             payload,
                             analysis_precedents_data,
                         )
@@ -158,21 +158,21 @@ class SearchAnalysisPrecedentsJob:
         ]
 
     @staticmethod
-    async def _synthesize_snalysis_precedents(
+    async def _synthesize_analysis_precedents(
         payload: _Payload,
         analysis_precedents_data: list[dict[str, Any]],
     ) -> None:
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
-            lambda: SearchAnalysisPrecedentsJob._synthesize_snalysis_precedents_sync(
+            lambda: SearchAnalysisPrecedentsJob._synthesize_analysis_precedents_sync(
                 payload,
                 analysis_precedents_data,
             ),
         )
 
     @staticmethod
-    def _synthesize_snalysis_precedents_sync(
+    def _synthesize_analysis_precedents_sync(
         payload: _Payload,
         analysis_precedents_data: list[dict[str, Any]],
     ) -> None:
