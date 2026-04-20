@@ -22,11 +22,11 @@ class PangeaBnpService(PangeaService):
         orgaos = [court.value for court in CourtValue]
         tipos = [kind.value for kind in PrecedentKindValue]
         payload = {
-                'filtro': {
-                    'buscaGeral': '',
-                    'ordenacao': 'Text',
-                    'pagina': page,
-                    'tamanhoPagina': page_size,
+            'filtro': {
+                'buscaGeral': '',
+                'ordenacao': 'Text',
+                'pagina': page,
+                'tamanhoPagina': page_size,
                 'tipos': tipos,
                 'orgaos': orgaos,
             }

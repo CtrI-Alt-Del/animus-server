@@ -215,11 +215,7 @@ class TestGetAnalysisReportUseCase:
 
         # Assert
         assert result.precedents[0].applicability_level == 2  # 85.0
-        assert (
-            result.precedents[1].applicability_level == 1
-        )  # 84.9
-        assert (
-            result.precedents[2].applicability_level == 1
-        )  # 70.0
+        assert result.precedents[1].applicability_level == 1  # 84.9
+        assert result.precedents[2].applicability_level == 1  # 70.0
         assert result.precedents[3].applicability_level == 0  # 69.9
         assert result.precedents[4].applicability_level == 0  # None

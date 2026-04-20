@@ -43,7 +43,9 @@ class AnalysisPrecedent(Structure):
             is_chosen=Logical.create(dto.is_chosen),
             synthesis=Text.create(dto.synthesis) if dto.synthesis is not None else None,
             thesis_similarity_score=Decimal.create(dto.thesis_similarity_score),
-            enunciation_similarity_score=Decimal.create(dto.enunciation_similarity_score),
+            enunciation_similarity_score=Decimal.create(
+                dto.enunciation_similarity_score
+            ),
             total_search_hits=Integer.create(dto.total_search_hits),
             similarity_rank=Integer.create(dto.similarity_rank),
             applicability_level=AnalysisPrecedentApplicabilityLevel.create(
