@@ -1,6 +1,7 @@
 from collections.abc import Iterator
 
 import pytest
+from docker.errors import DockerException
 from redis import Redis
 from testcontainers.redis import RedisContainer
 
@@ -9,8 +10,11 @@ from animus.constants import Env
 
 @pytest.fixture(scope='session')
 def redis_container() -> Iterator[RedisContainer]:
-    with RedisContainer('redis:7-alpine') as redis_container:
-        yield redis_container
+    try:
+        with RedisContainer('redis:7-alpine') as redis_container:
+            yield redis_container
+    except DockerException as error:
+        pytest.skip(f'Docker indisponivel para testes com Redis: {error}')
 
 
 @pytest.fixture(scope='session')

@@ -5,10 +5,6 @@ from typing import Any
 from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.core.intake.domain.errors import (
-    AnalysisNotFoundError,
-    PetitionSummaryUnavailableError,
-)
 from animus.core.intake.domain.events import (
     AnalysisPrecedentsSearchRequestedEvent,
 )
@@ -20,7 +16,6 @@ from animus.core.intake.use_cases import (
     SearchAnalysisPrecedentsUseCase,
     UpdateAnalysisStatusUseCase,
 )
-from animus.core.shared.domain.structures import Id
 from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
     QdrantPrecedentsEmbeddingsRepository,
 )
@@ -87,9 +82,9 @@ class SearchAnalysisPrecedentsJob:
                 )
 
                 await context.step.run(
-                    'generate_syntheses_and_persist',
+                    'synthesize_analysis_precedents',
                     lambda payload=payload, analysis_precedents_data=analysis_precedents_data: (
-                        SearchAnalysisPrecedentsJob._generate_syntheses_and_persist(
+                        SearchAnalysisPrecedentsJob._synthesize_analysis_precedents(
                             payload,
                             analysis_precedents_data,
                         )
@@ -163,24 +158,26 @@ class SearchAnalysisPrecedentsJob:
         ]
 
     @staticmethod
-    async def _generate_syntheses_and_persist(
+    async def _synthesize_analysis_precedents(
         payload: _Payload,
         analysis_precedents_data: list[dict[str, Any]],
     ) -> None:
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
-            lambda: SearchAnalysisPrecedentsJob._generate_syntheses_and_persist_sync(
+            lambda: SearchAnalysisPrecedentsJob._synthesize_analysis_precedents_sync(
                 payload,
                 analysis_precedents_data,
             ),
         )
 
     @staticmethod
-    def _generate_syntheses_and_persist_sync(
+    def _synthesize_analysis_precedents_sync(
         payload: _Payload,
         analysis_precedents_data: list[dict[str, Any]],
     ) -> None:
+        from animus.pipes.ai_pipe import AiPipe
+
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
             petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
@@ -189,7 +186,6 @@ class SearchAnalysisPrecedentsJob:
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
                 session
             )
-            analysis_id = Id.create(payload.analysis_id)
 
             UpdateAnalysisStatusUseCase(analisyses_repository).execute(
                 analysis_id=payload.analysis_id,
@@ -197,36 +193,20 @@ class SearchAnalysisPrecedentsJob:
             )
             session.commit()
 
-            petition_summary = petition_summaries_repository.find_by_analysis_id(
-                analysis_id=analysis_id,
+            workflow = AiPipe.get_synthesize_analysis_precedents_workflow(
+                petition_summaries_repository=petition_summaries_repository,
+                analysis_precedents_repository=analysis_precedents_repository,
+                analisyses_repository=analisyses_repository,
             )
-            if petition_summary is None:
-                raise PetitionSummaryUnavailableError
 
-            from animus.pipes.ai_pipe import AiPipe
-
-            workflow = AiPipe.get_synthesize_analysis_precedents_workflow()
-            analysis_precedents = workflow.run(
-                petition_summary=petition_summary,
+            workflow.run(
+                analysis_id=payload.analysis_id,
+                filters_dto=payload.filters_dto,
                 analysis_precedents=[
                     AnalysisPrecedentDto(**analysis_precedent_data)
                     for analysis_precedent_data in analysis_precedents_data
                 ],
             )
-
-            analysis_precedents_repository.remove_many_by_analysis_id(analysis_id)
-            analysis_precedents_repository.add_many_by_analysis_id(
-                analysis_id=analysis_id,
-                analysis_precedents=analysis_precedents.items,
-            )
-
-            analysis = analisyses_repository.find_by_id(analysis_id)
-            if analysis is None:
-                raise AnalysisNotFoundError
-
-            analysis.set_precedents_search_filters(payload.filters_dto)
-            analysis.set_status(AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value)
-            analisyses_repository.replace(analysis)
             session.commit()
 
     @staticmethod

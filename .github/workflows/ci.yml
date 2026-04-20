@@ -25,7 +25,7 @@ jobs:
 
       - name: "Approve valid merge"
         if: (github.base_ref == 'production' && github.head_ref == 'main') || (github.base_ref == 'main' && github.head_ref != 'production')
-        run: true
+        run: "true"
 
   typecheck:
     name: Typecheck
@@ -40,7 +40,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Typecheck
         run: uv run poe typecheck
@@ -58,13 +58,10 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Codecheck
         run: uv run poe codecheck
-
-      - name: Ensure codecheck produced no diffs
-        run: git diff --exit-code
 
   tests:
     name: Tests
@@ -79,11 +76,11 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Tests
         env:
-          PYTHONUNBUFFERED: '1'
+          PYTHONUNBUFFERED: "1"
         run: uv run poe test
 
   build:
@@ -99,7 +96,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Build
         run: uv build

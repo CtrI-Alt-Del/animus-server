@@ -25,9 +25,19 @@ jobs:
         with:
           node-version: 'lts/*'
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
       - name: Executar Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm install -D semantic-release @semantic-release/changelog @semantic-release/git semantic-release-replace-plugin @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/github
+          npm install -D semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/exec semantic-release-replace-plugin @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/github
           npx semantic-release

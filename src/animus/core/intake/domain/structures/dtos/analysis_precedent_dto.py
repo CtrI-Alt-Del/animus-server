@@ -7,6 +7,10 @@ class AnalysisPrecedentDto:
     analysis_id: str
     precedent: PrecedentDto
     is_chosen: bool = False
-    applicability_percentage: float | None = None
+    similarity_percentage: float | None = None
     synthesis: str | None = None
-    classification_level: str | None = None
+    thesis_similarity_score: float = 0.0
+    enunciation_similarity_score: float = 0.0
+    total_search_hits: int = 0
+    similarity_rank: int = 0
+    applicability_level: int | None = None

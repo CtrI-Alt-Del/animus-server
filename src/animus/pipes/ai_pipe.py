@@ -5,6 +5,9 @@ from fastapi import Depends
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
 )
+from animus.core.intake.interfaces.analysis_precedents_repository import (
+    AnalysisPrecedentsRepository,
+)
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
 from animus.core.intake.interfaces.summarize_petition_workflow import (
@@ -43,11 +46,17 @@ class AiPipe:
         )
 
     @staticmethod
-    def get_synthesize_analysis_precedents_workflow() -> (
-        SynthesizeAnalysisPrecedentsWorkflow
-    ):
+    def get_synthesize_analysis_precedents_workflow(
+        petition_summaries_repository: PetitionSummariesRepository,
+        analysis_precedents_repository: AnalysisPrecedentsRepository,
+        analisyses_repository: AnalisysesRepository,
+    ) -> SynthesizeAnalysisPrecedentsWorkflow:
         from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
             AgnoSynthesizeAnalysisPrecedentsWorkflow,
         )
 
-        return AgnoSynthesizeAnalysisPrecedentsWorkflow()
+        return AgnoSynthesizeAnalysisPrecedentsWorkflow(
+            petition_summaries_repository=petition_summaries_repository,
+            analysis_precedents_repository=analysis_precedents_repository,
+            analisyses_repository=analisyses_repository,
+        )

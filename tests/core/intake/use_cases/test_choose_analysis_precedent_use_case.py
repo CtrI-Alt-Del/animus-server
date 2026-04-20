@@ -62,7 +62,7 @@ class TestChooseAnalysisPrecedentUseCase:
                     thesis='Tese do precedente',
                     last_updated_in_pangea_at='2026-03-31T10:30:00+00:00',
                 ),
-                applicability_percentage=84.5,
+                similarity_percentage=84.5,
                 synthesis='Sintese do precedente',
                 is_chosen=False,
             )
@@ -151,7 +151,7 @@ class TestChooseAnalysisPrecedentUseCase:
                     thesis='Tese do precedente',
                     last_updated_in_pangea_at='2026-03-31T10:30:00+00:00',
                 ),
-                applicability_percentage=84.5,
+                similarity_percentage=84.5,
                 synthesis='Sintese do precedente',
                 is_chosen=False,
             )

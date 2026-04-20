@@ -4,44 +4,70 @@ from typing import TYPE_CHECKING, NamedTuple, cast
 from agno.run.base import RunContext
 from agno.workflow import Step, StepInput, StepOutput, Workflow
 
-from animus.ai.agno.outputs import AnalysisPrecedentsSynthesisOutput
 from animus.ai.agno.teams import IntakeTeam
-from animus.core.intake.domain.structures import AnalysisPrecedent
+from animus.core.intake.domain.errors import (
+    PetitionSummaryUnavailableError,
+)
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
 )
-from animus.core.intake.domain.structures.petition_summary import PetitionSummary
+from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
+    AnalysisPrecedentsSearchFiltersDto,
+)
+from animus.core.intake.interfaces import (
+    AnalysisPrecedentsRepository,
+    AnalisysesRepository,
+    PetitionSummariesRepository,
+)
 from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
     SynthesizeAnalysisPrecedentsWorkflow,
 )
+from animus.core.intake.use_cases import CreateAnalysisPrecedentsUseCase
 from animus.core.shared.domain.errors import AppError
-from animus.core.shared.responses import ListResponse
+from animus.core.shared.domain.structures import Id
 
 if TYPE_CHECKING:
     from agno.workflow.step import StepExecutor
 
 
 class _StepNames(NamedTuple):
+    FETCH_PETITION_SUMMARY: str = 'fetch-petition-summary'
     BUILD_SYNTHESIS_INPUT: str = 'build-synthesis-input'
     SYNTHESIZE_ANALYSIS_PRECEDENTS: str = 'synthesize-analysis-precedents'
+    PERSIST_ANALYSIS_PRECEDENTS: str = 'persist-analysis-precedents'
 
 
 class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkflow):
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        petition_summaries_repository: PetitionSummariesRepository,
+        analysis_precedents_repository: AnalysisPrecedentsRepository,
+        analisyses_repository: AnalisysesRepository,
+    ) -> None:
+        self._petition_summaries_repository = petition_summaries_repository
+        self._create_analysis_precedents_use_case = CreateAnalysisPrecedentsUseCase(
+            analysis_precedents_repository=analysis_precedents_repository,
+            analisyses_repository=analisyses_repository,
+        )
         self._team = IntakeTeam()
         self._step_names = _StepNames()
 
     def run(
         self,
-        petition_summary: PetitionSummary,
+        analysis_id: str,
+        filters_dto: AnalysisPrecedentsSearchFiltersDto,
         analysis_precedents: list[AnalysisPrecedentDto],
-    ) -> ListResponse[AnalysisPrecedent]:
+    ) -> None:
         if not analysis_precedents:
-            return ListResponse(items=[])
+            return
 
         workflow = Workflow(
             name='synthesize-analysis-precedents',
             steps=[
+                Step(
+                    name=self._step_names.FETCH_PETITION_SUMMARY,
+                    executor=cast('StepExecutor', self._fetch_petition_summary_step),
+                ),
                 Step(
                     name=self._step_names.BUILD_SYNTHESIS_INPUT,
                     executor=cast('StepExecutor', self._build_synthesis_input_step),
@@ -50,17 +76,44 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
                     name=self._step_names.SYNTHESIZE_ANALYSIS_PRECEDENTS,
                     agent=self._team.analysis_precedents_synthesizer_agent,
                 ),
+                Step(
+                    name=self._step_names.PERSIST_ANALYSIS_PRECEDENTS,
+                    executor=cast(
+                        'StepExecutor', self._persist_analysis_precedents_step
+                    ),
+                ),
             ],
             session_state={
-                'petition_summary': petition_summary,
+                'analysis_id': analysis_id,
+                'filters_dto': filters_dto,
                 'analysis_precedents': analysis_precedents,
             },
         )
 
-        output = workflow.run(input='start')
-        synthesis_output = self._normalize_synthesis_output(output.content)
+        workflow.run(input='start')
 
-        return self._merge_syntheses(analysis_precedents, synthesis_output)
+    def _fetch_petition_summary_step(
+        self,
+        _: StepInput,
+        run_context: RunContext,
+    ) -> StepOutput:
+        if run_context.session_state is None:
+            raise AppError('Erro de sessão', 'Session state is required')
+
+        analysis_id = str(run_context.session_state.get('analysis_id', ''))
+        if not analysis_id:
+            msg = 'Analysis id is required to synthesize analysis precedents'
+            raise AppError('Erro de execução do workflow', msg)
+
+        petition_summary = self._petition_summaries_repository.find_by_analysis_id(
+            analysis_id=Id.create(analysis_id),
+        )
+        if petition_summary is None:
+            raise PetitionSummaryUnavailableError
+
+        run_context.session_state['petition_summary'] = petition_summary
+
+        return StepOutput(content='petition-summary-loaded')
 
     def _build_synthesis_input_step(
         self,
@@ -73,7 +126,7 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
         petition_summary = run_context.session_state.get('petition_summary')
         analysis_precedents = run_context.session_state.get('analysis_precedents')
 
-        if not isinstance(petition_summary, PetitionSummary):
+        if petition_summary is None:
             msg = 'Petition summary is required to build precedents synthesis input'
             raise AppError('Erro de execução do workflow', msg)
 
@@ -93,7 +146,7 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
                     {index}. court: {analysis_precedent.precedent.identifier.court}
                        kind: {analysis_precedent.precedent.identifier.kind}
                        number: {analysis_precedent.precedent.identifier.number}
-                       applicability_percentage: {analysis_precedent.applicability_percentage}
+                       similarity_percentage: {analysis_precedent.similarity_percentage}
                        status: {analysis_precedent.precedent.status}
                        enunciation: {analysis_precedent.precedent.enunciation}
                        thesis: {analysis_precedent.precedent.thesis}
@@ -126,55 +179,48 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
 
         return StepOutput(content=prompt)
 
-    def _normalize_synthesis_output(
+    def _persist_analysis_precedents_step(
         self,
-        output: object,
-    ) -> AnalysisPrecedentsSynthesisOutput:
-        if isinstance(output, AnalysisPrecedentsSynthesisOutput):
-            return output
+        step_input: StepInput,
+        run_context: RunContext,
+    ) -> StepOutput:
+        if run_context.session_state is None:
+            raise AppError('Erro de sessão', 'Session state is required')
 
-        msg = 'Invalid synthesis output type from analysis precedents workflow'
-        raise AppError('Erro de execução do workflow', msg)
+        analysis_id = str(run_context.session_state.get('analysis_id', ''))
+        filters_dto = run_context.session_state.get('filters_dto')
+        raw_analysis_precedents = run_context.session_state.get('analysis_precedents')
 
-    def _merge_syntheses(
-        self,
-        analysis_precedents: list[AnalysisPrecedentDto],
-        synthesis_output: AnalysisPrecedentsSynthesisOutput,
-    ) -> ListResponse[AnalysisPrecedent]:
-        syntheses_by_identifier: dict[tuple[str, str, int], str] = {}
-        for item in synthesis_output.items:
-            identifier_key = (item.court, item.kind, item.number)
-            if identifier_key in syntheses_by_identifier:
-                msg = 'Duplicate precedent identifier returned by synthesis workflow'
-                raise AppError('Erro de execução do workflow', msg)
+        if not analysis_id:
+            msg = 'Analysis id is required to persist analysis precedents'
+            raise AppError('Erro de execução do workflow', msg)
 
-            syntheses_by_identifier[identifier_key] = item.synthesis.strip()
+        if not isinstance(filters_dto, AnalysisPrecedentsSearchFiltersDto):
+            msg = 'Analysis precedents filters are required to persist analysis precedents'
+            raise AppError('Erro de execução do workflow', msg)
 
-        analysis_precedent_entities: list[AnalysisPrecedent] = []
-        for analysis_precedent in analysis_precedents:
-            identifier = analysis_precedent.precedent.identifier
-            identifier_key = (
-                identifier.court,
-                identifier.kind,
-                identifier.number,
-            )
-            synthesis = syntheses_by_identifier.get(identifier_key)
-            if not synthesis:
-                msg = 'Missing synthesis for at least one precedent identifier'
-                raise AppError('Erro de execução do workflow', msg)
+        if not isinstance(raw_analysis_precedents, list):
+            msg = 'Analysis precedents are required to persist analysis precedents'
+            raise AppError('Erro de execução do workflow', msg)
 
-            analysis_precedent_entities.append(
-                AnalysisPrecedent.create(
-                    AnalysisPrecedentDto(
-                        analysis_id=analysis_precedent.analysis_id,
-                        precedent=analysis_precedent.precedent,
-                        is_chosen=analysis_precedent.is_chosen,
-                        applicability_percentage=(
-                            analysis_precedent.applicability_percentage
-                        ),
-                        synthesis=synthesis,
-                    )
-                )
-            )
+        analysis_precedents_candidates = cast('list[object]', raw_analysis_precedents)
+        if not all(
+            isinstance(analysis_precedent, AnalysisPrecedentDto)
+            for analysis_precedent in analysis_precedents_candidates
+        ):
+            msg = 'Analysis precedents are required to persist analysis precedents'
+            raise AppError('Erro de execução do workflow', msg)
 
-        return ListResponse(items=analysis_precedent_entities)
+        analysis_precedents = cast(
+            'list[AnalysisPrecedentDto]',
+            analysis_precedents_candidates,
+        )
+
+        self._create_analysis_precedents_use_case.execute(
+            analysis_id=analysis_id,
+            filters_dto=filters_dto,
+            analysis_precedents=analysis_precedents,
+            synthesis_output=step_input.get_last_step_content(),
+        )
+
+        return StepOutput(content='analysis-precedents-persisted')

@@ -75,7 +75,7 @@ def _create_full_analysis(
             analysis_id=analysis_id,
             precedent_id=precedent_id,
             is_chosen=True,
-            applicability_percentage=90.0,
+            similarity_percentage=90.0,
             synthesis='Sintese',
         )
     )
@@ -111,7 +111,7 @@ class TestGetAnalysisReportController:
         assert 'summary' in data
         assert 'precedents' in data
         assert len(data['precedents']) == 1
-        assert data['precedents'][0]['classification_level'] == 'APPLICABLE'
+        assert data['precedents'][0]['applicability_level'] == 0
 
     def test_should_return_404_when_analysis_not_found(
         self,

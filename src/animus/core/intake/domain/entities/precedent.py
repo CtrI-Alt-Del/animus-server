@@ -2,7 +2,6 @@ from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
 from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
 )
-from animus.core.intake.domain.structures.precedent_status import PrecedentStatus
 from animus.core.shared.domain.abstracts import Entity
 from animus.core.shared.domain.decorators import entity
 from animus.core.shared.domain.structures import Datetime, Id, Text
@@ -11,7 +10,7 @@ from animus.core.shared.domain.structures import Datetime, Id, Text
 @entity
 class Precedent(Entity):
     identifier: PrecedentIdentifier
-    status: PrecedentStatus
+    status: Text
     enunciation: Text
     thesis: Text
     last_updated_in_pangea_at: Datetime
@@ -21,7 +20,7 @@ class Precedent(Entity):
         return cls(
             id=Id.create(dto.id),
             identifier=PrecedentIdentifier.create(dto.identifier),
-            status=PrecedentStatus.create(dto.status),
+            status=Text.create(dto.status),
             enunciation=Text.create(dto.enunciation),
             thesis=Text.create(dto.thesis),
             last_updated_in_pangea_at=Datetime.create(dto.last_updated_in_pangea_at),
@@ -32,7 +31,7 @@ class Precedent(Entity):
         return PrecedentDto(
             id=self.id.value,
             identifier=self.identifier.dto,
-            status=self.status.dto,
+            status=self.status.value,
             enunciation=self.enunciation.value,
             thesis=self.thesis.value,
             last_updated_in_pangea_at=self.last_updated_in_pangea_at.value.isoformat(),
