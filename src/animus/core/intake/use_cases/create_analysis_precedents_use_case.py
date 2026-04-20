@@ -31,12 +31,19 @@ class CreateAnalysisPrecedentsUseCase:
         analysis_id: str,
         filters_dto: AnalysisPrecedentsSearchFiltersDto,
         analysis_precedents: list[AnalysisPrecedentDto],
-        synthesis_output: object,
+        synthesis_output: object | None = None,
     ) -> None:
-        merged_analysis_precedents = self._merge_syntheses(
-            analysis_precedents,
-            synthesis_output,
-        )
+        merged_analysis_precedents = analysis_precedents
+        if synthesis_output is not None:
+            merged_analysis_precedents = self._merge_syntheses(
+                analysis_precedents,
+                synthesis_output,
+            )
+        else:
+            merged_analysis_precedents = [
+                AnalysisPrecedent.create(analysis_precedent)
+                for analysis_precedent in analysis_precedents
+            ]
 
         analysis_id_entity = Id.create(analysis_id)
 
