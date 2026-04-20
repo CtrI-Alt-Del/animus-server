@@ -1,3 +1,18 @@
+# [1.19.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.18.0...v1.19.0) (2026-04-20)
+
+
+### Bug Fixes
+
+* ANI-83 include uv lock update in release automation ([1db7eb1](https://github.com/CtrI-Alt-Del/animus-server/commit/1db7eb1eaf9b93929d4826a7562007c88f82f096))
+* ANI-83 support expanded precedent status values ([f94262d](https://github.com/CtrI-Alt-Del/animus-server/commit/f94262d8afeffcd1cd1b813d9f6b8b7d19c754bf))
+* ANI-83 update CI workflow to use consistent quoting for Python version and environment variables ([da091e1](https://github.com/CtrI-Alt-Del/animus-server/commit/da091e10332184ecdec25c881ec6b4c4a488c087))
+
+
+### Features
+
+* ANI-83 add create-jira-ticket-prompt documentation for generating Jira tickets based on PRD or technical context ([9259ed6](https://github.com/CtrI-Alt-Del/animus-server/commit/9259ed6124d6b356c300818947f3ac5f135a9e67))
+* ANI-83 rename precedent similarity fields and persist scoring metadata ([ab9bbe8](https://github.com/CtrI-Alt-Del/animus-server/commit/ab9bbe89fe0296ef718ccce30c814ce8537ea141))
+
 # [1.18.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.17.0...v1.18.0) (2026-04-17)
 
 
