@@ -92,8 +92,7 @@ class SearchAnalysisPrecedentsJob:
 
                 await context.step.run(
                     'synthesize_analysis_precedents',
-                    lambda payload=payload,
-                    analysis_precedents_data=analysis_precedents_data: (
+                    lambda payload=payload, analysis_precedents_data=analysis_precedents_data: (
                         SearchAnalysisPrecedentsJob._synthesize_analysis_precedents(
                             payload,
                             analysis_precedents_data,
@@ -172,8 +171,10 @@ class SearchAnalysisPrecedentsJob:
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
-            lambda: SearchAnalysisPrecedentsJob._mark_analysis_as_analyzing_similarity_sync(
-                payload
+            lambda: (
+                SearchAnalysisPrecedentsJob._mark_analysis_as_analyzing_similarity_sync(
+                    payload
+                )
             ),
         )
 

@@ -17,7 +17,9 @@ from animus.rest.controllers.intake import (
     SearchAnalysisPrecedentsController,
     SummarizePetitionController,
 )
-from animus.rest.controllers.intake.list_processing_analyses_controller import ListProcessingAnalysesController
+from animus.rest.controllers.intake.list_processing_analyses_controller import (
+    ListProcessingAnalysesController,
+)
 
 
 class IntakeRouter:
