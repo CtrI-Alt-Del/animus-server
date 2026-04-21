@@ -44,3 +44,52 @@ class TestArchiveFolderController:
             'account_id': account.id,
             'is_archived': True,
         }
+
+    def test_should_return_403_when_folder_belongs_to_another_account(
+        self,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        create_folder: CreateFolderFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+    ) -> None:
+        owner = create_account(
+            email='owner@example.com',
+            is_verified=True,
+            is_active=True,
+        )
+        authenticated_account = create_account(
+            email='viewer@example.com',
+            is_verified=True,
+            is_active=True,
+        )
+        folder = create_folder(account_id=owner.id)
+
+        response = client.patch(
+            f'/library/folders/{folder.id}/archive',
+            headers=build_auth_headers(authenticated_account.id),
+        )
+
+        assert response.status_code == 403
+        assert response.json() == {
+            'title': 'Erro de acesso negado',
+            'message': 'Pasta nao pertence a conta autenticada',
+        }
+
+    def test_should_return_404_when_folder_does_not_exist(
+        self,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+    ) -> None:
+        account = create_account(is_verified=True, is_active=True)
+
+        response = client.patch(
+            '/library/folders/01BX5ZZKBKACTAV9WEVGEMMVRZ/archive',
+            headers=build_auth_headers(account.id),
+        )
+
+        assert response.status_code == 404
+        assert response.json() == {
+            'title': 'Not Found Error',
+            'message': 'Pasta nao encontrada',
+        }

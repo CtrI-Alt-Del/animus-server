@@ -1,5 +1,6 @@
 from collections.abc import Callable
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
@@ -44,3 +45,39 @@ class TestCreateFolderController:
             'account_id': account.id,
             'is_archived': False,
         }
+
+    @pytest.mark.parametrize('name', ['A', 'a' * 51])
+    def test_should_return_422_when_name_breaks_schema_constraints(
+        self,
+        name: str,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+    ) -> None:
+        account = create_account(is_verified=True, is_active=True)
+
+        response = client.post(
+            '/library/folders',
+            json={'name': name},
+            headers=build_auth_headers(account.id),
+        )
+
+        assert response.status_code == 422
+
+    def test_should_return_400_when_name_contains_only_spaces(
+        self,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+    ) -> None:
+        account = create_account(is_verified=True, is_active=True)
+
+        response = client.post(
+            '/library/folders',
+            json={'name': '  '},
+            headers=build_auth_headers(account.id),
+        )
+
+        assert response.status_code == 400
+        assert response.json()['title'] == 'Erro de validação'
+        assert 'pelo menos 2 caracteres' in response.json()['message']

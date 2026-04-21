@@ -12,7 +12,7 @@ from animus.pipes.database_pipe import DatabasePipe
 
 
 class _Body(BaseModel):
-    name: str = Field(min_length=1, max_length=50)
+    name: str = Field(min_length=2, max_length=50)
 
 
 class CreateFolderController:

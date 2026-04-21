@@ -81,6 +81,7 @@ class SqlalchemyFoldersRepository(FoldersRepository):
             select(func.count(AnalysisModel.id))
             .where(
                 AnalysisModel.folder_id == FolderModel.id,
+                AnalysisModel.account_id == FolderModel.account_id,
                 AnalysisModel.is_archived.is_(False),
             )
             .scalar_subquery()

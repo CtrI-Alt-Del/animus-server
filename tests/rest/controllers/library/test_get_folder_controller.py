@@ -63,3 +63,22 @@ class TestGetFolderController:
             'title': 'Erro de acesso negado',
             'message': 'Pasta nao pertence a conta autenticada',
         }
+
+    def test_should_return_404_when_folder_does_not_exist(
+        self,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+    ) -> None:
+        account = create_account(is_verified=True, is_active=True)
+
+        response = client.get(
+            '/library/folders/01BX5ZZKBKACTAV9WEVGEMMVRZ',
+            headers=build_auth_headers(account.id),
+        )
+
+        assert response.status_code == 404
+        assert response.json() == {
+            'title': 'Not Found Error',
+            'message': 'Pasta nao encontrada',
+        }
