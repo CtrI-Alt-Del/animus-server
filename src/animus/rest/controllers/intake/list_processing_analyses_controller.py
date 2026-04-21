@@ -7,6 +7,7 @@ from animus.core.intake.interfaces.analisyses_repository import AnalisysesReposi
 from animus.core.intake.use_cases.list_processing_analyses_use_case import (
     ListProcessingAnalysesUseCase,
 )
+from animus.core.shared.domain.structures.id import Id
 from animus.pipes.auth_pipe import (
     AuthPipe,
 )
@@ -23,7 +24,7 @@ class ListProcessingAnalysesController:
         )
         def _(
             account_id: Annotated[
-                str,
+                Id,
                 Depends(AuthPipe.get_account_id_from_request),
             ],
             analisyses_repository: Annotated[
@@ -35,4 +36,4 @@ class ListProcessingAnalysesController:
                 analisyses_repository=analisyses_repository,
             )
 
-            return use_case.execute(account_id=account_id)
+            return use_case.execute(account_id=account_id.value)

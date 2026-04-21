@@ -121,4 +121,4 @@ class TestListProcessingAnalysesController:
     ) -> None:
         response = client.get('/intake/analyses/processing')
 
-        assert response.status_code == 401
+        assert response.status_code == 422
