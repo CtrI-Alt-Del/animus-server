@@ -14,11 +14,22 @@ class AnalysisStatusValue(StrEnum):
     ANALYZING_PETITION = 'ANALYZING_PETITION'
     PETITION_ANALYZED = 'PETITION_ANALYZED'
     SEARCHING_PRECEDENTS = 'SEARCHING_PRECEDENTS'
+    ANALYZING_PRECEDENTS_SIMILARITY = 'ANALYZING_PRECEDENTS_SIMILARITY'
     ANALYZING_PRECEDENTS_APPLICABILITY = 'ANALYZING_PRECEDENTS_APPLICABILITY'
     GENERATING_SYNTHESIS = 'GENERATING_SYNTHESIS'
     WAITING_PRECEDENT_CHOISE = 'WAITING_PRECEDENT_CHOISE'
     PRECEDENT_CHOSED = 'PRECEDENT_CHOSED'
     FAILED = 'FAILED'
+
+    @classmethod
+    def get_processing_statuses(cls) -> list['AnalysisStatusValue']:
+        return [
+            cls.ANALYZING_PETITION,
+            cls.SEARCHING_PRECEDENTS,
+            cls.ANALYZING_PRECEDENTS_SIMILARITY,
+            cls.ANALYZING_PRECEDENTS_APPLICABILITY,
+            cls.GENERATING_SYNTHESIS,
+        ]
 
 
 @structure
@@ -57,6 +68,10 @@ class AnalysisStatus(Structure):
     @classmethod
     def create_as_searching_precedents(cls) -> 'AnalysisStatus':
         return cls(value=AnalysisStatusValue.SEARCHING_PRECEDENTS)
+
+    @classmethod
+    def create_as_analyzing_precedents_similarity(cls) -> 'AnalysisStatus':
+        return cls(value=AnalysisStatusValue.ANALYZING_PRECEDENTS_SIMILARITY)
 
     @classmethod
     def create_as_analyzing_precedents_applicability(cls) -> 'AnalysisStatus':
