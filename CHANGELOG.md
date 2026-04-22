@@ -1,3 +1,15 @@
+# [1.21.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.20.0...v1.21.0) (2026-04-22)
+
+
+### Bug Fixes
+
+* ANI-79 fix linter problems ([10341e0](https://github.com/CtrI-Alt-Del/animus-server/commit/10341e0f650c68c0c281f231609cd2c973fc5fd7))
+
+
+### Features
+
+* ANI-79 add endpoint to get analysis in processing ([eeca843](https://github.com/CtrI-Alt-Del/animus-server/commit/eeca843fda7aecfffd7c2af6ac40628c9acbd6c5))
+
 # [1.20.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.19.0...v1.20.0) (2026-04-22)
 
 
