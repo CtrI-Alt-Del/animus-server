@@ -1,3 +1,11 @@
+# [1.20.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.19.0...v1.20.0) (2026-04-22)
+
+
+### Features
+
+* **library:** ANI-65 add library folders endpoints and persistence ([321b7b0](https://github.com/CtrI-Alt-Del/animus-server/commit/321b7b06c8ab75959dae3ce8504830ce96935d6c))
+* **library:** ANI-65 enhance folder name validation and add additional tests for folder operations ([1f4d266](https://github.com/CtrI-Alt-Del/animus-server/commit/1f4d266c7d463eea37c59533083b087718aee08e))
+
 # [1.19.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.18.0...v1.19.0) (2026-04-20)
 
 

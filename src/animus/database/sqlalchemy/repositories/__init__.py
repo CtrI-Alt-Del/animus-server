@@ -5,6 +5,7 @@ from .intake import (
     SqlalchemyPetitionsRepository,
     SqlalchemyPrecedentsRepository,
 )
+from .library import SqlalchemyFoldersRepository
 
 __all__ = [
     'SqlalchemyAccountsRepository',
@@ -12,4 +13,5 @@ __all__ = [
     'SqlalchemyPetitionsRepository',
     'SqlalchemyPetitionSummariesRepository',
     'SqlalchemyPrecedentsRepository',
+    'SqlalchemyFoldersRepository',
 ]
