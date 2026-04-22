@@ -17,6 +17,9 @@ from animus.rest.controllers.intake import (
     SearchAnalysisPrecedentsController,
     SummarizePetitionController,
 )
+from animus.rest.controllers.intake.list_processing_analyses_controller import (
+    ListProcessingAnalysesController,
+)
 
 
 class IntakeRouter:
@@ -24,6 +27,7 @@ class IntakeRouter:
     def register() -> APIRouter:
         router = APIRouter(prefix='/intake', tags=['intake'])
 
+        ListProcessingAnalysesController.handle(router)
         CreateAnalysisController.handle(router)
         ListAnalysesController.handle(router)
         GetAnalysisController.handle(router)
