@@ -8,8 +8,10 @@ from animus.ai.agno.workflows.intake.agno_summarize_petition_workflow import (
     AgnoSummarizePetitionWorkflow,
 )
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.core.intake.domain.errors import PetitionNotFoundError
-from animus.core.intake.domain.events import PetitionSummaryRequestedEvent
+from animus.core.intake.domain.events import (
+    PetitionSummaryFinishedEvent,
+    PetitionSummaryRequestedEvent,
+)
 from animus.core.intake.use_cases import UpdateAnalysisStatusUseCase
 from animus.core.shared.domain.structures import Id
 from animus.core.storage.use_cases import GetDocumentContentUseCase
@@ -24,6 +26,7 @@ from animus.providers.storage import (
     PythonDocxProvider,
     SupabaseFileStorageProvider,
 )
+from animus.pubsub.inngest.inngest_broker import InngestBroker
 
 
 @dataclass(frozen=True)
@@ -49,10 +52,19 @@ class SummarizePetitionJob:
             payload = _Payload(petition_id=str(normalized_data['petition_id']))
 
             try:
-                await context.step.run(
+                analysis_id_value = await context.step.run(
                     'summarize_petition',
                     lambda payload=payload: SummarizePetitionJob._summarize_petition(
                         payload
+                    ),
+                )
+
+                await context.step.run(
+                    'publish_finished_event',
+                    lambda: InngestBroker(inngest).publish(
+                        PetitionSummaryFinishedEvent(
+                            analysis_id=Id.create(analysis_id_value)
+                        )
                     ),
                 )
             except Exception:
@@ -71,15 +83,15 @@ class SummarizePetitionJob:
         return {'petition_id': str(data['petition_id'])}
 
     @staticmethod
-    async def _summarize_petition(payload: _Payload) -> None:
+    async def _summarize_petition(payload: _Payload) -> str:
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
+        return await loop.run_in_executor(
             None,
             lambda: SummarizePetitionJob._summarize_petition_sync(payload),
         )
 
     @staticmethod
-    def _summarize_petition_sync(payload: _Payload) -> None:
+    def _summarize_petition_sync(payload: _Payload) -> str:
         with Sqlalchemy.session() as session:
             petitions_repository = SqlalchemyPetitionsRepository(session)
             petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
@@ -106,6 +118,8 @@ class SummarizePetitionJob:
                 petition_id=petition.id.value,
                 petition_document_content=document_content,
             )
+
+            return petition.analysis_id.value
 
     @staticmethod
     async def _mark_analysis_as_failed(payload: _Payload) -> None:

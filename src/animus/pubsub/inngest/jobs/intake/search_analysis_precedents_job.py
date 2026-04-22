@@ -7,6 +7,7 @@ from inngest import Context, Inngest, TriggerEvent
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.events import (
     AnalysisPrecedentsSearchRequestedEvent,
+    PrecedentsSearchFinishedEvent,
 )
 from animus.core.intake.domain.structures.dtos import AnalysisPrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
@@ -16,6 +17,7 @@ from animus.core.intake.use_cases import (
     SearchAnalysisPrecedentsUseCase,
     UpdateAnalysisStatusUseCase,
 )
+from animus.core.shared.domain.structures import Id
 from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
     QdrantPrecedentsEmbeddingsRepository,
 )
@@ -29,6 +31,7 @@ from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_summary_embeddings_provider import (
     OpenAIPetitionSummaryEmbeddingsProvider,
 )
+from animus.pubsub.inngest.inngest_broker import InngestBroker
 
 
 @dataclass(frozen=True)
@@ -96,6 +99,15 @@ class SearchAnalysisPrecedentsJob:
                         SearchAnalysisPrecedentsJob._synthesize_analysis_precedents(
                             payload,
                             analysis_precedents_data,
+                        )
+                    ),
+                )
+
+                await context.step.run(
+                    'publish_finished_event',
+                    lambda: InngestBroker(inngest).publish(
+                        PrecedentsSearchFinishedEvent(
+                            analysis_id=Id.create(payload.analysis_id)
                         )
                     ),
                 )
