@@ -105,7 +105,7 @@ class SearchAnalysisPrecedentsJob:
 
                 await context.step.run(
                     'publish_finished_event',
-                    lambda: InngestBroker(inngest).publish(
+                    lambda: InngestBroker(inngest).publish(  # type:ignore
                         PrecedentsSearchFinishedEvent(
                             analysis_id=Id.create(payload.analysis_id)
                         )

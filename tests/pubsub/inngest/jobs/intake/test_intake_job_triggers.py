@@ -4,13 +4,21 @@ from datetime import UTC, datetime
 import pytest
 from pytest import MonkeyPatch
 from animus.core.shared.domain.structures import Id
-from animus.core.intake.domain.events import PetitionSummaryRequestedEvent, AnalysisPrecedentsSearchRequestedEvent, PetitionSummaryFinishedEvent, PrecedentsSearchFinishedEvent
-from animus.pubsub.inngest.jobs.intake.summarize_petition_job import SummarizePetitionJob
-from animus.pubsub.inngest.jobs.intake.search_analysis_precedents_job import SearchAnalysisPrecedentsJob
+from animus.core.intake.domain.events import (
+    PetitionSummaryRequestedEvent,
+    AnalysisPrecedentsSearchRequestedEvent,
+    PetitionSummaryFinishedEvent,
+    PrecedentsSearchFinishedEvent,
+)
+from animus.pubsub.inngest.jobs.intake.summarize_petition_job import (
+    SummarizePetitionJob,
+)
+from animus.pubsub.inngest.jobs.intake.search_analysis_precedents_job import (
+    SearchAnalysisPrecedentsJob,
+)
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.database.sqlalchemy.models.intake.petition_model import PetitionModel
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from sqlalchemy.orm import Session, sessionmaker
 from animus.pubsub.inngest.inngest_broker import InngestBroker
 
@@ -73,7 +81,9 @@ class TestIntakeJobTriggers:
         def _publish(_self: InngestBroker, event: Any) -> None:
             published_events.append(event.name)
 
-        monkeypatch.setattr(SummarizePetitionJob, '_summarize_petition', _summarize_petition)
+        monkeypatch.setattr(
+            SummarizePetitionJob, '_summarize_petition', _summarize_petition
+        )
         monkeypatch.setattr(InngestBroker, 'publish', _publish)
 
         response = inngest_runtime.post_event(
@@ -109,7 +119,7 @@ class TestIntakeJobTriggers:
 
         async def _search_precedents(payload: Any) -> list[dict[str, Any]]:
             return []
-        
+
         async def _mark_analysis_as_analyzing_similarity(payload: Any) -> None:
             pass
 
@@ -119,9 +129,19 @@ class TestIntakeJobTriggers:
         def _publish(_self: InngestBroker, event: Any) -> None:
             published_events.append(event.name)
 
-        monkeypatch.setattr(SearchAnalysisPrecedentsJob, '_search_precedents', _search_precedents)
-        monkeypatch.setattr(SearchAnalysisPrecedentsJob, '_mark_analysis_as_analyzing_similarity', _mark_analysis_as_analyzing_similarity)
-        monkeypatch.setattr(SearchAnalysisPrecedentsJob, '_synthesize_analysis_precedents', _synthesize_analysis_precedents)
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob, '_search_precedents', _search_precedents
+        )
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_mark_analysis_as_analyzing_similarity',
+            _mark_analysis_as_analyzing_similarity,
+        )
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_synthesize_analysis_precedents',
+            _synthesize_analysis_precedents,
+        )
         monkeypatch.setattr(InngestBroker, 'publish', _publish)
 
         response = inngest_runtime.post_event(
@@ -130,7 +150,7 @@ class TestIntakeJobTriggers:
                 'analysis_id': seeded_data['analysis_id'],
                 'courts': [],
                 'precedent_kinds': [],
-                'limit': 5
+                'limit': 5,
             },
         )
 

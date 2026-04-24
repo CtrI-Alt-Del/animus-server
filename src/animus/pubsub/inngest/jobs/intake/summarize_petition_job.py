@@ -8,6 +8,9 @@ from animus.ai.agno.workflows.intake.agno_summarize_petition_workflow import (
     AgnoSummarizePetitionWorkflow,
 )
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.errors.petition_not_found_error import (
+    PetitionNotFoundError,
+)
 from animus.core.intake.domain.events import (
     PetitionSummaryFinishedEvent,
     PetitionSummaryRequestedEvent,
@@ -61,7 +64,7 @@ class SummarizePetitionJob:
 
                 await context.step.run(
                     'publish_finished_event',
-                    lambda: InngestBroker(inngest).publish(
+                    lambda: InngestBroker(inngest).publish(  # type:ignore
                         PetitionSummaryFinishedEvent(
                             analysis_id=Id.create(analysis_id_value)
                         )
