@@ -193,7 +193,7 @@ node_modules/
 .serena
 CLAUDE.md
 GEMINI.md
-opencode.jsonc
+opencode.json
 prompt.md
 gha-creds-*.json
 

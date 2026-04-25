@@ -1,9 +1,16 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KNDAZ1EYNG6DDECF2ZD93T46
-@petition_id = 01KNCDNWDAHD1H3A3DD1NFDPR9
+@analysis_id = 01KPXTZBZK9EG89M32G7Y973WC
+@petition_id = 01KPXTZJWKHEQM48NB212NKKY9
 @precedent_court = STJ
 @precedent_kind = RR
 @precedent_number = 974
+@list_limit = 10
+@list_is_archived = false
+@list_cursor = 01KPW7VM9WPZMPX7QHJNKF1Z43
+
+### Listar analises (ListAnalysesController)
+GET {{url}}/analyses?limit={{list_limit}}&is_archived={{list_is_archived}}&cursor={{list_cursor}}
+Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Solicitar busca assincrona de precedentes (SearchAnalysisPrecedentsController)
 POST {{url}}/analyses/{{analysis_id}}/precedents/search
