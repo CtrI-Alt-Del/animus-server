@@ -1,5 +1,5 @@
 from animus.ai.agno.outputs import PetitionSummaryOutput
 
-from .intake_team import IntakeTeam
+from .intake_squad import IntakeSquad
 
-__all__ = ['IntakeTeam', 'PetitionSummaryOutput']
+__all__ = ['IntakeSquad', 'PetitionSummaryOutput']

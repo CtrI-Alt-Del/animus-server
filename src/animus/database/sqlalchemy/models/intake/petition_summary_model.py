@@ -22,5 +22,33 @@ class PetitionSummaryModel(Model):
     relevant_laws: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     key_facts: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     search_terms: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    type_of_action: Mapped[str | None] = mapped_column(Text, nullable=True)
+    secondary_legal_issues: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    alternative_questions: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    jurisdiction_issue: Mapped[str | None] = mapped_column(Text, nullable=True)
+    standing_issue: Mapped[str | None] = mapped_column(Text, nullable=True)
+    requested_relief: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    procedural_issues: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+    excluded_or_accessory_topics: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
 
     petition: Mapped[Any] = relationship('PetitionModel', back_populates='summary')

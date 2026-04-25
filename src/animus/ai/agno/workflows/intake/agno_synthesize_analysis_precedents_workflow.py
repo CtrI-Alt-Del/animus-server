@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, NamedTuple, cast
 from agno.run.base import RunContext
 from agno.workflow import Step, StepInput, StepOutput, Workflow
 
-from animus.ai.agno.teams import IntakeTeam
+from animus.ai.agno.teams import IntakeSquad
 from animus.core.intake.domain.errors import (
     PetitionSummaryUnavailableError,
 )
@@ -49,7 +49,7 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
             analysis_precedents_repository=analysis_precedents_repository,
             analisyses_repository=analisyses_repository,
         )
-        self._team = IntakeTeam()
+        self._team = IntakeSquad()
         self._step_names = _StepNames()
 
     def run(

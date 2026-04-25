@@ -3,6 +3,7 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.analysis import Analysis
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
@@ -28,18 +29,22 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         cursor: Id | None,
         limit: Integer,
         is_archived: Logical,
+        statuses: tuple[AnalysisStatusValue, ...],
     ) -> CursorPaginationResponse[Analysis]:
+        status_values = [status.value for status in statuses]
+
         statement = select(AnalysisModel).where(
             AnalysisModel.account_id == account_id.value,
             AnalysisModel.is_archived == is_archived.value,
             AnalysisModel.name.ilike(f'%{search.value}%'),
+            AnalysisModel.status.in_(status_values),
         )
 
         if cursor is not None:
-            statement = statement.where(AnalysisModel.id > cursor.value)
+            statement = statement.where(AnalysisModel.id < cursor.value)
 
         models = self._sqlalchemy.scalars(
-            statement.order_by(AnalysisModel.id.asc()).limit(limit.value + 1)
+            statement.order_by(AnalysisModel.id.desc()).limit(limit.value + 1)
         ).all()
 
         has_next_page = len(models) > limit.value
@@ -51,29 +56,6 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
 
         next_cursor = Id.create(slice_models[-1].id)
         return CursorPaginationResponse(items=items, next_cursor=next_cursor)
-
-    def find_next_generated_name_number(self, account_id: Id) -> Integer:
-        generated_name_prefix = 'Nova analise #'
-        generated_name_start_index = len(generated_name_prefix) + 1
-        last_generated_number = self._sqlalchemy.scalar(
-            select(
-                func.max(
-                    cast(
-                        func.substring(
-                            AnalysisModel.name,
-                            generated_name_start_index,
-                        ),
-                        SqlalchemyInteger,
-                    )
-                )
-            ).where(
-                AnalysisModel.account_id == account_id.value,
-                AnalysisModel.is_archived.is_(False),
-                AnalysisModel.name.op('~')(r'^Nova analise #[0-9]+$'),
-            )
-        )
-
-        return Integer.create((last_generated_number or 0) + 1)
 
     def add(self, analysis: Analysis) -> None:
         self._sqlalchemy.add(AnalysisMapper.to_model(analysis))

@@ -24,7 +24,6 @@ if TYPE_CHECKING:
         PrecedentEmbeddingFieldValue,
     )
     from .precedent_kind import PrecedentKind, PrecedentKindValue
-    from .precedent_status import PrecedentStatus, PrecedentStatusValue
 
 __all__ = [
     'AnalysisReport',
@@ -42,8 +41,6 @@ __all__ = [
     'PetitionSummaryEmbedding',
     'PrecedentKind',
     'PrecedentKindValue',
-    'PrecedentStatus',
-    'PrecedentStatusValue',
     'PrecedentEmbeddingField',
     'PrecedentEmbeddingFieldValue',
     'PrecedentEmbedding',
@@ -94,8 +91,6 @@ def __getattr__(name: str) -> Any:
         ),
         'PrecedentKind': ('.precedent_kind', 'PrecedentKind'),
         'PrecedentKindValue': ('.precedent_kind', 'PrecedentKindValue'),
-        'PrecedentStatus': ('.precedent_status', 'PrecedentStatus'),
-        'PrecedentStatusValue': ('.precedent_status', 'PrecedentStatusValue'),
     }
 
     export = exports.get(name)

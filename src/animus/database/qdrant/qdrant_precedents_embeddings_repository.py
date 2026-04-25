@@ -65,8 +65,8 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
             self._client.create_collection(
                 collection_name=self._collection_name,
                 vectors_config={
-                    'enunciation': VectorParams(size=1024, distance=Distance.COSINE),
-                    'thesis': VectorParams(size=1024, distance=Distance.COSINE),
+                    'enunciation': VectorParams(size=3072, distance=Distance.COSINE),
+                    'thesis': VectorParams(size=3072, distance=Distance.COSINE),
                 },
                 sparse_vectors_config={
                     'enunciation_sparse': SparseVectorParams(),

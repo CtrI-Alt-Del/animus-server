@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.use_cases.list_analyses_use_case import ListAnalysesUseCase
 from animus.core.shared.domain.errors import ValidationError
@@ -46,6 +47,13 @@ class TestListAnalysesUseCase:
             cursor=Id.create('01BX5ZZKBKACTAV9WEVGEMMVS1'),
             limit=Integer.create(10),
             is_archived=Logical.create_false(),
+            statuses=(
+                AnalysisStatusValue.WAITING_PETITION,
+                AnalysisStatusValue.PETITION_UPLOADED,
+                AnalysisStatusValue.WAITING_PRECEDENT_CHOISE,
+                AnalysisStatusValue.PRECEDENT_CHOSED,
+                AnalysisStatusValue.FAILED,
+            ),
         )
         assert result.items == [analysis.dto]
         assert result.next_cursor == next_cursor

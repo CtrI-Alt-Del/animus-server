@@ -11,7 +11,8 @@ from animus.core.shared.domain.structures import Datetime, Id, Logical
 
 @structure
 class AnalysisPrecedentApplicabilityFeedback(Structure):
-    analysis_precedent_id: Id
+    analysis_id: Id
+    precedent_id: Id
     applicability_level: AnalysisPrecedentApplicabilityLevel
     is_from_human: Logical
     created_at: Datetime
@@ -22,7 +23,8 @@ class AnalysisPrecedentApplicabilityFeedback(Structure):
         dto: AnalysisPrecedentApplicabilityFeedbackDto,
     ) -> 'AnalysisPrecedentApplicabilityFeedback':
         return cls(
-            analysis_precedent_id=Id.create(dto.analysis_precedent_id),
+            analysis_id=Id.create(dto.analysis_id),
+            precedent_id=Id.create(dto.precedent_id),
             applicability_level=AnalysisPrecedentApplicabilityLevel.create(
                 dto.applicability_level
             ),
@@ -33,7 +35,8 @@ class AnalysisPrecedentApplicabilityFeedback(Structure):
     @property
     def dto(self) -> AnalysisPrecedentApplicabilityFeedbackDto:
         return AnalysisPrecedentApplicabilityFeedbackDto(
-            analysis_precedent_id=self.analysis_precedent_id.value,
+            analysis_id=self.analysis_id.value,
+            precedent_id=self.precedent_id.value,
             applicability_level=self.applicability_level.value,
             is_from_human=self.is_from_human.value,
             created_at=self.created_at.value.isoformat(),

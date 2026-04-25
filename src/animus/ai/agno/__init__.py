@@ -1,5 +1,5 @@
 from .outputs import PetitionSummaryOutput
-from .teams import IntakeTeam
+from .teams import IntakeSquad
 from .workflows import AgnoSummarizePetitionWorkflow
 
-__all__ = ['IntakeTeam', 'PetitionSummaryOutput', 'AgnoSummarizePetitionWorkflow']
+__all__ = ['IntakeSquad', 'PetitionSummaryOutput', 'AgnoSummarizePetitionWorkflow']

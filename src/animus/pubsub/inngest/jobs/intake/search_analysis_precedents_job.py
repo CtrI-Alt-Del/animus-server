@@ -5,8 +5,13 @@ from typing import Any
 from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
+from animus.core.intake.domain.entities.precedent import Precedent
 from animus.core.intake.domain.events import (
     AnalysisPrecedentsSearchRequestedEvent,
+)
+from animus.core.intake.domain.structures.extract_analysis_precedent_features_use_case import (
+    ExtractAnalysisPrecedentFeaturesUseCase,
 )
 from animus.core.intake.domain.structures.dtos import AnalysisPrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
@@ -29,6 +34,7 @@ from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_summary_embeddings_provider import (
     OpenAIPetitionSummaryEmbeddingsProvider,
 )
+from animus.core.shared.domain.structures import Id
 
 
 @dataclass(frozen=True)
@@ -77,6 +83,16 @@ class SearchAnalysisPrecedentsJob:
                     lambda payload=payload: (
                         SearchAnalysisPrecedentsJob._search_precedents(
                             payload,
+                        )
+                    ),
+                )
+
+                await context.step.run(
+                    'extract_analysis_precedent_features',
+                    lambda payload=payload, analysis_precedents_data=analysis_precedents_data: (
+                        SearchAnalysisPrecedentsJob._extract_analysis_precedent_features(
+                            payload,
+                            analysis_precedents_data,
                         )
                     ),
                 )
@@ -208,6 +224,52 @@ class SearchAnalysisPrecedentsJob:
                 ],
             )
             session.commit()
+
+    @staticmethod
+    async def _extract_analysis_precedent_features(
+        payload: _Payload,
+        analysis_precedents_data: list[dict[str, Any]],
+    ) -> None:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: SearchAnalysisPrecedentsJob._extract_analysis_precedent_features_sync(
+                payload,
+                analysis_precedents_data,
+            ),
+        )
+
+    @staticmethod
+    def _extract_analysis_precedent_features_sync(
+        payload: _Payload,
+        analysis_precedents_data: list[dict[str, Any]],
+    ) -> None:
+        with Sqlalchemy.session() as session:
+            petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
+                session
+            )
+            petition_summary = petition_summaries_repository.find_by_analysis_id(
+                analysis_id=Id.create(payload.analysis_id),
+            )
+            if petition_summary is None:
+                return
+
+            extract_features_use_case = ExtractAnalysisPrecedentFeaturesUseCase()
+
+            for analysis_precedent_data in analysis_precedents_data:
+                analysis_precedent = AnalysisPrecedentDto(**analysis_precedent_data)
+                precedent_dto = PrecedentDto(**analysis_precedent_data['precedent'])
+                precedent = Precedent.create(precedent_dto)
+                features = extract_features_use_case.execute(
+                    petition_summary=petition_summary,
+                    precedent=precedent,
+                )
+
+                print(
+                    'JOB -> analysis_precedent_features',
+                    analysis_precedent.precedent.identifier,
+                    asdict(features),
+                )
 
     @staticmethod
     async def _mark_analysis_as_failed(payload: _Payload) -> None:

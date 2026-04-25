@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.petition import Petition
 from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
-from animus.core.shared.domain.structures import Id
+from animus.core.shared.domain.structures import FilePath, Id
 from animus.core.shared.responses import ListResponse
 from animus.database.sqlalchemy.mappers.intake.petition_mapper import PetitionMapper
 from animus.database.sqlalchemy.models.intake.petition_model import PetitionModel
@@ -23,6 +23,17 @@ class SqlalchemyPetitionsRepository(PetitionsRepository):
     def find_by_analysis_id(self, analysis_id: Id) -> Petition | None:
         model = self._sqlalchemy.scalar(
             select(PetitionModel).where(PetitionModel.analysis_id == analysis_id.value)
+        )
+        if model is None:
+            return None
+
+        return PetitionMapper.to_entity(model)
+
+    def find_by_document_file_path(self, file_path: FilePath) -> Petition | None:
+        model = self._sqlalchemy.scalar(
+            select(PetitionModel).where(
+                PetitionModel.document_file_path == file_path.value
+            )
         )
         if model is None:
             return None

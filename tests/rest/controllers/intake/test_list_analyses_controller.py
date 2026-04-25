@@ -24,12 +24,12 @@ class TestListAnalysesController:
             is_verified=True,
             is_active=True,
         )
-        first_analysis = create_analysis(
+        create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
             name='Analise alfa',
         )
-        create_analysis(
+        second_analysis = create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAW',
             name='Analise beta',
@@ -56,19 +56,19 @@ class TestListAnalysesController:
         assert response.json() == {
             'items': [
                 {
-                    'id': first_analysis.id,
-                    'name': 'Analise alfa',
+                    'id': second_analysis.id,
+                    'name': second_analysis.name,
                     'folder_id': None,
                     'account_id': account.id,
                     'status': 'WAITING_PETITION',
                     'is_archived': False,
                     'precedents_search_filters': None,
-                    'created_at': first_analysis.created_at.replace(
+                    'created_at': second_analysis.created_at.replace(
                         tzinfo=UTC
                     ).isoformat(),
                 }
             ],
-            'next_cursor': first_analysis.id,
+            'next_cursor': second_analysis.id,
         }
 
     def test_should_return_422_when_limit_is_missing(

@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import ClassVar, TypedDict
+from typing import TypedDict
 
 from animus.core.intake.domain.errors import PetitionSummaryUnavailableError
 from animus.core.intake.domain.structures import AnalysisPrecedent
@@ -37,57 +37,6 @@ class _IdentifierScore(TypedDict):
 
 
 class SearchAnalysisPrecedentsUseCase:
-    _GENERIC_NEGATIVE_TERMS: ClassVar[set[str]] = {
-        'fgts',
-        'urv',
-        'imposto de renda',
-        'contribuicao previdenciaria',
-        'prestacao previdenciaria',
-        'insalubridade',
-        'periculosidade',
-        'ajuda de custo',
-        'rescisao indireta',
-    }
-
-    _ACCESSORY_MARKERS: ClassVar[set[str]] = {
-        'juros',
-        'correcao monetaria',
-        'correção monetária',
-        'honorarios',
-        'honorários',
-        'custas',
-        'prescricao',
-        'prescrição',
-        'ipca-e',
-        'parcelas vencidas',
-        'parcelas vincendas',
-        'quinquenio',
-        'quinquênio',
-        'sumula 85',
-        'súmula 85',
-        '11.960/09',
-    }
-
-    _SPECIALIZATION_TERMS: ClassVar[set[str]] = {
-        'ferias',
-        'férias',
-        'aposentadoria',
-        'aposentado',
-        'aposentado antes',
-        'licenca-premio',
-        'licença-prêmio',
-        'licença premio',
-        'conversao em pecunia',
-        'conversão em pecúnia',
-        'renuncia',
-        'renúncia',
-        'piso salarial',
-        'rsc',
-        'retribuicao por titulacao',
-        'retribuição por titulação',
-        'ferrovia',
-    }
-
     def __init__(
         self,
         petition_summaries_repository: PetitionSummariesRepository,

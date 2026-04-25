@@ -6,8 +6,8 @@ from animus.core.shared.domain.decorators import dto
 
 @dto
 class AnalysisPrecedentDatasetDto:
-    analysis_precedent_id: str
     analysis_id: str
+    precedent_id: str
     created_at: str
     applicability_level: int
     is_from_human: bool
@@ -16,5 +16,4 @@ class AnalysisPrecedentDatasetDto:
     total_search_hits: int
     similarity_rank: int
     identifier: PrecedentIdentifierDto
-    precedent_status: str
     last_updated_in_pangea_at: str

@@ -29,6 +29,7 @@ class CreatePetitionSummaryUseCase:
 
     def execute(self, petition_id: str, dto: PetitionSummaryDto) -> PetitionSummaryDto:
         petition_id_entity = Id.create(petition_id)
+        print('dto', dto)
         petition_summary = PetitionSummary.create(dto)
 
         existing_summary = self._petition_summaries_repository.find_by_petition_id(

@@ -20,9 +20,9 @@ from animus.database.sqlalchemy.repositories.intake import (
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.storage import (
+    GcsFileStorageProvider,
     PypdfPdfProvider,
     PythonDocxProvider,
-    SupabaseFileStorageProvider,
 )
 
 
@@ -88,14 +88,16 @@ class SummarizePetitionJob:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
 
             petition = petitions_repository.find_by_id(Id.create(payload.petition_id))
+            print('JOB -> petition', petition)
             if petition is None:
                 raise PetitionNotFoundError
 
             document_content = GetDocumentContentUseCase(
-                file_storage_provider=SupabaseFileStorageProvider(),
+                file_storage_provider=GcsFileStorageProvider(),
                 pdf_provider=PypdfPdfProvider(),
                 docx_provider=PythonDocxProvider(),
             ).execute(file_path=petition.document.file_path)
+            print('JOB -> document_content', document_content)
 
             workflow = AgnoSummarizePetitionWorkflow(
                 petition_summaries_repository=petition_summaries_repository,

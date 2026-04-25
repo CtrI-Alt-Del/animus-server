@@ -1,6 +1,7 @@
 from typing import Protocol
 
 from animus.core.intake.domain.entities.analysis import Analysis
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
 
@@ -15,6 +16,7 @@ class AnalisysesRepository(Protocol):
         cursor: Id | None,
         limit: Integer,
         is_archived: Logical,
+        statuses: tuple[AnalysisStatusValue, ...],
     ) -> CursorPaginationResponse[Analysis]: ...
 
     def find_next_generated_name_number(self, account_id: Id) -> Integer: ...

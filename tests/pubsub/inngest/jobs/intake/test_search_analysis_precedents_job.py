@@ -214,6 +214,18 @@ class TestSearchAnalysisPrecedentsJob:
                 }
             )
 
+        async def _extract_analysis_precedent_features(
+            payload: Any,
+            analysis_precedents_data: list[dict[str, Any]],
+        ) -> None:
+            captured_steps.append(
+                {
+                    'step': 'extract_analysis_precedent_features',
+                    'analysis_id': payload.analysis_id,
+                    'analysis_precedents_data': analysis_precedents_data,
+                }
+            )
+
         monkeypatch.setattr(
             SearchAnalysisPrecedentsJob,
             '_search_precedents',
@@ -223,6 +235,11 @@ class TestSearchAnalysisPrecedentsJob:
             SearchAnalysisPrecedentsJob,
             '_synthesize_analysis_precedents',
             _synthesize_analysis_precedents,
+        )
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_extract_analysis_precedent_features',
+            _extract_analysis_precedent_features,
         )
 
         response = inngest_runtime.post_event(
@@ -237,7 +254,7 @@ class TestSearchAnalysisPrecedentsJob:
 
         assert response.status == 200
 
-        _wait_until(lambda: len(captured_steps) == 2, timeout_seconds=20)
+        _wait_until(lambda: len(captured_steps) == 3, timeout_seconds=20)
 
         assert captured_steps == [
             {
@@ -246,6 +263,32 @@ class TestSearchAnalysisPrecedentsJob:
                 'courts': ['STF'],
                 'precedent_kinds': ['RG'],
                 'limit': 5,
+            },
+            {
+                'step': 'extract_analysis_precedent_features',
+                'analysis_id': seeded_data['analysis_id'],
+                'analysis_precedents_data': [
+                    {
+                        'analysis_id': seeded_data['analysis_id'],
+                        'precedent': {
+                            'id': seeded_data['precedent_id'],
+                            'identifier': {
+                                'court': 'STF',
+                                'kind': 'RG',
+                                'number': 101,
+                            },
+                            'status': 'vigente',
+                            'enunciation': 'Enunciado do precedente',
+                            'thesis': 'Tese do precedente',
+                            'last_updated_in_pangea_at': captured_steps[1][
+                                'analysis_precedents_data'
+                            ][0]['precedent']['last_updated_in_pangea_at'],
+                        },
+                        'similarity_percentage': 84.5,
+                        'synthesis': None,
+                        'is_chosen': False,
+                    }
+                ],
             },
             {
                 'step': 'generate_syntheses_and_persist',
@@ -263,7 +306,7 @@ class TestSearchAnalysisPrecedentsJob:
                             'status': 'vigente',
                             'enunciation': 'Enunciado do precedente',
                             'thesis': 'Tese do precedente',
-                            'last_updated_in_pangea_at': captured_steps[1][
+                            'last_updated_in_pangea_at': captured_steps[2][
                                 'analysis_precedents_data'
                             ][0]['precedent']['last_updated_in_pangea_at'],
                         },
