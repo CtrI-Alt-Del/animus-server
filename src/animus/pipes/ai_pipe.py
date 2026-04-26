@@ -52,10 +52,10 @@ class AiPipe:
         analisyses_repository: AnalisysesRepository,
     ) -> SynthesizeAnalysisPrecedentsWorkflow:
         from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
-            AgnoSynthesizeAnalysisPrecedentsWorkflow,
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
         )
 
-        return AgnoSynthesizeAnalysisPrecedentsWorkflow(
+        return AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
             petition_summaries_repository=petition_summaries_repository,
             analysis_precedents_repository=analysis_precedents_repository,
             analisyses_repository=analisyses_repository,

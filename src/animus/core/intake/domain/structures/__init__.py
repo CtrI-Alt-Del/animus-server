@@ -2,6 +2,7 @@ from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from .analysies_precedent_legal_features import AnalysiesPrecedentLegalFeatures
     from .analysis_report import AnalysisReport
     from .analysis_precedent import AnalysisPrecedent
     from .analysis_precedent_dataset_row import AnalysisPrecedentDatasetRow
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'AnalysisReport',
+    'AnalysiesPrecedentLegalFeatures',
     'AnalysisPrecedent',
     'AnalysisPrecedentDatasetRow',
     'AnalysisPrecedentApplicabilityFeedback',
@@ -50,6 +52,10 @@ __all__ = [
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
         'AnalysisReport': ('.analysis_report', 'AnalysisReport'),
+        'AnalysiesPrecedentLegalFeatures': (
+            '.analysies_precedent_legal_features',
+            'AnalysiesPrecedentLegalFeatures',
+        ),
         'AnalysisPrecedent': ('.analysis_precedent', 'AnalysisPrecedent'),
         'AnalysisPrecedentDatasetRow': (
             '.analysis_precedent_dataset_row',

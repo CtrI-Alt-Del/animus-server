@@ -9,7 +9,7 @@ from pytest import MonkeyPatch
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-from animus.ai.agno.workflows.intake import AgnoSynthesizeAnalysisPrecedentsWorkflow
+from animus.ai.agno.workflows.intake import AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
@@ -196,7 +196,7 @@ class TestSearchAnalysisPrecedentsJob:
                         'thesis': 'Tese do precedente',
                         'last_updated_in_pangea_at': datetime.now(UTC).isoformat(),
                     },
-                    'similarity_percentage': 84.5,
+                    'similarity_score': 84.5,
                     'synthesis': None,
                     'is_chosen': False,
                 }
@@ -214,18 +214,6 @@ class TestSearchAnalysisPrecedentsJob:
                 }
             )
 
-        async def _extract_analysis_precedent_features(
-            payload: Any,
-            analysis_precedents_data: list[dict[str, Any]],
-        ) -> None:
-            captured_steps.append(
-                {
-                    'step': 'extract_analysis_precedent_features',
-                    'analysis_id': payload.analysis_id,
-                    'analysis_precedents_data': analysis_precedents_data,
-                }
-            )
-
         monkeypatch.setattr(
             SearchAnalysisPrecedentsJob,
             '_search_precedents',
@@ -235,11 +223,6 @@ class TestSearchAnalysisPrecedentsJob:
             SearchAnalysisPrecedentsJob,
             '_synthesize_analysis_precedents',
             _synthesize_analysis_precedents,
-        )
-        monkeypatch.setattr(
-            SearchAnalysisPrecedentsJob,
-            '_extract_analysis_precedent_features',
-            _extract_analysis_precedent_features,
         )
 
         response = inngest_runtime.post_event(
@@ -254,7 +237,7 @@ class TestSearchAnalysisPrecedentsJob:
 
         assert response.status == 200
 
-        _wait_until(lambda: len(captured_steps) == 3, timeout_seconds=20)
+        _wait_until(lambda: len(captured_steps) == 2, timeout_seconds=20)
 
         assert captured_steps == [
             {
@@ -265,7 +248,7 @@ class TestSearchAnalysisPrecedentsJob:
                 'limit': 5,
             },
             {
-                'step': 'extract_analysis_precedent_features',
+                'step': 'generate_syntheses_and_persist',
                 'analysis_id': seeded_data['analysis_id'],
                 'analysis_precedents_data': [
                     {
@@ -284,33 +267,7 @@ class TestSearchAnalysisPrecedentsJob:
                                 'analysis_precedents_data'
                             ][0]['precedent']['last_updated_in_pangea_at'],
                         },
-                        'similarity_percentage': 84.5,
-                        'synthesis': None,
-                        'is_chosen': False,
-                    }
-                ],
-            },
-            {
-                'step': 'generate_syntheses_and_persist',
-                'analysis_id': seeded_data['analysis_id'],
-                'analysis_precedents_data': [
-                    {
-                        'analysis_id': seeded_data['analysis_id'],
-                        'precedent': {
-                            'id': seeded_data['precedent_id'],
-                            'identifier': {
-                                'court': 'STF',
-                                'kind': 'RG',
-                                'number': 101,
-                            },
-                            'status': 'vigente',
-                            'enunciation': 'Enunciado do precedente',
-                            'thesis': 'Tese do precedente',
-                            'last_updated_in_pangea_at': captured_steps[2][
-                                'analysis_precedents_data'
-                            ][0]['precedent']['last_updated_in_pangea_at'],
-                        },
-                        'similarity_percentage': 84.5,
+                        'similarity_score': 84.5,
                         'synthesis': None,
                         'is_chosen': False,
                     }
@@ -366,14 +323,14 @@ class TestSearchAnalysisPrecedentsJob:
                         thesis='Tese do precedente',
                         last_updated_in_pangea_at=datetime.now(UTC).isoformat(),
                     ),
-                    similarity_percentage=84.5,
+                    similarity_score=84.5,
                     synthesis=None,
                     is_chosen=False,
                 )
             ]
 
         def _run(
-            _self: AgnoSynthesizeAnalysisPrecedentsWorkflow,
+            _self: AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
             *,
             analysis_id: str,
             filters_dto: Any,
@@ -396,6 +353,13 @@ class TestSearchAnalysisPrecedentsJob:
                                 kind=analysis_precedent.precedent.identifier.kind,
                                 number=analysis_precedent.precedent.identifier.number,
                                 synthesis='Sintese final do precedente',
+                                legal_features=SimpleNamespace(
+                                    central_issue_match=2,
+                                    structural_issue_match=1,
+                                    context_compatibility=2,
+                                    is_lateral_topic=0,
+                                    is_accessory_topic=0,
+                                ),
                             )
                             for analysis_precedent in analysis_precedents
                         ]
@@ -415,11 +379,11 @@ class TestSearchAnalysisPrecedentsJob:
             lambda: object(),
         )
         monkeypatch.setattr(
-            AgnoSynthesizeAnalysisPrecedentsWorkflow,
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
             '__init__',
             lambda *args, **kwargs: None,  # type: ignore
         )
-        monkeypatch.setattr(AgnoSynthesizeAnalysisPrecedentsWorkflow, 'run', _run)
+        monkeypatch.setattr(AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow, 'run', _run)
 
         analysis_precedents_data = search_precedents_sync(payload)
 

@@ -57,7 +57,7 @@ def _create_analysis_with_precedent(
             analysis_id=analysis_id,
             precedent_id=precedent_id,
             is_chosen=False,
-            similarity_percentage=84.5,
+            similarity_score=84.5,
             synthesis='Sintese do precedente',
         )
     )

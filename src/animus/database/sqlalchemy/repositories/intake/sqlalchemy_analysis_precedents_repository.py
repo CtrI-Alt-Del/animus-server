@@ -18,10 +18,13 @@ class SqlalchemyAnalysisPrecedentsRepository(AnalysisPrecedentsRepository):
     ) -> ListResponse[AnalysisPrecedent]:
         models = self._sqlalchemy.scalars(
             select(AnalysisPrecedentModel)
-            .options(joinedload(AnalysisPrecedentModel.precedent))
+            .options(
+                joinedload(AnalysisPrecedentModel.precedent),
+                joinedload(AnalysisPrecedentModel.legal_features),
+            )
             .where(AnalysisPrecedentModel.analysis_id == analysis_id.value)
             .order_by(
-                desc(AnalysisPrecedentModel.similarity_percentage),
+                desc(AnalysisPrecedentModel.similarity_score),
                 AnalysisPrecedentModel.precedent_id.asc(),
             )
         ).all()
@@ -37,7 +40,10 @@ class SqlalchemyAnalysisPrecedentsRepository(AnalysisPrecedentsRepository):
     ) -> AnalysisPrecedent | None:
         model = self._sqlalchemy.scalar(
             select(AnalysisPrecedentModel)
-            .options(joinedload(AnalysisPrecedentModel.precedent))
+            .options(
+                joinedload(AnalysisPrecedentModel.precedent),
+                joinedload(AnalysisPrecedentModel.legal_features),
+            )
             .where(
                 AnalysisPrecedentModel.analysis_id == analysis_id.value,
                 AnalysisPrecedentModel.precedent_id == precedent_id.value,

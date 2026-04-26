@@ -1,4 +1,5 @@
 import asyncio
+import shutil
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -9,6 +10,9 @@ from inngest import Context, Inngest, TriggerEvent
 from animus.ai.agno.workflows.intake.agno_classify_analysis_precedents_applicability_workflow import (
     AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow,
 )
+from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
+    AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
+)
 from animus.ai.agno.workflows.intake.agno_summarize_petition_workflow import (
     AgnoSummarizePetitionWorkflow,
 )
@@ -17,13 +21,12 @@ from animus.core.auth.domain.errors import AccountNotFoundError
 from animus.core.auth.domain.structures import Email
 from animus.core.intake.domain.entities.dtos import PetitionDocumentDto
 from animus.core.intake.domain.structures.dtos import (
-    AnalysisPrecedentDatasetDto,
+    AnalysisPrecedentDatasetRowDto,
     AnalysisPrecedentsSearchFiltersDto,
 )
 from animus.core.intake.use_cases import (
     CreateAnalysisPrecedentApplicabilityFeedbackUseCase,
     CreateAnalysisPrecedentDatasetRowUseCase,
-    CreateAnalysisPrecedentsUseCase,
     CreateAnalysisUseCase,
     CreatePetitionUseCase,
     SearchAnalysisPrecedentsUseCase,
@@ -64,7 +67,7 @@ class _NoopBroker:
 class SeedAnalysesPrecedentsDatasetJob:
     _ACCOUNT_EMAIL = 'animus.ctrlaltdel@gmail.com'
     _PETITIONS_PREFIX = 'intake/xertica/petitions/'
-    _DATASET_BUCKET_PREFIX = 'intake/datasets/analysis-precedents/'
+    _DATASET_PATH_PREFIX = 'intake/datasets/analysis-precedents/'
     _LOCAL_DATASET_PREFIX = 'tmp/intake/datasets/analysis-precedents/'
 
     @staticmethod
@@ -98,14 +101,14 @@ class SeedAnalysesPrecedentsDatasetJob:
                 )
                 all_dataset_rows_data.extend(dataset_rows_data)
 
-            await context.step.run(
-                'export_dataset',
-                lambda all_dataset_rows_data=all_dataset_rows_data: (
-                    SeedAnalysesPrecedentsDatasetJob._export_dataset(
-                        all_dataset_rows_data,
-                    )
-                ),
-            )
+            # await context.step.run(
+            #     'export_dataset',
+            #     lambda all_dataset_rows_data=all_dataset_rows_data: (
+            #         SeedAnalysesPrecedentsDatasetJob._export_dataset(
+            #             all_dataset_rows_data,
+            #         )
+            #     ),
+            # )
 
         return _
 
@@ -242,11 +245,12 @@ class SeedAnalysesPrecedentsDatasetJob:
                 session.flush()
             else:
                 analysis_id = existing_petition.analysis_id.value
-                petition_summary = petition_summaries_repository.find_by_analysis_id(
-                    analysis_id=existing_petition.analysis_id,
-                )
-                if petition_summary is None:
-                    return []
+
+            petition_summary = petition_summaries_repository.find_by_analysis_id(
+                analysis_id=Id.create(analysis_id),
+            )
+            if petition_summary is None:
+                return []
 
             existing_analysis_precedents = (
                 analysis_precedents_repository.find_many_by_analysis_id(
@@ -274,35 +278,47 @@ class SeedAnalysesPrecedentsDatasetJob:
                     dto=filters_dto,
                 )
 
-                CreateAnalysisPrecedentsUseCase(
+                AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
+                    petition_summaries_repository=petition_summaries_repository,
                     analysis_precedents_repository=analysis_precedents_repository,
                     analisyses_repository=analisyses_repository,
-                ).execute(
+                ).run(
                     analysis_id=analysis_id,
                     filters_dto=filters_dto,
                     analysis_precedents=analysis_precedents,
-                    synthesis_output=None,
                 )
                 session.flush()
 
-            dataset_rows = AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
-                petition_summaries_repository=petition_summaries_repository,
-                create_analysis_precedent_applicability_feedback_use_case=(
-                    CreateAnalysisPrecedentApplicabilityFeedbackUseCase(
-                        feedbacks_repository=feedbacks_repository,
-                    )
-                ),
-                create_analysis_precedent_dataset_row_use_case=(
-                    CreateAnalysisPrecedentDatasetRowUseCase(
-                        dataset_rows_repository=dataset_rows_repository,
-                    )
-                ),
-            ).run(
-                analysis_id=analysis_id,
-                analysis_precedents=analysis_precedents,
-            )
+                analysis_precedents = [
+                    analysis_precedent.dto
+                    for analysis_precedent in analysis_precedents_repository.find_many_by_analysis_id(
+                        analysis_id=Id.create(analysis_id),
+                    ).items
+                ]
 
-            return [asdict(dataset_row) for dataset_row in dataset_rows]
+            return [
+                asdict(analysis_precedent) for analysis_precedent in analysis_precedents
+            ]
+
+            # dataset_rows = AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
+            #     petition_summaries_repository=petition_summaries_repository,
+            #     create_analysis_precedent_applicability_feedback_use_case=(
+            #         CreateAnalysisPrecedentApplicabilityFeedbackUseCase(
+            #             feedbacks_repository=feedbacks_repository,
+            #         )
+            #     ),
+            #     create_analysis_precedent_dataset_row_use_case=(
+            #         CreateAnalysisPrecedentDatasetRowUseCase(
+            #             dataset_rows_repository=dataset_rows_repository,
+            #         )
+            #     ),
+            # ).run(
+            #     analysis_id=analysis_id,
+            #     analysis_precedents=analysis_precedents,
+            # )
+            # session.flush()
+
+            # return [asdict(dataset_row) for dataset_row in dataset_rows]
 
     @staticmethod
     async def _export_dataset(all_dataset_rows_data: list[dict[str, Any]]) -> None:
@@ -327,12 +343,12 @@ class SeedAnalysesPrecedentsDatasetJob:
             f'{dataset_identifier}.parquet'
         )
         bucket_file_path = FilePath.create(
-            f'{SeedAnalysesPrecedentsDatasetJob._DATASET_BUCKET_PREFIX}'
+            f'{SeedAnalysesPrecedentsDatasetJob._DATASET_PATH_PREFIX}'
             f'{dataset_identifier}.parquet'
         )
 
         rows = [
-            AnalysisPrecedentDatasetDto(**dataset_row_data)
+            AnalysisPrecedentDatasetRowDto(**dataset_row_data)
             for dataset_row_data in all_dataset_rows_data
         ]
 
@@ -344,11 +360,12 @@ class SeedAnalysesPrecedentsDatasetJob:
         )
 
         file_storage_provider = GcsFileStorageProvider()
-        bucket = file_storage_provider.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
-        blob = bucket.blob(bucket_file_path.value)  # pyright: ignore[reportUnknownMemberType]
-        print(local_file_path.value)
+        upload_source_path = Path(bucket_file_path.value)
+        upload_source_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(local_file_path.value, upload_source_path)
 
         try:
-            blob.upload_from_filename(local_file_path.value)  # pyright: ignore[reportUnknownMemberType]
+            file_storage_provider.upload_files([bucket_file_path])
         finally:
             Path(local_file_path.value).unlink(missing_ok=True)
+            upload_source_path.unlink(missing_ok=True)

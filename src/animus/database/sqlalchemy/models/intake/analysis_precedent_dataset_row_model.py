@@ -28,6 +28,17 @@ class AnalysisPrecedentDatasetRowModel(Model):
         DateTime(timezone=True),
         nullable=False,
     )
+    central_issue_match: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    structural_issue_match: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+    context_compatibility: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0
+    )
+    is_lateral_topic: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_accessory_topic: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     analysis_precedent: Mapped[Any] = relationship('AnalysisPrecedentModel')
 

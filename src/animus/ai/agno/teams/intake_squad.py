@@ -3,9 +3,6 @@ from textwrap import dedent
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 
-from animus.ai.agno.outputs.intake.analysis_precedents_applicability_classification_output import (
-    AnalysisPrecedentsApplicabilityClassificationOutput,
-)
 from animus.ai.agno.outputs.intake.analysis_precedents_synthesis_output import (
     AnalysisPrecedentsSynthesisOutput,
 )
@@ -17,133 +14,149 @@ from animus.constants import Env
 
 class IntakeSquad:
     @property
-    def analysis_precedents_applicability_classifier_agent(self) -> Agent:
+    def analysis_precedents_synthesizer_and_classifier_agent(self) -> Agent:
         return Agent(
-            name='Analysis Precedents Applicability Classifier Agent',
-            description='An agent specialized in classifying the applicability of legal precedents in PT-BR',
-            instructions=dedent("""
-        Você é um especialista em aplicabilidade de precedentes jurídicos brasileiros.
-
-        Receberá o resumo estruturado de uma petição inicial e uma lista de precedentes
-        candidatos retornados por busca semântica. Sua tarefa é classificar a
-        aplicabilidade jurídica de cada precedente ao caso concreto.
-
-        ---
-
-        ## Definição dos labels
-
-        **2 — APLICÁVEL**
-        A tese do precedente responde diretamente à questão jurídica central da petição.
-        Exige coincidência de: instituto jurídico principal, relação de direito envolvida
-        e controvérsia concreta. O precedente poderia ser citado pelo juiz como
-        fundamento direto da decisão.
-
-        Exemplos de APLICÁVEL:
-        - Petição sobre recusa de cobertura de plano de saúde em carência → precedente
-        STJ sobre obrigatoriedade de cobertura de urgência em período de carência.
-        - Petição sobre FGTS de empregado doméstico → súmula STJ sobre fundo de garantia
-        de trabalhador doméstico.
-
-        **1 — POSSIVELMENTE APLICÁVEL**
-        O precedente trata da mesma área jurídica e pode ser usado como argumento de
-        suporte ou analogia, mas não responde diretamente à questão central. Use este
-        label quando houver dúvida jurídica legítima.
-
-        Situações típicas de POSSIVELMENTE APLICÁVEL:
-        - Mesma tese, mas proveniente de tribunal de hierarquia diferente (ex: TJ quando
-        o caso é de competência federal).
-        - Tese relacionada, mas sobre instituto jurídico adjacente (ex: precedente sobre
-        prazo de carência de plano coletivo para caso de plano individual).
-        - Tese aplicável apenas a parte dos pedidos da petição.
-        - Precedente com status "transitado em julgado" mas de período anterior a mudança
-        legislativa relevante — ainda citável, mas com ressalva.
-        - Tema repetitivo conexo ao caso, mas não o mais específico disponível.
-
-        **0 — NÃO APLICÁVEL**
-        O precedente não tem relação jurídica relevante com o caso. A similaridade
-        semântica entre os textos é superficial — o precedente trata de outro instituto,
-        outra relação de direito ou outra controvérsia.
-
-        ---
-
-        ## Regras obrigatórias de distribuição
-
-        Os precedentes candidatos são retornados por busca semântica com K fixo — a
-        maioria terá algum grau de relação com o caso. Siga estas diretrizes:
-
-        - **Não use label 0 por padrão.** Reserve-o para casos onde não há relação
-        jurídica real, mesmo após analisar thesis e enunciation com atenção.
-        - **Em caso de dúvida entre 0 e 1, use sempre 1.** O custo de perder um
-        precedente relevante é maior do que o custo de incluir um duvidoso.
-        - **Em caso de dúvida entre 1 e 2, use 1.** Só use 2 quando a correspondência
-        for clara e direta.
-        - Para lotes de 20 precedentes, espere em média: ~40% label 0, ~35% label 1,
-        ~25% label 2. Distribuições muito assimétricas (ex: 80%+ label 0) indicam
-        classificação conservadora demais — revise.
-
-        ---
-
-        ## Regras de confidence
-
-        - **high**: certeza jurídica elevada, thesis e enunciation claramente apontam
-        para o label escolhido.
-        - **medium**: há elementos de suporte, mas alguma ambiguidade. Use medium
-        livremente — não é sinal de erro.
-        - **low**: relação fraca, mas não descartável. Prefira low a descartar como 0.
-
-        Todos os itens são persistidos independente do confidence — use-o para calibrar
-        o peso do rótulo no treino, não como filtro de inclusão.
-
-        ---
-
-        ## Processo de análise por precedente
-
-        Para cada precedente, avalie nesta ordem:
-        1. Leia o `central_question` da petição — essa é a pergunta que um precedente
-        APLICÁVEL (label 2) deve responder.
-        2. Leia `thesis` do precedente — é o entendimento firmado pelo tribunal.
-        3. Leia `enunciation` — é a questão jurídica que motivou o julgamento.
-        4. Compare: a thesis responde diretamente o central_question? → label 2.
-        A thesis trata do mesmo universo jurídico mas não responde diretamente? → label 1.
-        Não há relação jurídica real? → label 0.
-        5. Considere `similarity_percentage`: valores altos (>60%) são indício de label 1
-        ou 2; valores baixos (<30%) sugerem label 0 — mas não determinam sozinhos.
-
-        ---
-
-        ## Restrições
-
-        - Retorne TODOS os precedentes recebidos, sem omitir nenhum.
-        - Preserve exatamente o `precedent_id` recebido na entrada.
-        - Responda apenas no formato estruturado esperado, sem texto adicional.
-        - Não invente fatos nem inferências além do que está nos dados fornecidos.
-        """),
-            model=OpenAIChat(id='gpt-4o', api_key=Env.OPENAI_API_KEY, timeout=60),
-            output_schema=AnalysisPrecedentsApplicabilityClassificationOutput,
-        )
-
-    @property
-    def analysis_precedents_synthesizer_agent(self) -> Agent:
-        return Agent(
-            name='Analysis Precedents Synthesis Agent',
+            name='Analysis Precedents Synthesizer and Classifier Agent',
             description='An agent specialized in relating petition summaries to legal precedents in PT-BR',
             instructions=dedent(
                 """
-                Você é um especialista em correlacionar resumos de petições com precedentes jurídicos brasileiros.
+            Você é um especialista em correlacionar resumos de petições com precedentes jurídicos brasileiros.
 
-                Receberá um resumo de petição e uma lista de precedentes candidatos.
-                Gere uma síntese curta, objetiva e fiel para cada precedente explicando a relação dele com o caso.
+            Receberá um resumo de petição e uma lista de precedentes candidatos.
+            Para cada precedente, produza:
 
-                Regras:
-                - Seja fiel apenas aos dados fornecidos.
-                - Não invente fatos, pedidos, fundamentos ou efeitos jurídicos.
-                - Explique a conexão prática entre o precedente e o caso em linguagem clara.
-                - Mantenha cada síntese concisa, em português brasileiro, sem markdown.
-                - Preserve exatamente `court`, `kind` e `number` recebidos na entrada.
-                - Retorne apenas o objeto estruturado no formato esperado.
-                """
+            1. uma síntese curta, objetiva e fiel explicando a relação prática com o caso;
+            2. features jurídicas inferidas;
+            3. um label de aplicabilidade (applicability_level).
+
+            ---
+
+            ## Features jurídicas (legal_features)
+
+            Gere, para cada precedente, os seguintes campos:
+
+            - central_issue_match:
+              2 = a thesis responde diretamente à central_question da petição;
+              1 = há relação jurídica relevante mas indireta ou parcial;
+              0 = não responde à questão central.
+
+            - structural_issue_match:
+              2 = resolve questão estrutural decisiva (competência, legitimidade, regime, cabimento);
+              1 = toca questão estrutural secundária;
+              0 = não possui relevância estrutural.
+
+            - context_compatibility:
+              2 = contexto jurídico muito compatível (mesmo regime, mesma relação jurídica);
+              1 = compatibilidade parcial (regime ou sujeito distinto mas analogia pertinente);
+              0 = contexto jurídico incompatível (outro instituto, outro ramo, outro sujeito).
+
+            - is_lateral_topic:
+              1 = o precedente trata de subtema lateral em relação ao núcleo da petição;
+              0 = não.
+
+            - is_accessory_topic:
+              1 = o precedente se relaciona apenas a ponto acessório (honorários, prescrição,
+                  custas, correção monetária), salvo quando esses são o objeto principal;
+              0 = não.
+
+            ---
+
+            ## Label de aplicabilidade (applicability_level)
+
+            O applicability_level deve ser ESTRITAMENTE CONSISTENTE com as legal_features.
+            Não atribua label=2 sem suporte nas features. As regras abaixo são invioláveis.
+
+            **REGRAS HARD — nunca viole:**
+
+            R1. Se central_issue_match=0 E structural_issue_match=0 E context_compatibility=0
+                → applicability_level DEVE ser 0. Sem exceção.
+
+            R2. Se central_issue_match=0 E structural_issue_match=0
+                → applicability_level DEVE ser no máximo 1. Nunca 2.
+
+            R3. Se is_accessory_topic=1 E central_issue_match=0
+                → applicability_level DEVE ser no máximo 1.
+
+            R4. Precedente de matéria jurídica completamente distinta
+                (ex: tributário em ação trabalhista, penal em ação civil,
+                 administrativo sem relação com o mérito)
+                → applicability_level DEVE ser 0, independente de similarity alta.
+
+            **Definições de applicability_level:**
+
+            2 — APLICÁVEL
+            Use apenas quando o precedente responde DIRETAMENTE à questão jurídica central
+            ou a questão estrutural decisiva do caso.
+            Requisito mínimo: central_issue_match >= 1 OU structural_issue_match = 2.
+            O precedente poderia ser citado como fundamento direto da decisão.
+
+            1 — POSSIVELMENTE APLICÁVEL
+            Use quando o precedente tem relevância jurídica real mas não responde
+            diretamente à questão central: resolve questão secundária, é analogicamente
+            útil, ou aplica-se a parte dos pedidos.
+
+            0 — NÃO APLICÁVEL
+            Use quando não há relação jurídica relevante com o caso concreto.
+            A semelhança é apenas superficial, lexical, ou de matéria distinta.
+
+            ---
+
+            ## Exemplos de calibração
+
+            ### Exemplo 1 — label=0 correto (matéria distinta)
+            Petição: acidente de trabalho com óbito, competência da Justiça do Trabalho
+            Precedente: pensão especial por morte de policial militar (Lei 2.153/72)
+            Features corretas:
+              central_issue_match=0, structural_issue_match=0, context_compatibility=0
+              is_lateral_topic=0, is_accessory_topic=0
+            applicability_level=0 ← correto. Regime estatutário/previdenciário é
+            incompatível com responsabilidade civil trabalhista. Mesmo similarity_score
+            alto não muda isso.
+
+            ### Exemplo 2 — label=0 correto (IRDR sem tese fixada)
+            Petição: qualquer tema
+            Precedente: IRDR prejudicado por maioria, sem fixação de tese
+            Features corretas:
+              central_issue_match=0 (sem tese para avaliar)
+              applicability_level=0 ← correto. Precedente sem tese não vincula e
+            não oferece resposta jurídica concreta.
+
+            ### Exemplo 3 — label=2 correto
+            Petição: restituição de valores de consórcio, valor da causa no Juizado
+            Precedente: IRDR que fixa que valor da causa = proveito econômico do
+            consorciado, não o valor total do contrato
+            Features corretas:
+              central_issue_match=2, structural_issue_match=2, context_compatibility=2
+            applicability_level=2 ← correto. Responde diretamente à central_question.
+
+            ### Exemplo 4 — label=1 correto (analogia parcial)
+            Petição: ação de acidente de trabalho, responsabilidade subjetiva por culpa
+            Precedente: responsabilidade objetiva do empregador em acidente de trajeto
+            Features corretas:
+              central_issue_match=1, structural_issue_match=0, context_compatibility=1
+            applicability_level=1 ← correto. Contexto próximo mas modalidade de
+            responsabilidade e fato gerador distintos.
+
+            ---
+
+            ## Regras gerais
+
+            - Seja fiel apenas aos dados fornecidos. Não invente fatos nem efeitos jurídicos.
+            - Explique a conexão prática em linguagem clara, sem markdown.
+            - Preserve exatamente `court`, `kind` e `number` recebidos na entrada.
+            - As features e o applicability_level devem ser consistentes com a síntese.
+              Se a síntese descreve o precedente como sem relação jurídica real,
+              o applicability_level DEVE ser 0.
+            - Não use as features para substituir a síntese; produza ambos.
+            - Retorne apenas o objeto estruturado no formato esperado.
+            """
             ),
-            model=OpenAIChat(id='gpt-4o', api_key=Env.OPENAI_API_KEY, timeout=60),
+            model=OpenAIChat(
+                id='gpt-5.4',
+                api_key=Env.OPENAI_API_KEY,
+                temperature=0,
+                timeout=60,
+            ),
             output_schema=AnalysisPrecedentsSynthesisOutput,
         )
 
@@ -370,6 +383,11 @@ class IntakeSquad:
         - Retorne apenas o objeto estruturado no formato esperado.
         """
             ),
-            model=OpenAIChat(id='gpt-5.4-mini', api_key=Env.OPENAI_API_KEY, timeout=60),
+            model=OpenAIChat(
+                id='gpt-5.4',
+                api_key=Env.OPENAI_API_KEY,
+                temperature=0,
+                timeout=60,
+            ),
             output_schema=PetitionSummaryOutput,
         )

@@ -75,7 +75,7 @@ def _create_full_analysis(
             analysis_id=analysis_id,
             precedent_id=precedent_id,
             is_chosen=True,
-            similarity_percentage=90.0,
+            similarity_score=90.0,
             synthesis='Sintese',
         )
     )

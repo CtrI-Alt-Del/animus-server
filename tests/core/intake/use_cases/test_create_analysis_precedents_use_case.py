@@ -51,7 +51,7 @@ class TestCreateAnalysisPrecedentsUseCase:
             self._create_analysis_precedent_dto(
                 analysis_id=analysis_id,
                 number=101,
-                similarity_percentage=84.5,
+                similarity_score=84.5,
                 similarity_rank=1,
                 synthesis=None,
             )
@@ -75,9 +75,10 @@ class TestCreateAnalysisPrecedentsUseCase:
         assert add_call['analysis_id'] == analysis_id_entity
         assert len(saved_precedents) == 1
         assert isinstance(saved_precedents[0], AnalysisPrecedent)
-        assert saved_precedents[0].similarity_percentage is not None
-        assert saved_precedents[0].similarity_percentage.value == 84.5
+        assert saved_precedents[0].similarity_score is not None
+        assert saved_precedents[0].similarity_score.value == 84.5
         assert saved_precedents[0].synthesis is None
+        assert saved_precedents[0].legal_features is None
 
         self.analisyses_repository_mock.find_by_id.assert_called_once_with(
             analysis_id_entity
@@ -102,7 +103,7 @@ class TestCreateAnalysisPrecedentsUseCase:
             self._create_analysis_precedent_dto(
                 analysis_id=analysis_id,
                 number=101,
-                similarity_percentage=84.5,
+                similarity_score=84.5,
                 similarity_rank=1,
                 synthesis=None,
             )
@@ -114,6 +115,13 @@ class TestCreateAnalysisPrecedentsUseCase:
                     kind='RG',
                     number=101,
                     synthesis='  Sintese final  ',
+                    legal_features=SimpleNamespace(
+                        central_issue_match=2,
+                        structural_issue_match=1,
+                        context_compatibility=2,
+                        is_lateral_topic=0,
+                        is_accessory_topic=0,
+                    ),
                 )
             ]
         )
@@ -134,6 +142,8 @@ class TestCreateAnalysisPrecedentsUseCase:
         assert len(saved_precedents) == 1
         assert saved_precedents[0].synthesis is not None
         assert saved_precedents[0].synthesis.value == 'Sintese final'
+        assert saved_precedents[0].legal_features is not None
+        assert saved_precedents[0].legal_features.central_issue_match.value == 2
 
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
         self,
@@ -144,7 +154,7 @@ class TestCreateAnalysisPrecedentsUseCase:
             self._create_analysis_precedent_dto(
                 analysis_id=analysis_id,
                 number=101,
-                similarity_percentage=84.5,
+                similarity_score=84.5,
                 similarity_rank=1,
                 synthesis=None,
             )
@@ -173,7 +183,7 @@ class TestCreateAnalysisPrecedentsUseCase:
             self._create_analysis_precedent_dto(
                 analysis_id=analysis_id,
                 number=101,
-                similarity_percentage=84.5,
+                similarity_score=84.5,
                 similarity_rank=1,
                 synthesis=None,
             )
@@ -185,6 +195,13 @@ class TestCreateAnalysisPrecedentsUseCase:
                     kind='RG',
                     number=999,
                     synthesis='Sintese de outro precedente',
+                    legal_features=SimpleNamespace(
+                        central_issue_match=2,
+                        structural_issue_match=1,
+                        context_compatibility=2,
+                        is_lateral_topic=0,
+                        is_accessory_topic=0,
+                    ),
                 )
             ]
         )
@@ -210,7 +227,7 @@ class TestCreateAnalysisPrecedentsUseCase:
     def _create_analysis_precedent_dto(
         analysis_id: str,
         number: int,
-        similarity_percentage: float,
+        similarity_score: float,
         similarity_rank: int,
         synthesis: str | None,
     ) -> AnalysisPrecedentDto:
@@ -227,7 +244,7 @@ class TestCreateAnalysisPrecedentsUseCase:
                 last_updated_in_pangea_at='2026-03-31T10:30:00+00:00',
             ),
             is_chosen=False,
-            similarity_percentage=similarity_percentage,
+            similarity_score=similarity_score,
             thesis_similarity_score=0.8,
             enunciation_similarity_score=0.75,
             total_search_hits=3,

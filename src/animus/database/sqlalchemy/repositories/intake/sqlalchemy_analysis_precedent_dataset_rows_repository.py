@@ -32,6 +32,7 @@ class SqlalchemyAnalysisPrecedentDatasetRowsRepository(
 
     def add(self, dataset_row: AnalysisPrecedentDatasetRow) -> None:
         self._sqlalchemy.add(AnalysisPrecedentDatasetRowMapper.to_model(dataset_row))
+        self._sqlalchemy.flush()
 
     def replace(self, dataset_row: AnalysisPrecedentDatasetRow) -> None:
         model = self._sqlalchemy.scalar(
@@ -61,3 +62,9 @@ class SqlalchemyAnalysisPrecedentDatasetRowsRepository(
         model.identifier_number = identifier_dto.number
         model.precedent_status = dataset_row.precedent_status.value
         model.last_updated_in_pangea_at = dataset_row.last_updated_in_pangea_at.value
+        model.central_issue_match = dataset_row.central_issue_match.value
+        model.structural_issue_match = dataset_row.structural_issue_match.value
+        model.context_compatibility = dataset_row.context_compatibility.value
+        model.is_lateral_topic = dataset_row.is_lateral_topic.value
+        model.is_accessory_topic = dataset_row.is_accessory_topic.value
+        self._sqlalchemy.flush()

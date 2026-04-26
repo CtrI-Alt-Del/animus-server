@@ -1,4 +1,4 @@
-"""rename applicability_percentage to similarity_percentage
+"""rename applicability_percentage to similarity_score
 
 Revision ID: 20260418_120000
 Revises: 20260415_120000
@@ -21,13 +21,13 @@ def upgrade() -> None:
     op.alter_column(
         'analysis_precedents',
         'applicability_percentage',
-        new_column_name='similarity_percentage',
+        new_column_name='similarity_score',
     )
 
 
 def downgrade() -> None:
     op.alter_column(
         'analysis_precedents',
-        'similarity_percentage',
+        'similarity_score',
         new_column_name='applicability_percentage',
     )

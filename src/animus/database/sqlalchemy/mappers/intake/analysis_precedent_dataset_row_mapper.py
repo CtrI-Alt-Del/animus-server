@@ -1,6 +1,6 @@
 from animus.core.intake.domain.structures import AnalysisPrecedentDatasetRow
-from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_dto import (
-    AnalysisPrecedentDatasetDto,
+from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_row_dto import (
+    AnalysisPrecedentDatasetRowDto,
 )
 from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
     PrecedentIdentifierDto,
@@ -16,7 +16,7 @@ class AnalysisPrecedentDatasetRowMapper:
         model: AnalysisPrecedentDatasetRowModel,
     ) -> AnalysisPrecedentDatasetRow:
         return AnalysisPrecedentDatasetRow.create(
-            AnalysisPrecedentDatasetDto(
+            AnalysisPrecedentDatasetRowDto(
                 analysis_id=model.analysis_id,
                 precedent_id=model.precedent_id,
                 created_at=model.created_at.isoformat(),
@@ -31,6 +31,11 @@ class AnalysisPrecedentDatasetRowMapper:
                     kind=model.identifier_kind,
                     number=model.identifier_number,
                 ),
+                central_issue_match=model.central_issue_match,
+                structural_issue_match=model.structural_issue_match,
+                context_compatibility=model.context_compatibility,
+                is_lateral_topic=model.is_lateral_topic,
+                is_accessory_topic=model.is_accessory_topic,
                 precedent_status=model.precedent_status,
                 last_updated_in_pangea_at=model.last_updated_in_pangea_at.isoformat(),
             )

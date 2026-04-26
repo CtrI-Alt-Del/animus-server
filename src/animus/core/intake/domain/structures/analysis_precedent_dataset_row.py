@@ -2,7 +2,7 @@ from animus.core.intake.domain.structures.analysis_precedent_applicability_level
     AnalysisPrecedentApplicabilityLevel,
 )
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_dto import (
-    AnalysisPrecedentDatasetDto,
+    AnalysisPrecedentDatasetRowDto,
 )
 from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
@@ -33,9 +33,16 @@ class AnalysisPrecedentDatasetRow(Structure):
     identifier: PrecedentIdentifier
     precedent_status: Text
     last_updated_in_pangea_at: Datetime
+    central_issue_match: Integer
+    structural_issue_match: Integer
+    context_compatibility: Integer
+    is_lateral_topic: Integer
+    is_accessory_topic: Integer
 
     @classmethod
-    def create(cls, dto: AnalysisPrecedentDatasetDto) -> 'AnalysisPrecedentDatasetRow':
+    def create(
+        cls, dto: AnalysisPrecedentDatasetRowDto
+    ) -> 'AnalysisPrecedentDatasetRow':
         return cls(
             analysis_id=Id.create(dto.analysis_id),
             precedent_id=Id.create(dto.precedent_id),
@@ -53,11 +60,16 @@ class AnalysisPrecedentDatasetRow(Structure):
             identifier=PrecedentIdentifier.create(dto.identifier),
             precedent_status=Text.create(dto.precedent_status),
             last_updated_in_pangea_at=Datetime.create(dto.last_updated_in_pangea_at),
+            central_issue_match=Integer.create(dto.central_issue_match),
+            structural_issue_match=Integer.create(dto.structural_issue_match),
+            context_compatibility=Integer.create(dto.context_compatibility),
+            is_lateral_topic=Integer.create(dto.is_lateral_topic),
+            is_accessory_topic=Integer.create(dto.is_accessory_topic),
         )
 
     @property
-    def dto(self) -> AnalysisPrecedentDatasetDto:
-        return AnalysisPrecedentDatasetDto(
+    def dto(self) -> AnalysisPrecedentDatasetRowDto:
+        return AnalysisPrecedentDatasetRowDto(
             analysis_id=self.analysis_id.value,
             precedent_id=self.precedent_id.value,
             created_at=self.created_at.value.isoformat(),
@@ -70,4 +82,9 @@ class AnalysisPrecedentDatasetRow(Structure):
             identifier=self.identifier.dto,
             precedent_status=self.precedent_status.value,
             last_updated_in_pangea_at=self.last_updated_in_pangea_at.value.isoformat(),
+            central_issue_match=self.central_issue_match.value,
+            structural_issue_match=self.structural_issue_match.value,
+            context_compatibility=self.context_compatibility.value,
+            is_lateral_topic=self.is_lateral_topic.value,
+            is_accessory_topic=self.is_accessory_topic.value,
         )

@@ -57,6 +57,29 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         next_cursor = Id.create(slice_models[-1].id)
         return CursorPaginationResponse(items=items, next_cursor=next_cursor)
 
+    def find_next_generated_name_number(self, account_id: Id) -> Integer:
+        generated_name_prefix = 'Nova analise #'
+        generated_name_start_index = len(generated_name_prefix) + 1
+        last_generated_number = self._sqlalchemy.scalar(
+            select(
+                func.max(
+                    cast(
+                        func.substring(
+                            AnalysisModel.name,
+                            generated_name_start_index,
+                        ),
+                        SqlalchemyInteger,
+                    )
+                )
+            ).where(
+                AnalysisModel.account_id == account_id.value,
+                AnalysisModel.is_archived.is_(False),
+                AnalysisModel.name.op('~')(r'^Nova analise #[0-9]+$'),
+            )
+        )
+
+        return Integer.create((last_generated_number or 0) + 1)
+
     def add(self, analysis: Analysis) -> None:
         self._sqlalchemy.add(AnalysisMapper.to_model(analysis))
 

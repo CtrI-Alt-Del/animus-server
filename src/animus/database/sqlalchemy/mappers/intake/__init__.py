@@ -1,3 +1,6 @@
+from .analysies_precedent_legal_features_mapper import (
+    AnalysiesPrecedentLegalFeaturesMapper,
+)
 from .analysis_precedent_applicability_feedback_mapper import (
     AnalysisPrecedentApplicabilityFeedbackMapper,
 )
@@ -9,6 +12,7 @@ from .petition_summary_mapper import PetitionSummaryMapper
 from .precedents_mapper import PrecedentMapper
 
 __all__ = [
+    'AnalysiesPrecedentLegalFeaturesMapper',
     'AnalysisPrecedentApplicabilityFeedbackMapper',
     'AnalysisPrecedentDatasetRowMapper',
     'AnalysisPrecedentMapper',

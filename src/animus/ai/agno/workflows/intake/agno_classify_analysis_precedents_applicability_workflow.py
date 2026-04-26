@@ -11,8 +11,8 @@ from animus.ai.agno.outputs.intake.analysis_precedents_applicability_classificat
 )
 from animus.ai.agno.teams import IntakeSquad
 from animus.core.intake.domain.errors import PetitionSummaryUnavailableError
-from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_dto import (
-    AnalysisPrecedentDatasetDto,
+from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_row_dto import (
+    AnalysisPrecedentDatasetRowDto as AnalysisPrecedentDatasetRowDto,
 )
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
@@ -66,9 +66,9 @@ def build_classification_prompt(
 
         ## Precedentes candidatos
 
-        Os precedentes estão ordenados por similarity_percentage decrescente —
+        Os precedentes estão ordenados por similarity_score decrescente —
         os primeiros têm maior similaridade semântica com a petição.
-        Precedentes no final da lista com similarity_percentage baixo tendem a
+        Precedentes no final da lista com similarity_score baixo tendem a
         ser label 0, mas avalie sempre thesis e enunciation antes de decidir.
 
         {chr(10).join(precedents_input)}
@@ -99,7 +99,7 @@ class AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
         self,
         analysis_id: str,
         analysis_precedents: list[AnalysisPrecedentDto],
-    ) -> list[AnalysisPrecedentDatasetDto]:
+    ) -> list[AnalysisPrecedentDatasetRowDto]:
         if not analysis_precedents:
             return []
 
@@ -131,15 +131,12 @@ class AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
         )
 
         output = workflow.run(input='start')
-        try:
-            return self._normalize_dataset_rows_output(output.content)
-        except AppError:
-            return []
+        return self._normalize_dataset_rows_output(output.content)
 
     def _normalize_dataset_rows_output(
         self,
         output_content: object,
-    ) -> list[AnalysisPrecedentDatasetDto]:
+    ) -> list[AnalysisPrecedentDatasetRowDto]:
         unwrapped_content = self._unwrap_output_content(output_content)
 
         if not isinstance(unwrapped_content, list):
@@ -184,8 +181,8 @@ class AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
     def _coerce_dataset_row(
         self,
         dataset_row_candidate: object,
-    ) -> AnalysisPrecedentDatasetDto:
-        if isinstance(dataset_row_candidate, AnalysisPrecedentDatasetDto):
+    ) -> AnalysisPrecedentDatasetRowDto:
+        if isinstance(dataset_row_candidate, AnalysisPrecedentDatasetRowDto):
             return dataset_row_candidate
 
         if isinstance(dataset_row_candidate, Mapping):
@@ -193,7 +190,7 @@ class AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
                 'dict[str, Any]',
                 dict(cast('Mapping[str, object]', dataset_row_candidate)),
             )
-            return AnalysisPrecedentDatasetDto(**dataset_row_data)
+            return AnalysisPrecedentDatasetRowDto(**dataset_row_data)
 
         msg = 'Invalid classifications output type from workflow'
         raise AppError('Erro de execução do workflow', msg)
@@ -254,15 +251,24 @@ class AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
                 dedent(
                     f"""
                     {index}. precedent_id: {precedent_id}
-                       court: {analysis_precedent.precedent.identifier.court}
-                       kind: {analysis_precedent.precedent.identifier.kind}
-                       number: {analysis_precedent.precedent.identifier.number}
-                       status: {analysis_precedent.precedent.status}
-                       similarity_percentage: {analysis_precedent.similarity_percentage}
-                       thesis_similarity_score: {analysis_precedent.thesis_similarity_score}
-                       enunciation_similarity_score: {analysis_precedent.enunciation_similarity_score}
-                       enunciation: {analysis_precedent.precedent.enunciation}
-                       thesis: {analysis_precedent.precedent.thesis}
+                    court: {analysis_precedent.precedent.identifier.court}
+                    kind: {analysis_precedent.precedent.identifier.kind}
+                    number: {analysis_precedent.precedent.identifier.number}
+                    status: {analysis_precedent.precedent.status}
+                    similarity_score: {analysis_precedent.similarity_score}
+                    thesis_similarity_score: {analysis_precedent.thesis_similarity_score}
+                    enunciation_similarity_score: {analysis_precedent.enunciation_similarity_score}
+                    total_search_hits: {analysis_precedent.total_search_hits}
+                    similarity_rank: {analysis_precedent.similarity_rank}
+                    legal_features:
+                        central_issue_match: {analysis_precedent.legal_features.central_issue_match if analysis_precedent.legal_features is not None else 0}
+                        structural_issue_match: {analysis_precedent.legal_features.structural_issue_match if analysis_precedent.legal_features is not None else 0}
+                        context_compatibility: {analysis_precedent.legal_features.context_compatibility if analysis_precedent.legal_features is not None else 0}
+                        is_lateral_topic: {analysis_precedent.legal_features.is_lateral_topic if analysis_precedent.legal_features is not None else 0}
+                        is_accessory_topic: {analysis_precedent.legal_features.is_accessory_topic if analysis_precedent.legal_features is not None else 0}
+                    enunciation: {analysis_precedent.precedent.enunciation}
+                    thesis: {analysis_precedent.precedent.thesis}
+                    synthesis: {analysis_precedent.synthesis}
                     """
                 ).strip()
             )
@@ -295,7 +301,7 @@ class AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
             self._get_analysis_precedents_by_precedent_id(run_context)
         )
 
-        dataset_rows: list[AnalysisPrecedentDatasetDto] = []
+        dataset_rows: list[AnalysisPrecedentDatasetRowDto] = []
         processed_precedent_ids: set[str] = set()
         for classification in classification_output.items:
             if classification.confidence.strip().lower() not in (

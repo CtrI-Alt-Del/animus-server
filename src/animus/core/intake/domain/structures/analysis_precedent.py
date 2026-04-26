@@ -1,4 +1,7 @@
 from animus.core.intake.domain.entities.precedent import Precedent
+from animus.core.intake.domain.structures.analysies_precedent_legal_features import (
+    AnalysiesPrecedentLegalFeatures,
+)
 from animus.core.intake.domain.structures.analysis_precedent_applicability_level import (
     AnalysisPrecedentApplicabilityLevel,
 )
@@ -12,7 +15,6 @@ from animus.core.shared.domain.structures import (
     Id,
     Integer,
     Logical,
-    Percentage,
     Text,
 )
 
@@ -27,17 +29,18 @@ class AnalysisPrecedent(Structure):
     enunciation_similarity_score: Decimal
     total_search_hits: Integer
     similarity_rank: Integer
-    similarity_percentage: Percentage | None
+    similarity_score: Decimal | None
     applicability_level: AnalysisPrecedentApplicabilityLevel
+    legal_features: AnalysiesPrecedentLegalFeatures | None
 
     @classmethod
     def create(cls, dto: AnalysisPrecedentDto) -> 'AnalysisPrecedent':
         return cls(
             analysis_id=Id.create(dto.analysis_id),
             precedent=Precedent.create(dto.precedent),
-            similarity_percentage=(
-                Percentage.create(dto.similarity_percentage)
-                if dto.similarity_percentage is not None
+            similarity_score=(
+                Decimal.create(dto.similarity_score)
+                if dto.similarity_score is not None
                 else None
             ),
             is_chosen=Logical.create(dto.is_chosen),
@@ -50,8 +53,11 @@ class AnalysisPrecedent(Structure):
             similarity_rank=Integer.create(dto.similarity_rank),
             applicability_level=AnalysisPrecedentApplicabilityLevel.create(
                 dto.applicability_level
-                if dto.applicability_level is not None
-                else dto.similarity_percentage
+            ),
+            legal_features=(
+                AnalysiesPrecedentLegalFeatures.create(dto.legal_features)
+                if dto.legal_features is not None
+                else None
             ),
         )
 
@@ -61,9 +67,9 @@ class AnalysisPrecedent(Structure):
             analysis_id=self.analysis_id.value,
             precedent=self.precedent.dto,
             synthesis=self.synthesis.value if self.synthesis is not None else None,
-            similarity_percentage=(
-                self.similarity_percentage.value
-                if self.similarity_percentage is not None
+            similarity_score=(
+                self.similarity_score.value
+                if self.similarity_score is not None
                 else None
             ),
             is_chosen=self.is_chosen.value,
@@ -72,4 +78,7 @@ class AnalysisPrecedent(Structure):
             total_search_hits=self.total_search_hits.value,
             similarity_rank=self.similarity_rank.value,
             applicability_level=self.applicability_level.dto,
+            legal_features=(
+                self.legal_features.dto if self.legal_features is not None else None
+            ),
         )

@@ -1,3 +1,6 @@
+from .analysies_precedent_legal_features_model import (
+    AnalysiesPrecedentLegalFeaturesModel,
+)
 from .analysis_precedent_applicability_feedback_model import (
     AnalysisPrecedentApplicabilityFeedbackModel,
 )
@@ -9,6 +12,7 @@ from .petition_summary_model import PetitionSummaryModel
 from .precedent_model import PrecedentModel
 
 __all__ = [
+    'AnalysiesPrecedentLegalFeaturesModel',
     'AnalysisPrecedentApplicabilityFeedbackModel',
     'AnalysisPrecedentDatasetRowModel',
     'AnalysisPrecedentModel',

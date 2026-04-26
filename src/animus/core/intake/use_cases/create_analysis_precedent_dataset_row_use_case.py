@@ -3,7 +3,7 @@ from animus.core.intake.domain.structures.dtos.analysis_precedent_applicability_
     AnalysisPrecedentApplicabilityFeedbackDto,
 )
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_dto import (
-    AnalysisPrecedentDatasetDto,
+    AnalysisPrecedentDatasetRowDto,
 )
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
@@ -22,9 +22,11 @@ class CreateAnalysisPrecedentDatasetRowUseCase:
         self,
         analysis_precedent: AnalysisPrecedentDto,
         feedback: AnalysisPrecedentApplicabilityFeedbackDto,
-    ) -> AnalysisPrecedentDatasetDto:
+    ) -> AnalysisPrecedentDatasetRowDto:
+        legal_features = analysis_precedent.legal_features
+
         dataset_row = AnalysisPrecedentDatasetRow.create(
-            AnalysisPrecedentDatasetDto(
+            AnalysisPrecedentDatasetRowDto(
                 analysis_id=analysis_precedent.analysis_id,
                 precedent_id=feedback.precedent_id,
                 created_at=feedback.created_at,
@@ -40,6 +42,29 @@ class CreateAnalysisPrecedentDatasetRowUseCase:
                 precedent_status=analysis_precedent.precedent.status,
                 last_updated_in_pangea_at=(
                     analysis_precedent.precedent.last_updated_in_pangea_at
+                ),
+                central_issue_match=(
+                    legal_features.central_issue_match
+                    if legal_features is not None
+                    else 0
+                ),
+                structural_issue_match=(
+                    legal_features.structural_issue_match
+                    if legal_features is not None
+                    else 0
+                ),
+                context_compatibility=(
+                    legal_features.context_compatibility
+                    if legal_features is not None
+                    else 0
+                ),
+                is_lateral_topic=(
+                    legal_features.is_lateral_topic if legal_features is not None else 0
+                ),
+                is_accessory_topic=(
+                    legal_features.is_accessory_topic
+                    if legal_features is not None
+                    else 0
                 ),
             )
         )

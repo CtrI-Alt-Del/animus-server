@@ -3,8 +3,8 @@ import dataclasses
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_dto import (
-    AnalysisPrecedentDatasetDto,
+from animus.ai.agno.workflows.intake.agno_classify_analysis_precedents_applicability_workflow import (
+    AnalysisPrecedentDatasetRowDto,
 )
 from animus.core.shared.domain.structures import FilePath
 from animus.core.storage.interfaces import ParquetProvider
@@ -13,7 +13,7 @@ from animus.core.storage.interfaces import ParquetProvider
 class PyarrowParquetProvider(ParquetProvider):
     def write_analysis_precedents_dataset(
         self,
-        rows: list[AnalysisPrecedentDatasetDto],
+        rows: list[AnalysisPrecedentDatasetRowDto],
         local_file_path: FilePath,
     ) -> None:
         pyarrow_rows = [dataclasses.asdict(row) for row in rows]
