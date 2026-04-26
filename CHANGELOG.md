@@ -1,3 +1,10 @@
+## [1.21.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.0...v1.21.1) (2026-04-26)
+
+
+### Bug Fixes
+
+* ANI-63 update .gitignore to change opencode.jsonc to opencode.json ([3518546](https://github.com/CtrI-Alt-Del/animus-server/commit/351854618fbb559a3df112fbc7b54096e666e98e))
+
 # [1.21.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.20.0...v1.21.0) (2026-04-22)
 
 
