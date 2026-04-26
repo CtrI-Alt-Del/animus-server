@@ -13,7 +13,7 @@ class AnalysisModel(Model):
 
     id: Mapped[str] = mapped_column(String(26), primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    folder_id: Mapped[str | None] = mapped_column(String(26), nullable=True)
+    folder_id: Mapped[str | None] = mapped_column(String(26), nullable=True, index=True)
     account_id: Mapped[str] = mapped_column(String(26), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String, nullable=False)
     is_archived: Mapped[bool] = mapped_column(Boolean, nullable=False)

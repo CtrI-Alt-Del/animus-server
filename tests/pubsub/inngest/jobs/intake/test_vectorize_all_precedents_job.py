@@ -12,8 +12,8 @@ from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
     QdrantPrecedentsEmbeddingsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
-from animus.providers.intake.precedent_embeddings.openai.openai_precedent_embeddings_provider import (
-    OpenAIPrecedentEmbeddingsProvider,
+from animus.providers.intake.precedent_embeddings.bertimbau.bertimbau_precedent_embeddings_provider import (
+    BertimbauPrecedentEmbeddingsProvider,
 )
 
 
@@ -37,7 +37,7 @@ class TestVectorizeAllPrecedentsJob:
             lambda *args, **kwargs: None,  # type:ignore
         )
         monkeypatch.setattr(
-            OpenAIPrecedentEmbeddingsProvider,
+            BertimbauPrecedentEmbeddingsProvider,
             '__init__',
             lambda *args, **kwargs: None,  # type:ignore
         )

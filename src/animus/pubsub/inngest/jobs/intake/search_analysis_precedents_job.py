@@ -20,8 +20,8 @@ from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
     QdrantPrecedentsEmbeddingsRepository,
 )
 from animus.database.sqlalchemy.repositories.intake import (
-    SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyPetitionSummariesRepository,
     SqlalchemyPrecedentsRepository,
 )
@@ -76,6 +76,15 @@ class SearchAnalysisPrecedentsJob:
                     'search_precedents',
                     lambda payload=payload: (
                         SearchAnalysisPrecedentsJob._search_precedents(
+                            payload,
+                        )
+                    ),
+                )
+
+                await context.step.run(
+                    'mark_analysis_as_analyzing_similarity',
+                    lambda payload=payload: (
+                        SearchAnalysisPrecedentsJob._mark_analysis_as_analyzing_similarity(
                             payload,
                         )
                     ),
@@ -158,6 +167,29 @@ class SearchAnalysisPrecedentsJob:
         ]
 
     @staticmethod
+    async def _mark_analysis_as_analyzing_similarity(payload: _Payload) -> None:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: (
+                SearchAnalysisPrecedentsJob._mark_analysis_as_analyzing_similarity_sync(
+                    payload
+                )
+            ),
+        )
+
+    @staticmethod
+    def _mark_analysis_as_analyzing_similarity_sync(payload: _Payload) -> None:
+        with Sqlalchemy.session() as session:
+            UpdateAnalysisStatusUseCase(
+                SqlalchemyAnalisysesRepository(session)
+            ).execute(
+                analysis_id=payload.analysis_id,
+                status=AnalysisStatusValue.ANALYZING_PRECEDENTS_SIMILARITY.value,
+            )
+            session.commit()
+
+    @staticmethod
     async def _synthesize_analysis_precedents(
         payload: _Payload,
         analysis_precedents_data: list[dict[str, Any]],
@@ -226,3 +258,4 @@ class SearchAnalysisPrecedentsJob:
                 analysis_id=payload.analysis_id,
                 status=AnalysisStatusValue.FAILED.value,
             )
+            session.commit()

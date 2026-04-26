@@ -1,3 +1,23 @@
+# [1.21.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.20.0...v1.21.0) (2026-04-22)
+
+
+### Bug Fixes
+
+* ANI-79 fix linter problems ([10341e0](https://github.com/CtrI-Alt-Del/animus-server/commit/10341e0f650c68c0c281f231609cd2c973fc5fd7))
+
+
+### Features
+
+* ANI-79 add endpoint to get analysis in processing ([eeca843](https://github.com/CtrI-Alt-Del/animus-server/commit/eeca843fda7aecfffd7c2af6ac40628c9acbd6c5))
+
+# [1.20.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.19.0...v1.20.0) (2026-04-22)
+
+
+### Features
+
+* **library:** ANI-65 add library folders endpoints and persistence ([321b7b0](https://github.com/CtrI-Alt-Del/animus-server/commit/321b7b06c8ab75959dae3ce8504830ce96935d6c))
+* **library:** ANI-65 enhance folder name validation and add additional tests for folder operations ([1f4d266](https://github.com/CtrI-Alt-Del/animus-server/commit/1f4d266c7d463eea37c59533083b087718aee08e))
+
 # [1.19.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.18.0...v1.19.0) (2026-04-20)
 
 

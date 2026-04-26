@@ -3,6 +3,7 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.analysis import Analysis
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
@@ -51,6 +52,25 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
 
         next_cursor = Id.create(slice_models[-1].id)
         return CursorPaginationResponse(items=items, next_cursor=next_cursor)
+
+    def find_many_in_processing(self, account_id: Id) -> list[Analysis]:
+        processing_statuses = [
+            status.value for status in AnalysisStatusValue.get_processing_statuses()
+        ]
+
+        statement = (
+            select(AnalysisModel)
+            .where(
+                AnalysisModel.account_id == account_id.value,
+                AnalysisModel.is_archived.is_(False),
+                AnalysisModel.status.in_(processing_statuses),
+            )
+            .order_by(AnalysisModel.id.desc())
+        )
+
+        models = self._sqlalchemy.scalars(statement).all()
+
+        return [AnalysisMapper.to_entity(model) for model in models]
 
     def find_next_generated_name_number(self, account_id: Id) -> Integer:
         generated_name_prefix = 'Nova analise #'
