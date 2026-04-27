@@ -88,18 +88,14 @@ class CreateAnalysisPrecedentsUseCase:
 
         # R2: contexto incompatível sem match forte → no máximo 1
         elif (
-            f.context_compatibility == 0
-            and f.central_issue_match < 2
-            and f.structural_issue_match < 2
+            (
+                f.context_compatibility == 0
+                and f.central_issue_match < 2
+                and f.structural_issue_match < 2
+            )
+            or no_match
+            or (f.is_accessory_topic == 1 and f.central_issue_match < 2)
         ):
-            corrected_level = min(corrected_level, 1)
-
-        # R3: nenhum match central/estrutural → no máximo 1
-        elif no_match:
-            corrected_level = min(corrected_level, 1)
-
-        # R4: tópico acessório sem match central forte → no máximo 1
-        elif f.is_accessory_topic == 1 and f.central_issue_match < 2:
             corrected_level = min(corrected_level, 1)
 
         if corrected_level == dto.applicability_level:
@@ -114,6 +110,7 @@ class CreateAnalysisPrecedentsUseCase:
             enunciation_similarity_score=dto.enunciation_similarity_score,
             total_search_hits=dto.total_search_hits,
             similarity_rank=dto.similarity_rank,
+            final_rank=dto.final_rank,
             applicability_level=corrected_level,
             legal_features=dto.legal_features,
             synthesis=dto.synthesis,
@@ -126,17 +123,20 @@ class CreateAnalysisPrecedentsUseCase:
         f = dto.legal_features
 
         if f is None:
-            return (100 * applicability_level) + (0.05 * similarity_score)
+            return (200 * applicability_level) + (0.05 * similarity_score)
 
-        return (
-            100 * applicability_level
-            + 30 * f.central_issue_match
-            + 20 * f.context_compatibility
-            + 15 * f.structural_issue_match
-            - 20 * f.is_lateral_topic
-            - 15 * f.is_accessory_topic
-            + 0.05 * similarity_score
+        # Gap entre níveis = 200, máximo das features = ~100
+        # Garante que label=2 sempre supera label=1, independente das features
+        features_score = (
+            +20 * f.central_issue_match  # 0, 20, 40
+            + 15 * f.context_compatibility  # 0, 15, 30
+            + 10 * f.structural_issue_match  # 0, 10, 20
+            - 10 * f.is_lateral_topic  # 0, -10
+            - 8 * f.is_accessory_topic  # 0, -8
         )
+        # Máximo: 40+30+20 = 90 | Mínimo: -10-8 = -18 | Range: 108
+
+        return 200 * applicability_level + features_score + 0.05 * similarity_score
 
     @classmethod
     def _rerank_key(cls, dto: AnalysisPrecedentDto) -> tuple[float, float]:
@@ -163,8 +163,13 @@ class CreateAnalysisPrecedentsUseCase:
             kind = getattr(item, 'kind', None)
             number = getattr(item, 'number', None)
             synthesis = getattr(item, 'synthesis', None)
-            applicability_level = getattr(item, 'applicability_level', None)
+            raw_applicability_level = getattr(item, 'applicability_level', None)
             legal_features = getattr(item, 'legal_features', None)
+
+            if raw_applicability_level is None:
+                applicability_level = 0
+            else:
+                applicability_level = raw_applicability_level
 
             if (
                 not isinstance(court, str)
@@ -244,6 +249,7 @@ class CreateAnalysisPrecedentsUseCase:
                     ),
                     total_search_hits=analysis_precedent.total_search_hits,
                     similarity_rank=analysis_precedent.similarity_rank,
+                    final_rank=analysis_precedent.final_rank,
                     applicability_level=applicability_level,
                     legal_features=legal_features_dto,
                     synthesis=synthesis,
@@ -270,7 +276,8 @@ class CreateAnalysisPrecedentsUseCase:
                 thesis_similarity_score=dto.thesis_similarity_score,
                 enunciation_similarity_score=dto.enunciation_similarity_score,
                 total_search_hits=dto.total_search_hits,
-                similarity_rank=rank,
+                similarity_rank=dto.similarity_rank,
+                final_rank=rank,
                 applicability_level=dto.applicability_level,
                 legal_features=dto.legal_features,
                 synthesis=dto.synthesis,

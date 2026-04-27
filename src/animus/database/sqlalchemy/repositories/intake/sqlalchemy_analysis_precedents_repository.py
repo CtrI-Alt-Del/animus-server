@@ -24,6 +24,7 @@ class SqlalchemyAnalysisPrecedentsRepository(AnalysisPrecedentsRepository):
             )
             .where(AnalysisPrecedentModel.analysis_id == analysis_id.value)
             .order_by(
+                AnalysisPrecedentModel.final_rank.asc(),
                 desc(AnalysisPrecedentModel.similarity_score),
                 AnalysisPrecedentModel.precedent_id.asc(),
             )

@@ -46,6 +46,11 @@ class AnalysisPrecedentModel(Model):
         nullable=False,
         default=0,
     )
+    final_rank: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
     applicability_level: Mapped[int] = mapped_column(
         Integer,
         nullable=False,

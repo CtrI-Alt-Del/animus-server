@@ -9,7 +9,9 @@ from pytest import MonkeyPatch
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-from animus.ai.agno.workflows.intake import AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow
+from animus.ai.agno.workflows.intake import (
+    AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
+)
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
@@ -383,7 +385,9 @@ class TestSearchAnalysisPrecedentsJob:
             '__init__',
             lambda *args, **kwargs: None,  # type: ignore
         )
-        monkeypatch.setattr(AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow, 'run', _run)
+        monkeypatch.setattr(
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow, 'run', _run
+        )
 
         analysis_precedents_data = search_precedents_sync(payload)
 

@@ -14,6 +14,10 @@ from animus.constants import Env
 
 class IntakeSquad:
     @property
+    def analysis_precedents_applicability_classifier_agent(self) -> Agent:
+        return self.analysis_precedents_synthesizer_and_classifier_agent
+
+    @property
     def analysis_precedents_synthesizer_and_classifier_agent(self) -> Agent:
         return Agent(
             name='Analysis Precedents Synthesizer and Classifier Agent',

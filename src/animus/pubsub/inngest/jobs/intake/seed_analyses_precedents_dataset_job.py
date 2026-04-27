@@ -7,9 +7,6 @@ from typing import Any, cast
 
 from inngest import Context, Inngest, TriggerEvent
 
-from animus.ai.agno.workflows.intake.agno_classify_analysis_precedents_applicability_workflow import (
-    AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow,
-)
 from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
     AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
 )
@@ -25,8 +22,6 @@ from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentsSearchFiltersDto,
 )
 from animus.core.intake.use_cases import (
-    CreateAnalysisPrecedentApplicabilityFeedbackUseCase,
-    CreateAnalysisPrecedentDatasetRowUseCase,
     CreateAnalysisUseCase,
     CreatePetitionUseCase,
     SearchAnalysisPrecedentsUseCase,
@@ -39,8 +34,6 @@ from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
 )
 from animus.database.sqlalchemy.repositories.auth import SqlalchemyAccountsRepository
 from animus.database.sqlalchemy.repositories.intake import (
-    SqlalchemyAnalysisPrecedentApplicabilityFeedbacksRepository,
-    SqlalchemyAnalysisPrecedentDatasetRowsRepository,
     SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyAnalisysesRepository,
     SqlalchemyPetitionSummariesRepository,
@@ -100,15 +93,6 @@ class SeedAnalysesPrecedentsDatasetJob:
                     ),
                 )
                 all_dataset_rows_data.extend(dataset_rows_data)
-
-            # await context.step.run(
-            #     'export_dataset',
-            #     lambda all_dataset_rows_data=all_dataset_rows_data: (
-            #         SeedAnalysesPrecedentsDatasetJob._export_dataset(
-            #             all_dataset_rows_data,
-            #         )
-            #     ),
-            # )
 
         return _
 
@@ -196,12 +180,6 @@ class SeedAnalysesPrecedentsDatasetJob:
                 session
             )
             precedents_repository = SqlalchemyPrecedentsRepository(session)
-            feedbacks_repository = (
-                SqlalchemyAnalysisPrecedentApplicabilityFeedbacksRepository(session)
-            )
-            dataset_rows_repository = SqlalchemyAnalysisPrecedentDatasetRowsRepository(
-                session
-            )
 
             existing_petition = petitions_repository.find_by_document_file_path(
                 FilePath.create(petition_file_path)
@@ -299,26 +277,6 @@ class SeedAnalysesPrecedentsDatasetJob:
             return [
                 asdict(analysis_precedent) for analysis_precedent in analysis_precedents
             ]
-
-            # dataset_rows = AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow(
-            #     petition_summaries_repository=petition_summaries_repository,
-            #     create_analysis_precedent_applicability_feedback_use_case=(
-            #         CreateAnalysisPrecedentApplicabilityFeedbackUseCase(
-            #             feedbacks_repository=feedbacks_repository,
-            #         )
-            #     ),
-            #     create_analysis_precedent_dataset_row_use_case=(
-            #         CreateAnalysisPrecedentDatasetRowUseCase(
-            #             dataset_rows_repository=dataset_rows_repository,
-            #         )
-            #     ),
-            # ).run(
-            #     analysis_id=analysis_id,
-            #     analysis_precedents=analysis_precedents,
-            # )
-            # session.flush()
-
-            # return [asdict(dataset_row) for dataset_row in dataset_rows]
 
     @staticmethod
     async def _export_dataset(all_dataset_rows_data: list[dict[str, Any]]) -> None:

@@ -22,6 +22,7 @@ class AnalysisPrecedentMapper:
                 enunciation_similarity_score=model.enunciation_similarity_score,
                 total_search_hits=model.total_search_hits,
                 similarity_rank=model.similarity_rank,
+                final_rank=model.final_rank,
                 applicability_level=model.applicability_level,
                 legal_features=(
                     AnalysiesPrecedentLegalFeaturesMapper.to_entity(
@@ -49,6 +50,7 @@ class AnalysisPrecedentMapper:
             enunciation_similarity_score=entity.enunciation_similarity_score.value,
             total_search_hits=entity.total_search_hits.value,
             similarity_rank=entity.similarity_rank.value,
+            final_rank=entity.final_rank.value,
             applicability_level=entity.applicability_level.dto,
             synthesis=entity.synthesis.value if entity.synthesis is not None else None,
             legal_features=(

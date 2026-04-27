@@ -16,5 +16,6 @@ class AnalysisPrecedentDto:
     enunciation_similarity_score: float = 0.0
     total_search_hits: int = 0
     similarity_rank: int = 0
+    final_rank: int = 0
     applicability_level: int | None = None
     legal_features: AnalysiesPrecedentLegalFeaturesDto | None = None

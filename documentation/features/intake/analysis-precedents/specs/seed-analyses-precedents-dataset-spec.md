@@ -75,7 +75,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - **`CreatePetitionSummaryUseCase`** (`src/animus/core/intake/use_cases/create_petition_summary_use_case.py`) - persiste o resumo e move a analise para `PETITION_ANALYZED`.
 - **`SearchAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/search_analysis_precedents_use_case.py`) - executa embeddings, busca vetorial, deduplicacao, score e ordenacao dos precedentes.
 - **`CreateAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/create_analysis_precedents_use_case.py`) - persiste os `AnalysisPrecedent` e atualiza a analise para `WAITING_PRECEDENT_CHOISE`; ja suporta `synthesis_output=None`.
-- **`AnalysisPrecedent`** (`src/animus/core/intake/domain/structures/analysis_precedent.py`) - ja carrega `similarity_score`, `thesis_similarity_score`, `enunciation_similarity_score`, `total_search_hits`, `similarity_rank` e `applicability_level`.
+- **`AnalysisPrecedent`** (`src/animus/core/intake/domain/structures/analysis_precedent.py`) - ja carrega `similarity_score`, `thesis_similarity_score`, `enunciation_similarity_score`, `total_search_hits`, `similarity_rank`, `final_rank` e `applicability_level`.
 - **`AnalysisPrecedentApplicabilityLevel`** (`src/animus/core/intake/domain/structures/analysis_precedent_applicability_level.py`) - encapsula a classificacao ordinal `NOT_APPLICABLE | POSSIBLY_APPLICABLE | APPLICABLE`.
 - **`AnalysisPrecedentApplicabilityFeedback`** (`src/animus/core/intake/domain/structures/analysis_precedent_applicability_feedback.py`) - estrutura existente, mas hoje modelada com `analysis_precedent_id`, ainda sem persistencia ou uso.
 - **`AnalysisPrecedentDatasetRow`** (`src/animus/core/intake/domain/structures/analysis_precedent_dataset_row.py`) - estrutura existente para dataset, tambem ainda sem persistencia ou uso.
@@ -92,13 +92,13 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## Database
 
-- **`AnalysisPrecedentModel`** (`src/animus/database/sqlalchemy/models/intake/analysis_precedent_model.py`) - tabela `analysis_precedents` ja contem `similarity_score`, `thesis_similarity_score`, `enunciation_similarity_score`, `total_search_hits`, `similarity_rank` e `applicability_level`.
+- **`AnalysisPrecedentModel`** (`src/animus/database/sqlalchemy/models/intake/analysis_precedent_model.py`) - tabela `analysis_precedents` ja contem `similarity_score`, `thesis_similarity_score`, `enunciation_similarity_score`, `total_search_hits`, `similarity_rank`, `final_rank` e `applicability_level`.
 - **`SqlalchemyAnalysisPrecedentsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedents_repository.py`) - referencia de persistencia dos precedentes da analise.
 - **`SqlalchemyPetitionsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petitions_repository.py`) - repository atual de `Petition`; faltando busca por `document_file_path`.
 - **`SqlalchemyAccountsRepository`** (`src/animus/database/sqlalchemy/repositories/auth/sqlalchemy_accounts_repository.py`) - implementacao concreta de busca de conta por e-mail.
 - **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) - persistencia da analise, inclusive `add_many(...)` e `replace(...)`.
 - **`SqlalchemyPetitionSummariesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petition_summaries_repository.py`) - suporte de persistencia/leitura do resumo.
-- **Migracoes existentes** (`migrations/versions/20260328_150000_create_analysis_precedents_table.py`, `migrations/versions/20260418_130000_add_analysis_precedent_scores_columns.py`) - base atual da tabela `analysis_precedents` e das colunas de score.
+- **Migracoes existentes** (`migrations/versions/20260328_150000_create_analysis_precedents_table.py`, `migrations/versions/20260418_130000_add_analysis_precedent_scores_columns.py`, `migrations/versions/20260426_160000_add_final_rank_to_analysis_precedents.py`) - base atual da tabela `analysis_precedents` e das colunas de score/rank.
 
 ## AI
 

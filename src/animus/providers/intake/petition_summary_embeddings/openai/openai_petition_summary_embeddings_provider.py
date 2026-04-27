@@ -84,6 +84,13 @@ class _ChunkBuilder:
         self._add(f'Questão jurídica principal: {s.legal_issue.value}')
         self._add(f'Pergunta jurídica central: {s.central_question.value}')
 
+        self._add_optional_single_chunks()
+        self._add_prefixed_list_chunks()
+        self._add_relevant_laws_chunk()
+
+    def _add_optional_single_chunks(self) -> None:
+        s = self._summary
+
         if s.type_of_action is not None:
             self._add(f'Tipo de ação: {s.type_of_action.value}')
 
@@ -93,27 +100,28 @@ class _ChunkBuilder:
         if s.standing_issue is not None:
             self._add(f'Questão de legitimidade: {s.standing_issue.value}')
 
-        for item in s.secondary_legal_issues:
-            self._add(f'Questão jurídica secundária: {item.value}')
+    def _add_prefixed_list_chunks(self) -> None:
+        s = self._summary
+        list_fields = [
+            ('Questão jurídica secundária: ', s.secondary_legal_issues),
+            ('Pergunta jurídica adicional: ', s.alternative_questions),
+            ('Fato relevante: ', s.key_facts),
+            ('Pedido principal: ', s.requested_relief),
+            ('Tema processual relevante: ', s.procedural_issues),
+            ('', s.search_terms),
+        ]
 
-        for item in s.alternative_questions:
-            self._add(f'Pergunta jurídica adicional: {item.value}')
+        for prefix, items in list_fields:
+            for item in items:
+                self._add(f'{prefix}{item.value}')
 
-        for item in s.key_facts:
-            self._add(f'Fato relevante: {item.value}')
+    def _add_relevant_laws_chunk(self) -> None:
+        relevant_laws = self._summary.relevant_laws
+        if not relevant_laws:
+            return
 
-        for item in s.requested_relief:
-            self._add(f'Pedido principal: {item.value}')
-
-        for item in s.procedural_issues:
-            self._add(f'Tema processual relevante: {item.value}')
-
-        for item in s.search_terms:
-            self._add(item.value)
-
-        if s.relevant_laws:
-            laws = ' | '.join(item.value for item in s.relevant_laws)
-            self._add(f'Fundamentos normativos: {laws}')
+        laws = ' | '.join(item.value for item in relevant_laws)
+        self._add(f'Fundamentos normativos: {laws}')
 
     def _add_composite_chunks(self) -> None:
         self._add(self._build_structural_chunk())

@@ -29,6 +29,7 @@ class AnalysisPrecedent(Structure):
     enunciation_similarity_score: Decimal
     total_search_hits: Integer
     similarity_rank: Integer
+    final_rank: Integer
     similarity_score: Decimal | None
     applicability_level: AnalysisPrecedentApplicabilityLevel
     legal_features: AnalysiesPrecedentLegalFeatures | None
@@ -51,8 +52,11 @@ class AnalysisPrecedent(Structure):
             ),
             total_search_hits=Integer.create(dto.total_search_hits),
             similarity_rank=Integer.create(dto.similarity_rank),
+            final_rank=Integer.create(dto.final_rank),
             applicability_level=AnalysisPrecedentApplicabilityLevel.create(
                 dto.applicability_level
+                if dto.applicability_level is not None
+                else dto.similarity_score
             ),
             legal_features=(
                 AnalysiesPrecedentLegalFeatures.create(dto.legal_features)
@@ -77,6 +81,7 @@ class AnalysisPrecedent(Structure):
             enunciation_similarity_score=self.enunciation_similarity_score.value,
             total_search_hits=self.total_search_hits.value,
             similarity_rank=self.similarity_rank.value,
+            final_rank=self.final_rank.value,
             applicability_level=self.applicability_level.dto,
             legal_features=(
                 self.legal_features.dto if self.legal_features is not None else None
