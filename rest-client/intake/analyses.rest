@@ -1,6 +1,6 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KPXTZBZK9EG89M32G7Y973WC
-@petition_id = 01KPXTZJWKHEQM48NB212NKKY9
+@analysis_id = 01KQ5CG4D1VSKXJXJ8W4YBRYFX
+@petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
 @precedent_court = STJ
 @precedent_kind = RR
 @precedent_number = 974
