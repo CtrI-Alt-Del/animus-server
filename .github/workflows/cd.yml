@@ -30,6 +30,7 @@ jobs:
       GAR_REPOSITORY: ${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}
       CLOUD_RUN_REGION: ${{ vars.GCP_CLOUD_RUN_REGION }}
       CLOUD_RUN_SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+      CLOUD_RUN_MEMORY: ${{ vars.GCP_CLOUD_RUN_MEMORY != '' && vars.GCP_CLOUD_RUN_MEMORY || '1Gi' }}
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
 
     steps:
@@ -247,6 +248,7 @@ jobs:
           service: ${{ env.CLOUD_RUN_SERVICE }}
           region: ${{ env.CLOUD_RUN_REGION }}
           image: ${{ steps.context.outputs.deploy_image }}
+          flags: --memory=${{ env.CLOUD_RUN_MEMORY }}
           env_vars: |
             DATABASE_URL=${{ steps.runtime.outputs.database_url }}
           env_vars_update_strategy: merge
