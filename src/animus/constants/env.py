@@ -12,7 +12,7 @@ class _Env(BaseSettings):
     )
 
     MODE: Literal['dev', 'stg', 'prod']
-    HOST: str = '127.0.0.1'
+    HOST: str = '0.0.0.0'
     PORT: int = 8080
 
     DATABASE_URL: str

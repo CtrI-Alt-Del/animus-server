@@ -11,7 +11,7 @@ app = FastAPIApp.register()
 def main() -> None:
     from animus.constants import Env
 
-    run('main:app', host=Env.HOST, port=Env.PORT, reload=True)
+    run('main:app', host=Env.HOST, port=Env.PORT, reload=Env.MODE == 'dev')
 
 
 if __name__ == '__main__':
