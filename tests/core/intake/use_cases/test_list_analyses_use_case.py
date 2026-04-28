@@ -46,6 +46,7 @@ class TestListAnalysesUseCase:
             cursor=Id.create('01BX5ZZKBKACTAV9WEVGEMMVS1'),
             limit=Integer.create(10),
             is_archived=Logical.create_false(),
+            only_unfoldered=Logical.create_false(),
         )
         assert result.items == [analysis.dto]
         assert result.next_cursor == next_cursor

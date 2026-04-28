@@ -28,12 +28,13 @@ class ListUnfolderedAnalysesUseCase:
         normalized_limit = Integer.create(limit)
         normalized_is_archived = Logical.create(is_archived)
 
-        analyses = self._analisyses_repository.find_many_unfoldered(
+        analyses = self._analisyses_repository.find_many(
             account_id=normalized_account_id,
             search=normalized_search,
             cursor=normalized_cursor,
             limit=normalized_limit,
             is_archived=normalized_is_archived,
+            only_unfoldered=Logical.create_true(),
         )
 
         return analyses.mapItems(lambda analysis: analysis.dto)

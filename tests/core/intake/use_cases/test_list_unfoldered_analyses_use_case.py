@@ -32,7 +32,7 @@ class TestListUnfolderedAnalysesUseCase:
             name='Analise sem pasta',
         )
         next_cursor = Id.create('01BX5ZZKBKACTAV9WEVGEMMVS0')
-        self.analisyses_repository_mock.find_many_unfoldered.return_value = (
+        self.analisyses_repository_mock.find_many.return_value = (
             CursorPaginationResponse(items=[analysis], next_cursor=next_cursor)
         )
 
@@ -44,12 +44,13 @@ class TestListUnfolderedAnalysesUseCase:
             is_archived=False,
         )
 
-        self.analisyses_repository_mock.find_many_unfoldered.assert_called_once_with(
+        self.analisyses_repository_mock.find_many.assert_called_once_with(
             account_id=Id.create('01BX5ZZKBKACTAV9WEVGEMMVRZ'),
             search=Text.create('sem pasta'),
             cursor=Id.create('01BX5ZZKBKACTAV9WEVGEMMVS1'),
             limit=Integer.create(10),
             is_archived=Logical.create_false(),
+            only_unfoldered=Logical.create_true(),
         )
         assert result.items == [analysis.dto]
         assert result.next_cursor == next_cursor
@@ -64,7 +65,7 @@ class TestListUnfolderedAnalysesUseCase:
                 is_archived=False,
             )
 
-        self.analisyses_repository_mock.find_many_unfoldered.assert_not_called()
+        self.analisyses_repository_mock.find_many.assert_not_called()
 
     def test_should_raise_validation_error_when_limit_is_not_positive(self) -> None:
         with pytest.raises(
@@ -79,4 +80,4 @@ class TestListUnfolderedAnalysesUseCase:
                 is_archived=False,
             )
 
-        self.analisyses_repository_mock.find_many_unfoldered.assert_not_called()
+        self.analisyses_repository_mock.find_many.assert_not_called()
