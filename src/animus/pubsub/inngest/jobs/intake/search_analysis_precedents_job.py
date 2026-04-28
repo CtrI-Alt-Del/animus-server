@@ -16,9 +16,6 @@ from animus.core.intake.use_cases import (
     SearchAnalysisPrecedentsUseCase,
     UpdateAnalysisStatusUseCase,
 )
-from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
-    QdrantPrecedentsEmbeddingsRepository,
-)
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalisysesRepository,
     SqlalchemyAnalysisPrecedentsRepository,
@@ -138,6 +135,10 @@ class SearchAnalysisPrecedentsJob:
     def _search_precedents_sync(
         payload: _Payload,
     ) -> list[dict[str, Any]]:
+        from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
+            QdrantPrecedentsEmbeddingsRepository,
+        )
+
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
             petition_summaries_repository = SqlalchemyPetitionSummariesRepository(

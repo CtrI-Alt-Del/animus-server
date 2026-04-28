@@ -1,13 +1,10 @@
-from typing import Any
 import asyncio
+from typing import Any
 
 from inngest import Context, Inngest, TriggerCron, TriggerEvent
 
 from animus.core.intake.use_cases.vectorize_precedents_use_case import (
     VectorizePrecedentsUseCase,
-)
-from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
-    QdrantPrecedentsEmbeddingsRepository,
 )
 from animus.database.sqlalchemy.repositories.intake.sqlalchemy_precendents_repository import (
     SqlalchemyPrecedentsRepository,
@@ -45,6 +42,10 @@ class VectorizePrecedentsJob:
                 page += 1
 
         async def _vectorize_precedents(page: int, page_size: int) -> bool:
+            from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
+                QdrantPrecedentsEmbeddingsRepository,
+            )
+
             with Sqlalchemy.session() as session:
                 use_case = VectorizePrecedentsUseCase(
                     pangea_service=PangeaBnpService(client=HttpxRestClient()),

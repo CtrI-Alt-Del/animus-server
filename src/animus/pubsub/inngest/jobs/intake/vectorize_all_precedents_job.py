@@ -6,16 +6,10 @@ from inngest import Context, Inngest, TriggerEvent
 from animus.core.intake.use_cases.vectorize_all_precedents_use_case import (
     VectorizeAllPrecedentsUseCase,
 )
-from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
-    QdrantPrecedentsEmbeddingsRepository,
-)
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyPrecedentsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
-from animus.providers.intake.precedent_embeddings.bertimbau.bertimbau_precedent_embeddings_provider import (
-    BertimbauPrecedentEmbeddingsProvider,
-)
 
 
 class VectorizeAllPrecedentsJob:
@@ -45,6 +39,13 @@ class VectorizeAllPrecedentsJob:
 
     @staticmethod
     async def _vectorize_page(page: int) -> int:
+        from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
+            QdrantPrecedentsEmbeddingsRepository,
+        )
+        from animus.providers.intake.precedent_embeddings.bertimbau.bertimbau_precedent_embeddings_provider import (
+            BertimbauPrecedentEmbeddingsProvider,
+        )
+
         with Sqlalchemy.session() as session:
             use_case = VectorizeAllPrecedentsUseCase(
                 precedents_repository=SqlalchemyPrecedentsRepository(session),
