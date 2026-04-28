@@ -111,6 +111,7 @@ jobs:
           project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Validate Cloud Run runtime environment
+        id: runtime
         shell: bash
         run: |
           if ! service_json="$(gcloud run services describe "$CLOUD_RUN_SERVICE" --project "$GCP_PROJECT_ID" --region "$CLOUD_RUN_REGION" --format=json)"; then
@@ -125,9 +126,12 @@ jobs:
             grep -qx "$1" <<< "$env_names"
           }
 
+          env_value() {
+            jq -r --arg name "$1" '.spec.template.spec.containers[0].env[]? | select(.name == $name) | .value // empty' <<< "$service_json"
+          }
+
           required_env_vars=(
             MODE
-            DATABASE_URL
             GCS_BUCKET_NAME
             SUPABASE_URL
             SUPABASE_KEY
@@ -161,6 +165,46 @@ jobs:
             fi
           done
 
+          database_url="$(env_value DATABASE_URL)"
+          if [ -z "$database_url" ]; then
+            postgres_user="$(env_value POSTGRES_USER)"
+            postgres_password="$(env_value POSTGRES_PASSWORD)"
+            postgres_db="$(env_value POSTGRES_DB)"
+            cloud_sql_instances="$(jq -r '.spec.template.metadata.annotations["run.googleapis.com/cloudsql-instances"] // .metadata.annotations["run.googleapis.com/cloudsql-instances"] // empty' <<< "$service_json")"
+            cloud_sql_instance="${cloud_sql_instances%%,*}"
+
+            for variable in POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB; do
+              if [ -z "$(env_value "$variable")" ]; then
+                echo "Missing required Cloud Run runtime environment variable: $variable"
+                missing=1
+              fi
+            done
+
+            if [ -z "$cloud_sql_instance" ]; then
+              echo "Missing required Cloud Run Cloud SQL instance annotation."
+              missing=1
+            fi
+
+            if [ "$missing" -eq 0 ]; then
+              export POSTGRES_USER="$postgres_user"
+              export POSTGRES_PASSWORD="$postgres_password"
+              export POSTGRES_DB="$postgres_db"
+              export CLOUD_SQL_INSTANCE="$cloud_sql_instance"
+              database_url="$(python3 - <<'PY'
+          import os
+          from urllib.parse import quote
+
+          user = quote(os.environ['POSTGRES_USER'], safe='')
+          password = quote(os.environ['POSTGRES_PASSWORD'], safe='')
+          database = quote(os.environ['POSTGRES_DB'], safe='')
+          instance = os.environ['CLOUD_SQL_INSTANCE']
+
+          print(f'postgresql://{user}:{password}@/{database}?host=/cloudsql/{instance}')
+          PY
+          )"
+            fi
+          fi
+
           mode="$(jq -r '.spec.template.spec.containers[0].env[]? | select(.name == "MODE") | .value // empty' <<< "$service_json")"
           if has_env GCS_EMULATOR_HOST && [ "$mode" != "dev" ]; then
             echo "GCS_EMULATOR_HOST is configured, but it can only be used with MODE=dev."
@@ -170,6 +214,9 @@ jobs:
           if [ "$missing" -ne 0 ]; then
             exit 1
           fi
+
+          echo "::add-mask::$database_url"
+          echo "database_url=$database_url" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Artifact Registry
         uses: docker/login-action@v3
@@ -200,6 +247,9 @@ jobs:
           service: ${{ env.CLOUD_RUN_SERVICE }}
           region: ${{ env.CLOUD_RUN_REGION }}
           image: ${{ steps.context.outputs.deploy_image }}
+          env_vars: |
+            DATABASE_URL=${{ steps.runtime.outputs.database_url }}
+          env_vars_update_strategy: merge
 
       - name: Output deployed service URL
         shell: bash
