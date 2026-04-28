@@ -1,3 +1,10 @@
+## [1.21.3](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.2...v1.21.3) (2026-04-28)
+
+
+### Bug Fixes
+
+* ANI-86 derive cloud run database url ([7929475](https://github.com/CtrI-Alt-Del/animus-server/commit/7929475c0cb21c012993ddc9d0adb8b586be77d4))
+
 ## [1.21.2](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.1...v1.21.2) (2026-04-28)
 
 
