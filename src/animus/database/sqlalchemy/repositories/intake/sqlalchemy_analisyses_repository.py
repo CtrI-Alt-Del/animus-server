@@ -30,11 +30,48 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         limit: Integer,
         is_archived: Logical,
     ) -> CursorPaginationResponse[Analysis]:
+        return self._find_many(
+            account_id=account_id,
+            search=search,
+            cursor=cursor,
+            limit=limit,
+            is_archived=is_archived,
+        )
+
+    def find_many_unfoldered(
+        self,
+        account_id: Id,
+        search: Text,
+        cursor: Id | None,
+        limit: Integer,
+        is_archived: Logical,
+    ) -> CursorPaginationResponse[Analysis]:
+        return self._find_many(
+            account_id=account_id,
+            search=search,
+            cursor=cursor,
+            limit=limit,
+            is_archived=is_archived,
+            only_unfoldered=True,
+        )
+
+    def _find_many(
+        self,
+        account_id: Id,
+        search: Text,
+        cursor: Id | None,
+        limit: Integer,
+        is_archived: Logical,
+        only_unfoldered: bool = False,
+    ) -> CursorPaginationResponse[Analysis]:
         statement = select(AnalysisModel).where(
             AnalysisModel.account_id == account_id.value,
             AnalysisModel.is_archived == is_archived.value,
             AnalysisModel.name.ilike(f'%{search.value}%'),
         )
+
+        if only_unfoldered:
+            statement = statement.where(AnalysisModel.folder_id.is_(None))
 
         if cursor is not None:
             statement = statement.where(AnalysisModel.id > cursor.value)

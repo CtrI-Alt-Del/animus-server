@@ -17,6 +17,15 @@ class AnalisysesRepository(Protocol):
         is_archived: Logical,
     ) -> CursorPaginationResponse[Analysis]: ...
 
+    def find_many_unfoldered(
+        self,
+        account_id: Id,
+        search: Text,
+        cursor: Id | None,
+        limit: Integer,
+        is_archived: Logical,
+    ) -> CursorPaginationResponse[Analysis]: ...
+
     def find_many_in_processing(self, account_id: Id) -> list[Analysis]: ...
 
     def find_next_generated_name_number(self, account_id: Id) -> Integer: ...
