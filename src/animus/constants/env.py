@@ -12,7 +12,7 @@ class _Env(BaseSettings):
     )
 
     MODE: Literal['dev', 'stg', 'prod']
-    HOST: str = '0.0.0.0'
+    HOST: str = '0.0.0.0'  # noqa: S104
     PORT: int = cast('int', 8080)
 
     DATABASE_URL: str
