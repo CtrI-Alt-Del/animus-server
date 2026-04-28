@@ -46,7 +46,7 @@ wheels = [
 
 [[package]]
 name = "animus"
-version = "1.14.0"
+version = "1.21.2"
 source = { editable = "." }
 dependencies = [
     { name = "agno" },

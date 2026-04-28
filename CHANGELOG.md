@@ -1,3 +1,13 @@
+## [1.21.2](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.1...v1.21.2) (2026-04-28)
+
+
+### Bug Fixes
+
+* ANI-86 align server runtime configuration ([f4237d4](https://github.com/CtrI-Alt-Del/animus-server/commit/f4237d48d29f458efbaf006f8235517b2d8f2f39))
+* ANI-86 allow container host binding ([2ee6957](https://github.com/CtrI-Alt-Del/animus-server/commit/2ee69575b5409c9db30ef9907363dcc2752602a0))
+* ANI-86 satisfy env port typecheck ([00a8ba2](https://github.com/CtrI-Alt-Del/animus-server/commit/00a8ba2f16ba5f578e89e315c5617de4b12f7d7f))
+* ANI-86 validate cloud run runtime before deploy ([aee2614](https://github.com/CtrI-Alt-Del/animus-server/commit/aee26140206cc4ca9e577ff7a60ff3b61fa22ff9))
+
 ## [1.21.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.0...v1.21.1) (2026-04-26)
 
 
