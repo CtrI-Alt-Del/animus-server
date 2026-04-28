@@ -28,6 +28,15 @@ from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_
 )
 
 
+class QdrantPrecedentsEmbeddingsRepository:
+    def __new__(cls) -> Any:
+        from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
+            QdrantPrecedentsEmbeddingsRepository as Repository,
+        )
+
+        return Repository()
+
+
 @dataclass(frozen=True)
 class _Payload:
     analysis_id: str
@@ -135,10 +144,6 @@ class SearchAnalysisPrecedentsJob:
     def _search_precedents_sync(
         payload: _Payload,
     ) -> list[dict[str, Any]]:
-        from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
-            QdrantPrecedentsEmbeddingsRepository,
-        )
-
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
             petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
