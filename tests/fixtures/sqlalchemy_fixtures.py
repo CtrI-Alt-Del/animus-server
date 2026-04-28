@@ -1,6 +1,7 @@
 from collections.abc import Iterator
 
 import pytest
+from docker.errors import DockerException
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from testcontainers.postgres import PostgresContainer
@@ -10,8 +11,11 @@ from animus.database.sqlalchemy.models.model import Model
 
 @pytest.fixture(scope='session')
 def postgres_container() -> Iterator[PostgresContainer]:
-    with PostgresContainer('postgres:16-alpine') as postgres:
-        yield postgres
+    try:
+        with PostgresContainer('postgres:16-alpine') as postgres:
+            yield postgres
+    except DockerException as error:
+        pytest.skip(f'Docker indisponivel para testes com Postgres: {error}')
 
 
 @pytest.fixture(scope='session')

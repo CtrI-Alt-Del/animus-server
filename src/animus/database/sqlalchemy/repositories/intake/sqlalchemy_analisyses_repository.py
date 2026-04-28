@@ -3,6 +3,7 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.analysis import Analysis
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
@@ -52,6 +53,25 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         next_cursor = Id.create(slice_models[-1].id)
         return CursorPaginationResponse(items=items, next_cursor=next_cursor)
 
+    def find_many_in_processing(self, account_id: Id) -> list[Analysis]:
+        processing_statuses = [
+            status.value for status in AnalysisStatusValue.get_processing_statuses()
+        ]
+
+        statement = (
+            select(AnalysisModel)
+            .where(
+                AnalysisModel.account_id == account_id.value,
+                AnalysisModel.is_archived.is_(False),
+                AnalysisModel.status.in_(processing_statuses),
+            )
+            .order_by(AnalysisModel.id.desc())
+        )
+
+        models = self._sqlalchemy.scalars(statement).all()
+
+        return [AnalysisMapper.to_entity(model) for model in models]
+
     def find_next_generated_name_number(self, account_id: Id) -> Integer:
         generated_name_prefix = 'Nova analise #'
         generated_name_start_index = len(generated_name_prefix) + 1
@@ -96,3 +116,19 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         model.account_id = analysis.account_id.value
         model.status = analysis.status.value.value
         model.is_archived = analysis.is_archived.value
+
+        if analysis.precedents_search_filters is None:
+            model.precedents_search_courts = None
+            model.precedents_search_precedent_kinds = None
+            model.precedents_search_limit = None
+        else:
+            model.precedents_search_courts = [
+                court.dto for court in analysis.precedents_search_filters.courts
+            ]
+            model.precedents_search_precedent_kinds = [
+                precedent_kind.dto
+                for precedent_kind in analysis.precedents_search_filters.precedent_kinds
+            ]
+            model.precedents_search_limit = (
+                analysis.precedents_search_filters.limit.value
+            )

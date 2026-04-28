@@ -1,3 +1,100 @@
+## [1.21.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.0...v1.21.1) (2026-04-26)
+
+
+### Bug Fixes
+
+* ANI-63 update .gitignore to change opencode.jsonc to opencode.json ([3518546](https://github.com/CtrI-Alt-Del/animus-server/commit/351854618fbb559a3df112fbc7b54096e666e98e))
+
+# [1.21.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.20.0...v1.21.0) (2026-04-22)
+
+
+### Bug Fixes
+
+* ANI-79 fix linter problems ([10341e0](https://github.com/CtrI-Alt-Del/animus-server/commit/10341e0f650c68c0c281f231609cd2c973fc5fd7))
+
+
+### Features
+
+* ANI-79 add endpoint to get analysis in processing ([eeca843](https://github.com/CtrI-Alt-Del/animus-server/commit/eeca843fda7aecfffd7c2af6ac40628c9acbd6c5))
+
+# [1.20.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.19.0...v1.20.0) (2026-04-22)
+
+
+### Features
+
+* **library:** ANI-65 add library folders endpoints and persistence ([321b7b0](https://github.com/CtrI-Alt-Del/animus-server/commit/321b7b06c8ab75959dae3ce8504830ce96935d6c))
+* **library:** ANI-65 enhance folder name validation and add additional tests for folder operations ([1f4d266](https://github.com/CtrI-Alt-Del/animus-server/commit/1f4d266c7d463eea37c59533083b087718aee08e))
+
+# [1.19.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.18.0...v1.19.0) (2026-04-20)
+
+
+### Bug Fixes
+
+* ANI-83 include uv lock update in release automation ([1db7eb1](https://github.com/CtrI-Alt-Del/animus-server/commit/1db7eb1eaf9b93929d4826a7562007c88f82f096))
+* ANI-83 support expanded precedent status values ([f94262d](https://github.com/CtrI-Alt-Del/animus-server/commit/f94262d8afeffcd1cd1b813d9f6b8b7d19c754bf))
+* ANI-83 update CI workflow to use consistent quoting for Python version and environment variables ([da091e1](https://github.com/CtrI-Alt-Del/animus-server/commit/da091e10332184ecdec25c881ec6b4c4a488c087))
+
+
+### Features
+
+* ANI-83 add create-jira-ticket-prompt documentation for generating Jira tickets based on PRD or technical context ([9259ed6](https://github.com/CtrI-Alt-Del/animus-server/commit/9259ed6124d6b356c300818947f3ac5f135a9e67))
+* ANI-83 rename precedent similarity fields and persist scoring metadata ([ab9bbe8](https://github.com/CtrI-Alt-Del/animus-server/commit/ab9bbe89fe0296ef718ccce30c814ce8537ea141))
+
+# [1.18.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.17.0...v1.18.0) (2026-04-17)
+
+
+### Bug Fixes
+
+* ANI-77 manter filtros de precedentes nulos em analises legadas ([ed1b827](https://github.com/CtrI-Alt-Del/animus-server/commit/ed1b8276ac6fffca9461a21d6d39b441199d3e34))
+
+
+### Features
+
+* ANI-77 persist precedent search filters ([f203b17](https://github.com/CtrI-Alt-Del/animus-server/commit/f203b17027fe2fc8d552ccc03d792a3cf61149ea))
+
+# [1.17.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.16.1...v1.17.0) (2026-04-15)
+
+
+### Features
+
+* ANI-84 add push notification provider interface ([c84cea7](https://github.com/CtrI-Alt-Del/animus-server/commit/c84cea76bd1cf3ab94dfe0d42c9eb06e02d38a37))
+
+## [1.16.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.16.0...v1.16.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* ANI-83 update FolderDto to include 'id' attribute initialization ([4d2ce1c](https://github.com/CtrI-Alt-Del/animus-server/commit/4d2ce1c948fc212d1db6b19aa7c7d540f590e400))
+
+# [1.16.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.15.0...v1.16.0) (2026-04-15)
+
+
+### Bug Fixes
+
+* **auth:** ANI-70 format code for better readability ([f612be9](https://github.com/CtrI-Alt-Del/animus-server/commit/f612be9ff708895fe6458dd12049769d7bee7089))
+* **auth:** ANI-70 honor reset password cooldown on forgot ([7e5c9f4](https://github.com/CtrI-Alt-Del/animus-server/commit/7e5c9f4150633b22a17b17befee5724ebe16868d))
+* **migrations:** ANI-70 resolve analysis migration branch conflict ([e5073e1](https://github.com/CtrI-Alt-Del/animus-server/commit/e5073e15d257635703ccad7313e82d6fac14a4bc))
+
+
+### Features
+
+* **auth:** ANI-70 add reset password otp core flow ([1fb5cda](https://github.com/CtrI-Alt-Del/animus-server/commit/1fb5cda90ba13eabf5cd712ae267bab87b72b204))
+* **auth:** ANI-70 expose otp reset password endpoints ([ca2f3f9](https://github.com/CtrI-Alt-Del/animus-server/commit/ca2f3f9ebfb1e4f0e7dd71b8b781f5ce4bf39a39))
+* **notification:** ANI-70 send password reset emails with otp ([ac5ef5d](https://github.com/CtrI-Alt-Del/animus-server/commit/ac5ef5df654cd0bef725b4a37c4a89c0adb6af18))
+
+# [1.15.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.14.0...v1.15.0) (2026-04-15)
+
+
+### Bug Fixes
+
+* ANI-99 format files and correct ruff target version ([5240935](https://github.com/CtrI-Alt-Del/animus-server/commit/524093580b9bf0cef75460fa23a7350a61c5de61))
+* ANI-99 move supabase Mapping import to type checking ([f7be45a](https://github.com/CtrI-Alt-Del/animus-server/commit/f7be45a3906b7b9ec0948b279cdc2bb346f24712))
+
+
+### Features
+
+* ANI-99 migrate file storage provider to supabase ([3137ef5](https://github.com/CtrI-Alt-Del/animus-server/commit/3137ef568d76ec685c26c87f34e11dd5c0031a3c))
+
 # [1.14.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.13.0...v1.14.0) (2026-04-05)
 
 

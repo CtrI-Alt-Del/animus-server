@@ -31,7 +31,7 @@ class PrecedentMapper:
             court=entity.identifier.court.dto,
             kind=entity.identifier.kind.dto,
             number=entity.identifier.number.value,
-            status=entity.status.dto,
+            status=entity.status.value,
             enunciation=entity.enunciation.value,
             thesis=entity.thesis.value,
             last_updated_in_pangea_at=entity.last_updated_in_pangea_at.value,

@@ -154,6 +154,67 @@ docker compose down
 - Em `prod`, nao use `GCS_EMULATOR_HOST`; use bucket real no GCS.
 - Mantenha segredos (`*_KEY`, `*_SECRET`, credenciais e URLs com auth) em gerenciador de segredos.
 
+## 📦 CD de Imagem Docker e Cloud Run
+
+O repositorio possui um workflow de CD dedicado para publicar a imagem Docker no Google Artifact Registry e atualizar o servico no Google Cloud Run.
+
+### Gatilhos
+
+- Push em `main`: publica imagem de `staging` e faz deploy no Cloud Run.
+- Push em `production`: publica imagem de `prod` e faz deploy no Cloud Run.
+- O CD so roda quando o workflow `Continuous Integration` termina com sucesso para o mesmo push.
+
+### Tags publicadas
+
+- `main`:
+  - `staging`
+  - `staging-<sha-curto>`
+- `production`:
+  - `prod`
+  - `prod-<sha-curto>`
+  - `latest`
+
+### Deploy no Cloud Run
+
+- `main`: faz deploy da imagem `staging-<sha-curto>` no servico configurado para `staging`.
+- `production`: faz deploy da imagem `prod-<sha-curto>` no servico configurado para `production`.
+- O deploy usa uma tag imutavel por commit para garantir rastreabilidade da revisao publicada.
+
+### Variaveis do GitHub Actions
+
+Configure estas variaveis em `Settings > Secrets and variables > Actions` ou nos `Environments` correspondentes:
+
+- `GCP_PROJECT_ID`: ID do projeto GCP.
+- `GCP_ARTIFACT_REGISTRY_REGION`: regiao do Artifact Registry, ex. `southamerica-east1`.
+- `GCP_ARTIFACT_REGISTRY_REPOSITORY`: nome do repositorio Docker no Artifact Registry.
+- `GCP_CLOUD_RUN_REGION`: regiao do servico Cloud Run, ex. `southamerica-east1`.
+- `GCP_CLOUD_RUN_SERVICE`: nome do servico Cloud Run que recebera o deploy.
+- `GCP_WORKLOAD_IDENTITY_PROVIDER`: resource name completo do provider, ex. `projects/123456789/locations/global/workloadIdentityPools/github/providers/animus-server`.
+- `GCP_SERVICE_ACCOUNT_EMAIL`: email da service account usada pelo GitHub Actions.
+- `IMAGE_NAME`: opcional; nome da imagem. Padrao: `animus-server`.
+
+### Configuracao recomendada no GCP
+
+Use `Workload Identity Federation` em vez de chave JSON fixa.
+
+1. Habilite as APIs do Artifact Registry e Cloud Run no projeto.
+2. Crie um repositorio Docker no Artifact Registry.
+3. Crie uma service account para o GitHub Actions.
+4. Conceda a essa service account ao menos `roles/artifactregistry.writer`.
+5. Conceda tambem `roles/run.admin` para atualizar o Cloud Run.
+6. Conceda `roles/iam.serviceAccountUser` na service account de runtime usada pelo Cloud Run, quando aplicavel.
+7. Crie um `Workload Identity Pool` para GitHub Actions.
+8. Crie um `OIDC Provider` com issuer `https://token.actions.githubusercontent.com`.
+9. Restrinja o provider ao owner/repositorio corretos.
+10. Permita que o repositorio GitHub impersonifique a service account com `roles/iam.workloadIdentityUser`.
+
+### Exemplo de destino da imagem
+
+```text
+southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:staging
+southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
+```
+
 ### Detalhamento por variavel
 
 - `HOST`

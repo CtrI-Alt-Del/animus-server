@@ -1,13 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from pydantic import BaseModel
 
-from animus.core.auth.interfaces.accounts_repository import AccountsRepository
-from animus.core.auth.use_cases.forgot_password_use_case import ForgotPasswordUseCase
-from animus.core.shared.interfaces.broker import Broker
-from animus.pipes.database_pipe import DatabasePipe
-from animus.pipes.pubsub_pipe import PubSubPipe
+from animus.constants.env import Env
+from animus.core.auth.interfaces import AccountsRepository
+from animus.core.auth.use_cases import ForgotPasswordUseCase
+from animus.core.shared.domain.structures import Ttl
+from animus.core.shared.interfaces import Broker, CacheProvider, OtpProvider
+from animus.pipes import DatabasePipe, ProvidersPipe, PubSubPipe
 
 
 class _Body(BaseModel):
@@ -27,9 +28,24 @@ class ForgotPasswordController:
                 AccountsRepository,
                 Depends(DatabasePipe.get_accounts_repository_from_request),
             ],
+            otp_provider: Annotated[
+                OtpProvider, Depends(ProvidersPipe.get_otp_provider)
+            ],
+            cache_provider: Annotated[
+                CacheProvider,
+                Depends(ProvidersPipe.get_cache_provider),
+            ],
             broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
-        ) -> None:
+        ) -> Response:
             use_case = ForgotPasswordUseCase(
-                accounts_repository=accounts_repository, broker=broker
+                accounts_repository=accounts_repository,
+                otp_provider=otp_provider,
+                cache_provider=cache_provider,
+                broker=broker,
+                reset_password_otp_ttl=Ttl.create(Env.RESET_PASSWORD_OTP_TTL_SECONDS),
+                reset_password_otp_resend_cooldown_ttl=Ttl.create(
+                    Env.RESET_PASSWORD_OTP_RESEND_COOLDOWN_SECONDS
+                ),
             )
-            return use_case.execute(body.email)
+            use_case.execute(email=body.email)
+            return Response(status_code=204)

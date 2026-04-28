@@ -1,4 +1,5 @@
 import time
+from types import SimpleNamespace
 from typing import cast
 from datetime import UTC, datetime
 from typing import Any
@@ -11,16 +12,21 @@ from sqlalchemy.orm import Session, sessionmaker
 from animus.ai.agno.workflows.intake import AgnoSynthesizeAnalysisPrecedentsWorkflow
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
-from animus.core.intake.domain.structures import AnalysisPrecedent
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
 )
 from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
     PrecedentIdentifierDto,
 )
-from animus.core.intake.use_cases import SearchAnalysisPrecedentsUseCase
+from animus.core.intake.use_cases import (
+    CreateAnalysisPrecedentsUseCase,
+    SearchAnalysisPrecedentsUseCase,
+)
 from animus.core.shared.domain.structures import Id
-from animus.core.shared.responses import ListResponse
+from animus.database.sqlalchemy.repositories.intake import (
+    SqlalchemyAnalysisPrecedentsRepository,
+    SqlalchemyAnalisysesRepository,
+)
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.database.sqlalchemy.models.intake.analysis_precedent_model import (
     AnalysisPrecedentModel,
@@ -108,6 +114,19 @@ def _get_analysis_status(
         session.close()
 
 
+def _get_analysis(
+    sqlalchemy_session_factory: sessionmaker[Session],
+    analysis_id: str,
+) -> AnalysisModel:
+    session = sqlalchemy_session_factory()
+    try:
+        model = session.get(AnalysisModel, analysis_id)
+        assert model is not None
+        return model
+    finally:
+        session.close()
+
+
 def _get_analysis_precedents(
     sqlalchemy_session_factory: sessionmaker[Session],
     analysis_id: str,
@@ -177,13 +196,13 @@ class TestSearchAnalysisPrecedentsJob:
                         'thesis': 'Tese do precedente',
                         'last_updated_in_pangea_at': datetime.now(UTC).isoformat(),
                     },
-                    'applicability_percentage': 84.5,
+                    'similarity_percentage': 84.5,
                     'synthesis': None,
                     'is_chosen': False,
                 }
             ]
 
-        async def _generate_syntheses_and_persist(
+        async def _synthesize_analysis_precedents(
             payload: Any,
             analysis_precedents_data: list[dict[str, Any]],
         ) -> None:
@@ -202,8 +221,8 @@ class TestSearchAnalysisPrecedentsJob:
         )
         monkeypatch.setattr(
             SearchAnalysisPrecedentsJob,
-            '_generate_syntheses_and_persist',
-            _generate_syntheses_and_persist,
+            '_synthesize_analysis_precedents',
+            _synthesize_analysis_precedents,
         )
 
         response = inngest_runtime.post_event(
@@ -248,7 +267,7 @@ class TestSearchAnalysisPrecedentsJob:
                                 'analysis_precedents_data'
                             ][0]['precedent']['last_updated_in_pangea_at'],
                         },
-                        'applicability_percentage': 84.5,
+                        'similarity_percentage': 84.5,
                         'synthesis': None,
                         'is_chosen': False,
                     }
@@ -268,12 +287,12 @@ class TestSearchAnalysisPrecedentsJob:
         job_class = cast('Any', SearchAnalysisPrecedentsJob)
         payload_factory = job_module._Payload  # noqa: SLF001
         search_precedents_sync = job_class._search_precedents_sync  # noqa: SLF001
-        generate_syntheses_and_persist_sync_name = (
-            '_generate_syntheses_and_persist_sync'
+        synthesize_analysis_precedents_sync_name = (
+            '_synthesize_analysis_precedents_sync'
         )
-        generate_syntheses_and_persist_sync = getattr(
+        synthesize_analysis_precedents_sync = getattr(
             job_class,
-            generate_syntheses_and_persist_sync_name,
+            synthesize_analysis_precedents_sync_name,
         )
         seeded_data = _seed_analysis_with_petition_summary(sqlalchemy_session_factory)
         payload = payload_factory(
@@ -304,7 +323,7 @@ class TestSearchAnalysisPrecedentsJob:
                         thesis='Tese do precedente',
                         last_updated_in_pangea_at=datetime.now(UTC).isoformat(),
                     ),
-                    applicability_percentage=84.5,
+                    similarity_percentage=84.5,
                     synthesis=None,
                     is_chosen=False,
                 )
@@ -313,25 +332,33 @@ class TestSearchAnalysisPrecedentsJob:
         def _run(
             _self: AgnoSynthesizeAnalysisPrecedentsWorkflow,
             *,
-            petition_summary: Any,
+            analysis_id: str,
+            filters_dto: Any,
             analysis_precedents: list[AnalysisPrecedentDto],
-        ) -> ListResponse[AnalysisPrecedent]:
-            return ListResponse(
-                items=[
-                    AnalysisPrecedent.create(
-                        AnalysisPrecedentDto(
-                            analysis_id=analysis_precedent.analysis_id,
-                            precedent=analysis_precedent.precedent,
-                            applicability_percentage=(
-                                analysis_precedent.applicability_percentage
-                            ),
-                            synthesis='Sintese final do precedente',
-                            is_chosen=analysis_precedent.is_chosen,
-                        )
-                    )
-                    for analysis_precedent in analysis_precedents
-                ]
-            )
+        ) -> None:
+            with Sqlalchemy.session() as session:
+                CreateAnalysisPrecedentsUseCase(
+                    analysis_precedents_repository=SqlalchemyAnalysisPrecedentsRepository(
+                        session
+                    ),
+                    analisyses_repository=SqlalchemyAnalisysesRepository(session),
+                ).execute(
+                    analysis_id=analysis_id,
+                    filters_dto=filters_dto,
+                    analysis_precedents=analysis_precedents,
+                    synthesis_output=SimpleNamespace(
+                        items=[
+                            SimpleNamespace(
+                                court=analysis_precedent.precedent.identifier.court,
+                                kind=analysis_precedent.precedent.identifier.kind,
+                                number=analysis_precedent.precedent.identifier.number,
+                                synthesis='Sintese final do precedente',
+                            )
+                            for analysis_precedent in analysis_precedents
+                        ]
+                    ),
+                )
+                session.commit()
 
         monkeypatch.setattr(SearchAnalysisPrecedentsUseCase, 'execute', _execute)
         monkeypatch.setattr(
@@ -361,7 +388,7 @@ class TestSearchAnalysisPrecedentsJob:
             == AnalysisStatusValue.SEARCHING_PRECEDENTS.value
         )
 
-        generate_syntheses_and_persist_sync(payload, analysis_precedents_data)
+        synthesize_analysis_precedents_sync(payload, analysis_precedents_data)
 
         analysis_precedents = _get_analysis_precedents(
             sqlalchemy_session_factory,
@@ -375,10 +402,17 @@ class TestSearchAnalysisPrecedentsJob:
             )
             == AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value
         )
+        analysis = _get_analysis(
+            sqlalchemy_session_factory,
+            seeded_data['analysis_id'],
+        )
         assert len(analysis_precedents) == 1
         assert analysis_precedents[0].precedent_id == seeded_data['precedent_id']
         assert analysis_precedents[0].synthesis == 'Sintese final do precedente'
         assert analysis_precedents[0].is_chosen is False
+        assert analysis.precedents_search_courts == ['STF']
+        assert analysis.precedents_search_precedent_kinds == ['RG']
+        assert analysis.precedents_search_limit == 5
 
     def test_should_persist_failed_status_when_sync_failure_handler_runs(
         self,

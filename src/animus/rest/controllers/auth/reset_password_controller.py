@@ -3,15 +3,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from animus.core.auth.interfaces.accounts_repository import AccountsRepository
-from animus.core.auth.interfaces.hash_provider import HashProvider
-from animus.core.auth.use_cases.reset_password_use_case import ResetPasswordUseCase
-from animus.pipes.database_pipe import DatabasePipe
-from animus.pipes.providers_pipe import ProvidersPipe
+from animus.core.auth.interfaces import AccountsRepository, HashProvider
+from animus.core.auth.use_cases import ResetPasswordUseCase
+from animus.core.shared.interfaces import CacheProvider
+from animus.pipes import DatabasePipe, ProvidersPipe
 
 
 class _Body(BaseModel):
-    account_id: str
+    reset_context: str
     new_password: str
 
 
@@ -28,13 +27,20 @@ class ResetPasswordController:
                 AccountsRepository,
                 Depends(DatabasePipe.get_accounts_repository_from_request),
             ],
+            cache_provider: Annotated[
+                CacheProvider,
+                Depends(ProvidersPipe.get_cache_provider),
+            ],
             hash_provider: Annotated[
                 HashProvider, Depends(ProvidersPipe.get_hash_provider)
             ],
         ) -> None:
             use_case = ResetPasswordUseCase(
-                accounts_repository=accounts_repository, hash_provider=hash_provider
+                accounts_repository=accounts_repository,
+                cache_provider=cache_provider,
+                hash_provider=hash_provider,
             )
             return use_case.execute(
-                account_id=body.account_id, new_password=body.new_password
+                reset_context=body.reset_context,
+                new_password=body.new_password,
             )

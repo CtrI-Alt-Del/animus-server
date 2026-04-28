@@ -12,7 +12,7 @@ class PrecedentModel(Model):
     kind: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
     number: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
 
-    status: Mapped[str] = mapped_column(String(50), nullable=False)
+    status: Mapped[str] = mapped_column(String(120), nullable=False)
 
     enunciation: Mapped[str] = mapped_column(Text, nullable=False)
     thesis: Mapped[str] = mapped_column(Text, nullable=False)

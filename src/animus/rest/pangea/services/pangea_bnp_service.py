@@ -24,7 +24,6 @@ class PangeaBnpService(PangeaService):
         payload = {
             'filtro': {
                 'buscaGeral': '',
-                'cancelados': False,
                 'ordenacao': 'Text',
                 'pagina': page,
                 'tamanhoPagina': page_size,
