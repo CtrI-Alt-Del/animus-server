@@ -9,6 +9,7 @@ from .list_analyses_controller import ListAnalysesController
 from .get_analysis_petition_controller import GetAnalysisPetitionController
 from .list_analysis_petitions_controller import ListAnalysisPetitionsController
 from .list_analysis_precedents_controller import ListAnalysisPrecedentsController
+from .list_unfoldered_analyses_controller import ListUnfolderedAnalysesController
 from .rename_analysis_controller import RenameAnalysisController
 from .search_analysis_precedents_controller import SearchAnalysisPrecedentsController
 from .summarize_petition_controller import SummarizePetitionController
@@ -25,6 +26,7 @@ __all__ = [
     'GetAnalysisController',
     'GetAnalysisReportController',
     'ListAnalysesController',
+    'ListUnfolderedAnalysesController',
     'ListAnalysisPetitionsController',
     'ListAnalysisPrecedentsController',
     'RenameAnalysisController',

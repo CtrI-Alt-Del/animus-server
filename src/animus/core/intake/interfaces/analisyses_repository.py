@@ -16,8 +16,11 @@ class AnalisysesRepository(Protocol):
         cursor: Id | None,
         limit: Integer,
         is_archived: Logical,
+        only_unfoldered: Logical,
         statuses: tuple[AnalysisStatusValue, ...],
     ) -> CursorPaginationResponse[Analysis]: ...
+
+    def find_many_in_processing(self, account_id: Id) -> list[Analysis]: ...
 
     def find_next_generated_name_number(self, account_id: Id) -> Integer: ...
 

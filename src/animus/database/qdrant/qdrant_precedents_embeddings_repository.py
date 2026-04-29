@@ -1,7 +1,7 @@
 import uuid
+from collections.abc import Iterable
 from typing import Any, Protocol, TypedDict, cast
 
-from fastembed import SparseTextEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Condition,
@@ -53,11 +53,17 @@ class _SparseEmbeddingLike(Protocol):
     values: list[float]
 
 
+class _SparseEmbeddingModel(Protocol):
+    def embed(self, documents: list[str]) -> Iterable[object]: ...
+
+
 class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
     def __init__(self) -> None:
+        from fastembed import SparseTextEmbedding
+
         self._client = QdrantClient(url=Env.QDRANT_URL, api_key=Env.QDRANT_API_KEY)
         self._collection_name = f'{Env.MODE}_precedents'
-        self._sparse_model = SparseTextEmbedding(model_name='Qdrant/bm25')
+        self._sparse_model: object = SparseTextEmbedding(model_name='Qdrant/bm25')
         self._ensure_collection_exists()
 
     def _ensure_collection_exists(self) -> None:
@@ -75,7 +81,8 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
             )
 
     def _encode_sparse(self, text: str) -> SparseVector:
-        sparse_results = list(self._sparse_model.embed([text]))
+        sparse_model = cast('_SparseEmbeddingModel', self._sparse_model)
+        sparse_results = list(sparse_model.embed([text]))
         if not sparse_results:
             return SparseVector(indices=[], values=[])
 

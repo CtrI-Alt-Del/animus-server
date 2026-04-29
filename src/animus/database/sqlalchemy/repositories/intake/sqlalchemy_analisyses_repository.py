@@ -29,6 +29,7 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         cursor: Id | None,
         limit: Integer,
         is_archived: Logical,
+        only_unfoldered: Logical,
         statuses: tuple[AnalysisStatusValue, ...],
     ) -> CursorPaginationResponse[Analysis]:
         status_values = [status.value for status in statuses]
@@ -39,6 +40,9 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
             AnalysisModel.name.ilike(f'%{search.value}%'),
             AnalysisModel.status.in_(status_values),
         )
+
+        if only_unfoldered.value:
+            statement = statement.where(AnalysisModel.folder_id.is_(None))
 
         if cursor is not None:
             statement = statement.where(AnalysisModel.id < cursor.value)
@@ -56,6 +60,25 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
 
         next_cursor = Id.create(slice_models[-1].id)
         return CursorPaginationResponse(items=items, next_cursor=next_cursor)
+
+    def find_many_in_processing(self, account_id: Id) -> list[Analysis]:
+        processing_statuses = [
+            status.value for status in AnalysisStatusValue.get_processing_statuses()
+        ]
+
+        statement = (
+            select(AnalysisModel)
+            .where(
+                AnalysisModel.account_id == account_id.value,
+                AnalysisModel.is_archived.is_(False),
+                AnalysisModel.status.in_(processing_statuses),
+            )
+            .order_by(AnalysisModel.id.desc())
+        )
+
+        models = self._sqlalchemy.scalars(statement).all()
+
+        return [AnalysisMapper.to_entity(model) for model in models]
 
     def find_next_generated_name_number(self, account_id: Id) -> Integer:
         generated_name_prefix = 'Nova analise #'

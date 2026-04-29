@@ -1,4 +1,4 @@
-name: Docker CD
+name: Continuous Deployment
 
 on:
   workflow_run:
@@ -30,6 +30,7 @@ jobs:
       GAR_REPOSITORY: ${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}
       CLOUD_RUN_REGION: ${{ vars.GCP_CLOUD_RUN_REGION }}
       CLOUD_RUN_SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+      CLOUD_RUN_MEMORY: ${{ vars.GCP_CLOUD_RUN_MEMORY != '' && vars.GCP_CLOUD_RUN_MEMORY || '1Gi' }}
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
 
     steps:
@@ -105,6 +106,119 @@ jobs:
           token_format: access_token
           create_credentials_file: true
 
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Validate Cloud Run runtime environment
+        id: runtime
+        shell: bash
+        run: |
+          if ! service_json="$(gcloud run services describe "$CLOUD_RUN_SERVICE" --project "$GCP_PROJECT_ID" --region "$CLOUD_RUN_REGION" --format=json)"; then
+            echo "Could not describe Cloud Run service '$CLOUD_RUN_SERVICE' in region '$CLOUD_RUN_REGION'."
+            echo "Create/configure the service with the required runtime environment before deploying a new revision."
+            exit 1
+          fi
+
+          env_names="$(jq -r '.spec.template.spec.containers[0].env[]?.name' <<< "$service_json")"
+
+          has_env() {
+            grep -qx "$1" <<< "$env_names"
+          }
+
+          env_value() {
+            jq -r --arg name "$1" '.spec.template.spec.containers[0].env[]? | select(.name == $name) | .value // empty' <<< "$service_json"
+          }
+
+          required_env_vars=(
+            MODE
+            GCS_BUCKET_NAME
+            SUPABASE_URL
+            SUPABASE_KEY
+            SUPABASE_STORAGE_BUCKET
+            JWT_SECRET_KEY
+            JWT_ALGORITHM
+            JWT_ACCESS_TOKEN_EXPIRATION_SECONDS
+            JWT_REFRESH_TOKEN_EXPIRATION_SECONDS
+            REDIS_URL
+            INNGEST_SIGNING_KEY
+            INNGEST_EVENT_KEY
+            RESEND_API_KEY
+            RESEND_SENDER_EMAIL
+            GOOGLE_CLIENT_ID
+            PANGEA_SERVICE_URL
+            QDRANT_URL
+            QDRANT_API_KEY
+            GEMINI_API_KEY
+            OPENAI_API_KEY
+            EMAIL_VERIFICATION_OTP_TTL_SECONDS
+            RESET_PASSWORD_OTP_TTL_SECONDS
+            RESET_PASSWORD_OTP_RESEND_COOLDOWN_SECONDS
+            RESET_PASSWORD_CONTEXT_TTL_SECONDS
+          )
+
+          missing=0
+          for variable in "${required_env_vars[@]}"; do
+            if ! has_env "$variable"; then
+              echo "Missing required Cloud Run runtime environment variable: $variable"
+              missing=1
+            fi
+          done
+
+          database_url="$(env_value DATABASE_URL)"
+          if [ -z "$database_url" ]; then
+            postgres_user="$(env_value POSTGRES_USER)"
+            postgres_password="$(env_value POSTGRES_PASSWORD)"
+            postgres_db="$(env_value POSTGRES_DB)"
+            cloud_sql_instances="$(jq -r '.spec.template.metadata.annotations["run.googleapis.com/cloudsql-instances"] // .metadata.annotations["run.googleapis.com/cloudsql-instances"] // empty' <<< "$service_json")"
+            cloud_sql_instance="${cloud_sql_instances%%,*}"
+
+            for variable in POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB; do
+              if [ -z "$(env_value "$variable")" ]; then
+                echo "Missing required Cloud Run runtime environment variable: $variable"
+                missing=1
+              fi
+            done
+
+            if [ -z "$cloud_sql_instance" ]; then
+              echo "Missing required Cloud Run Cloud SQL instance annotation."
+              missing=1
+            fi
+
+            if [ "$missing" -eq 0 ]; then
+              export POSTGRES_USER="$postgres_user"
+              export POSTGRES_PASSWORD="$postgres_password"
+              export POSTGRES_DB="$postgres_db"
+              export CLOUD_SQL_INSTANCE="$cloud_sql_instance"
+              database_url="$(python3 - <<'PY'
+          import os
+          from urllib.parse import quote
+
+          user = quote(os.environ['POSTGRES_USER'], safe='')
+          password = quote(os.environ['POSTGRES_PASSWORD'], safe='')
+          database = quote(os.environ['POSTGRES_DB'], safe='')
+          instance = os.environ['CLOUD_SQL_INSTANCE']
+
+          print(f'postgresql://{user}:{password}@/{database}?host=/cloudsql/{instance}')
+          PY
+          )"
+            fi
+          fi
+
+          mode="$(jq -r '.spec.template.spec.containers[0].env[]? | select(.name == "MODE") | .value // empty' <<< "$service_json")"
+          if has_env GCS_EMULATOR_HOST && [ "$mode" != "dev" ]; then
+            echo "GCS_EMULATOR_HOST is configured, but it can only be used with MODE=dev."
+            missing=1
+          fi
+
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+          echo "::add-mask::$database_url"
+          echo "database_url=$database_url" >> "$GITHUB_OUTPUT"
+
       - name: Log in to Artifact Registry
         uses: docker/login-action@v3
         with:
@@ -134,6 +248,10 @@ jobs:
           service: ${{ env.CLOUD_RUN_SERVICE }}
           region: ${{ env.CLOUD_RUN_REGION }}
           image: ${{ steps.context.outputs.deploy_image }}
+          flags: --memory=${{ env.CLOUD_RUN_MEMORY }}
+          env_vars: |
+            DATABASE_URL=${{ steps.runtime.outputs.database_url }}
+          env_vars_update_strategy: merge
 
       - name: Output deployed service URL
         shell: bash

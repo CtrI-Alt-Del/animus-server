@@ -12,16 +12,14 @@ from animus.core.intake.domain.structures.dtos import AnalysisPrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
     AnalysisPrecedentsSearchFiltersDto,
 )
+from animus.core.intake.interfaces import PrecedentsEmbeddingsRepository
 from animus.core.intake.use_cases import (
     SearchAnalysisPrecedentsUseCase,
     UpdateAnalysisStatusUseCase,
 )
-from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
-    QdrantPrecedentsEmbeddingsRepository,
-)
 from animus.database.sqlalchemy.repositories.intake import (
-    SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyPetitionSummariesRepository,
     SqlalchemyPrecedentsRepository,
 )
@@ -29,6 +27,14 @@ from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_summary_embeddings_provider import (
     OpenAIPetitionSummaryEmbeddingsProvider,
 )
+
+
+def _build_precedents_embeddings_repository() -> PrecedentsEmbeddingsRepository:
+    from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
+        QdrantPrecedentsEmbeddingsRepository,
+    )
+
+    return QdrantPrecedentsEmbeddingsRepository()
 
 
 @dataclass(frozen=True)
@@ -76,6 +82,15 @@ class SearchAnalysisPrecedentsJob:
                     'search_precedents',
                     lambda payload=payload: (
                         SearchAnalysisPrecedentsJob._search_precedents(
+                            payload,
+                        )
+                    ),
+                )
+
+                await context.step.run(
+                    'mark_analysis_as_analyzing_similarity',
+                    lambda payload=payload: (
+                        SearchAnalysisPrecedentsJob._mark_analysis_as_analyzing_similarity(
                             payload,
                         )
                     ),
@@ -146,7 +161,9 @@ class SearchAnalysisPrecedentsJob:
                 petition_summary_embeddings_provider=(
                     OpenAIPetitionSummaryEmbeddingsProvider()
                 ),
-                precedents_embeddings_repository=QdrantPrecedentsEmbeddingsRepository(),
+                precedents_embeddings_repository=(
+                    _build_precedents_embeddings_repository()
+                ),
                 precedents_repository=precedents_repository,
             ).execute(
                 analysis_id=payload.analysis_id,
@@ -156,6 +173,29 @@ class SearchAnalysisPrecedentsJob:
         return [
             asdict(analysis_precedent) for analysis_precedent in analysis_precedents
         ]
+
+    @staticmethod
+    async def _mark_analysis_as_analyzing_similarity(payload: _Payload) -> None:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: (
+                SearchAnalysisPrecedentsJob._mark_analysis_as_analyzing_similarity_sync(
+                    payload
+                )
+            ),
+        )
+
+    @staticmethod
+    def _mark_analysis_as_analyzing_similarity_sync(payload: _Payload) -> None:
+        with Sqlalchemy.session() as session:
+            UpdateAnalysisStatusUseCase(
+                SqlalchemyAnalisysesRepository(session)
+            ).execute(
+                analysis_id=payload.analysis_id,
+                status=AnalysisStatusValue.ANALYZING_PRECEDENTS_SIMILARITY.value,
+            )
+            session.commit()
 
     @staticmethod
     async def _synthesize_analysis_precedents(
@@ -226,3 +266,4 @@ class SearchAnalysisPrecedentsJob:
                 analysis_id=payload.analysis_id,
                 status=AnalysisStatusValue.FAILED.value,
             )
+            session.commit()

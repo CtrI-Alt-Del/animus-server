@@ -44,6 +44,7 @@ class ListAnalysesUseCase:
             cursor=normalized_cursor,
             limit=normalized_limit,
             is_archived=normalized_is_archived,
+            only_unfoldered=Logical.create_false(),
             statuses=_ALLOWED_ANALYSIS_STATUSES,
         )
 
