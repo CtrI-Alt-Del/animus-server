@@ -1,4 +1,4 @@
-from .archive_analysis_use_case import ArchiveAnalysisUseCase
+from .archive_analyses_use_case import ArchiveAnalysesUseCase
 from .choose_analysis_precedent_use_case import ChooseAnalysisPrecedentUseCase
 from .create_analysis_use_case import CreateAnalysisUseCase
 from .create_analysis_precedents_use_case import CreateAnalysisPrecedentsUseCase
@@ -12,6 +12,7 @@ from .list_analyses_use_case import ListAnalysesUseCase
 from .list_unfoldered_analyses_use_case import ListUnfolderedAnalysesUseCase
 from .list_analysis_petitions_use_case import ListAnalysisPetitionsUseCase
 from .list_analysis_precedents_use_case import ListAnalysisPrecedentsUseCase
+from .move_analyses_to_folder_use_case import MoveAnalysesToFolderUseCase
 from .rename_analysis_use_case import RenameAnalysisUseCase
 from .request_analysis_precedents_search_use_case import (
     RequestAnalysisPrecedentsSearchUseCase,
@@ -22,7 +23,7 @@ from .update_analysis_status_use_case import UpdateAnalysisStatusUseCase
 from .vectorize_all_precedents_use_case import VectorizeAllPrecedentsUseCase
 
 __all__ = [
-    'ArchiveAnalysisUseCase',
+    'ArchiveAnalysesUseCase',
     'ChooseAnalysisPrecedentUseCase',
     'CreateAnalysisUseCase',
     'CreateAnalysisPrecedentsUseCase',
@@ -36,6 +37,7 @@ __all__ = [
     'ListUnfolderedAnalysesUseCase',
     'ListAnalysisPetitionsUseCase',
     'ListAnalysisPrecedentsUseCase',
+    'MoveAnalysesToFolderUseCase',
     'RenameAnalysisUseCase',
     'RequestAnalysisPrecedentsSearchUseCase',
     'RequestPetitionSummaryUseCase',

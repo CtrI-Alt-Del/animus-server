@@ -75,3 +75,6 @@ class Analysis(Entity):
         dto: AnalysisPrecedentsSearchFiltersDto,
     ) -> None:
         self.precedents_search_filters = AnalysisPrecedentsSearchFilters.create(dto)
+
+    def move_to_folder(self, folder_id: Id | None) -> None:
+        self.folder_id = folder_id
