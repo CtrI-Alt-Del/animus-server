@@ -1,3 +1,39 @@
+## [1.22.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.22.0...v1.22.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* ANI-86 preserve qdrant job monkeypatch ([2aa311f](https://github.com/CtrI-Alt-Del/animus-server/commit/2aa311f623b952a507a715d4301afe5cac36205f))
+
+
+### Performance Improvements
+
+* ANI-86 defer heavy job imports ([cfa0632](https://github.com/CtrI-Alt-Del/animus-server/commit/cfa0632a6017dbc2d76ebfc9e33c1c05ed15ccb4))
+
+# [1.22.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.3...v1.22.0) (2026-04-29)
+
+
+### Features
+
+* ANI-72 add ListUnfolderedAnalyses functionality with controller and use case ([f279408](https://github.com/CtrI-Alt-Del/animus-server/commit/f279408049928136500b241480cf8da9ea56f17a))
+
+## [1.21.3](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.2...v1.21.3) (2026-04-28)
+
+
+### Bug Fixes
+
+* ANI-86 derive cloud run database url ([7929475](https://github.com/CtrI-Alt-Del/animus-server/commit/7929475c0cb21c012993ddc9d0adb8b586be77d4))
+
+## [1.21.2](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.1...v1.21.2) (2026-04-28)
+
+
+### Bug Fixes
+
+* ANI-86 align server runtime configuration ([f4237d4](https://github.com/CtrI-Alt-Del/animus-server/commit/f4237d48d29f458efbaf006f8235517b2d8f2f39))
+* ANI-86 allow container host binding ([2ee6957](https://github.com/CtrI-Alt-Del/animus-server/commit/2ee69575b5409c9db30ef9907363dcc2752602a0))
+* ANI-86 satisfy env port typecheck ([00a8ba2](https://github.com/CtrI-Alt-Del/animus-server/commit/00a8ba2f16ba5f578e89e315c5617de4b12f7d7f))
+* ANI-86 validate cloud run runtime before deploy ([aee2614](https://github.com/CtrI-Alt-Del/animus-server/commit/aee26140206cc4ca9e577ff7a60ff3b61fa22ff9))
+
 ## [1.21.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.0...v1.21.1) (2026-04-26)
 
 

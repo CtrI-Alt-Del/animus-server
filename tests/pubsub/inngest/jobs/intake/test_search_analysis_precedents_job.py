@@ -368,7 +368,7 @@ class TestSearchAnalysisPrecedentsJob:
         )
         monkeypatch.setattr(
             job_module,
-            'QdrantPrecedentsEmbeddingsRepository',
+            '_build_precedents_embeddings_repository',
             lambda: object(),
         )
         monkeypatch.setattr(

@@ -15,6 +15,7 @@ class AnalisysesRepository(Protocol):
         cursor: Id | None,
         limit: Integer,
         is_archived: Logical,
+        only_unfoldered: Logical,
     ) -> CursorPaginationResponse[Analysis]: ...
 
     def find_many_in_processing(self, account_id: Id) -> list[Analysis]: ...
