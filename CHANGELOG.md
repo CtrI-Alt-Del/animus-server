@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.3...v1.22.0) (2026-04-29)
+
+
+### Features
+
+* ANI-72 add ListUnfolderedAnalyses functionality with controller and use case ([f279408](https://github.com/CtrI-Alt-Del/animus-server/commit/f279408049928136500b241480cf8da9ea56f17a))
+
 ## [1.21.3](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.2...v1.21.3) (2026-04-28)
 
 
