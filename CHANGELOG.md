@@ -1,3 +1,16 @@
+# [1.23.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.22.1...v1.23.0) (2026-04-29)
+
+
+### Bug Fixes
+
+* ANI-64 fixed linter problems ([fe73fbe](https://github.com/CtrI-Alt-Del/animus-server/commit/fe73fbe9408bf6809ef3ae45e342ab94855e3814))
+
+
+### Features
+
+* ANI-64 add base for job to send notification ([ef09e10](https://github.com/CtrI-Alt-Del/animus-server/commit/ef09e10a4f267e77425822fa3892e557719af070))
+* ANI-79 Add onesignal implementation ([8d40584](https://github.com/CtrI-Alt-Del/animus-server/commit/8d40584a51e4b30224759685684201578b9cdab1))
+
 ## [1.22.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.22.0...v1.22.1) (2026-04-29)
 
 
