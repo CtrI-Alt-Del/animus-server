@@ -29,12 +29,16 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         cursor: Id | None,
         limit: Integer,
         is_archived: Logical,
+        only_unfoldered: Logical,
     ) -> CursorPaginationResponse[Analysis]:
         statement = select(AnalysisModel).where(
             AnalysisModel.account_id == account_id.value,
             AnalysisModel.is_archived == is_archived.value,
             AnalysisModel.name.ilike(f'%{search.value}%'),
         )
+
+        if only_unfoldered.value:
+            statement = statement.where(AnalysisModel.folder_id.is_(None))
 
         if cursor is not None:
             statement = statement.where(AnalysisModel.id > cursor.value)

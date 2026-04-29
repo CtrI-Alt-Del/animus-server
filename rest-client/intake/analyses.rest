@@ -20,6 +20,10 @@ Content-Type: application/json
 GET {{url}}/analyses/{{analysis_id}}/status
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Listar analises sem pasta (ListUnfolderedAnalysesController)
+GET {{url}}/analyses/unfoldered?limit=10&search=&is_archived=false
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Obter peticao atual da analise (GetAnalysisPetitionController)
 GET {{url}}/analyses/{{analysis_id}}/petition
 Authorization: Bearer {{ACCESS_TOKEN}}
