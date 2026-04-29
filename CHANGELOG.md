@@ -1,3 +1,15 @@
+## [1.22.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.22.0...v1.22.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* ANI-86 preserve qdrant job monkeypatch ([2aa311f](https://github.com/CtrI-Alt-Del/animus-server/commit/2aa311f623b952a507a715d4301afe5cac36205f))
+
+
+### Performance Improvements
+
+* ANI-86 defer heavy job imports ([cfa0632](https://github.com/CtrI-Alt-Del/animus-server/commit/cfa0632a6017dbc2d76ebfc9e33c1c05ed15ccb4))
+
 # [1.22.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.21.3...v1.22.0) (2026-04-29)
 
 
