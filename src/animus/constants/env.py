@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,8 +12,8 @@ class _Env(BaseSettings):
     )
 
     MODE: Literal['dev', 'stg', 'prod']
-    HOST: str = '127.0.0.1'
-    PORT: int = 8080
+    HOST: str = '0.0.0.0'  # noqa: S104
+    PORT: int = cast('int', 8080)
 
     DATABASE_URL: str
 
