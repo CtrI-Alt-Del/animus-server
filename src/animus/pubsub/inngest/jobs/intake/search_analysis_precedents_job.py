@@ -29,14 +29,6 @@ from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_
 )
 
 
-def _build_precedents_embeddings_repository() -> PrecedentsEmbeddingsRepository:
-    from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
-        QdrantPrecedentsEmbeddingsRepository,
-    )
-
-    return QdrantPrecedentsEmbeddingsRepository()
-
-
 @dataclass(frozen=True)
 class _Payload:
     analysis_id: str
@@ -162,7 +154,7 @@ class SearchAnalysisPrecedentsJob:
                     OpenAIPetitionSummaryEmbeddingsProvider()
                 ),
                 precedents_embeddings_repository=(
-                    _build_precedents_embeddings_repository()
+                    SearchAnalysisPrecedentsJob._build_precedents_embeddings_repository()
                 ),
                 precedents_repository=precedents_repository,
             ).execute(
@@ -267,3 +259,11 @@ class SearchAnalysisPrecedentsJob:
                 status=AnalysisStatusValue.FAILED.value,
             )
             session.commit()
+
+    @staticmethod
+    def _build_precedents_embeddings_repository() -> PrecedentsEmbeddingsRepository:
+        from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
+            QdrantPrecedentsEmbeddingsRepository,
+        )
+
+        return QdrantPrecedentsEmbeddingsRepository()

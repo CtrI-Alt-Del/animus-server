@@ -41,7 +41,6 @@ class GetDocumentContentUseCase:
             else:
                 content = self._docx_provider.extract_content(file)
         except Exception as error:
-            print('JOB -> ERROR', error)
             if self._is_not_found_error(error):
                 raise PetitionDocumentNotFoundError from error
 

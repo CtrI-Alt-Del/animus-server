@@ -2,7 +2,7 @@
   "rest-client.environmentVariables": {
     "DEV": {
       "BASE_URL": "http://localhost:8080",
-      "ACCESS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUtNWDNTQlowRjU1UlE3WDY5V1lFRlo3SyIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3NzcyNDI3NDcsImV4cCI6MTc3NzI0NjM0N30.TO-kVf_HtgFwRZWsRscEuxOaZgyop_fDFGoDyKX7dt0"
+      "ACCESS_TOKEN": "change-this-access-token"
     }
   }
 }

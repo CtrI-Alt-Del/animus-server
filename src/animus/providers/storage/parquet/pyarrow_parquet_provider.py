@@ -3,7 +3,7 @@ import dataclasses
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from animus.ai.agno.workflows.intake.agno_classify_analysis_precedents_applicability_workflow import (
+from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_row_dto import (
     AnalysisPrecedentDatasetRowDto,
 )
 from animus.core.shared.domain.structures import FilePath
