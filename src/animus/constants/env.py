@@ -37,6 +37,9 @@ class _Env(BaseSettings):
     RESEND_API_KEY: str
     RESEND_SENDER_EMAIL: str
 
+    ONESIGNAL_APP_ID: str
+    ONESIGNAL_REST_API_KEY: str
+
     GOOGLE_CLIENT_ID: str
     PANGEA_SERVICE_URL: str
 

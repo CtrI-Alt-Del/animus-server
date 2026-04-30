@@ -17,6 +17,10 @@ from animus.pubsub.inngest.jobs.intake import (
     VectorizeAllPrecedentsJob,
     VectorizePrecedentsJob,
 )
+from animus.pubsub.inngest.jobs.notification import (
+    SendPetitionSummaryFinishedNotificationJob,
+    SendPrecedentsSearchFinishedNotificationJob,
+)
 
 
 class InngestPubSub:
@@ -47,6 +51,8 @@ class InngestPubSub:
         return [
             SendAccountVerificationEmailJob.handle(inngest),
             SendPasswordResetEmailJob.handle(inngest),
+            SendPetitionSummaryFinishedNotificationJob.handle(inngest),
+            SendPrecedentsSearchFinishedNotificationJob.handle(inngest),
         ]
 
     @staticmethod

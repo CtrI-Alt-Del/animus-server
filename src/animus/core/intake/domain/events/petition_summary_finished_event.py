@@ -9,9 +9,9 @@ class _Payload:
     analysis_id: Id
 
 
-class SynthesisGenerationEndedEvent(Event[_Payload]):
-    name = 'intake/synthesis.generation.ended'
+class PetitionSummaryFinishedEvent(Event[_Payload]):
+    name = 'intake/petition_summary.finished'
 
     def __init__(self, analysis_id: Id) -> None:
         payload = _Payload(analysis_id=analysis_id)
-        super().__init__(SynthesisGenerationEndedEvent.name, payload)
+        super().__init__(PetitionSummaryFinishedEvent.name, payload)
