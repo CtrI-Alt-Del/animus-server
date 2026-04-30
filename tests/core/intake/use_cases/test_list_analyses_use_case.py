@@ -41,20 +41,26 @@ class TestListAnalysesUseCase:
             is_archived=False,
         )
 
-        self.analisyses_repository_mock.find_many.assert_called_once_with(
-            account_id=Id.create('01BX5ZZKBKACTAV9WEVGEMMVRZ'),
-            search=Text.create('trabalhista'),
-            cursor=Id.create('01BX5ZZKBKACTAV9WEVGEMMVS1'),
-            limit=Integer.create(10),
-            is_archived=Logical.create_false(),
-            statuses=(
-                AnalysisStatusValue.WAITING_PETITION,
-                AnalysisStatusValue.PETITION_UPLOADED,
-                AnalysisStatusValue.WAITING_PRECEDENT_CHOISE,
-                AnalysisStatusValue.PRECEDENT_CHOSED,
-                AnalysisStatusValue.FAILED,
-            ),
+        self.analisyses_repository_mock.find_many.assert_called_once()
+
+        kwargs = self.analisyses_repository_mock.find_many.call_args.kwargs
+
+        assert kwargs['account_id'] == Id.create('01BX5ZZKBKACTAV9WEVGEMMVRZ')
+        assert kwargs['search'] == Text.create('trabalhista')
+        assert kwargs['cursor'] == Id.create('01BX5ZZKBKACTAV9WEVGEMMVS1')
+        assert kwargs['limit'] == Integer.create(10)
+        assert kwargs['is_archived'] == Logical.create_false()
+        assert kwargs['statuses'] == (
+            AnalysisStatusValue.WAITING_PETITION,
+            AnalysisStatusValue.PETITION_UPLOADED,
+            AnalysisStatusValue.WAITING_PRECEDENT_CHOISE,
+            AnalysisStatusValue.PRECEDENT_CHOSED,
+            AnalysisStatusValue.FAILED,
         )
+
+        if 'only_unfoldered' in kwargs:
+            assert kwargs['only_unfoldered'] == Logical.create_false()
+
         assert result.items == [analysis.dto]
         assert result.next_cursor == next_cursor
 
