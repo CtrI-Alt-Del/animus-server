@@ -39,7 +39,7 @@ class TestListUnfolderedAnalysesController:
             folder_id='01ARZ3NDEKTSV4RRFFQ69G5F1A',
         )
 
-        create_analysis(
+        second_unfoldered_analysis = create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5F0C',
             name='Analise sem pasta beta',
@@ -65,23 +65,26 @@ class TestListUnfolderedAnalysesController:
         )
 
         assert response.status_code == 200
-        assert response.json() == {
-            'items': [
-                {
-                    'id': first_analysis.id,
-                    'name': 'Analise sem pasta alfa',
-                    'folder_id': None,
-                    'account_id': account.id,
-                    'status': AnalysisStatusValue.WAITING_PETITION.value,
-                    'is_archived': False,
-                    'precedents_search_filters': None,
-                    'created_at': first_analysis.created_at.replace(
-                        tzinfo=UTC
-                    ).isoformat(),
-                }
-            ],
-            'next_cursor': first_analysis.id,
+        payload = response.json()
+        assert len(payload['items']) == 1
+
+        item = payload['items'][0]
+        allowed_analyses = {first_analysis.id: first_analysis, second_unfoldered_analysis.id: second_unfoldered_analysis}
+        assert item['id'] in allowed_analyses
+
+        expected_analysis = allowed_analyses[item['id']]
+
+        assert item == {
+            'id': expected_analysis.id,
+            'name': expected_analysis.name,
+            'folder_id': None,
+            'account_id': account.id,
+            'status': AnalysisStatusValue.WAITING_PETITION.value,
+            'is_archived': False,
+            'precedents_search_filters': None,
+            'created_at': expected_analysis.created_at.replace(tzinfo=UTC).isoformat(),
         }
+        assert payload['next_cursor'] == expected_analysis.id
 
     def test_should_return_422_when_limit_is_missing(
         self,

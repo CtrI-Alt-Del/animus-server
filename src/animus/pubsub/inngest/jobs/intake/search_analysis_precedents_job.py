@@ -34,6 +34,10 @@ from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
 )
 
 
+def _build_precedents_embeddings_repository() -> QdrantPrecedentsEmbeddingsRepository:
+    return QdrantPrecedentsEmbeddingsRepository()
+
+
 @dataclass(frozen=True)
 class _Payload:
     analysis_id: str
@@ -167,9 +171,7 @@ class SearchAnalysisPrecedentsJob:
                 petition_summary_embeddings_provider=(
                     OpenAIPetitionSummaryEmbeddingsProvider()
                 ),
-                precedents_embeddings_repository=(
-                    QdrantPrecedentsEmbeddingsRepository()
-                ),
+                precedents_embeddings_repository=(_build_precedents_embeddings_repository()),
                 precedents_repository=precedents_repository,
             ).execute(
                 analysis_id=payload.analysis_id,
