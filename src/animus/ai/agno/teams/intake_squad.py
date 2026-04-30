@@ -160,6 +160,7 @@ class IntakeSquad:
                 api_key=Env.OPENAI_API_KEY,
                 temperature=0,
                 timeout=60,
+                seed=42,
             ),
             output_schema=AnalysisPrecedentsSynthesisOutput,
         )
