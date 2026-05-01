@@ -9,9 +9,6 @@ on:
     branches:
       - main
       - production
-  pull_request:
-    branches:
-      - main
 
 permissions:
   contents: read
@@ -20,10 +17,10 @@ permissions:
 jobs:
   publish:
     name: Publish Docker Image
-    # if: ${{ github.event.workflow_run.conclusion == 'success' &&
-    #   github.event.workflow_run.event == 'push' &&
-    #   (github.event.workflow_run.head_branch == 'main' ||
-    #   github.event.workflow_run.head_branch == 'production') }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      (github.event.workflow_run.head_branch == 'main' ||
+      github.event.workflow_run.head_branch == 'production') }}
     concurrency:
       group: docker-cd-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: true
@@ -77,8 +74,8 @@ jobs:
         id: context
         shell: bash
         run: |
-          branch="main"
-          head_sha="a1b2c3d4e5f67890123456789abcdef012345678"
+          branch="${{ github.event.workflow_run.head_branch }}"
+          head_sha="${{ github.event.workflow_run.head_sha }}"
           short_sha="${head_sha::7}"
           registry="${GAR_REGION}-docker.pkg.dev"
           image="${registry}/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/${IMAGE_NAME}"
