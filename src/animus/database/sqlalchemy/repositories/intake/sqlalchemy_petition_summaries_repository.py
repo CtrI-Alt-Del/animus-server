@@ -57,3 +57,33 @@ class SqlalchemyPetitionSummariesRepository(PetitionSummariesRepository):
         model.relevant_laws = [item.value for item in petition_summary.relevant_laws]
         model.key_facts = [item.value for item in petition_summary.key_facts]
         model.search_terms = [item.value for item in petition_summary.search_terms]
+        model.type_of_action = (
+            petition_summary.type_of_action.value
+            if petition_summary.type_of_action is not None
+            else None
+        )
+        model.secondary_legal_issues = [
+            item.value for item in petition_summary.secondary_legal_issues
+        ]
+        model.alternative_questions = [
+            item.value for item in petition_summary.alternative_questions
+        ]
+        model.jurisdiction_issue = (
+            petition_summary.jurisdiction_issue.value
+            if petition_summary.jurisdiction_issue is not None
+            else None
+        )
+        model.standing_issue = (
+            petition_summary.standing_issue.value
+            if petition_summary.standing_issue is not None
+            else None
+        )
+        model.requested_relief = [
+            item.value for item in petition_summary.requested_relief
+        ]
+        model.procedural_issues = [
+            item.value for item in petition_summary.procedural_issues
+        ]
+        model.excluded_or_accessory_topics = [
+            item.value for item in petition_summary.excluded_or_accessory_topics
+        ]

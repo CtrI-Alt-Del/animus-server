@@ -49,12 +49,12 @@ class AnalysisPrecedentApplicabilityLevel(Structure):
                     f'Nivel de aplicabilidade invalido: {value}'
                 ) from error
 
-        similarity_percentage = value
+        similarity_score = value
 
-        if similarity_percentage >= 85.0:
+        if similarity_score >= 85.0:
             return cls(value=AnalysisPrecedentApplicabilityLevelValue.APPLICABLE)
 
-        if similarity_percentage >= 70.0:
+        if similarity_score >= 70.0:
             return cls(
                 value=AnalysisPrecedentApplicabilityLevelValue.POSSIBLY_APPLICABLE
             )

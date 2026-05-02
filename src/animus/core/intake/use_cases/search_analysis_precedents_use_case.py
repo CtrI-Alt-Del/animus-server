@@ -1,5 +1,6 @@
+import math
 from collections.abc import Iterable
-from typing import ClassVar, TypedDict
+from typing import TypedDict
 
 from animus.core.intake.domain.errors import PetitionSummaryUnavailableError
 from animus.core.intake.domain.structures import AnalysisPrecedent
@@ -27,6 +28,21 @@ from animus.core.intake.interfaces import (
 )
 from animus.core.shared.domain.structures import Id, Integer
 
+# Pesos da fórmula de scoring.
+# thesis recebe maior peso por ser a declaração normativa definitiva do precedente.
+# Para precedentes sem thesis (SVs, súmulas), o peso é redistribuído —
+# ver _calculate_similarity_score.
+_THESIS_WEIGHT: float = 0.50
+_ENUNCIATION_WEIGHT: float = 0.50
+
+# Bônus de cobertura: recompensa precedentes que aparecem em muitos chunks da petição.
+# Escala logarítmica para discriminar alta cobertura (50 hits) de cobertura básica
+# (4 hits) sem inflar o score de precedentes com poucos hits.
+# Fórmula: min(log(1 + total_hits) * factor, cap).
+# Exemplos: hits=4 → ~2.8%, hits=10 → ~4.8%, hits=20 → ~6.2%, hits=50 → ~8.0%
+_COVERAGE_LOG_FACTOR: float = 0.02
+_MAX_COVERAGE_BONUS: float = 0.08
+
 
 class _IdentifierScore(TypedDict):
     thesis_max: float
@@ -37,57 +53,6 @@ class _IdentifierScore(TypedDict):
 
 
 class SearchAnalysisPrecedentsUseCase:
-    _GENERIC_NEGATIVE_TERMS: ClassVar[set[str]] = {
-        'fgts',
-        'urv',
-        'imposto de renda',
-        'contribuicao previdenciaria',
-        'prestacao previdenciaria',
-        'insalubridade',
-        'periculosidade',
-        'ajuda de custo',
-        'rescisao indireta',
-    }
-
-    _ACCESSORY_MARKERS: ClassVar[set[str]] = {
-        'juros',
-        'correcao monetaria',
-        'correção monetária',
-        'honorarios',
-        'honorários',
-        'custas',
-        'prescricao',
-        'prescrição',
-        'ipca-e',
-        'parcelas vencidas',
-        'parcelas vincendas',
-        'quinquenio',
-        'quinquênio',
-        'sumula 85',
-        'súmula 85',
-        '11.960/09',
-    }
-
-    _SPECIALIZATION_TERMS: ClassVar[set[str]] = {
-        'ferias',
-        'férias',
-        'aposentadoria',
-        'aposentado',
-        'aposentado antes',
-        'licenca-premio',
-        'licença-prêmio',
-        'licença premio',
-        'conversao em pecunia',
-        'conversão em pecúnia',
-        'renuncia',
-        'renúncia',
-        'piso salarial',
-        'rsc',
-        'retribuicao por titulacao',
-        'retribuição por titulação',
-        'ferrovia',
-    }
-
     def __init__(
         self,
         petition_summaries_repository: PetitionSummariesRepository,
@@ -141,60 +106,56 @@ class SearchAnalysisPrecedentsUseCase:
             for precedent in precedents.items
         }
 
-        scored_precedents: list[tuple[float, AnalysisPrecedentDto]] = []
+        # Monta lista de (score, scores_dict, identifier_key) para ordenação.
+        # O identifier_key é calculado uma única vez aqui e reutilizado no loop
+        # de construção dos DTOs, evitando chamadas duplicadas a _get_identifier_key.
+        scored_precedents: list[
+            tuple[float, _IdentifierScore, tuple[str, str, int]]
+        ] = []
         for identifier, scores in scored_identifiers.items():
-            precedent = precedents_by_identifier.get(
-                self._get_identifier_key(identifier)
-            )
-            if precedent is None:
+            identifier_key = self._get_identifier_key(identifier)
+            if identifier_key not in precedents_by_identifier:
                 continue
 
-            similarity_percentage = self._calculate_similarity_percentage(
+            # Score bruto sem cap — preserva ordenação real para o banco e para o ML.
+            # O cap de 95% é responsabilidade da camada de serialização REST,
+            # não deste use case. Aplicar o cap aqui colapsaria precedentes com
+            # scores distintos no mesmo valor, corrompendo a ordenação persistida
+            # no banco e os dados de treino do ML.
+            similarity_score = self._calculate_similarity_score(
                 thesis_score=scores['thesis_max'],
                 enunciation_score=scores['enunciation_max'],
                 total_hits=scores['total_hits'],
+                thesis_hits=scores['thesis_hits'],
+                enunciation_hits=scores['enunciation_hits'],
             )
 
-            scored_precedents.append(
-                (
-                    similarity_percentage,
-                    AnalysisPrecedentDto(
-                        analysis_id=analysis_id_entity.value,
-                        precedent=precedent.dto,
-                        similarity_percentage=similarity_percentage,
-                        synthesis=None,
-                        is_chosen=False,
-                        thesis_similarity_score=scores['thesis_max'],
-                        enunciation_similarity_score=scores['enunciation_max'],
-                        total_search_hits=scores['total_hits'],
-                    ),
-                )
-            )
+            scored_precedents.append((similarity_score, scores, identifier_key))
 
-        sorted_precedents = sorted(
-            scored_precedents,
-            key=lambda item: item[0],
-            reverse=True,
-        )
+        scored_precedents.sort(key=lambda item: item[0], reverse=True)
 
-        sorted_analysis_precedents = [
+        analysis_precedents = [
             AnalysisPrecedent.create(
                 AnalysisPrecedentDto(
-                    analysis_id=item.analysis_id,
-                    precedent=item.precedent,
-                    similarity_percentage=item.similarity_percentage,
-                    synthesis=item.synthesis,
-                    is_chosen=item.is_chosen,
-                    thesis_similarity_score=item.thesis_similarity_score,
-                    enunciation_similarity_score=item.enunciation_similarity_score,
-                    total_search_hits=item.total_search_hits,
-                    similarity_rank=index,
+                    analysis_id=analysis_id_entity.value,
+                    precedent=precedents_by_identifier[identifier_key].dto,
+                    similarity_score=similarity_score,
+                    synthesis=None,
+                    is_chosen=False,
+                    thesis_similarity_score=scores['thesis_max'],
+                    enunciation_similarity_score=scores['enunciation_max'],
+                    total_search_hits=scores['total_hits'],
+                    similarity_rank=rank,
+                    applicability_level=None,
+                    legal_features=None,
                 )
             )
-            for index, (_, item) in enumerate(sorted_precedents, start=1)
+            for rank, (similarity_score, scores, identifier_key) in enumerate(
+                scored_precedents, start=1
+            )
         ]
 
-        return [item.dto for item in sorted_analysis_precedents[: filters.limit.value]]
+        return [item.dto for item in analysis_precedents[: filters.limit.value * 2]]
 
     def _score_identifiers(
         self,
@@ -233,19 +194,47 @@ class SearchAnalysisPrecedentsUseCase:
 
         return scores_by_identifier
 
-    def _calculate_similarity_percentage(
+    def _calculate_similarity_score(
         self,
         thesis_score: float,
         enunciation_score: float,
         total_hits: int,
+        thesis_hits: int,
+        enunciation_hits: int,
     ) -> float:
-        base_score = (thesis_score * 0.58) + (enunciation_score * 0.42)
-        coverage_bonus = min(total_hits * 0.01, 0.04)
+        """Retorna o score bruto sem cap.
 
-        final_score = base_score + coverage_bonus
-        normalized_percentage = round(final_score * 100, 2)
+        Ponderação adaptativa por disponibilidade de campos:
+        - Ambos ausentes: score zero (precedente sem texto indexado).
+        - Apenas enunciation (SVs, súmulas, precedentes em fase inicial):
+          usa enunciation com peso total para não penalizar estruturalmente
+          precedentes com thesis vazia.
+        - Apenas thesis: caso simétrico, usa thesis com peso total.
+        - Ambos presentes: ponderação padrão thesis/enunciation.
 
-        return min(max(normalized_percentage, 0.0), 95.0)
+        Bônus de cobertura em escala logarítmica para discriminar precedentes
+        com alta cobertura (50+ hits) de cobertura básica (4 hits) sem inflar
+        o score de precedentes com poucos hits.
+
+        O cap de 95% é responsabilidade da camada de serialização REST.
+        """
+        if thesis_hits == 0 and enunciation_hits == 0:
+            base_score = 0.0
+        elif thesis_hits == 0:
+            base_score = enunciation_score
+        elif enunciation_hits == 0:
+            base_score = thesis_score
+        else:
+            base_score = (thesis_score * _THESIS_WEIGHT) + (
+                enunciation_score * _ENUNCIATION_WEIGHT
+            )
+
+        coverage_bonus = min(
+            math.log1p(total_hits) * _COVERAGE_LOG_FACTOR,
+            _MAX_COVERAGE_BONUS,
+        )
+
+        return round((base_score + coverage_bonus) * 100, 2)
 
     def _get_identifier_key(
         self,

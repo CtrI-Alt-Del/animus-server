@@ -22,7 +22,7 @@ class AnalysisPrecedentModel(Model):
         primary_key=True,
     )
     is_chosen: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    similarity_percentage: Mapped[float | None] = mapped_column(
+    similarity_score: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,
     )
@@ -46,6 +46,11 @@ class AnalysisPrecedentModel(Model):
         nullable=False,
         default=0,
     )
+    final_rank: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
     applicability_level: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
@@ -55,3 +60,9 @@ class AnalysisPrecedentModel(Model):
 
     analysis: Mapped[Any] = relationship('AnalysisModel')
     precedent: Mapped[Any] = relationship('PrecedentModel')
+    legal_features: Mapped[Any] = relationship(
+        'AnalysiesPrecedentLegalFeaturesModel',
+        back_populates='analysis_precedent',
+        uselist=False,
+        cascade='all, delete-orphan',
+    )

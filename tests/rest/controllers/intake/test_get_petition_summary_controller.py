@@ -86,6 +86,14 @@ class TestGetPetitionSummaryController:
             'relevant_laws': ['Codigo Civil, Art. 389'],
             'key_facts': ['Contrato firmado e nao adimplido'],
             'search_terms': ['inadimplemento contratual'],
+            'type_of_action': None,
+            'secondary_legal_issues': [],
+            'alternative_questions': [],
+            'jurisdiction_issue': None,
+            'standing_issue': None,
+            'requested_relief': [],
+            'procedural_issues': [],
+            'excluded_or_accessory_topics': [],
         }
 
     def test_should_return_403_when_petition_belongs_to_another_account(

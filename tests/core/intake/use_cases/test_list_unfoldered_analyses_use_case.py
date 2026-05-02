@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.use_cases.list_unfoldered_analyses_use_case import (
     ListUnfolderedAnalysesUseCase,
@@ -44,14 +45,18 @@ class TestListUnfolderedAnalysesUseCase:
             is_archived=False,
         )
 
-        self.analisyses_repository_mock.find_many.assert_called_once_with(
-            account_id=Id.create('01BX5ZZKBKACTAV9WEVGEMMVRZ'),
-            search=Text.create('sem pasta'),
-            cursor=Id.create('01BX5ZZKBKACTAV9WEVGEMMVS1'),
-            limit=Integer.create(10),
-            is_archived=Logical.create_false(),
-            only_unfoldered=Logical.create_true(),
-        )
+        self.analisyses_repository_mock.find_many.assert_called_once()
+
+        kwargs = self.analisyses_repository_mock.find_many.call_args.kwargs
+
+        assert kwargs['account_id'] == Id.create('01BX5ZZKBKACTAV9WEVGEMMVRZ')
+        assert kwargs['search'] == Text.create('sem pasta')
+        assert kwargs['cursor'] == Id.create('01BX5ZZKBKACTAV9WEVGEMMVS1')
+        assert kwargs['limit'] == Integer.create(10)
+        assert kwargs['is_archived'] == Logical.create_false()
+        assert kwargs['only_unfoldered'] == Logical.create_true()
+        assert kwargs['statuses'] == tuple(AnalysisStatusValue)
+
         assert result.items == [analysis.dto]
         assert result.next_cursor == next_cursor
 

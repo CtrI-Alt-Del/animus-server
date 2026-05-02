@@ -9,7 +9,9 @@ from pytest import MonkeyPatch
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-from animus.ai.agno.workflows.intake import AgnoSynthesizeAnalysisPrecedentsWorkflow
+from animus.ai.agno.workflows.intake import (
+    AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
+)
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
@@ -196,7 +198,7 @@ class TestSearchAnalysisPrecedentsJob:
                         'thesis': 'Tese do precedente',
                         'last_updated_in_pangea_at': datetime.now(UTC).isoformat(),
                     },
-                    'similarity_percentage': 84.5,
+                    'similarity_score': 84.5,
                     'synthesis': None,
                     'is_chosen': False,
                 }
@@ -267,7 +269,7 @@ class TestSearchAnalysisPrecedentsJob:
                                 'analysis_precedents_data'
                             ][0]['precedent']['last_updated_in_pangea_at'],
                         },
-                        'similarity_percentage': 84.5,
+                        'similarity_score': 84.5,
                         'synthesis': None,
                         'is_chosen': False,
                     }
@@ -323,14 +325,14 @@ class TestSearchAnalysisPrecedentsJob:
                         thesis='Tese do precedente',
                         last_updated_in_pangea_at=datetime.now(UTC).isoformat(),
                     ),
-                    similarity_percentage=84.5,
+                    similarity_score=84.5,
                     synthesis=None,
                     is_chosen=False,
                 )
             ]
 
         def _run(
-            _self: AgnoSynthesizeAnalysisPrecedentsWorkflow,
+            _self: AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
             *,
             analysis_id: str,
             filters_dto: Any,
@@ -353,6 +355,13 @@ class TestSearchAnalysisPrecedentsJob:
                                 kind=analysis_precedent.precedent.identifier.kind,
                                 number=analysis_precedent.precedent.identifier.number,
                                 synthesis='Sintese final do precedente',
+                                legal_features=SimpleNamespace(
+                                    central_issue_match=2,
+                                    structural_issue_match=1,
+                                    context_compatibility=2,
+                                    is_lateral_topic=0,
+                                    is_accessory_topic=0,
+                                ),
                             )
                             for analysis_precedent in analysis_precedents
                         ]
@@ -372,11 +381,13 @@ class TestSearchAnalysisPrecedentsJob:
             lambda: object(),
         )
         monkeypatch.setattr(
-            AgnoSynthesizeAnalysisPrecedentsWorkflow,
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
             '__init__',
             lambda *args, **kwargs: None,  # type: ignore
         )
-        monkeypatch.setattr(AgnoSynthesizeAnalysisPrecedentsWorkflow, 'run', _run)
+        monkeypatch.setattr(
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow, 'run', _run
+        )
 
         analysis_precedents_data = search_precedents_sync(payload)
 

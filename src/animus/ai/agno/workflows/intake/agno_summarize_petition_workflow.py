@@ -5,7 +5,7 @@ from agno.run.base import RunContext
 from agno.workflow import Step, StepInput, StepOutput, Workflow
 
 from animus.ai.agno.outputs import PetitionSummaryOutput
-from animus.ai.agno.teams import IntakeTeam
+from animus.ai.agno.teams import IntakeSquad
 from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
     PetitionSummaryDto,
 )
@@ -42,7 +42,7 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
             petitions_repository=petitions_repository,
             analisyses_repository=analisyses_repository,
         )
-        self._team = IntakeTeam()
+        self._team = IntakeSquad()
         self._step_names = _StepNames()
 
     def run(
@@ -108,6 +108,14 @@ class AgnoSummarizePetitionWorkflow(SummarizePetitionWorkflow):
                 relevant_laws=output.relevant_laws,
                 key_facts=output.key_facts,
                 search_terms=output.search_terms,
+                type_of_action=output.type_of_action,
+                secondary_legal_issues=output.secondary_legal_issues,
+                alternative_questions=output.alternative_questions,
+                jurisdiction_issue=output.jurisdiction_issue,
+                standing_issue=output.standing_issue,
+                requested_relief=output.requested_relief,
+                procedural_issues=output.procedural_issues,
+                excluded_or_accessory_topics=output.excluded_or_accessory_topics,
             )
 
         msg = 'Invalid summary output type from petition summarizer workflow'

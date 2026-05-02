@@ -1,8 +1,18 @@
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
+
+
+_ALLOWED_ANALYSIS_STATUSES: tuple[AnalysisStatusValue, ...] = (
+    AnalysisStatusValue.WAITING_PETITION,
+    AnalysisStatusValue.PETITION_UPLOADED,
+    AnalysisStatusValue.WAITING_PRECEDENT_CHOISE,
+    AnalysisStatusValue.PRECEDENT_CHOSED,
+    AnalysisStatusValue.FAILED,
+)
 
 
 class ListAnalysesUseCase:
@@ -35,6 +45,7 @@ class ListAnalysesUseCase:
             limit=normalized_limit,
             is_archived=normalized_is_archived,
             only_unfoldered=Logical.create_false(),
+            statuses=_ALLOWED_ANALYSIS_STATUSES,
         )
 
         return analyses.mapItems(lambda analysis: analysis.dto)

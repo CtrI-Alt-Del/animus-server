@@ -18,13 +18,11 @@ from animus.providers.notification.email_sender.resend.resend_email_sender_provi
     ResendEmailSenderProvider,
 )
 from animus.providers.shared.cache.redis.redis_cache_provider import RedisCacheProvider
+from animus.providers.storage import GcsFileStorageProvider
 from animus.providers.storage.document.docx.python_docx_provider import (
     PythonDocxProvider,
 )
 from animus.providers.storage.document.pdf.pypdf_pdf_provider import PypdfPdfProvider
-from animus.providers.storage.file_storage.supabase.supabase_file_storage_provider import (
-    SupabaseFileStorageProvider,
-)
 
 
 class ProvidersPipe:
@@ -54,7 +52,7 @@ class ProvidersPipe:
 
     @staticmethod
     def get_file_storage_provider() -> FileStorageProvider:
-        return SupabaseFileStorageProvider()
+        return GcsFileStorageProvider()
 
     @staticmethod
     def get_pdf_provider() -> PdfProvider:

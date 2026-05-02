@@ -6,21 +6,17 @@ from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.events import (
-    AnalysisPrecedentsSearchRequestedEvent,
     PrecedentsSearchFinishedEvent,
+    AnalysisPrecedentsSearchRequestedEvent,
 )
 from animus.core.intake.domain.structures.dtos import AnalysisPrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
     AnalysisPrecedentsSearchFiltersDto,
 )
-from animus.core.intake.interfaces import PrecedentsEmbeddingsRepository
+from animus.core.shared.domain.structures import Id
 from animus.core.intake.use_cases import (
     SearchAnalysisPrecedentsUseCase,
     UpdateAnalysisStatusUseCase,
-)
-from animus.core.shared.domain.structures import Id
-from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
-    QdrantPrecedentsEmbeddingsRepository,
 )
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalisysesRepository,
@@ -33,13 +29,12 @@ from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_
     OpenAIPetitionSummaryEmbeddingsProvider,
 )
 from animus.pubsub.inngest.inngest_broker import InngestBroker
+from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
+    QdrantPrecedentsEmbeddingsRepository,
+)
 
 
-def _build_precedents_embeddings_repository() -> PrecedentsEmbeddingsRepository:
-    from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
-        QdrantPrecedentsEmbeddingsRepository,
-    )
-
+def _build_precedents_embeddings_repository() -> QdrantPrecedentsEmbeddingsRepository:
     return QdrantPrecedentsEmbeddingsRepository()
 
 
@@ -114,7 +109,7 @@ class SearchAnalysisPrecedentsJob:
 
                 await context.step.run(
                     'publish_finished_event',
-                    lambda: InngestBroker(inngest).publish(  # type:ignore
+                    lambda payload=payload: InngestBroker(inngest).publish(  # type: ignore
                         PrecedentsSearchFinishedEvent(
                             analysis_id=Id.create(payload.analysis_id)
                         )
@@ -176,9 +171,7 @@ class SearchAnalysisPrecedentsJob:
                 petition_summary_embeddings_provider=(
                     OpenAIPetitionSummaryEmbeddingsProvider()
                 ),
-                precedents_embeddings_repository=(
-                    _build_precedents_embeddings_repository()
-                ),
+                precedents_embeddings_repository=(_build_precedents_embeddings_repository()),
                 precedents_repository=precedents_repository,
             ).execute(
                 analysis_id=payload.analysis_id,

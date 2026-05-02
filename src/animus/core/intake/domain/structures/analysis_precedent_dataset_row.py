@@ -2,21 +2,27 @@ from animus.core.intake.domain.structures.analysis_precedent_applicability_level
     AnalysisPrecedentApplicabilityLevel,
 )
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_dto import (
-    AnalysisPrecedentDatasetDto,
+    AnalysisPrecedentDatasetRowDto,
 )
 from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
 )
-from animus.core.intake.domain.structures.precedent_status import PrecedentStatus
 from animus.core.shared.domain.abstracts import Structure
 from animus.core.shared.domain.decorators import structure
-from animus.core.shared.domain.structures import Datetime, Decimal, Id, Integer, Logical
+from animus.core.shared.domain.structures import (
+    Datetime,
+    Decimal,
+    Id,
+    Integer,
+    Logical,
+    Text,
+)
 
 
 @structure
 class AnalysisPrecedentDatasetRow(Structure):
-    analysis_precedent_id: Id
     analysis_id: Id
+    precedent_id: Id
     created_at: Datetime
     applicability_level: AnalysisPrecedentApplicabilityLevel
     is_from_human: Logical
@@ -25,14 +31,21 @@ class AnalysisPrecedentDatasetRow(Structure):
     total_search_hits: Integer
     similarity_rank: Integer
     identifier: PrecedentIdentifier
-    precedent_status: PrecedentStatus
+    precedent_status: Text
     last_updated_in_pangea_at: Datetime
+    central_issue_match: Integer
+    structural_issue_match: Integer
+    context_compatibility: Integer
+    is_lateral_topic: Integer
+    is_accessory_topic: Integer
 
     @classmethod
-    def create(cls, dto: AnalysisPrecedentDatasetDto) -> 'AnalysisPrecedentDatasetRow':
+    def create(
+        cls, dto: AnalysisPrecedentDatasetRowDto
+    ) -> 'AnalysisPrecedentDatasetRow':
         return cls(
-            analysis_precedent_id=Id.create(dto.analysis_precedent_id),
             analysis_id=Id.create(dto.analysis_id),
+            precedent_id=Id.create(dto.precedent_id),
             created_at=Datetime.create(dto.created_at),
             applicability_level=AnalysisPrecedentApplicabilityLevel.create(
                 dto.applicability_level
@@ -45,15 +58,20 @@ class AnalysisPrecedentDatasetRow(Structure):
             total_search_hits=Integer.create(dto.total_search_hits),
             similarity_rank=Integer.create(dto.similarity_rank),
             identifier=PrecedentIdentifier.create(dto.identifier),
-            precedent_status=PrecedentStatus.create(dto.precedent_status),
+            precedent_status=Text.create(dto.precedent_status),
             last_updated_in_pangea_at=Datetime.create(dto.last_updated_in_pangea_at),
+            central_issue_match=Integer.create(dto.central_issue_match),
+            structural_issue_match=Integer.create(dto.structural_issue_match),
+            context_compatibility=Integer.create(dto.context_compatibility),
+            is_lateral_topic=Integer.create(dto.is_lateral_topic),
+            is_accessory_topic=Integer.create(dto.is_accessory_topic),
         )
 
     @property
-    def dto(self) -> AnalysisPrecedentDatasetDto:
-        return AnalysisPrecedentDatasetDto(
-            analysis_precedent_id=self.analysis_precedent_id.value,
+    def dto(self) -> AnalysisPrecedentDatasetRowDto:
+        return AnalysisPrecedentDatasetRowDto(
             analysis_id=self.analysis_id.value,
+            precedent_id=self.precedent_id.value,
             created_at=self.created_at.value.isoformat(),
             applicability_level=self.applicability_level.dto,
             is_from_human=self.is_from_human.value,
@@ -62,6 +80,11 @@ class AnalysisPrecedentDatasetRow(Structure):
             total_search_hits=self.total_search_hits.value,
             similarity_rank=self.similarity_rank.value,
             identifier=self.identifier.dto,
-            precedent_status=self.precedent_status.dto,
+            precedent_status=self.precedent_status.value,
             last_updated_in_pangea_at=self.last_updated_in_pangea_at.value.isoformat(),
+            central_issue_match=self.central_issue_match.value,
+            structural_issue_match=self.structural_issue_match.value,
+            context_compatibility=self.context_compatibility.value,
+            is_lateral_topic=self.is_lateral_topic.value,
+            is_accessory_topic=self.is_accessory_topic.value,
         )

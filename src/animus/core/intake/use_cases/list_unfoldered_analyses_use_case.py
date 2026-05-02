@@ -1,3 +1,4 @@
+from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.errors import ValidationError
@@ -6,6 +7,10 @@ from animus.core.shared.responses import CursorPaginationResponse
 
 
 class ListUnfolderedAnalysesUseCase:
+    _ALLOWED_ANALYSIS_STATUSES: tuple[AnalysisStatusValue, ...] = tuple(
+        AnalysisStatusValue
+    )
+
     def __init__(self, analisyses_repository: AnalisysesRepository) -> None:
         self._analisyses_repository = analisyses_repository
 
@@ -35,6 +40,7 @@ class ListUnfolderedAnalysesUseCase:
             limit=normalized_limit,
             is_archived=normalized_is_archived,
             only_unfoldered=Logical.create_true(),
+            statuses=ListUnfolderedAnalysesUseCase._ALLOWED_ANALYSIS_STATUSES,
         )
 
-        return analyses.mapItems(lambda analysis: analysis.dto)
+        return analyses.map_items(lambda analysis: analysis.dto)

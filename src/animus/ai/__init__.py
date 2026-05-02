@@ -1,7 +1,7 @@
-from .agno import AgnoSummarizePetitionWorkflow, IntakeTeam, PetitionSummaryOutput
+from .agno import AgnoSummarizePetitionWorkflow, IntakeSquad, PetitionSummaryOutput
 
 __all__ = [
-    'IntakeTeam',
+    'IntakeSquad',
     'PetitionSummaryOutput',
     'AgnoSummarizePetitionWorkflow',
 ]

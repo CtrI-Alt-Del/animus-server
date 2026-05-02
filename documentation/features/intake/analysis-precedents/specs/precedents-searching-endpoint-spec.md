@@ -294,11 +294,11 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 
 ## Camada Providers
 
-- **Localizacao:** `src/animus/providers/intake/petition_summary_embeddings/bertimbau/bertimbau_petition_summary_embeddings_provider.py` (**novo arquivo**)
+- **Localizacao:** `src/animus/providers/intake/petition_summary_embeddings/openai/openai_petition_summary_embeddings_provider.py`
 - **Interface implementada (port):** `PetitionSummaryEmbeddingsProvider`
-- **Biblioteca/SDK utilizado:** `sentence-transformers`
+- **Biblioteca/SDK utilizado:** `OpenAI`
 - **Metodos:**
-  - `generate(petition_summary: PetitionSummary) -> list[PetitionSummaryEmbedding]` - gera embeddings a partir dos campos estruturados (`case_summary`, `legal_issue`, `central_question`, `relevant_laws`, `key_facts`, `search_terms`), usando o mesmo modelo `rufimelo/Legal-BERTimbau-sts-large` do pipeline de precedentes.
+  - `generate(petition_summary: PetitionSummary) -> list[PetitionSummaryEmbedding]` - gera embeddings a partir dos campos estruturados do resumo usando `text-embedding-3-large`, com chunking semantico voltado para busca de precedentes.
 
 ## Camada PubSub (Eventos de Dominio)
 
@@ -471,10 +471,10 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
   - **Motivo da escolha:** a relacao com o caso inicial e o dado central da sintese; receber o resumo explicitamente mantem o contrato de AI orientado a dados de dominio, nao a lookup implcito.
   - **Impactos / trade-offs:** a interface muda e exige atualizacao do `AiPipe`, mas o workflow fica mais previsivel e menos acoplado a repository.
 
-- **Decisao:** reutilizar o mesmo modelo de embeddings `rufimelo/Legal-BERTimbau-sts-large` para o `PetitionSummary`.
-  - **Alternativas consideradas:** usar `Gemini` embeddings; usar `OpenAI` embeddings; concatenar tudo em um unico texto e gerar apenas um vetor.
-  - **Motivo da escolha:** o indice atual de precedentes ja esta vetorizado com esse modelo no job `VectorizePrecedentsJob`, e consulta e indice precisam compartilhar o mesmo espaco vetorial.
-  - **Impactos / trade-offs:** a codebase ganha mais um provider concreto baseado em `sentence-transformers`, mas evita incompatibilidade de dimensionalidade e semantica com o indice ja existente.
+- **Decisao:** usar `OpenAI` embeddings no `PetitionSummary`.
+  - **Alternativas consideradas:** usar `Gemini` embeddings; manter um provider local de embeddings; concatenar tudo em um unico texto e gerar apenas um vetor.
+  - **Motivo da escolha:** o projeto ja possui providers OpenAI em uso nos fluxos ativos, reduz o peso operacional da imagem e elimina a dependencia do stack local `torch`/CUDA.
+  - **Impactos / trade-offs:** simplifica deploy e build, mas troca um modelo local por uma dependencia de API externa para geracao dos embeddings.
 
 - **Decisao:** manter as rotas sob o `IntakeRouter` existente.
   - **Alternativas consideradas:** criar um router dedicado a `analyses` fora de `/intake`; expor paths nus fora do contexto atual.

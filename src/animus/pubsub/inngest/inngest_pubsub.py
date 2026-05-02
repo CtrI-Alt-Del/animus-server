@@ -12,6 +12,7 @@ from animus.pubsub.inngest.jobs.auth.send_password_reset_email_job import (
 from animus.pubsub.inngest.jobs.intake import (
     RemovePetitionDocumentFileJob,
     SearchAnalysisPrecedentsJob,
+    SeedAnalysesPrecedentsDatasetJob,
     SummarizePetitionJob,
     VectorizeAllPrecedentsJob,
     VectorizePrecedentsJob,
@@ -59,6 +60,7 @@ class InngestPubSub:
         return [
             RemovePetitionDocumentFileJob.handle(inngest),
             SearchAnalysisPrecedentsJob.handle(inngest),
+            SeedAnalysesPrecedentsDatasetJob.handle(inngest),
             SummarizePetitionJob.handle(inngest),
             VectorizeAllPrecedentsJob.handle(inngest),
             VectorizePrecedentsJob.handle(inngest),

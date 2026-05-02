@@ -21,7 +21,9 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.add_column(
         'analysis_precedents',
-        sa.Column('thesis_similarity_score', sa.Float(), nullable=False, server_default='0'),
+        sa.Column(
+            'thesis_similarity_score', sa.Float(), nullable=False, server_default='0'
+        ),
     )
     op.add_column(
         'analysis_precedents',
@@ -34,7 +36,9 @@ def upgrade() -> None:
     )
     op.add_column(
         'analysis_precedents',
-        sa.Column('total_search_hits', sa.Integer(), nullable=False, server_default='0'),
+        sa.Column(
+            'total_search_hits', sa.Integer(), nullable=False, server_default='0'
+        ),
     )
     op.add_column(
         'analysis_precedents',
@@ -42,7 +46,9 @@ def upgrade() -> None:
     )
     op.add_column(
         'analysis_precedents',
-        sa.Column('applicability_level', sa.Integer(), nullable=False, server_default='0'),
+        sa.Column(
+            'applicability_level', sa.Integer(), nullable=False, server_default='0'
+        ),
     )
 
     op.execute(
@@ -51,16 +57,18 @@ def upgrade() -> None:
             UPDATE analysis_precedents
             SET applicability_level =
                 CASE
-                    WHEN similarity_percentage IS NULL THEN 0
-                    WHEN similarity_percentage >= 85 THEN 2
-                    WHEN similarity_percentage >= 70 THEN 1
+                    WHEN similarity_score IS NULL THEN 0
+                    WHEN similarity_score >= 85 THEN 2
+                    WHEN similarity_score >= 70 THEN 1
                     ELSE 0
                 END
             """
         )
     )
 
-    op.alter_column('analysis_precedents', 'thesis_similarity_score', server_default=None)
+    op.alter_column(
+        'analysis_precedents', 'thesis_similarity_score', server_default=None
+    )
     op.alter_column(
         'analysis_precedents',
         'enunciation_similarity_score',

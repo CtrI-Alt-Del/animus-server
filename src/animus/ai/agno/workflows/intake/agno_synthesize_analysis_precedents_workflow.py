@@ -4,7 +4,10 @@ from typing import TYPE_CHECKING, NamedTuple, cast
 from agno.run.base import RunContext
 from agno.workflow import Step, StepInput, StepOutput, Workflow
 
-from animus.ai.agno.teams import IntakeTeam
+from animus.ai.agno.outputs.intake.analysis_precedents_synthesis_output import (
+    AnalysisPrecedentsSynthesisOutput,
+)
+from animus.ai.agno.teams import IntakeSquad
 from animus.core.intake.domain.errors import (
     PetitionSummaryUnavailableError,
 )
@@ -22,7 +25,9 @@ from animus.core.intake.interfaces import (
 from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
     SynthesizeAnalysisPrecedentsWorkflow,
 )
-from animus.core.intake.use_cases import CreateAnalysisPrecedentsUseCase
+from animus.core.intake.use_cases import (
+    CreateAnalysisPrecedentsUseCase,
+)
 from animus.core.shared.domain.errors import AppError
 from animus.core.shared.domain.structures import Id
 
@@ -37,7 +42,9 @@ class _StepNames(NamedTuple):
     PERSIST_ANALYSIS_PRECEDENTS: str = 'persist-analysis-precedents'
 
 
-class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkflow):
+class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
+    SynthesizeAnalysisPrecedentsWorkflow
+):
     def __init__(
         self,
         petition_summaries_repository: PetitionSummariesRepository,
@@ -49,7 +56,7 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
             analysis_precedents_repository=analysis_precedents_repository,
             analisyses_repository=analisyses_repository,
         )
-        self._team = IntakeTeam()
+        self._squad = IntakeSquad()
         self._step_names = _StepNames()
 
     def run(
@@ -62,7 +69,7 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
             return
 
         workflow = Workflow(
-            name='synthesize-analysis-precedents',
+            name='synthesize-and-classify-analysis-precedents',
             steps=[
                 Step(
                     name=self._step_names.FETCH_PETITION_SUMMARY,
@@ -74,7 +81,7 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
                 ),
                 Step(
                     name=self._step_names.SYNTHESIZE_ANALYSIS_PRECEDENTS,
-                    agent=self._team.analysis_precedents_synthesizer_agent,
+                    agent=self._squad.analysis_precedents_synthesizer_and_classifier_agent,
                 ),
                 Step(
                     name=self._step_names.PERSIST_ANALYSIS_PRECEDENTS,
@@ -146,7 +153,13 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
                     {index}. court: {analysis_precedent.precedent.identifier.court}
                        kind: {analysis_precedent.precedent.identifier.kind}
                        number: {analysis_precedent.precedent.identifier.number}
-                       similarity_percentage: {analysis_precedent.similarity_percentage}
+                       similarity_score: {analysis_precedent.similarity_score}
+                       legal_features_objetivas:
+                           central_issue_match: {analysis_precedent.legal_features.central_issue_match if analysis_precedent.legal_features is not None else 0}
+                           structural_issue_match: {analysis_precedent.legal_features.structural_issue_match if analysis_precedent.legal_features is not None else 0}
+                           context_compatibility: {analysis_precedent.legal_features.context_compatibility if analysis_precedent.legal_features is not None else 0}
+                           is_lateral_topic: {analysis_precedent.legal_features.is_lateral_topic if analysis_precedent.legal_features is not None else 0}
+                           is_accessory_topic: {analysis_precedent.legal_features.is_accessory_topic if analysis_precedent.legal_features is not None else 0}
                        status: {analysis_precedent.precedent.status}
                        enunciation: {analysis_precedent.precedent.enunciation}
                        thesis: {analysis_precedent.precedent.thesis}
@@ -161,7 +174,7 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
 
         prompt = dedent(
             f"""
-            Relacione os precedentes candidatos com a peticao e retorne uma sintese
+            Relacione os precedentes candidatos com a peticao e retorne uma sintese e as features jurídicas
             para cada precedente no formato estruturado esperado.
 
             Resumo da peticao:
@@ -171,6 +184,14 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
             - relevant_laws: {', '.join(petition_summary_dto.relevant_laws)}
             - key_facts: {', '.join(petition_summary_dto.key_facts)}
             - search_terms: {', '.join(petition_summary_dto.search_terms)}
+            - type_of_action: {petition_summary_dto.type_of_action}
+            - secondary_legal_issues: {', '.join(petition_summary_dto.secondary_legal_issues)}
+            - alternative_questions: {', '.join(petition_summary_dto.alternative_questions)}
+            - jurisdiction_issue: {petition_summary_dto.jurisdiction_issue}
+            - standing_issue: {petition_summary_dto.standing_issue}
+            - requested_relief: {', '.join(petition_summary_dto.requested_relief)}
+            - procedural_issues: {', '.join(petition_summary_dto.procedural_issues)}
+            - excluded_or_accessory_topics: {', '.join(petition_summary_dto.excluded_or_accessory_topics)}
 
             Precedentes candidatos:
             {precedents_input}
@@ -216,11 +237,25 @@ class AgnoSynthesizeAnalysisPrecedentsWorkflow(SynthesizeAnalysisPrecedentsWorkf
             analysis_precedents_candidates,
         )
 
+        synthesis_output = self._coerce_synthesis_output(
+            step_input.get_last_step_content()
+        )
+
         self._create_analysis_precedents_use_case.execute(
             analysis_id=analysis_id,
             filters_dto=filters_dto,
             analysis_precedents=analysis_precedents,
-            synthesis_output=step_input.get_last_step_content(),
+            synthesis_output=synthesis_output,
         )
 
         return StepOutput(content='analysis-precedents-persisted')
+
+    def _coerce_synthesis_output(
+        self,
+        raw_synthesis_output: object,
+    ) -> AnalysisPrecedentsSynthesisOutput:
+        if isinstance(raw_synthesis_output, AnalysisPrecedentsSynthesisOutput):
+            return raw_synthesis_output
+
+        msg = 'Invalid synthesis output type from precedents synthesizer agent'
+        raise AppError('Erro de execução do workflow', msg)

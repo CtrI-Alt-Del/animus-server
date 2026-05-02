@@ -25,9 +25,9 @@ from animus.database.sqlalchemy.repositories.intake import (
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.storage import (
+    GcsFileStorageProvider,
     PypdfPdfProvider,
     PythonDocxProvider,
-    SupabaseFileStorageProvider,
 )
 from animus.pubsub.inngest.inngest_broker import InngestBroker
 
@@ -107,7 +107,7 @@ class SummarizePetitionJob:
                 raise PetitionNotFoundError
 
             document_content = GetDocumentContentUseCase(
-                file_storage_provider=SupabaseFileStorageProvider(),
+                file_storage_provider=GcsFileStorageProvider(),
                 pdf_provider=PypdfPdfProvider(),
                 docx_provider=PythonDocxProvider(),
             ).execute(file_path=petition.document.file_path)

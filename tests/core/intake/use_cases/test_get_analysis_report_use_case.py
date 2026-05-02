@@ -81,7 +81,7 @@ class TestGetAnalysisReportUseCase:
                     thesis='T1',
                     last_updated_in_pangea_at='2026-04-04T10:00:00Z',
                 ),
-                similarity_percentage=90.0,
+                similarity_score=90.0,
                 is_chosen=True,
                 synthesis='S1',
             )
@@ -97,7 +97,7 @@ class TestGetAnalysisReportUseCase:
                     thesis='T2',
                     last_updated_in_pangea_at='2026-04-04T10:00:00Z',
                 ),
-                similarity_percentage=75.0,
+                similarity_score=75.0,
                 is_chosen=False,
                 synthesis='S2',
             )
@@ -187,7 +187,7 @@ class TestGetAnalysisReportUseCase:
                         thesis='T',
                         last_updated_in_pangea_at='2026-04-04T10:00:00Z',
                     ),
-                    similarity_percentage=percentage,
+                    similarity_score=percentage,
                     is_chosen=False,
                     synthesis='S',
                 )

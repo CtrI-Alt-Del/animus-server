@@ -30,21 +30,25 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         limit: Integer,
         is_archived: Logical,
         only_unfoldered: Logical,
+        statuses: tuple[AnalysisStatusValue, ...],
     ) -> CursorPaginationResponse[Analysis]:
+        status_values = [status.value for status in statuses]
+
         statement = select(AnalysisModel).where(
             AnalysisModel.account_id == account_id.value,
             AnalysisModel.is_archived == is_archived.value,
             AnalysisModel.name.ilike(f'%{search.value}%'),
+            AnalysisModel.status.in_(status_values),
         )
 
         if only_unfoldered.value:
             statement = statement.where(AnalysisModel.folder_id.is_(None))
 
         if cursor is not None:
-            statement = statement.where(AnalysisModel.id > cursor.value)
+            statement = statement.where(AnalysisModel.id < cursor.value)
 
         models = self._sqlalchemy.scalars(
-            statement.order_by(AnalysisModel.id.asc()).limit(limit.value + 1)
+            statement.order_by(AnalysisModel.id.desc()).limit(limit.value + 1)
         ).all()
 
         has_next_page = len(models) > limit.value

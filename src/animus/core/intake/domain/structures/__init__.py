@@ -2,6 +2,7 @@ from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from .analysies_precedent_legal_features import AnalysiesPrecedentLegalFeatures
     from .analysis_report import AnalysisReport
     from .analysis_precedent import AnalysisPrecedent
     from .analysis_precedent_dataset_row import AnalysisPrecedentDatasetRow
@@ -24,10 +25,10 @@ if TYPE_CHECKING:
         PrecedentEmbeddingFieldValue,
     )
     from .precedent_kind import PrecedentKind, PrecedentKindValue
-    from .precedent_status import PrecedentStatus, PrecedentStatusValue
 
 __all__ = [
     'AnalysisReport',
+    'AnalysiesPrecedentLegalFeatures',
     'AnalysisPrecedent',
     'AnalysisPrecedentDatasetRow',
     'AnalysisPrecedentApplicabilityFeedback',
@@ -42,8 +43,6 @@ __all__ = [
     'PetitionSummaryEmbedding',
     'PrecedentKind',
     'PrecedentKindValue',
-    'PrecedentStatus',
-    'PrecedentStatusValue',
     'PrecedentEmbeddingField',
     'PrecedentEmbeddingFieldValue',
     'PrecedentEmbedding',
@@ -53,6 +52,10 @@ __all__ = [
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
         'AnalysisReport': ('.analysis_report', 'AnalysisReport'),
+        'AnalysiesPrecedentLegalFeatures': (
+            '.analysies_precedent_legal_features',
+            'AnalysiesPrecedentLegalFeatures',
+        ),
         'AnalysisPrecedent': ('.analysis_precedent', 'AnalysisPrecedent'),
         'AnalysisPrecedentDatasetRow': (
             '.analysis_precedent_dataset_row',
@@ -94,8 +97,6 @@ def __getattr__(name: str) -> Any:
         ),
         'PrecedentKind': ('.precedent_kind', 'PrecedentKind'),
         'PrecedentKindValue': ('.precedent_kind', 'PrecedentKindValue'),
-        'PrecedentStatus': ('.precedent_status', 'PrecedentStatus'),
-        'PrecedentStatusValue': ('.precedent_status', 'PrecedentStatusValue'),
     }
 
     export = exports.get(name)
