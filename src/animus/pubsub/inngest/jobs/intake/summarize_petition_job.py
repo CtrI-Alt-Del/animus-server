@@ -30,6 +30,7 @@ from animus.providers.storage import (
     PythonDocxProvider,
 )
 from animus.pubsub.inngest.inngest_broker import InngestBroker
+from animus.pubsub.inngest.inngest_job import InngestJob
 
 
 @dataclass(frozen=True)
@@ -37,12 +38,14 @@ class _Payload:
     petition_id: str
 
 
-class SummarizePetitionJob:
+class SummarizePetitionJob(InngestJob):
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
             fn_id='summarize-petition',
             trigger=TriggerEvent(event=PetitionSummaryRequestedEvent.name),
+            retries=0,
+            on_failure=SummarizePetitionJob._handle_failure,
         )
         async def _(context: Context) -> None:
             data = dict(context.event.data)
@@ -146,3 +149,12 @@ class SummarizePetitionJob:
                 analysis_id=petition.analysis_id.value,
                 status=AnalysisStatusValue.FAILED.value,
             )
+            session.commit()
+
+    @staticmethod
+    async def _handle_failure(context: Context) -> None:
+        event_data = SummarizePetitionJob.get_event_data_from_context_failure(context)
+        normalized_data = await SummarizePetitionJob._normalize_payload(event_data)
+        payload = _Payload(petition_id=str(normalized_data['petition_id']))
+
+        await SummarizePetitionJob._mark_analysis_as_failed(payload)

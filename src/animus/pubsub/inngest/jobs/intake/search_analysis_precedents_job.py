@@ -29,6 +29,7 @@ from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_
     OpenAIPetitionSummaryEmbeddingsProvider,
 )
 from animus.pubsub.inngest.inngest_broker import InngestBroker
+from animus.pubsub.inngest.inngest_job import InngestJob
 from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
     QdrantPrecedentsEmbeddingsRepository,
 )
@@ -54,7 +55,7 @@ class _Payload:
         )
 
 
-class SearchAnalysisPrecedentsJob:
+class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
@@ -62,6 +63,8 @@ class SearchAnalysisPrecedentsJob:
             trigger=TriggerEvent(
                 event=AnalysisPrecedentsSearchRequestedEvent.name,
             ),
+            retries=2,
+            on_failure=SearchAnalysisPrecedentsJob._handle_failure,
         )
         async def _(context: Context) -> None:
             data = dict(context.event.data)
@@ -171,7 +174,9 @@ class SearchAnalysisPrecedentsJob:
                 petition_summary_embeddings_provider=(
                     OpenAIPetitionSummaryEmbeddingsProvider()
                 ),
-                precedents_embeddings_repository=(_build_precedents_embeddings_repository()),
+                precedents_embeddings_repository=(
+                    _build_precedents_embeddings_repository()
+                ),
                 precedents_repository=precedents_repository,
             ).execute(
                 analysis_id=payload.analysis_id,
@@ -260,6 +265,7 @@ class SearchAnalysisPrecedentsJob:
     @staticmethod
     async def _mark_analysis_as_failed(payload: _Payload) -> None:
         loop = asyncio.get_running_loop()
+        print('SearchAnalysisPrecedentsJob._mark_analysis_as_failed')
         await loop.run_in_executor(
             None,
             lambda: SearchAnalysisPrecedentsJob._mark_analysis_as_failed_sync(payload),
@@ -275,3 +281,19 @@ class SearchAnalysisPrecedentsJob:
                 status=AnalysisStatusValue.FAILED.value,
             )
             session.commit()
+
+    @staticmethod
+    async def _handle_failure(context: Context) -> None:
+        event_data = SearchAnalysisPrecedentsJob.get_event_data_from_context_failure(
+            context
+        )
+        normalized_data = await SearchAnalysisPrecedentsJob._normalize_payload(
+            event_data
+        )
+        payload = _Payload(
+            analysis_id=str(normalized_data['analysis_id']),
+            courts=list(normalized_data['courts']),
+            precedent_kinds=list(normalized_data['precedent_kinds']),
+            limit=int(normalized_data['limit']),
+        )
+        await SearchAnalysisPrecedentsJob._mark_analysis_as_failed(payload)
