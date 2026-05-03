@@ -13,6 +13,7 @@ from .list_unfoldered_analyses_controller import ListUnfolderedAnalysesControlle
 from .rename_analysis_controller import RenameAnalysisController
 from .search_analysis_precedents_controller import SearchAnalysisPrecedentsController
 from .summarize_petition_controller import SummarizePetitionController
+from .update_analysis_status_controller import UpdateAnalysisStatusController
 from .get_petition_summary_controller import GetPetitionSummaryController
 
 __all__ = [
@@ -32,4 +33,5 @@ __all__ = [
     'RenameAnalysisController',
     'SearchAnalysisPrecedentsController',
     'SummarizePetitionController',
+    'UpdateAnalysisStatusController',
 ]

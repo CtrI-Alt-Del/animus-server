@@ -34,6 +34,7 @@ class GetDocumentContentUseCase:
             raise UnsupportedPetitionDocumentTypeError
 
         try:
+            print(file_path)
             file = self._file_storage_provider.get_file(file_path)
 
             if file_extension.endswith('.pdf'):

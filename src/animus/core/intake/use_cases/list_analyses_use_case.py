@@ -11,6 +11,8 @@ _ALLOWED_ANALYSIS_STATUSES: tuple[AnalysisStatusValue, ...] = (
     AnalysisStatusValue.PETITION_UPLOADED,
     AnalysisStatusValue.WAITING_PRECEDENT_CHOISE,
     AnalysisStatusValue.PRECEDENT_CHOSED,
+    AnalysisStatusValue.PETITION_UPLOADED,
+    AnalysisStatusValue.PETITION_ANALYZED,
     AnalysisStatusValue.FAILED,
 )
 

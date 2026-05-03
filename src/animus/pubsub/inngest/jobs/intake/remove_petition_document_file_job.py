@@ -5,7 +5,7 @@ from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.intake.domain.events import PetitionReplacedEvent
 from animus.core.shared.domain.structures import FilePath
-from animus.providers.storage import SupabaseFileStorageProvider
+from animus.providers.storage import GcsFileStorageProvider
 
 
 @dataclass(frozen=True)
@@ -46,7 +46,7 @@ class RemovePetitionDocumentFileJob:
 
     @staticmethod
     async def _remove_petition_document_file(payload: _Payload) -> None:
-        file_storage_provider = SupabaseFileStorageProvider()
+        file_storage_provider = GcsFileStorageProvider()
         file_storage_provider.remove_files(
             [FilePath.create(value=payload.petition_document_path)]
         )
