@@ -5,8 +5,8 @@ from sqlalchemy import engine_from_config, pool
 
 from animus.constants import Env
 from animus.database.sqlalchemy.models.model import Model
-import animus.database.sqlalchemy.models.auth  # noqa: F401
-import animus.database.sqlalchemy.models.intake  # noqa: F401
+import animus.database.sqlalchemy.models.auth
+import animus.database.sqlalchemy.models.intake
 import animus.database.sqlalchemy.models.library  # noqa: F401
 
 config = context.config

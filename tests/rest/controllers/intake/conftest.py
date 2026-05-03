@@ -8,10 +8,12 @@ from ulid import ULID
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.models.intake import AnalysisModel
+from animus.database.sqlalchemy.models.library import FolderModel
 from animus.providers.auth.jwt.jose.jose_jwt_provider import JoseJwtProvider
 
 BuildAuthHeadersFixture = Callable[[str], dict[str, str]]
 CreateAnalysisFixture = Callable[..., AnalysisModel]
+CreateFolderFixture = Callable[..., FolderModel]
 
 
 @pytest.fixture
@@ -56,3 +58,31 @@ def create_analysis(
         return model
 
     return _create_analysis
+
+
+@pytest.fixture
+def create_folder(
+    sqlalchemy_session_factory: sessionmaker[Session],
+) -> CreateFolderFixture:
+    def _create_folder(
+        *,
+        account_id: str,
+        folder_id: str | None = None,
+        name: str = 'Pasta inicial',
+        is_archived: bool = False,
+    ) -> FolderModel:
+        session = sqlalchemy_session_factory()
+        model = FolderModel(
+            id=folder_id or str(ULID()),
+            name=name,
+            account_id=account_id,
+            is_archived=is_archived,
+        )
+        session.add(model)
+        session.commit()
+        session.refresh(model)
+        session.expunge(model)
+        session.close()
+        return model
+
+    return _create_folder
