@@ -1,3 +1,4 @@
+from animus.core.intake.domain.entities.analysis import Analysis  # noqa: TC001
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
@@ -26,16 +27,14 @@ class MoveAnalysesToFolderUseCase:
         folder_id: str | None,
     ) -> list[AnalysisDto]:
         normalized_account_id = Id.create(account_id)
-        normalized_folder_id = (
-            Id.create(folder_id) if folder_id is not None else None
-        )
+        normalized_folder_id = Id.create(folder_id) if folder_id is not None else None
 
         if normalized_folder_id is not None:
             folder = self._folders_repository.find_by_id(normalized_folder_id)
             if folder is None or folder.account_id != normalized_account_id:
                 raise FolderNotFoundError
 
-        analyses = []
+        analyses: list[Analysis] = []
         for analysis_id in analysis_ids:
             normalized_analysis_id = Id.create(analysis_id)
             analysis = self._analisyses_repository.find_by_id(normalized_analysis_id)

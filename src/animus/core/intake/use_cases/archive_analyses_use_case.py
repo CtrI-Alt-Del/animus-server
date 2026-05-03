@@ -1,3 +1,4 @@
+from animus.core.intake.domain.entities.analysis import Analysis  # noqa: TC001
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
@@ -13,7 +14,7 @@ class ArchiveAnalysesUseCase:
     def execute(self, account_id: str, analysis_ids: list[str]) -> list[AnalysisDto]:
         normalized_account_id = Id.create(account_id)
 
-        analyses = []
+        analyses: list[Analysis] = []
         for analysis_id in analysis_ids:
             normalized_analysis_id = Id.create(analysis_id)
             analysis = self._analisyses_repository.find_by_id(normalized_analysis_id)

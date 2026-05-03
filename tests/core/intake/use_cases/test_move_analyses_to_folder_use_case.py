@@ -38,7 +38,7 @@ class TestMoveAnalysesToFolderUseCase:
         analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
         account_id = '01BX5ZZKBKACTAV9WEVGEMMVRZ'
         folder_id = '01BX5ZZKBKACTAV9WEVGEMMVS1'
-        
+
         analysis = AnalysesFaker.fake(
             analysis_id=analysis_id,
             account_id=account_id,
@@ -47,7 +47,7 @@ class TestMoveAnalysesToFolderUseCase:
             folder_id=folder_id,
             account_id=account_id,
         )
-        
+
         self.analisyses_repository_mock.find_by_id.return_value = analysis
         self.folders_repository_mock.find_by_id.return_value = folder
 
@@ -69,13 +69,13 @@ class TestMoveAnalysesToFolderUseCase:
     def test_should_move_analyses_to_none_folder(self) -> None:
         analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
         account_id = '01BX5ZZKBKACTAV9WEVGEMMVRZ'
-        
+
         analysis = AnalysesFaker.fake(
             analysis_id=analysis_id,
             account_id=account_id,
             folder_id='01BX5ZZKBKACTAV9WEVGEMMVS1',
         )
-        
+
         self.analisyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(
@@ -92,12 +92,12 @@ class TestMoveAnalysesToFolderUseCase:
     ) -> None:
         account_id = '01BX5ZZKBKACTAV9WEVGEMMVRZ'
         folder_id = '01BX5ZZKBKACTAV9WEVGEMMVS1'
-        
+
         folder = FoldersFaker.fake(
             folder_id=folder_id,
             account_id='01BX5ZZKBKACTAV9WEVGEMMVS0',
         )
-        
+
         self.folders_repository_mock.find_by_id.return_value = folder
 
         with pytest.raises(FolderNotFoundError):
@@ -112,12 +112,12 @@ class TestMoveAnalysesToFolderUseCase:
     ) -> None:
         analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
         account_id = '01BX5ZZKBKACTAV9WEVGEMMVRZ'
-        
+
         analysis = AnalysesFaker.fake(
             analysis_id=analysis_id,
             account_id='01BX5ZZKBKACTAV9WEVGEMMVS0',
         )
-        
+
         self.analisyses_repository_mock.find_by_id.return_value = analysis
 
         with pytest.raises(AnalysisNotFoundError):
