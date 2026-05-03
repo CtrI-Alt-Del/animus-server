@@ -1,3 +1,15 @@
+# [1.25.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.24.0...v1.25.0) (2026-05-03)
+
+
+### Bug Fixes
+
+* ANI-66 fix linter problems ([38b8956](https://github.com/CtrI-Alt-Del/animus-server/commit/38b8956b68901c307ec045b7aedca7bb7bc762b1))
+
+
+### Features
+
+* ANI-66 add analysis folder movement endpoint ([4eea3a6](https://github.com/CtrI-Alt-Del/animus-server/commit/4eea3a6373659dcbd541a05ebe113c8e413a13c4))
+
 # [1.24.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.23.0...v1.24.0) (2026-05-02)
 
 
