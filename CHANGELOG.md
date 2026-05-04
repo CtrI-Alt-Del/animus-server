@@ -1,3 +1,16 @@
+# [1.26.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.25.0...v1.26.0) (2026-05-04)
+
+
+### Bug Fixes
+
+* ANI-76 register move analyses route and stabilize auth job test ([78871b5](https://github.com/CtrI-Alt-Del/animus-server/commit/78871b54cd385a8399a1bc7e5bc63c800c3ae477))
+* ANI-76 update analysis statuses and improve account ID handling in search analysis precedents job ([e18a495](https://github.com/CtrI-Alt-Del/animus-server/commit/e18a495dd881aed9658c04bfac8e59580aa86e4a))
+
+
+### Features
+
+* ANI-76 add batch analysis archive and move to folder flows ([69a364f](https://github.com/CtrI-Alt-Del/animus-server/commit/69a364f2631885b7d7cce3556c88d9c0346c0a74))
+
 # [1.25.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.24.0...v1.25.0) (2026-05-03)
 
 
