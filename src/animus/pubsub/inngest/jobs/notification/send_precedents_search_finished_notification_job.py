@@ -7,16 +7,13 @@ from inngest import Context, Inngest, TriggerEvent
 from animus.core.intake.domain.events import PrecedentsSearchFinishedEvent
 from animus.core.notification import SendPrecedentsSearchFinishedNotificationUseCase
 from animus.core.shared.domain.structures import Id
-from animus.database.sqlalchemy.repositories.intake import (
-    SqlalchemyAnalisysesRepository,
-)
-from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.notification import OneSignalPushNotificationProvider
 
 
 @dataclass(frozen=True)
 class _Payload:
     analysis_id: str
+    account_id: str
 
 
 class SendPrecedentsSearchFinishedNotificationJob:
@@ -36,7 +33,10 @@ class SendPrecedentsSearchFinishedNotificationJob:
                 SendPrecedentsSearchFinishedNotificationJob._normalize_payload,
                 data,
             )
-            payload = _Payload(analysis_id=str(normalized_data['analysis_id']))
+            payload = _Payload(
+                analysis_id=str(normalized_data['analysis_id']),
+                account_id=str(normalized_data['account_id']),
+            )
 
             await context.step.run(
                 'send_notification',
@@ -51,7 +51,10 @@ class SendPrecedentsSearchFinishedNotificationJob:
 
     @staticmethod
     async def _normalize_payload(data: dict[str, Any]) -> dict[str, str]:
-        return {'analysis_id': str(data['analysis_id'])}
+        return {
+            'analysis_id': str(data['analysis_id']),
+            'account_id': str(data['account_id']),
+        }
 
     @staticmethod
     async def _send_notification(payload: _Payload) -> None:
@@ -65,18 +68,10 @@ class SendPrecedentsSearchFinishedNotificationJob:
 
     @staticmethod
     def _send_notification_sync(payload: _Payload) -> None:
-        with Sqlalchemy.session() as session:
-            analisyses_repository = SqlalchemyAnalisysesRepository(session)
-            analysis_id = Id.create(payload.analysis_id)
-            analysis = analisyses_repository.find_by_id(analysis_id)
-
-            if analysis is None:
-                return
-
-            use_case = SendPrecedentsSearchFinishedNotificationUseCase(
-                push_notification_provider=OneSignalPushNotificationProvider()
-            )
-            use_case.execute(
-                account_id=analysis.account_id,
-                analysis_id=analysis.id,
-            )
+        use_case = SendPrecedentsSearchFinishedNotificationUseCase(
+            push_notification_provider=OneSignalPushNotificationProvider()
+        )
+        use_case.execute(
+            account_id=Id.create(payload.account_id),
+            analysis_id=Id.create(payload.analysis_id),
+        )

@@ -11,8 +11,8 @@ class OneSignalPushNotificationProvider(PushNotificationProvider):
         recipient_id: Id,
         analysis_id: Id,
     ) -> None:
-        title = 'Analise de peticao concluida'
-        body = 'O resumo da sua peticao ja esta disponivel.'
+        title = 'Analise de petição concluida'
+        body = 'O resumo da sua petição ja esta disponivel.'
         data = {
             'type': 'petition_summary_finished',
             'analysis_id': analysis_id.value,
@@ -25,7 +25,7 @@ class OneSignalPushNotificationProvider(PushNotificationProvider):
         analysis_id: Id,
     ) -> None:
         title = 'Busca de precedentes finalizada'
-        body = 'A busca e sintese de precedentes para sua analise foi concluida.'
+        body = 'A busca de precedentes para sua analise foi concluida.'
         data = {
             'type': 'precedents_search_finished',
             'analysis_id': analysis_id.value,

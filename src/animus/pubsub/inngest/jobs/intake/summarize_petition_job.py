@@ -30,6 +30,7 @@ from animus.providers.storage import (
     PythonDocxProvider,
 )
 from animus.pubsub.inngest.inngest_broker import InngestBroker
+from animus.pubsub.inngest.inngest_job import InngestJob
 
 
 @dataclass(frozen=True)
@@ -37,12 +38,20 @@ class _Payload:
     petition_id: str
 
 
-class SummarizePetitionJob:
+@dataclass(frozen=True)
+class _SummaryResult:
+    analysis_id: str
+    account_id: str
+
+
+class SummarizePetitionJob(InngestJob):
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
             fn_id='summarize-petition',
             trigger=TriggerEvent(event=PetitionSummaryRequestedEvent.name),
+            retries=0,
+            on_failure=SummarizePetitionJob._handle_failure,
         )
         async def _(context: Context) -> None:
             data = dict(context.event.data)
@@ -55,18 +64,23 @@ class SummarizePetitionJob:
             payload = _Payload(petition_id=str(normalized_data['petition_id']))
 
             try:
-                analysis_id_value = await context.step.run(
+                summary_result_data = await context.step.run(
                     'summarize_petition',
                     lambda payload=payload: SummarizePetitionJob._summarize_petition(
                         payload
                     ),
+                )
+                summary_result = _SummaryResult(
+                    analysis_id=str(summary_result_data['analysis_id']),
+                    account_id=str(summary_result_data['account_id']),
                 )
 
                 await context.step.run(
                     'publish_finished_event',
                     lambda: InngestBroker(inngest).publish(  # type:ignore
                         PetitionSummaryFinishedEvent(
-                            analysis_id=Id.create(analysis_id_value)
+                            analysis_id=summary_result.analysis_id,
+                            account_id=summary_result.account_id,
                         )
                     ),
                 )
@@ -86,7 +100,7 @@ class SummarizePetitionJob:
         return {'petition_id': str(data['petition_id'])}
 
     @staticmethod
-    async def _summarize_petition(payload: _Payload) -> str:
+    async def _summarize_petition(payload: _Payload) -> dict[str, str]:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             None,
@@ -94,7 +108,7 @@ class SummarizePetitionJob:
         )
 
     @staticmethod
-    def _summarize_petition_sync(payload: _Payload) -> str:
+    def _summarize_petition_sync(payload: _Payload) -> dict[str, str]:
         with Sqlalchemy.session() as session:
             petitions_repository = SqlalchemyPetitionsRepository(session)
             petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
@@ -122,7 +136,17 @@ class SummarizePetitionJob:
                 petition_document_content=document_content,
             )
 
-            return petition.analysis_id.value
+            analysis = analisyses_repository.find_by_id(petition.analysis_id)
+            if analysis is None:
+                return {
+                    'analysis_id': petition.analysis_id.value,
+                    'account_id': '',
+                }
+
+            return {
+                'analysis_id': petition.analysis_id.value,
+                'account_id': analysis.account_id.value,
+            }
 
     @staticmethod
     async def _mark_analysis_as_failed(payload: _Payload) -> None:
@@ -146,3 +170,12 @@ class SummarizePetitionJob:
                 analysis_id=petition.analysis_id.value,
                 status=AnalysisStatusValue.FAILED.value,
             )
+            session.commit()
+
+    @staticmethod
+    async def _handle_failure(context: Context) -> None:
+        event_data = SummarizePetitionJob.get_event_data_from_context_failure(context)
+        normalized_data = await SummarizePetitionJob._normalize_payload(event_data)
+        payload = _Payload(petition_id=str(normalized_data['petition_id']))
+
+        await SummarizePetitionJob._mark_analysis_as_failed(payload)

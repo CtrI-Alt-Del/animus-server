@@ -1,6 +1,6 @@
 """create folders table
 
-Revision ID: 20260420_120000
+Revision ID: 20260420_120001
 Revises: 20260418_140000, 2ee630b3a47c
 Create Date: 2026-04-20 12:00:00
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '20260420_120000'
+revision: str = '20260420_120001'
 down_revision: str | Sequence[str] | None = ('20260418_140000', '2ee630b3a47c')
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None

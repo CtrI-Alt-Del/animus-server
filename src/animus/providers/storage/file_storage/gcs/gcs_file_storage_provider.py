@@ -1,7 +1,7 @@
 import os
-from datetime import datetime, timedelta, UTC
+from datetime import timedelta
 from pathlib import Path
-from urllib.parse import quote, urlencode
+from urllib.parse import urlencode
 
 from google.api_core.exceptions import NotFound
 from google.cloud.storage import Client
@@ -31,17 +31,17 @@ class GcsFileStorageProvider(FileStorageProvider):
 
     def generate_upload_url(self, file_path: FilePath) -> UploadUrl:
         if self._is_emulator:
-            signed_url_str = self._generate_fake_emulator_signed_upload_url(file_path)
+            upload_url_str = self._generate_emulator_upload_url(file_path)
         else:
             bucket_obj = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
             blob = bucket_obj.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
-            signed_url_str = blob.generate_signed_url(  # pyright: ignore[reportUnknownMemberType]
+            upload_url_str = blob.generate_signed_url(  # pyright: ignore[reportUnknownMemberType]
                 method='PUT',
                 version='v4',
                 expiration=timedelta(minutes=15),
             )
 
-        url_obj = Url.create(signed_url_str)
+        url_obj = Url.create(upload_url_str)
         token_obj = Text.create('')
 
         return UploadUrl.create(url=url_obj, token=token_obj, file_path=file_path)
@@ -91,30 +91,30 @@ class GcsFileStorageProvider(FileStorageProvider):
             except NotFound:
                 continue
 
-    def _generate_fake_emulator_signed_upload_url(self, file_path: FilePath) -> str:
-        base_url = self._normalize_emulator_base_url(Env.GCS_EMULATOR_HOST)
-        object_path = quote(file_path.value.lstrip('/'), safe='/')
+    def _generate_emulator_upload_url(self, file_path: FilePath) -> str:
+        """
+        Fake GCS local.
 
-        now = datetime.now(UTC)
-        expires_at = now + timedelta(minutes=15)
-        datestamp = now.strftime('%Y%m%d')
-        timestamp = now.strftime('%Y%m%dT%H%M%SZ')
+        O emulador testado não aceita:
+            PUT /{bucket}/{object}
+
+        Ele aceita upload pela JSON API:
+            POST /upload/storage/v1/b/{bucket}/o?uploadType=media&name={object}
+
+        Portanto, em dev/local, o cliente deve fazer POST com o arquivo no body.
+        Em produção, o cliente continua fazendo PUT na signed URL real do GCS.
+        """
+        base_url = self._normalize_emulator_base_url(Env.GCS_EMULATOR_HOST)
+        object_name = file_path.value.lstrip('/')
 
         query = urlencode(
             {
-                'X-Goog-Algorithm': 'GOOG4-RSA-SHA256',
-                'X-Goog-Credential': (
-                    f'fake-sa@local-dev.iam.gserviceaccount.com/'
-                    f'{datestamp}/auto/storage/goog4_request'
-                ),
-                'X-Goog-Date': timestamp,
-                'X-Goog-Expires': int((expires_at - now).total_seconds()),
-                'X-Goog-SignedHeaders': 'host',
-                'X-Goog-Signature': 'fake-signature',
+                'uploadType': 'media',
+                'name': object_name,
             }
         )
 
-        return f'{base_url}/{Env.GCS_BUCKET_NAME}/{object_path}?{query}'
+        return f'{base_url}/upload/storage/v1/b/{Env.GCS_BUCKET_NAME}/o?{query}'
 
     @staticmethod
     def _normalize_emulator_base_url(host: str | None) -> str:

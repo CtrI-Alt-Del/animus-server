@@ -1,6 +1,6 @@
 import asyncio
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, cast
 
 from inngest import Context, Inngest, TriggerEvent
 
@@ -29,6 +29,7 @@ from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_
     OpenAIPetitionSummaryEmbeddingsProvider,
 )
 from animus.pubsub.inngest.inngest_broker import InngestBroker
+from animus.pubsub.inngest.inngest_job import InngestJob
 from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
     QdrantPrecedentsEmbeddingsRepository,
 )
@@ -54,7 +55,7 @@ class _Payload:
         )
 
 
-class SearchAnalysisPrecedentsJob:
+class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
@@ -62,6 +63,8 @@ class SearchAnalysisPrecedentsJob:
             trigger=TriggerEvent(
                 event=AnalysisPrecedentsSearchRequestedEvent.name,
             ),
+            retries=2,
+            on_failure=SearchAnalysisPrecedentsJob._handle_failure,
         )
         async def _(context: Context) -> None:
             data = dict(context.event.data)
@@ -79,7 +82,7 @@ class SearchAnalysisPrecedentsJob:
             )
 
             try:
-                analysis_precedents_data = await context.step.run(
+                search_result_data = await context.step.run(
                     'search_precedents',
                     lambda payload=payload: (
                         SearchAnalysisPrecedentsJob._search_precedents(
@@ -87,6 +90,30 @@ class SearchAnalysisPrecedentsJob:
                         )
                     ),
                 )
+                if isinstance(search_result_data, dict):
+                    search_result_data_dict = cast(dict[str, Any], search_result_data)
+                    analysis_precedents_data = list(
+                        cast(
+                            list[dict[str, Any]],
+                            search_result_data_dict.get(
+                                'analysis_precedents_data', []
+                            ),
+                        )
+                    )
+                    account_id = str(search_result_data_dict.get('account_id', ''))
+                else:
+                    analysis_precedents_data = list(search_result_data)
+                    account_id = ''
+
+                if account_id == '':
+                    account_id = await context.step.run(
+                        'get_analysis_account_id',
+                        lambda payload=payload: (
+                            SearchAnalysisPrecedentsJob._get_analysis_account_id(
+                                payload
+                            )
+                        ),
+                    )
 
                 await context.step.run(
                     'mark_analysis_as_analyzing_similarity',
@@ -111,7 +138,8 @@ class SearchAnalysisPrecedentsJob:
                     'publish_finished_event',
                     lambda payload=payload: InngestBroker(inngest).publish(  # type: ignore
                         PrecedentsSearchFinishedEvent(
-                            analysis_id=Id.create(payload.analysis_id)
+                            analysis_id=payload.analysis_id,
+                            account_id=account_id,
                         )
                     ),
                 )
@@ -171,16 +199,35 @@ class SearchAnalysisPrecedentsJob:
                 petition_summary_embeddings_provider=(
                     OpenAIPetitionSummaryEmbeddingsProvider()
                 ),
-                precedents_embeddings_repository=(_build_precedents_embeddings_repository()),
+                precedents_embeddings_repository=(
+                    _build_precedents_embeddings_repository()
+                ),
                 precedents_repository=precedents_repository,
             ).execute(
                 analysis_id=payload.analysis_id,
                 dto=payload.filters_dto,
             )
 
-        return [
-            asdict(analysis_precedent) for analysis_precedent in analysis_precedents
-        ]
+        return [asdict(analysis_precedent) for analysis_precedent in analysis_precedents]
+
+    @staticmethod
+    async def _get_analysis_account_id(payload: _Payload) -> str:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: SearchAnalysisPrecedentsJob._get_analysis_account_id_sync(payload),
+        )
+
+    @staticmethod
+    def _get_analysis_account_id_sync(payload: _Payload) -> str:
+        with Sqlalchemy.session() as session:
+            analysis = SqlalchemyAnalisysesRepository(session).find_by_id(
+                Id.create(payload.analysis_id)
+            )
+            if analysis is None:
+                return ''
+
+            return analysis.account_id.value
 
     @staticmethod
     async def _mark_analysis_as_analyzing_similarity(payload: _Payload) -> None:
@@ -275,3 +322,19 @@ class SearchAnalysisPrecedentsJob:
                 status=AnalysisStatusValue.FAILED.value,
             )
             session.commit()
+
+    @staticmethod
+    async def _handle_failure(context: Context) -> None:
+        event_data = SearchAnalysisPrecedentsJob.get_event_data_from_context_failure(
+            context
+        )
+        normalized_data = await SearchAnalysisPrecedentsJob._normalize_payload(
+            event_data
+        )
+        payload = _Payload(
+            analysis_id=str(normalized_data['analysis_id']),
+            courts=list(normalized_data['courts']),
+            precedent_kinds=list(normalized_data['precedent_kinds']),
+            limit=int(normalized_data['limit']),
+        )
+        await SearchAnalysisPrecedentsJob._mark_analysis_as_failed(payload)
