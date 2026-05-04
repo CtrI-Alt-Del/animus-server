@@ -79,6 +79,7 @@ class TestNotificationJobs:
             name='intake/petition_summary.finished',
             data={
                 'analysis_id': seeded_data['analysis_id'],
+                'account_id': seeded_data['account_id'],
             },
         )
 
@@ -142,6 +143,7 @@ class TestNotificationJobs:
             name='intake/precedents_search.finished',
             data={
                 'analysis_id': seeded_data['analysis_id'],
+                'account_id': seeded_data['account_id'],
             },
         )
 
