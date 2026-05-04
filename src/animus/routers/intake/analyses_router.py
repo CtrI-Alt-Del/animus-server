@@ -11,6 +11,7 @@ from animus.rest.controllers.intake import (
     ListAnalysisPetitionsController,
     ListAnalysisPrecedentsController,
     ListUnfolderedAnalysesController,
+    MoveAnalysesToFolderController,
     RenameAnalysisController,
     SearchAnalysisPrecedentsController,
     UpdateAnalysisStatusController,
@@ -38,6 +39,7 @@ class AnalysesRouter:
         ListAnalysisPrecedentsController.handle(router)
         GetAnalysisStatusController.handle(router)
         UpdateAnalysisStatusController.handle(router)
+        MoveAnalysesToFolderController.handle(router)
         ChooseAnalysisPrecedentController.handle(router)
 
         return router

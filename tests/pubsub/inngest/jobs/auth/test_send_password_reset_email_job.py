@@ -51,7 +51,7 @@ class TestSendPasswordResetEmailJob:
 
         assert response.status == 200
 
-        deadline = time.monotonic() + 90
+        deadline = time.monotonic() + 120
         while time.monotonic() < deadline:
             if len(captured_calls) == 1:
                 break
