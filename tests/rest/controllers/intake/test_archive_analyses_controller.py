@@ -11,7 +11,7 @@ BuildAuthHeadersFixture = Callable[[str], dict[str, str]]
 CreateAnalysisFixture = Callable[..., AnalysisModel]
 
 
-class TestArchiveAnalysisController:
+class TestArchiveAnalysesController:
     def test_should_return_200_and_keep_archive_idempotent(
         self,
         client: TestClient,
@@ -24,8 +24,9 @@ class TestArchiveAnalysisController:
         analysis = create_analysis(account_id=account.id, is_archived=True)
 
         response = client.patch(
-            f'/intake/analyses/{analysis.id}/archive',
+            '/intake/analyses/archive',
             headers=build_auth_headers(account.id),
+            json={'analysis_ids': [analysis.id]},
         )
 
         inspection_session = sqlalchemy_session_factory()
@@ -37,9 +38,9 @@ class TestArchiveAnalysisController:
         assert response.status_code == 200
         assert persisted_analysis is not None
         assert persisted_analysis.is_archived is True
-        assert response.json()['is_archived'] is True
+        assert response.json()[0]['is_archived'] is True
 
-    def test_should_return_404_when_analysis_belongs_to_another_account(
+    def test_should_return_404_when_any_analysis_belongs_to_another_account(
         self,
         client: TestClient,
         create_account: CreateAccountFixture,
@@ -59,8 +60,9 @@ class TestArchiveAnalysisController:
         analysis = create_analysis(account_id=owner_account.id)
 
         response = client.patch(
-            f'/intake/analyses/{analysis.id}/archive',
+            '/intake/analyses/archive',
             headers=build_auth_headers(authenticated_account.id),
+            json={'analysis_ids': [analysis.id]},
         )
 
         assert response.status_code == 404
@@ -69,7 +71,7 @@ class TestArchiveAnalysisController:
             'message': 'Analise nao encontrada',
         }
 
-    def test_should_return_400_when_analysis_id_is_invalid(
+    def test_should_return_400_when_analysis_ids_are_missing(
         self,
         client: TestClient,
         create_account: CreateAccountFixture,
@@ -78,10 +80,9 @@ class TestArchiveAnalysisController:
         account = create_account(is_verified=True, is_active=True)
 
         response = client.patch(
-            '/intake/analyses/invalid-analysis-id/archive',
+            '/intake/analyses/archive',
             headers=build_auth_headers(account.id),
+            json={},
         )
 
-        assert response.status_code == 400
-        assert response.json()['title'] == 'Erro de validação'
-        assert 'ULID' in response.json()['message']
+        assert response.status_code == 422

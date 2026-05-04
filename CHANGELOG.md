@@ -1,3 +1,32 @@
+# [1.25.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.24.0...v1.25.0) (2026-05-03)
+
+
+### Bug Fixes
+
+* ANI-66 fix linter problems ([38b8956](https://github.com/CtrI-Alt-Del/animus-server/commit/38b8956b68901c307ec045b7aedca7bb7bc762b1))
+
+
+### Features
+
+* ANI-66 add analysis folder movement endpoint ([4eea3a6](https://github.com/CtrI-Alt-Del/animus-server/commit/4eea3a6373659dcbd541a05ebe113c8e413a13c4))
+
+# [1.24.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.23.0...v1.24.0) (2026-05-02)
+
+
+### Bug Fixes
+
+* ANI-63 address unresolved review feedback ([b50c5c9](https://github.com/CtrI-Alt-Del/animus-server/commit/b50c5c9db67de4f6963a3472cff2c9982d9fc1ca))
+* ANI-63 make intake squad synthesis deterministic ([f2a0d05](https://github.com/CtrI-Alt-Del/animus-server/commit/f2a0d056af975c8001f8b541dacea288dd28165c))
+* ANI-63 restore precedent final rank persistence and migration chain ([02db91c](https://github.com/CtrI-Alt-Del/animus-server/commit/02db91c56249c4d7651f54681b149b09de86a043))
+
+
+### Features
+
+* ANI-63 implement intake precedent dataset and petition enrichment flow ([6f3caca](https://github.com/CtrI-Alt-Del/animus-server/commit/6f3caca38d71a9dc258de449936d0bae2e8caad8))
+* ANI-63 migrate legal features schema and intake precedent flow ([f293d81](https://github.com/CtrI-Alt-Del/animus-server/commit/f293d817abd27d11b585ec3912ae7c1bbecdfad6))
+* ANI-63 publish PrecedentsSearchFinishedEvent upon completion of search analysis job ([96467d8](https://github.com/CtrI-Alt-Del/animus-server/commit/96467d860899af403ced1ba555cec04acff5b161))
+* ANI-63 set seed for deterministic output in intake squad synthesis ([42477ad](https://github.com/CtrI-Alt-Del/animus-server/commit/42477addf83098b8b56f33940a8ae1c83d953554))
+
 # [1.23.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.22.1...v1.23.0) (2026-04-29)
 
 

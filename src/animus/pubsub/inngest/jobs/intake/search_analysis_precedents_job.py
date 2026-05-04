@@ -55,6 +55,12 @@ class _Payload:
         )
 
 
+@dataclass(frozen=True)
+class _SearchPrecedentsResult:
+    analysis_precedents_data: list[dict[str, Any]]
+    account_id: str
+
+
 class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def handle(inngest: Inngest) -> Any:
@@ -82,13 +88,19 @@ class SearchAnalysisPrecedentsJob(InngestJob):
             )
 
             try:
-                analysis_precedents_data = await context.step.run(
+                search_result_data = await context.step.run(
                     'search_precedents',
                     lambda payload=payload: (
                         SearchAnalysisPrecedentsJob._search_precedents(
                             payload,
                         )
                     ),
+                )
+                search_result = _SearchPrecedentsResult(
+                    analysis_precedents_data=list(
+                        search_result_data['analysis_precedents_data']
+                    ),
+                    account_id=str(search_result_data['account_id']),
                 )
 
                 await context.step.run(
@@ -102,7 +114,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
 
                 await context.step.run(
                     'synthesize_analysis_precedents',
-                    lambda payload=payload, analysis_precedents_data=analysis_precedents_data: (
+                    lambda payload=payload, analysis_precedents_data=search_result.analysis_precedents_data: (
                         SearchAnalysisPrecedentsJob._synthesize_analysis_precedents(
                             payload,
                             analysis_precedents_data,
@@ -114,7 +126,8 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                     'publish_finished_event',
                     lambda payload=payload: InngestBroker(inngest).publish(  # type: ignore
                         PrecedentsSearchFinishedEvent(
-                            analysis_id=Id.create(payload.analysis_id)
+                            analysis_id=payload.analysis_id,
+                            account_id=search_result.account_id,
                         )
                     ),
                 )
@@ -146,7 +159,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     async def _search_precedents(
         payload: _Payload,
-    ) -> list[dict[str, Any]]:
+    ) -> dict[str, Any]:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             None,
@@ -156,7 +169,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def _search_precedents_sync(
         payload: _Payload,
-    ) -> list[dict[str, Any]]:
+    ) -> dict[str, Any]:
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
             petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
@@ -168,6 +181,13 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
             )
             session.commit()
+
+            analysis = analisyses_repository.find_by_id(Id.create(payload.analysis_id))
+            if analysis is None:
+                return {
+                    'analysis_precedents_data': [],
+                    'account_id': '',
+                }
 
             analysis_precedents = SearchAnalysisPrecedentsUseCase(
                 petition_summaries_repository=petition_summaries_repository,
@@ -183,9 +203,12 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 dto=payload.filters_dto,
             )
 
-        return [
-            asdict(analysis_precedent) for analysis_precedent in analysis_precedents
-        ]
+        return {
+            'analysis_precedents_data': [
+                asdict(analysis_precedent) for analysis_precedent in analysis_precedents
+            ],
+            'account_id': analysis.account_id.value,
+        }
 
     @staticmethod
     async def _mark_analysis_as_analyzing_similarity(payload: _Payload) -> None:
