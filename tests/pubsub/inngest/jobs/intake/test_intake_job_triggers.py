@@ -56,6 +56,7 @@ def _seed_data(
     return {
         'analysis_id': analysis_id,
         'petition_id': petition_id,
+        'account_id': account_id,
     }
 
 
@@ -75,8 +76,11 @@ class TestIntakeJobTriggers:
         seeded_data = _seed_data(sqlalchemy_session_factory)
         published_events: list[str] = []
 
-        async def _summarize_petition(payload: Any) -> str:
-            return seeded_data['analysis_id']
+        async def _summarize_petition(payload: Any) -> dict[str, str]:
+            return {
+                'analysis_id': seeded_data['analysis_id'],
+                'account_id': seeded_data['account_id'],
+            }
 
         def _publish(_self: InngestBroker, event: Any) -> None:
             published_events.append(event.name)
@@ -117,8 +121,11 @@ class TestIntakeJobTriggers:
         seeded_data = _seed_data(sqlalchemy_session_factory)
         published_events: list[str] = []
 
-        async def _search_precedents(payload: Any) -> list[dict[str, Any]]:
-            return []
+        async def _search_precedents(payload: Any) -> dict[str, Any]:
+            return {
+                'analysis_precedents_data': [],
+                'account_id': seeded_data['account_id'],
+            }
 
         async def _mark_analysis_as_analyzing_similarity(payload: Any) -> None:
             pass

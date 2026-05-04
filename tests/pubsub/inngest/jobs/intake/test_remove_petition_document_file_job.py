@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from pytest import MonkeyPatch
 
-from animus.providers.storage import SupabaseFileStorageProvider
+from animus.providers.storage import GcsFileStorageProvider
 
 
 class TestRemovePetitionDocumentFileJob:
@@ -23,13 +23,13 @@ class TestRemovePetitionDocumentFileJob:
         captured_calls: list[list[str]] = []
 
         def _remove_files(
-            _self: SupabaseFileStorageProvider,
+            _self: GcsFileStorageProvider,
             file_paths: Any,
         ) -> None:
             captured_calls.append([file_path.value for file_path in file_paths])
 
         monkeypatch.setattr(
-            SupabaseFileStorageProvider,
+            GcsFileStorageProvider,
             'remove_files',
             _remove_files,
         )

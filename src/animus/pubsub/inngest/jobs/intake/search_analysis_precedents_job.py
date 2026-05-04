@@ -1,6 +1,6 @@
 import asyncio
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, cast
 
 from inngest import Context, Inngest, TriggerEvent
 
@@ -55,12 +55,6 @@ class _Payload:
         )
 
 
-@dataclass(frozen=True)
-class _SearchPrecedentsResult:
-    analysis_precedents_data: list[dict[str, Any]]
-    account_id: str
-
-
 class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def handle(inngest: Inngest) -> Any:
@@ -96,12 +90,30 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                         )
                     ),
                 )
-                search_result = _SearchPrecedentsResult(
-                    analysis_precedents_data=list(
-                        search_result_data['analysis_precedents_data']
-                    ),
-                    account_id=str(search_result_data['account_id']),
-                )
+                if isinstance(search_result_data, dict):
+                    search_result_data_dict = cast(dict[str, Any], search_result_data)
+                    analysis_precedents_data = list(
+                        cast(
+                            list[dict[str, Any]],
+                            search_result_data_dict.get(
+                                'analysis_precedents_data', []
+                            ),
+                        )
+                    )
+                    account_id = str(search_result_data_dict.get('account_id', ''))
+                else:
+                    analysis_precedents_data = list(search_result_data)
+                    account_id = ''
+
+                if account_id == '':
+                    account_id = await context.step.run(
+                        'get_analysis_account_id',
+                        lambda payload=payload: (
+                            SearchAnalysisPrecedentsJob._get_analysis_account_id(
+                                payload
+                            )
+                        ),
+                    )
 
                 await context.step.run(
                     'mark_analysis_as_analyzing_similarity',
@@ -114,7 +126,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
 
                 await context.step.run(
                     'synthesize_analysis_precedents',
-                    lambda payload=payload, analysis_precedents_data=search_result.analysis_precedents_data: (
+                    lambda payload=payload, analysis_precedents_data=analysis_precedents_data: (
                         SearchAnalysisPrecedentsJob._synthesize_analysis_precedents(
                             payload,
                             analysis_precedents_data,
@@ -127,7 +139,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                     lambda payload=payload: InngestBroker(inngest).publish(  # type: ignore
                         PrecedentsSearchFinishedEvent(
                             analysis_id=payload.analysis_id,
-                            account_id=search_result.account_id,
+                            account_id=account_id,
                         )
                     ),
                 )
@@ -159,7 +171,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     async def _search_precedents(
         payload: _Payload,
-    ) -> dict[str, Any]:
+    ) -> list[dict[str, Any]]:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             None,
@@ -169,7 +181,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def _search_precedents_sync(
         payload: _Payload,
-    ) -> dict[str, Any]:
+    ) -> list[dict[str, Any]]:
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
             petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
@@ -181,13 +193,6 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
             )
             session.commit()
-
-            analysis = analisyses_repository.find_by_id(Id.create(payload.analysis_id))
-            if analysis is None:
-                return {
-                    'analysis_precedents_data': [],
-                    'account_id': '',
-                }
 
             analysis_precedents = SearchAnalysisPrecedentsUseCase(
                 petition_summaries_repository=petition_summaries_repository,
@@ -203,12 +208,26 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 dto=payload.filters_dto,
             )
 
-        return {
-            'analysis_precedents_data': [
-                asdict(analysis_precedent) for analysis_precedent in analysis_precedents
-            ],
-            'account_id': analysis.account_id.value,
-        }
+        return [asdict(analysis_precedent) for analysis_precedent in analysis_precedents]
+
+    @staticmethod
+    async def _get_analysis_account_id(payload: _Payload) -> str:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: SearchAnalysisPrecedentsJob._get_analysis_account_id_sync(payload),
+        )
+
+    @staticmethod
+    def _get_analysis_account_id_sync(payload: _Payload) -> str:
+        with Sqlalchemy.session() as session:
+            analysis = SqlalchemyAnalisysesRepository(session).find_by_id(
+                Id.create(payload.analysis_id)
+            )
+            if analysis is None:
+                return ''
+
+            return analysis.account_id.value
 
     @staticmethod
     async def _mark_analysis_as_analyzing_similarity(payload: _Payload) -> None:
@@ -288,7 +307,6 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     async def _mark_analysis_as_failed(payload: _Payload) -> None:
         loop = asyncio.get_running_loop()
-        print('SearchAnalysisPrecedentsJob._mark_analysis_as_failed')
         await loop.run_in_executor(
             None,
             lambda: SearchAnalysisPrecedentsJob._mark_analysis_as_failed_sync(payload),
