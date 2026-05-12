@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.database.sqlalchemy.models.intake import (
     AnalysisModel,
@@ -32,6 +33,7 @@ def _create_full_analysis(
             name='Analise completa',
             folder_id=None,
             account_id=account_id,
+            type=AnalysisType.LAWYER.value,
             status=AnalysisStatusValue.PETITION_UPLOADED.value,
             is_archived=False,
             created_at=datetime.now(UTC),

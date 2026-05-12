@@ -2,7 +2,9 @@ from unittest.mock import ANY, call, create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.lawyer_analysis_status import (
+    LawyerAnalysisStatus,
+)
 from animus.core.intake.domain.entities.dtos.petition_document_dto import (
     PetitionDocumentDto,
 )
@@ -41,7 +43,7 @@ class TestCreatePetitionUseCase:
         analysis_id_entity = Id.create(analysis_id)
         analysis = AnalysesFaker.fake(
             analysis_id=analysis_id,
-            status=AnalysisStatusValue.WAITING_PETITION.value,
+            status=LawyerAnalysisStatus.WAITING_DOCUMENT_UPLOAD.value,
         )
         self.petitions_repository_mock.find_by_analysis_id.return_value = None
         self.analisyses_repository_mock.find_by_id.return_value = analysis
@@ -69,7 +71,7 @@ class TestCreatePetitionUseCase:
         replaced_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
 
         assert added_petition.dto == result
-        assert replaced_analysis.status.value == AnalysisStatusValue.PETITION_UPLOADED
+        assert replaced_analysis.status == LawyerAnalysisStatus.DOCUMENT_UPLOADED.value
         assert result.id is not None
         assert result.analysis_id == analysis_id
         assert result.uploaded_at == '2026-03-31T10:30:00+00:00'
@@ -91,7 +93,7 @@ class TestCreatePetitionUseCase:
         )
         analysis = AnalysesFaker.fake(
             analysis_id=analysis_id,
-            status=AnalysisStatusValue.WAITING_PETITION.value,
+            status=LawyerAnalysisStatus.WAITING_DOCUMENT_UPLOAD.value,
         )
         document = PetitionDocumentDto(
             file_path='petitions/new-petition.pdf',
@@ -133,7 +135,7 @@ class TestCreatePetitionUseCase:
             published_event.payload.petition_document_path
             == existing_document.file_path
         )
-        assert updated_analysis.status.value == AnalysisStatusValue.PETITION_UPLOADED
+        assert updated_analysis.status == LawyerAnalysisStatus.DOCUMENT_UPLOADED.value
         assert added_petition.dto == result
         assert result.analysis_id == analysis_id
         assert result.document == document

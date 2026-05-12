@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.models.intake import (
@@ -34,6 +35,7 @@ def _create_analysis_with_petition_summary(
             name='Analise de precedentes',
             folder_id=None,
             account_id=account_id,
+            type=AnalysisType.LAWYER.value,
             status=AnalysisStatusValue.WAITING_PETITION.value,
             is_archived=False,
             created_at=datetime.now(UTC),

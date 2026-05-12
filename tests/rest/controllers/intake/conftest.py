@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.models.intake import AnalysisModel
@@ -36,6 +37,7 @@ def create_analysis(
         account_id: str,
         analysis_id: str | None = None,
         name: str = 'Analise inicial',
+        analysis_type: str = AnalysisType.LAWYER.value,
         status: str = AnalysisStatusValue.WAITING_PETITION.value,
         folder_id: str | None = None,
         is_archived: bool = False,
@@ -46,6 +48,7 @@ def create_analysis(
             name=name,
             folder_id=folder_id,
             account_id=account_id,
+            type=analysis_type,
             status=status,
             is_archived=is_archived,
             created_at=datetime.now(UTC),

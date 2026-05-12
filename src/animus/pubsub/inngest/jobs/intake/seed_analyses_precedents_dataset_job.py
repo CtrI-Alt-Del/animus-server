@@ -10,20 +10,23 @@ from inngest import Context, Inngest, TriggerEvent
 from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
     AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
 )
-from animus.ai.agno.workflows.intake.agno_summarize_petition_workflow import (
-    AgnoSummarizePetitionWorkflow,
+from animus.ai.agno.workflows.intake.agno_summarize_case_workflow import (
+    AgnoSummarizeCaseWorkflow,
 )
 from animus.constants import Env
 from animus.core.auth.domain.errors import AccountNotFoundError
 from animus.core.auth.domain.structures import Email
-from animus.core.intake.domain.entities.dtos import PetitionDocumentDto
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentDatasetRowDto,
     AnalysisPrecedentsSearchFiltersDto,
 )
+from animus.core.intake.interfaces.petition_summaries_repository import (
+    PetitionSummariesRepository,
+)
 from animus.core.intake.use_cases import (
+    CreateAnalysisDocumentUseCase,
     CreateAnalysisUseCase,
-    CreatePetitionUseCase,
     SearchAnalysisPrecedentsUseCase,
 )
 from animus.core.shared.domain.abstracts import Event
@@ -34,15 +37,15 @@ from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
 )
 from animus.database.sqlalchemy.repositories.auth import SqlalchemyAccountsRepository
 from animus.database.sqlalchemy.repositories.intake import (
+    SqlalchemyAnalysisDocumentsRepository,
     SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyAnalisysesRepository,
-    SqlalchemyPetitionSummariesRepository,
-    SqlalchemyPetitionsRepository,
+    SqlalchemyCaseSummariesRepository,
     SqlalchemyPrecedentsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
-from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_summary_embeddings_provider import (
-    OpenAIPetitionSummaryEmbeddingsProvider,
+from animus.providers.intake.case_summary_embeddings.openai.openai_case_summary_embeddings_provider import (
+    OpenAICaseSummaryEmbeddingsProvider,
 )
 from animus.providers.storage import (
     GcsFileStorageProvider,
@@ -59,7 +62,7 @@ class _NoopBroker:
 
 class SeedAnalysesPrecedentsDatasetJob:
     _ACCOUNT_EMAIL = 'animus.ctrlaltdel@gmail.com'
-    _PETITIONS_PREFIX = 'intake/xertica/petitions/'
+    _DOCUMENTS_PREFIX = 'intake/xertica/documents/'
     _DATASET_PATH_PREFIX = 'intake/datasets/analysis-precedents/'
     _LOCAL_DATASET_PREFIX = 'tmp/intake/datasets/analysis-precedents/'
 
@@ -76,19 +79,19 @@ class SeedAnalysesPrecedentsDatasetJob:
                 'resolve_account',
                 SeedAnalysesPrecedentsDatasetJob._resolve_account,
             )
-            petition_file_paths = await context.step.run(
-                'list_petition_files',
-                SeedAnalysesPrecedentsDatasetJob._list_petition_files,
+            document_file_paths = await context.step.run(
+                'list_document_files',
+                SeedAnalysesPrecedentsDatasetJob._list_document_files,
             )
 
             all_dataset_rows_data: list[dict[str, Any]] = []
-            for index, petition_file_path in enumerate(petition_file_paths, start=1):
+            for index, document_file_path in enumerate(document_file_paths, start=1):
                 dataset_rows_data = await context.step.run(
                     f'process_file_{index}',
-                    lambda account_id=account_id, petition_file_path=petition_file_path: (
+                    lambda account_id=account_id, document_file_path=document_file_path: (
                         SeedAnalysesPrecedentsDatasetJob._process_file(
                             account_id=account_id,
-                            petition_file_path=petition_file_path,
+                            document_file_path=document_file_path,
                         )
                     ),
                 )
@@ -116,25 +119,25 @@ class SeedAnalysesPrecedentsDatasetJob:
             return account.id.value
 
     @staticmethod
-    async def _list_petition_files() -> list[str]:
+    async def _list_document_files() -> list[str]:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             None,
-            SeedAnalysesPrecedentsDatasetJob._list_petition_files_sync,
+            SeedAnalysesPrecedentsDatasetJob._list_document_files_sync,
         )
 
     @staticmethod
-    def _list_petition_files_sync() -> list[str]:
+    def _list_document_files_sync() -> list[str]:
         file_storage_provider = GcsFileStorageProvider()
         bucket = file_storage_provider.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
         blobs = cast(
             'Any',
             bucket.list_blobs(  # pyright: ignore[reportUnknownMemberType]
-                prefix=SeedAnalysesPrecedentsDatasetJob._PETITIONS_PREFIX,
+                prefix=SeedAnalysesPrecedentsDatasetJob._DOCUMENTS_PREFIX,
             ),
         )
 
-        petition_file_paths: list[str] = []
+        document_file_paths: list[str] = []
         for blob in blobs:
             blob_name = getattr(blob, 'name', None)
             if not isinstance(blob_name, str):
@@ -146,88 +149,84 @@ class SeedAnalysesPrecedentsDatasetJob:
             if not blob_name.lower().endswith('.pdf'):
                 continue
 
-            petition_file_paths.append(blob_name)
+            document_file_paths.append(blob_name)
 
-        petition_file_paths.sort()
-        return petition_file_paths
+        document_file_paths.sort()
+        return document_file_paths
 
     @staticmethod
     async def _process_file(
         account_id: str,
-        petition_file_path: str,
+        document_file_path: str,
     ) -> list[dict[str, Any]]:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             None,
             lambda: SeedAnalysesPrecedentsDatasetJob._process_file_sync(
                 account_id=account_id,
-                petition_file_path=petition_file_path,
+                document_file_path=document_file_path,
             ),
         )
 
     @staticmethod
     def _process_file_sync(
         account_id: str,
-        petition_file_path: str,
+        document_file_path: str,
     ) -> list[dict[str, Any]]:
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
-            petitions_repository = SqlalchemyPetitionsRepository(session)
-            petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
-                session
-            )
+            analysis_documents_repository = SqlalchemyAnalysisDocumentsRepository(session)
+            case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
                 session
             )
             precedents_repository = SqlalchemyPrecedentsRepository(session)
 
-            existing_petition = petitions_repository.find_by_document_file_path(
-                FilePath.create(petition_file_path)
+            existing_document = analysis_documents_repository.find_by_file_path(
+                FilePath.create(document_file_path)
             )
-            if existing_petition is None:
+            if existing_document is None:
                 analysis = CreateAnalysisUseCase(analisyses_repository).execute(
                     account_id=account_id,
+                    type=AnalysisType.LAWYER.value,
                 )
                 session.flush()
                 analysis_id = Id.create(analysis.id).value
 
-                petition = CreatePetitionUseCase(
-                    petitions_repository=petitions_repository,
+                CreateAnalysisDocumentUseCase(
+                    analysis_documents_repository=analysis_documents_repository,
                     analisyses_repository=analisyses_repository,
                     broker=_NoopBroker(),
                 ).execute(
                     analysis_id=analysis_id,
                     uploaded_at=Datetime.create_at_now().value.isoformat(),
-                    document=PetitionDocumentDto(
-                        file_path=petition_file_path,
-                        name=Path(petition_file_path).name,
-                    ),
+                    file_path=document_file_path,
+                    name=Path(document_file_path).name,
                 )
                 session.flush()
-                petition_id = Id.create(petition.id).value
 
                 document_content = GetDocumentContentUseCase(
                     file_storage_provider=GcsFileStorageProvider(),
                     pdf_provider=PypdfPdfProvider(),
                     docx_provider=PythonDocxProvider(),
-                ).execute(file_path=FilePath.create(petition_file_path))
+                ).execute(file_path=FilePath.create(document_file_path))
 
-                AgnoSummarizePetitionWorkflow(
-                    petition_summaries_repository=petition_summaries_repository,
-                    petitions_repository=petitions_repository,
+                AgnoSummarizeCaseWorkflow(
+                    case_summaries_repository=case_summaries_repository,
+                    analysis_documents_repository=analysis_documents_repository,
                     analisyses_repository=analisyses_repository,
                 ).run(
-                    petition_id=petition_id,
-                    petition_document_content=document_content,
+                    analysis_id=analysis_id,
+                    document_content=document_content,
                 )
                 session.flush()
             else:
-                analysis_id = existing_petition.analysis_id.value
+                analysis_id = existing_document.analysis_id.value
 
-            petition_summary = petition_summaries_repository.find_by_analysis_id(
+            case_summary = case_summaries_repository.find_by_analysis_id(
                 analysis_id=Id.create(analysis_id),
             )
-            if petition_summary is None:
+            if case_summary is None:
                 return []
 
             existing_analysis_precedents = (
@@ -243,9 +242,9 @@ class SeedAnalysesPrecedentsDatasetJob:
             else:
                 filters_dto = AnalysisPrecedentsSearchFiltersDto(limit=10)
                 analysis_precedents = SearchAnalysisPrecedentsUseCase(
-                    petition_summaries_repository=petition_summaries_repository,
-                    petition_summary_embeddings_provider=(
-                        OpenAIPetitionSummaryEmbeddingsProvider()
+                    case_summaries_repository=case_summaries_repository,
+                    case_summary_embeddings_provider=(
+                        OpenAICaseSummaryEmbeddingsProvider()
                     ),
                     precedents_embeddings_repository=(
                         QdrantPrecedentsEmbeddingsRepository()
@@ -257,7 +256,10 @@ class SeedAnalysesPrecedentsDatasetJob:
                 )
 
                 AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
-                    petition_summaries_repository=petition_summaries_repository,
+                    petition_summaries_repository=cast(
+                        PetitionSummariesRepository,
+                        case_summaries_repository,
+                    ),
                     analysis_precedents_repository=analysis_precedents_repository,
                     analisyses_repository=analisyses_repository,
                 ).run(

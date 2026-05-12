@@ -18,15 +18,18 @@ from animus.core.intake.use_cases import (
     SearchAnalysisPrecedentsUseCase,
     UpdateAnalysisStatusUseCase,
 )
+from animus.core.intake.interfaces.petition_summaries_repository import (
+    PetitionSummariesRepository,
+)
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalisysesRepository,
     SqlalchemyAnalysisPrecedentsRepository,
-    SqlalchemyPetitionSummariesRepository,
+    SqlalchemyCaseSummariesRepository,
     SqlalchemyPrecedentsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
-from animus.providers.intake.petition_summary_embeddings.openai.openai_petition_summary_embeddings_provider import (
-    OpenAIPetitionSummaryEmbeddingsProvider,
+from animus.providers.intake.case_summary_embeddings.openai.openai_case_summary_embeddings_provider import (
+    OpenAICaseSummaryEmbeddingsProvider,
 )
 from animus.pubsub.inngest.inngest_broker import InngestBroker
 from animus.pubsub.inngest.inngest_job import InngestJob
@@ -184,7 +187,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     ) -> list[dict[str, Any]]:
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
-            petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
+            case_summaries_repository = SqlalchemyCaseSummariesRepository(
                 session
             )
             precedents_repository = SqlalchemyPrecedentsRepository(session)
@@ -195,10 +198,8 @@ class SearchAnalysisPrecedentsJob(InngestJob):
             session.commit()
 
             analysis_precedents = SearchAnalysisPrecedentsUseCase(
-                petition_summaries_repository=petition_summaries_repository,
-                petition_summary_embeddings_provider=(
-                    OpenAIPetitionSummaryEmbeddingsProvider()
-                ),
+                case_summaries_repository=case_summaries_repository,
+                case_summary_embeddings_provider=(OpenAICaseSummaryEmbeddingsProvider()),
                 precedents_embeddings_repository=(
                     _build_precedents_embeddings_repository()
                 ),
@@ -275,7 +276,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
 
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
-            petition_summaries_repository = SqlalchemyPetitionSummariesRepository(
+            case_summaries_repository = SqlalchemyCaseSummariesRepository(
                 session
             )
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
@@ -289,7 +290,10 @@ class SearchAnalysisPrecedentsJob(InngestJob):
             session.commit()
 
             workflow = AiPipe.get_synthesize_analysis_precedents_workflow(
-                petition_summaries_repository=petition_summaries_repository,
+                petition_summaries_repository=cast(
+                    PetitionSummariesRepository,
+                    case_summaries_repository,
+                ),
                 analysis_precedents_repository=analysis_precedents_repository,
                 analisyses_repository=analisyses_repository,
             )

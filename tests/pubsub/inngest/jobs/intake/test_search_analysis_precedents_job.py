@@ -12,7 +12,10 @@ from sqlalchemy.orm import Session, sessionmaker
 from animus.ai.agno.workflows.intake import (
     AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
 )
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
+from animus.core.intake.domain.entities.lawyer_analysis_status import (
+    LawyerAnalysisStatus,
+)
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
@@ -58,7 +61,8 @@ def _seed_analysis_with_petition_summary(
             name='Analise de teste',
             account_id=Id.create().value,
             folder_id=None,
-            status=AnalysisStatusValue.WAITING_PETITION.value,
+            type=AnalysisType.LAWYER.value,
+            status=LawyerAnalysisStatus.DOCUMENT_UPLOADED.value,
             is_archived=False,
         )
     )
@@ -396,7 +400,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == AnalysisStatusValue.SEARCHING_PRECEDENTS.value
+            == LawyerAnalysisStatus.SEARCHING_PRECEDENTS.value
         )
 
         synthesize_analysis_precedents_sync(payload, analysis_precedents_data)
@@ -411,7 +415,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value
+            == LawyerAnalysisStatus.DONE.value
         )
         analysis = _get_analysis(
             sqlalchemy_session_factory,
@@ -457,7 +461,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == AnalysisStatusValue.FAILED.value
+            == LawyerAnalysisStatus.FAILED.value
         )
         assert (
             _get_analysis_precedents(

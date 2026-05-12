@@ -5,6 +5,7 @@ from typing import Any
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
         'AnalysisReportDto': ('.analysis_report_dto', 'AnalysisReportDto'),
+        'AnalysisDocumentDto': ('.analysis_document_dto', 'AnalysisDocumentDto'),
         'PetitionSummaryEmbeddingDto': (
             '.petition_summary_embedding_dto',
             'PetitionSummaryEmbeddingDto',
@@ -28,6 +29,9 @@ def __getattr__(name: str) -> Any:
             '.analysis_precedents_search_filters_dto',
             'AnalysisPrecedentsSearchFiltersDto',
         ),
+        'CaseSummaryDto': ('.case_summary_dto', 'CaseSummaryDto'),
+        'JudgmentDraftDto': ('.judgment_draft_dto', 'JudgmentDraftDto'),
+        'PetitionDraftDto': ('.petition_draft_dto', 'PetitionDraftDto'),
         'PetitionSummaryDto': ('.petition_summary_dto', 'PetitionSummaryDto'),
         'PrecedentIdentifierDto': (
             '.precedent_identifier_dto',

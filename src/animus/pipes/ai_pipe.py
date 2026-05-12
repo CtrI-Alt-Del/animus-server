@@ -2,16 +2,21 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from animus.core.intake.interfaces.petition_summaries_repository import (
-    PetitionSummariesRepository,
-)
 from animus.core.intake.interfaces.analysis_precedents_repository import (
     AnalysisPrecedentsRepository,
 )
+from animus.core.intake.interfaces.analysis_documents_repository import (
+    AnalysisDocumentsRepository,
+)
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
-from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
-from animus.core.intake.interfaces.summarize_petition_workflow import (
-    SummarizePetitionWorkflow,
+from animus.core.intake.interfaces.case_summaries_repository import (
+    CaseSummariesRepository,
+)
+from animus.core.intake.interfaces.petition_summaries_repository import (
+    PetitionSummariesRepository,
+)
+from animus.core.intake.interfaces.summarize_case_workflow import (
+    SummarizeCaseWorkflow,
 )
 from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
     SynthesizeAnalysisPrecedentsWorkflow,
@@ -21,27 +26,27 @@ from animus.pipes.database_pipe import DatabasePipe
 
 class AiPipe:
     @staticmethod
-    def get_summarize_petition_workflow(
-        petition_summaries_repository: Annotated[
-            PetitionSummariesRepository,
-            Depends(DatabasePipe.get_petition_summaries_repository_from_request),
+    def get_summarize_case_workflow(
+        case_summaries_repository: Annotated[
+            CaseSummariesRepository,
+            Depends(DatabasePipe.get_case_summaries_repository_from_request),
         ],
-        petitions_repository: Annotated[
-            PetitionsRepository,
-            Depends(DatabasePipe.get_petitions_repository_from_request),
+        analysis_documents_repository: Annotated[
+            AnalysisDocumentsRepository,
+            Depends(DatabasePipe.get_analysis_documents_repository_from_request),
         ],
         analisyses_repository: Annotated[
             AnalisysesRepository,
             Depends(DatabasePipe.get_analisyses_repository_from_request),
         ],
-    ) -> SummarizePetitionWorkflow:
-        from animus.ai.agno.workflows.intake.agno_summarize_petition_workflow import (
-            AgnoSummarizePetitionWorkflow,
+    ) -> SummarizeCaseWorkflow:
+        from animus.ai.agno.workflows.intake.agno_summarize_case_workflow import (
+            AgnoSummarizeCaseWorkflow,
         )
 
-        return AgnoSummarizePetitionWorkflow(
-            petition_summaries_repository=petition_summaries_repository,
-            petitions_repository=petitions_repository,
+        return AgnoSummarizeCaseWorkflow(
+            case_summaries_repository=case_summaries_repository,
+            analysis_documents_repository=analysis_documents_repository,
             analisyses_repository=analisyses_repository,
         )
 

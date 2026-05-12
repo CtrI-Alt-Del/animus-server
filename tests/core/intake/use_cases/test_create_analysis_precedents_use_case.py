@@ -4,7 +4,10 @@ from unittest.mock import create_autospec
 import pytest
 
 from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
+from animus.core.intake.domain.entities.lawyer_analysis_status import (
+    LawyerAnalysisStatus,
+)
 from animus.core.intake.domain.entities.dtos import AnalysisDto, PrecedentDto
 from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures import AnalysisPrecedent
@@ -85,10 +88,7 @@ class TestCreateAnalysisPrecedentsUseCase:
         )
         self.analisyses_repository_mock.replace.assert_called_once()
         updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
-        assert (
-            updated_analysis.status.value.value
-            == AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value
-        )
+        assert updated_analysis.status == LawyerAnalysisStatus.DONE.value
         assert updated_analysis.precedents_search_filters is not None
         assert updated_analysis.precedents_search_filters.dto == filters_dto
 
@@ -260,7 +260,8 @@ class TestCreateAnalysisPrecedentsUseCase:
                 name='Analise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
-                status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
+                type=AnalysisType.LAWYER.value,
+                status=LawyerAnalysisStatus.SEARCHING_PRECEDENTS.value,
                 is_archived=False,
                 created_at='2026-03-31T10:30:00+00:00',
             )

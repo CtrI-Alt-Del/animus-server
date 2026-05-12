@@ -5,7 +5,7 @@ from typing import Any
 from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.intake.domain.events import PetitionSummaryFinishedEvent
-from animus.core.notification import SendPetitionSummaryFinishedNotificationUseCase
+from animus.core.notification import SendCaseSummaryFinishedNotificationUseCase
 from animus.core.shared.domain.structures import Id
 from animus.providers.notification import OneSignalPushNotificationProvider
 
@@ -68,7 +68,7 @@ class SendPetitionSummaryFinishedNotificationJob:
 
     @staticmethod
     def _send_notification_sync(payload: _Payload) -> None:
-        use_case = SendPetitionSummaryFinishedNotificationUseCase(
+        use_case = SendCaseSummaryFinishedNotificationUseCase(
             push_notification_provider=OneSignalPushNotificationProvider()
         )
         use_case.execute(

@@ -2,7 +2,10 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
+from animus.core.intake.domain.entities.lawyer_analysis_status import (
+    LawyerAnalysisStatus,
+)
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.use_cases.list_analyses_use_case import ListAnalysesUseCase
 from animus.core.shared.domain.errors import ValidationError
@@ -51,12 +54,16 @@ class TestListAnalysesUseCase:
         assert kwargs['limit'] == Integer.create(10)
         assert kwargs['is_archived'] == Logical.create_false()
         assert kwargs['statuses'] == (
-            AnalysisStatusValue.WAITING_PETITION,
-            AnalysisStatusValue.PETITION_UPLOADED,
-            AnalysisStatusValue.WAITING_PRECEDENT_CHOISE,
-            AnalysisStatusValue.PRECEDENT_CHOSED,
-            AnalysisStatusValue.PETITION_ANALYZED,
-            AnalysisStatusValue.FAILED,
+            LawyerAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
+            LawyerAnalysisStatus.DOCUMENT_UPLOADED,
+            LawyerAnalysisStatus.CASE_ANALYZED,
+            LawyerAnalysisStatus.DONE,
+            LawyerAnalysisStatus.FAILED,
+            JudgeAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
+            JudgeAnalysisStatus.DOCUMENT_UPLOADED,
+            JudgeAnalysisStatus.CASE_ANALYZED,
+            JudgeAnalysisStatus.DONE,
+            JudgeAnalysisStatus.FAILED,
         )
 
         if 'only_unfoldered' in kwargs:

@@ -1,0 +1,16 @@
+from typing import Protocol
+
+from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
+from animus.core.shared.domain.structures import FilePath, Id
+
+
+class AnalysisDocumentsRepository(Protocol):
+    def find_by_analysis_id(self, analysis_id: Id) -> AnalysisDocument | None: ...
+
+    def find_by_file_path(self, file_path: FilePath) -> AnalysisDocument | None: ...
+
+    def add(self, document: AnalysisDocument) -> None: ...
+
+    def replace(self, document: AnalysisDocument) -> None: ...
+
+    def remove_by_analysis_id(self, analysis_id: Id) -> None: ...

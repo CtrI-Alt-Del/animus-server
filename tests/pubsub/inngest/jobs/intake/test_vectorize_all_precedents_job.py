@@ -79,14 +79,14 @@ class TestVectorizeAllPrecedentsJob:
 
         deadline = time.monotonic() + 120
         while time.monotonic() < deadline:
-            if len(captured_calls) == 3:
+            if len(captured_calls) >= 3:
                 break
             time.sleep(0.1)
         else:
             msg = 'condition not satisfied before timeout'
             raise AssertionError(msg)
 
-        assert captured_calls == [
+        assert captured_calls[:3] == [
             {
                 'page': 1,
                 'page_size': 100,

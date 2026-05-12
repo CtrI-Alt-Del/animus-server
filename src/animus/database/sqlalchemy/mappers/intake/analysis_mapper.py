@@ -1,4 +1,5 @@
 from animus.core.intake.domain.entities.analysis import Analysis
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
     AnalysisPrecedentsSearchFiltersDto,
@@ -15,6 +16,7 @@ class AnalysisMapper:
                 name=model.name,
                 folder_id=model.folder_id,
                 account_id=model.account_id,
+                type=AnalysisType(model.type),
                 status=model.status,
                 is_archived=model.is_archived,
                 precedents_search_filters=AnalysisMapper._to_filters_dto(model),
@@ -35,7 +37,8 @@ class AnalysisMapper:
             name=entity.name.value,
             folder_id=entity.folder_id.value if entity.folder_id is not None else None,
             account_id=entity.account_id.value,
-            status=entity.status.value.value,
+            type=entity.type.value,
+            status=entity.status.value,
             is_archived=entity.is_archived.value,
             precedents_search_courts=(
                 list(precedents_search_filters_dto.courts)

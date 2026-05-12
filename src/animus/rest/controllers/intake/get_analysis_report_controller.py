@@ -7,10 +7,12 @@ from animus.core.intake.interfaces.analisyses_repository import AnalisysesReposi
 from animus.core.intake.interfaces.analysis_precedents_repository import (
     AnalysisPrecedentsRepository,
 )
-from animus.core.intake.interfaces.petition_summaries_repository import (
-    PetitionSummariesRepository,
+from animus.core.intake.interfaces.case_summaries_repository import (
+    CaseSummariesRepository,
 )
-from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
+from animus.core.intake.interfaces.analysis_documents_repository import (
+    AnalysisDocumentsRepository,
+)
 from animus.core.intake.use_cases import GetAnalysisReportUseCase
 from animus.core.shared.domain.structures import Id
 from animus.pipes.auth_pipe import AuthPipe
@@ -32,13 +34,13 @@ class GetAnalysisReportController:
                 AnalisysesRepository,
                 Depends(DatabasePipe.get_analisyses_repository_from_request),
             ],
-            petitions_repository: Annotated[
-                PetitionsRepository,
-                Depends(DatabasePipe.get_petitions_repository_from_request),
+            analysis_documents_repository: Annotated[
+                AnalysisDocumentsRepository,
+                Depends(DatabasePipe.get_analysis_documents_repository_from_request),
             ],
-            petition_summaries_repository: Annotated[
-                PetitionSummariesRepository,
-                Depends(DatabasePipe.get_petition_summaries_repository_from_request),
+            case_summaries_repository: Annotated[
+                CaseSummariesRepository,
+                Depends(DatabasePipe.get_case_summaries_repository_from_request),
             ],
             analysis_precedents_repository: Annotated[
                 AnalysisPrecedentsRepository,
@@ -47,8 +49,8 @@ class GetAnalysisReportController:
         ) -> AnalysisReportDto:
             use_case = GetAnalysisReportUseCase(
                 analisyses_repository=analisyses_repository,
-                petitions_repository=petitions_repository,
-                petition_summaries_repository=petition_summaries_repository,
+                analysis_documents_repository=analysis_documents_repository,
+                case_summaries_repository=case_summaries_repository,
                 analysis_precedents_repository=analysis_precedents_repository,
             )
 

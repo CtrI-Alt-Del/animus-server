@@ -6,7 +6,7 @@ from animus.core.shared.domain.structures import Id
 
 
 class OneSignalPushNotificationProvider(PushNotificationProvider):
-    def send_petition_summary_finished_message(
+    def send_case_summary_finished_message(
         self,
         recipient_id: Id,
         analysis_id: Id,
@@ -14,7 +14,7 @@ class OneSignalPushNotificationProvider(PushNotificationProvider):
         title = 'Analise de petição concluida'
         body = 'O resumo da sua petição ja esta disponivel.'
         data = {
-            'type': 'petition_summary_finished',
+            'type': 'case_summary_finished',
             'analysis_id': analysis_id.value,
         }
         self._send_push(recipient_id, title, body, data)

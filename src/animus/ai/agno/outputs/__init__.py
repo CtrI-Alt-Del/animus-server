@@ -1,3 +1,11 @@
-from .intake import AnalysisPrecedentsSynthesisOutput, PetitionSummaryOutput
+from .intake import (
+    AnalysisPrecedentsSynthesisOutput,
+    CaseSummaryOutput,
+    PetitionSummaryOutput,
+)
 
-__all__ = ['AnalysisPrecedentsSynthesisOutput', 'PetitionSummaryOutput']
+__all__ = [
+    'AnalysisPrecedentsSynthesisOutput',
+    'CaseSummaryOutput',
+    'PetitionSummaryOutput',
+]

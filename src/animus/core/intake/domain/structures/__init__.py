@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from .analysies_precedent_legal_features import AnalysiesPrecedentLegalFeatures
     from .analysis_report import AnalysisReport
+    from .analysis_document import AnalysisDocument
     from .analysis_precedent import AnalysisPrecedent
     from .analysis_precedent_dataset_row import AnalysisPrecedentDatasetRow
     from .analysis_precedent_applicability_feedback import (
@@ -15,7 +16,10 @@ if TYPE_CHECKING:
     )
     from .analysis_petition import AnalysisPetition
     from .analysis_precedents_search_filters import AnalysisPrecedentsSearchFilters
+    from .case_summary import CaseSummary
     from .court import Court, CourtValue
+    from .judgment_draft import JudgmentDraft
+    from .petition_draft import PetitionDraft
     from .petition_document import PetitionDocument
     from .petition_summary import PetitionSummary
     from .petition_summary_embedding import PetitionSummaryEmbedding
@@ -28,6 +32,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'AnalysisReport',
+    'AnalysisDocument',
     'AnalysiesPrecedentLegalFeatures',
     'AnalysisPrecedent',
     'AnalysisPrecedentDatasetRow',
@@ -36,8 +41,11 @@ __all__ = [
     'AnalysisPrecedentApplicabilityLevelValue',
     'AnalysisPetition',
     'AnalysisPrecedentsSearchFilters',
+    'CaseSummary',
     'Court',
     'CourtValue',
+    'JudgmentDraft',
+    'PetitionDraft',
     'PetitionDocument',
     'PetitionSummary',
     'PetitionSummaryEmbedding',
@@ -52,6 +60,7 @@ __all__ = [
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
         'AnalysisReport': ('.analysis_report', 'AnalysisReport'),
+        'AnalysisDocument': ('.analysis_document', 'AnalysisDocument'),
         'AnalysiesPrecedentLegalFeatures': (
             '.analysies_precedent_legal_features',
             'AnalysiesPrecedentLegalFeatures',
@@ -78,9 +87,12 @@ def __getattr__(name: str) -> Any:
             '.analysis_precedents_search_filters',
             'AnalysisPrecedentsSearchFilters',
         ),
+        'CaseSummary': ('.case_summary', 'CaseSummary'),
         'Court': ('.court', 'Court'),
         'CourtValue': ('.court', 'CourtValue'),
+        'JudgmentDraft': ('.judgment_draft', 'JudgmentDraft'),
         'PetitionDocument': ('.petition_document', 'PetitionDocument'),
+        'PetitionDraft': ('.petition_draft', 'PetitionDraft'),
         'PetitionSummary': ('.petition_summary', 'PetitionSummary'),
         'PetitionSummaryEmbedding': (
             '.petition_summary_embedding',

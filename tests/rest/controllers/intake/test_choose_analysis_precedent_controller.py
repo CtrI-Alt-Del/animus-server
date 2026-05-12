@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.models.intake import (
@@ -35,6 +36,7 @@ def _create_analysis_with_precedent(
             name='Analise de precedentes',
             folder_id=None,
             account_id=account_id,
+            type=AnalysisType.LAWYER.value,
             status=AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value,
             is_archived=False,
             created_at=datetime.now(UTC),
@@ -102,10 +104,10 @@ class TestChooseAnalysisPrecedentController:
 
         assert response.status_code == 200
         assert response.json() == {
-            'value': AnalysisStatusValue.PRECEDENT_CHOSED.value,
+            'value': 'DONE',
         }
         assert persisted_analysis is not None
-        assert persisted_analysis.status == AnalysisStatusValue.PRECEDENT_CHOSED.value
+        assert persisted_analysis.status == 'DONE'
         assert persisted_analysis_precedent is not None
         assert persisted_analysis_precedent.is_chosen is True
 

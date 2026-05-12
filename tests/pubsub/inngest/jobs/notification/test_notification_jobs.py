@@ -4,6 +4,7 @@ import pytest
 from pytest import MonkeyPatch
 from animus.providers.notification import OneSignalPushNotificationProvider
 from animus.core.shared.domain.structures import Id
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -23,6 +24,7 @@ def _seed_analysis(
             name='Analise de teste',
             account_id=account_id,
             folder_id=None,
+            type=AnalysisType.LAWYER.value,
             status=AnalysisStatusValue.PETITION_ANALYZED.value,
             is_archived=False,
         )
@@ -43,7 +45,7 @@ class TestNotificationJobs:
     @pytest.mark.filterwarnings(
         r'ignore:websockets\.server\.WebSocketServerProtocol is deprecated:DeprecationWarning'
     )
-    def test_should_process_petition_summary_finished_event(
+    def test_should_process_case_summary_finished_event(
         self,
         monkeypatch: MonkeyPatch,
         inngest_runtime: Any,
@@ -52,7 +54,7 @@ class TestNotificationJobs:
         seeded_data = _seed_analysis(sqlalchemy_session_factory)
         captured_calls: list[dict[str, str]] = []
 
-        def _send_petition_summary_finished_message(
+        def _send_case_summary_finished_message(
             _self: OneSignalPushNotificationProvider,
             recipient_id: Id,
             analysis_id: Id,
@@ -66,8 +68,8 @@ class TestNotificationJobs:
 
         monkeypatch.setattr(
             OneSignalPushNotificationProvider,
-            'send_petition_summary_finished_message',
-            _send_petition_summary_finished_message,
+            'send_case_summary_finished_message',
+            _send_case_summary_finished_message,
         )
         monkeypatch.setattr(
             Sqlalchemy,
@@ -76,7 +78,7 @@ class TestNotificationJobs:
         )
 
         response = inngest_runtime.post_event(
-            name='intake/petition_summary.finished',
+            name='intake/case_summary.finished',
             data={
                 'analysis_id': seeded_data['analysis_id'],
                 'account_id': seeded_data['account_id'],

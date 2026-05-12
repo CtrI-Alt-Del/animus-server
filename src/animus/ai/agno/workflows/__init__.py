@@ -1,3 +1,3 @@
-from .intake import AgnoSummarizePetitionWorkflow
+from .intake import AgnoSummarizeCaseWorkflow
 
-__all__ = ['AgnoSummarizePetitionWorkflow']
+__all__ = ['AgnoSummarizeCaseWorkflow']

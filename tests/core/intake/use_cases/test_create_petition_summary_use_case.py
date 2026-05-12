@@ -2,7 +2,9 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.lawyer_analysis_status import (
+    LawyerAnalysisStatus,
+)
 from animus.core.intake.domain.entities.dtos.petition_document_dto import (
     PetitionDocumentDto,
 )
@@ -75,7 +77,7 @@ class TestCreatePetitionSummaryUseCase:
         )
         analysis = AnalysesFaker.fake(
             analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
-            status=AnalysisStatusValue.ANALYZING_PETITION.value,
+            status=LawyerAnalysisStatus.ANALYZING_CASE.value,
         )
 
         self.petition_summaries_repository_mock.find_by_petition_id.return_value = None
@@ -99,7 +101,7 @@ class TestCreatePetitionSummaryUseCase:
             == petition_id_entity
         )
         assert petition_summary.dto == dto
-        assert updated_analysis.status.value == AnalysisStatusValue.PETITION_ANALYZED
+        assert updated_analysis.status == LawyerAnalysisStatus.CASE_ANALYZED.value
         assert result == dto
 
     def test_should_replace_petition_summary_when_petition_already_has_summary(
@@ -133,7 +135,7 @@ class TestCreatePetitionSummaryUseCase:
         )
         analysis = AnalysesFaker.fake(
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
-            status=AnalysisStatusValue.ANALYZING_PETITION.value,
+            status=LawyerAnalysisStatus.ANALYZING_CASE.value,
         )
         self.petition_summaries_repository_mock.find_by_petition_id.return_value = (
             object()
@@ -162,7 +164,7 @@ class TestCreatePetitionSummaryUseCase:
             == petition_id_entity
         )
         assert petition_summary.dto == dto
-        assert updated_analysis.status.value == AnalysisStatusValue.PETITION_ANALYZED
+        assert updated_analysis.status == LawyerAnalysisStatus.CASE_ANALYZED.value
         assert result == dto
 
     def test_should_raise_validation_error_when_petition_id_is_invalid(self) -> None:

@@ -1,18 +1,25 @@
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
+from animus.core.intake.domain.entities.lawyer_analysis_status import LawyerAnalysisStatus
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
 
 
-_ALLOWED_ANALYSIS_STATUSES: tuple[AnalysisStatusValue, ...] = (
-    AnalysisStatusValue.WAITING_PETITION,
-    AnalysisStatusValue.PETITION_UPLOADED,
-    AnalysisStatusValue.WAITING_PRECEDENT_CHOISE,
-    AnalysisStatusValue.PRECEDENT_CHOSED,
-    AnalysisStatusValue.PETITION_ANALYZED,
-    AnalysisStatusValue.FAILED,
+_ALLOWED_ANALYSIS_STATUSES: tuple[
+    LawyerAnalysisStatus | JudgeAnalysisStatus, ...
+] = (
+    LawyerAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
+    LawyerAnalysisStatus.DOCUMENT_UPLOADED,
+    LawyerAnalysisStatus.CASE_ANALYZED,
+    LawyerAnalysisStatus.DONE,
+    LawyerAnalysisStatus.FAILED,
+    JudgeAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
+    JudgeAnalysisStatus.DOCUMENT_UPLOADED,
+    JudgeAnalysisStatus.CASE_ANALYZED,
+    JudgeAnalysisStatus.DONE,
+    JudgeAnalysisStatus.FAILED,
 )
 
 

@@ -13,12 +13,12 @@ from animus.pubsub.inngest.jobs.intake import (
     RemovePetitionDocumentFileJob,
     SearchAnalysisPrecedentsJob,
     SeedAnalysesPrecedentsDatasetJob,
-    SummarizePetitionJob,
+    SummarizeCaseJob,
     VectorizeAllPrecedentsJob,
     VectorizePrecedentsJob,
 )
 from animus.pubsub.inngest.jobs.notification import (
-    SendPetitionSummaryFinishedNotificationJob,
+    SendCaseSummaryFinishedNotificationJob,
     SendPrecedentsSearchFinishedNotificationJob,
 )
 
@@ -51,7 +51,7 @@ class InngestPubSub:
         return [
             SendAccountVerificationEmailJob.handle(inngest),
             SendPasswordResetEmailJob.handle(inngest),
-            SendPetitionSummaryFinishedNotificationJob.handle(inngest),
+            SendCaseSummaryFinishedNotificationJob.handle(inngest),
             SendPrecedentsSearchFinishedNotificationJob.handle(inngest),
         ]
 
@@ -61,7 +61,7 @@ class InngestPubSub:
             RemovePetitionDocumentFileJob.handle(inngest),
             SearchAnalysisPrecedentsJob.handle(inngest),
             SeedAnalysesPrecedentsDatasetJob.handle(inngest),
-            SummarizePetitionJob.handle(inngest),
+            SummarizeCaseJob.handle(inngest),
             VectorizeAllPrecedentsJob.handle(inngest),
             VectorizePrecedentsJob.handle(inngest),
         ]

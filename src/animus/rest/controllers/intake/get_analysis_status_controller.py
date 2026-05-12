@@ -21,4 +21,4 @@ class GetAnalysisStatusController:
                 Depends(IntakePipe.verify_analysis_by_account_from_request),
             ],
         ) -> AnalysisStatusDto:
-            return analysis.status.dto
+            return AnalysisStatusDto(value=analysis.status.value)

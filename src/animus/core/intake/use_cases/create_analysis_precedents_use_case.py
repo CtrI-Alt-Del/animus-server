@@ -1,6 +1,8 @@
 from typing import cast
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
+from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
+from animus.core.intake.domain.entities.lawyer_analysis_status import LawyerAnalysisStatus
 from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures import AnalysisPrecedent
 from animus.core.intake.domain.structures.dtos.analysies_precedent_legal_features_dto import (
@@ -63,7 +65,10 @@ class CreateAnalysisPrecedentsUseCase:
             raise AnalysisNotFoundError
 
         analysis.set_precedents_search_filters(filters_dto)
-        analysis.set_status(AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value)
+        if analysis.type == AnalysisType.LAWYER:
+            analysis.set_status(LawyerAnalysisStatus.DONE)
+        else:
+            analysis.set_status(JudgeAnalysisStatus.DONE)
         self._analisyses_repository.replace(analysis)
 
         return [

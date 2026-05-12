@@ -7,8 +7,8 @@ from animus.core.intake.domain.structures.dtos.analysis_petition_dto import (
     AnalysisPetitionDto,
 )
 from animus.core.intake.interfaces import (
-    PetitionSummariesRepository,
-    PetitionsRepository,
+    AnalysisDocumentsRepository,
+    CaseSummariesRepository,
 )
 from animus.core.intake.use_cases import ListAnalysisPetitionsUseCase
 from animus.core.shared.responses import ListResponse
@@ -29,18 +29,18 @@ class ListAnalysisPetitionsController:
                 Analysis,
                 Depends(IntakePipe.verify_analysis_by_account_from_request),
             ],
-            petitions_repository: Annotated[
-                PetitionsRepository,
-                Depends(DatabasePipe.get_petitions_repository_from_request),
+            analysis_documents_repository: Annotated[
+                AnalysisDocumentsRepository,
+                Depends(DatabasePipe.get_analysis_documents_repository_from_request),
             ],
-            petition_summaries_repository: Annotated[
-                PetitionSummariesRepository,
-                Depends(DatabasePipe.get_petition_summaries_repository_from_request),
+            case_summaries_repository: Annotated[
+                CaseSummariesRepository,
+                Depends(DatabasePipe.get_case_summaries_repository_from_request),
             ],
         ) -> ListResponse[AnalysisPetitionDto]:
             use_case = ListAnalysisPetitionsUseCase(
-                petitions_repository=petitions_repository,
-                petition_summaries_repository=petition_summaries_repository,
+                analysis_documents_repository=analysis_documents_repository,
+                case_summaries_repository=case_summaries_repository,
             )
 
             return use_case.execute(analysis.id.value)

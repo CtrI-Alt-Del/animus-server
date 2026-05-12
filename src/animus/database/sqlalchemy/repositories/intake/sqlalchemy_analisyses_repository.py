@@ -3,7 +3,8 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
+from animus.core.intake.domain.entities.lawyer_analysis_status import LawyerAnalysisStatus
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
@@ -30,15 +31,13 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         limit: Integer,
         is_archived: Logical,
         only_unfoldered: Logical,
-        statuses: tuple[AnalysisStatusValue, ...],
+        statuses: tuple[str, ...],
     ) -> CursorPaginationResponse[Analysis]:
-        status_values = [status.value for status in statuses]
-
         statement = select(AnalysisModel).where(
             AnalysisModel.account_id == account_id.value,
             AnalysisModel.is_archived == is_archived.value,
             AnalysisModel.name.ilike(f'%{search.value}%'),
-            AnalysisModel.status.in_(status_values),
+            AnalysisModel.status.in_(statuses),
         )
 
         if only_unfoldered.value:
@@ -63,7 +62,11 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
 
     def find_many_in_processing(self, account_id: Id) -> list[Analysis]:
         processing_statuses = [
-            status.value for status in AnalysisStatusValue.get_processing_statuses()
+            status.value
+            for status in (
+                *LawyerAnalysisStatus.get_processing_statuses(),
+                *JudgeAnalysisStatus.get_processing_statuses(),
+            )
         ]
 
         statement = (
@@ -122,7 +125,8 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
             analysis.folder_id.value if analysis.folder_id is not None else None
         )
         model.account_id = analysis.account_id.value
-        model.status = analysis.status.value.value
+        model.type = analysis.type.value
+        model.status = analysis.status.value
         model.is_archived = analysis.is_archived.value
 
         if analysis.precedents_search_filters is None:
