@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from .analysies_precedent_legal_features import AnalysiesPrecedentLegalFeatures
     from .analysis_report import AnalysisReport
+    from .judge_analysis_report import JudgeAnalysisReport
+    from .lawer_analysis_report import LawerAnalysisReport
     from .analysis_document import AnalysisDocument
     from .analysis_precedent import AnalysisPrecedent
     from .analysis_precedent_dataset_row import AnalysisPrecedentDatasetRow
@@ -32,6 +34,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     'AnalysisReport',
+    'JudgeAnalysisReport',
+    'LawerAnalysisReport',
     'AnalysisDocument',
     'AnalysiesPrecedentLegalFeatures',
     'AnalysisPrecedent',
@@ -60,6 +64,8 @@ __all__ = [
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
         'AnalysisReport': ('.analysis_report', 'AnalysisReport'),
+        'JudgeAnalysisReport': ('.judge_analysis_report', 'JudgeAnalysisReport'),
+        'LawerAnalysisReport': ('.lawer_analysis_report', 'LawerAnalysisReport'),
         'AnalysisDocument': ('.analysis_document', 'AnalysisDocument'),
         'AnalysiesPrecedentLegalFeatures': (
             '.analysies_precedent_legal_features',

@@ -5,6 +5,14 @@ from typing import Any
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
         'AnalysisReportDto': ('.analysis_report_dto', 'AnalysisReportDto'),
+        'JudgeAnalysisReportDto': (
+            '.judge_analysis_report_dto',
+            'JudgeAnalysisReportDto',
+        ),
+        'LawerAnalysisReportDto': (
+            '.lawer_analysis_report_dto',
+            'LawerAnalysisReportDto',
+        ),
         'AnalysisDocumentDto': ('.analysis_document_dto', 'AnalysisDocumentDto'),
         'PetitionSummaryEmbeddingDto': (
             '.petition_summary_embedding_dto',
