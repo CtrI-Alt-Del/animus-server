@@ -3,9 +3,6 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .analysies_precedent_legal_features import AnalysiesPrecedentLegalFeatures
-    from .analysis_report import AnalysisReport
-    from .judge_analysis_report import JudgeAnalysisReport
-    from .lawer_analysis_report import LawerAnalysisReport
     from .analysis_document import AnalysisDocument
     from .analysis_precedent import AnalysisPrecedent
     from .analysis_precedent_dataset_row import AnalysisPrecedentDatasetRow
@@ -18,8 +15,10 @@ if TYPE_CHECKING:
     )
     from .analysis_petition import AnalysisPetition
     from .analysis_precedents_search_filters import AnalysisPrecedentsSearchFilters
+    from .case_assessment_analysis_report import CaseAssessmentAnalysisReport
     from .case_summary import CaseSummary
     from .court import Court, CourtValue
+    from .first_instance_analysis_report import FirstInstanceAnalysisReport
     from .judgment_draft import JudgmentDraft
     from .petition_draft import PetitionDraft
     from .petition_document import PetitionDocument
@@ -31,11 +30,9 @@ if TYPE_CHECKING:
         PrecedentEmbeddingFieldValue,
     )
     from .precedent_kind import PrecedentKind, PrecedentKindValue
+    from .second_instance_analysis_report import SecondInstanceAnalysisReport
 
 __all__ = [
-    'AnalysisReport',
-    'JudgeAnalysisReport',
-    'LawerAnalysisReport',
     'AnalysisDocument',
     'AnalysiesPrecedentLegalFeatures',
     'AnalysisPrecedent',
@@ -45,9 +42,11 @@ __all__ = [
     'AnalysisPrecedentApplicabilityLevelValue',
     'AnalysisPetition',
     'AnalysisPrecedentsSearchFilters',
+    'CaseAssessmentAnalysisReport',
     'CaseSummary',
     'Court',
     'CourtValue',
+    'FirstInstanceAnalysisReport',
     'JudgmentDraft',
     'PetitionDraft',
     'PetitionDocument',
@@ -57,15 +56,13 @@ __all__ = [
     'PrecedentKindValue',
     'PrecedentEmbeddingField',
     'PrecedentEmbeddingFieldValue',
+    'SecondInstanceAnalysisReport',
     'PrecedentEmbedding',
 ]
 
 
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
-        'AnalysisReport': ('.analysis_report', 'AnalysisReport'),
-        'JudgeAnalysisReport': ('.judge_analysis_report', 'JudgeAnalysisReport'),
-        'LawerAnalysisReport': ('.lawer_analysis_report', 'LawerAnalysisReport'),
         'AnalysisDocument': ('.analysis_document', 'AnalysisDocument'),
         'AnalysiesPrecedentLegalFeatures': (
             '.analysies_precedent_legal_features',
@@ -93,9 +90,17 @@ def __getattr__(name: str) -> Any:
             '.analysis_precedents_search_filters',
             'AnalysisPrecedentsSearchFilters',
         ),
+        'CaseAssessmentAnalysisReport': (
+            '.case_assessment_analysis_report',
+            'CaseAssessmentAnalysisReport',
+        ),
         'CaseSummary': ('.case_summary', 'CaseSummary'),
         'Court': ('.court', 'Court'),
         'CourtValue': ('.court', 'CourtValue'),
+        'FirstInstanceAnalysisReport': (
+            '.first_instance_analysis_report',
+            'FirstInstanceAnalysisReport',
+        ),
         'JudgmentDraft': ('.judgment_draft', 'JudgmentDraft'),
         'PetitionDocument': ('.petition_document', 'PetitionDocument'),
         'PetitionDraft': ('.petition_draft', 'PetitionDraft'),
@@ -112,6 +117,10 @@ def __getattr__(name: str) -> Any:
         'PrecedentEmbeddingFieldValue': (
             '.precedent_embedding_field',
             'PrecedentEmbeddingFieldValue',
+        ),
+        'SecondInstanceAnalysisReport': (
+            '.second_instance_analysis_report',
+            'SecondInstanceAnalysisReport',
         ),
         'PrecedentKind': ('.precedent_kind', 'PrecedentKind'),
         'PrecedentKindValue': ('.precedent_kind', 'PrecedentKindValue'),

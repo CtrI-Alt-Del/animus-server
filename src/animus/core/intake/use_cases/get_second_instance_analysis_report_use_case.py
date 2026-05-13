@@ -7,9 +7,11 @@ from animus.core.intake.domain.errors.analysis_document_not_found_error import (
 from animus.core.intake.domain.errors.case_summary_unavailable_error import (
     CaseSummaryUnavailableError,
 )
-from animus.core.intake.domain.structures.analysis_report import AnalysisReport
-from animus.core.intake.domain.structures.dtos.analysis_report_dto import (
-    AnalysisReportDto,
+from animus.core.intake.domain.structures.dtos.second_instance_analysis_report_dto import (
+    SecondInstanceAnalysisReportDto,
+)
+from animus.core.intake.domain.structures.second_instance_analysis_report import (
+    SecondInstanceAnalysisReport,
 )
 from animus.core.intake.interfaces.analysis_documents_repository import (
     AnalysisDocumentsRepository,
@@ -25,7 +27,7 @@ from animus.core.shared.domain.errors.forbidden_error import ForbiddenError
 from animus.core.shared.domain.structures import Id
 
 
-class GetAnalysisReportUseCase:
+class GetSecondInstanceAnalysisReportUseCase:
     def __init__(
         self,
         analisyses_repository: AnalisysesRepository,
@@ -38,7 +40,9 @@ class GetAnalysisReportUseCase:
         self._case_summaries_repository = case_summaries_repository
         self._analysis_precedents_repository = analysis_precedents_repository
 
-    def execute(self, analysis_id: str, account_id: str) -> AnalysisReportDto:
+    def execute(
+        self, analysis_id: str, account_id: str
+    ) -> SecondInstanceAnalysisReportDto:
         id_analysis = Id.create(analysis_id)
         id_account = Id.create(account_id)
 
@@ -73,7 +77,7 @@ class GetAnalysisReportUseCase:
             None,
         )
 
-        report = AnalysisReport(
+        report = SecondInstanceAnalysisReport(
             analysis=analysis,
             document=document,
             case_summary=case_summary,

@@ -35,7 +35,7 @@ def create_analysis(
         account_id: str,
         analysis_id: str | None = None,
         name: str = 'Analise inicial',
-        analysis_type: str = AnalysisType.LAWYER.value,
+        analysis_type: str = AnalysisType.FIRST_INSTANCE.value,
         status: str = AnalysisStatusValue.WAITING_PETITION.value,
         folder_id: str | None = None,
         is_archived: bool = False,

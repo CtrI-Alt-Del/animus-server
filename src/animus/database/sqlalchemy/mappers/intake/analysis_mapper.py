@@ -16,7 +16,7 @@ class AnalysisMapper:
                 name=model.name,
                 folder_id=model.folder_id,
                 account_id=model.account_id,
-                type=AnalysisType(model.type),
+                type=AnalysisType.normalize(model.type),
                 status=model.status,
                 is_archived=model.is_archived,
                 precedents_search_filters=AnalysisMapper._to_filters_dto(model),

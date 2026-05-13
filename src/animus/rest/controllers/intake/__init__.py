@@ -5,9 +5,17 @@ from .create_analysis_document_controller import CreateAnalysisDocumentControlle
 from .create_petition_controller import CreatePetitionController
 from .get_analysis_controller import GetAnalysisController
 from .get_analysis_document_controller import GetAnalysisDocumentController
-from .get_analysis_report_controller import GetAnalysisReportController
+from .get_case_assessment_analysis_report_controller import (
+    GetCaseAssessmentAnalysisReportController,
+)
 from .get_analysis_status_controller import GetAnalysisStatusController
 from .get_case_summary_controller import GetCaseSummaryController
+from .get_first_instance_analysis_report_controller import (
+    GetFirstInstanceAnalysisReportController,
+)
+from .get_second_instance_analysis_report_controller import (
+    GetSecondInstanceAnalysisReportController,
+)
 from .list_analyses_controller import ListAnalysesController
 from .get_analysis_petition_controller import GetAnalysisPetitionController
 from .list_analysis_petitions_controller import ListAnalysisPetitionsController
@@ -33,7 +41,7 @@ __all__ = [
     'GetCaseSummaryController',
     'GetAnalysisStatusController',
     'GetAnalysisController',
-    'GetAnalysisReportController',
+    'GetCaseAssessmentAnalysisReportController',
     'ListAnalysesController',
     'ListUnfolderedAnalysesController',
     'ListAnalysisPetitionsController',
@@ -44,4 +52,6 @@ __all__ = [
     'SearchAnalysisPrecedentsController',
     'SummarizePetitionController',
     'UpdateAnalysisStatusController',
+    'GetFirstInstanceAnalysisReportController',
+    'GetSecondInstanceAnalysisReportController',
 ]

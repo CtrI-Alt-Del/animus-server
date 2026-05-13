@@ -18,4 +18,6 @@ class JudgmentDraftModel(Model):
     )
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
-    analysis: Mapped[Any] = relationship('AnalysisModel', back_populates='judgment_draft')
+    analysis: Mapped[Any] = relationship(
+        'AnalysisModel', back_populates='judgment_draft'
+    )

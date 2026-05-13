@@ -3,7 +3,6 @@ from datetime import UTC
 
 from fastapi.testclient import TestClient
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.database.sqlalchemy.models.intake import AnalysisModel
 from tests.fixtures.auth_fixtures import CreateAccountFixture
 
@@ -69,7 +68,10 @@ class TestListUnfolderedAnalysesController:
         assert len(payload['items']) == 1
 
         item = payload['items'][0]
-        allowed_analyses = {first_analysis.id: first_analysis, second_unfoldered_analysis.id: second_unfoldered_analysis}
+        allowed_analyses = {
+            first_analysis.id: first_analysis,
+            second_unfoldered_analysis.id: second_unfoldered_analysis,
+        }
         assert item['id'] in allowed_analyses
 
         expected_analysis = allowed_analyses[item['id']]
@@ -79,7 +81,8 @@ class TestListUnfolderedAnalysesController:
             'name': expected_analysis.name,
             'folder_id': None,
             'account_id': account.id,
-            'status': AnalysisStatusValue.WAITING_PETITION.value,
+            'type': 'FIRST_INSTANCE',
+            'status': 'WAITING_DOCUMENT_UPLOAD',
             'is_archived': False,
             'precedents_search_filters': None,
             'created_at': expected_analysis.created_at.replace(tzinfo=UTC).isoformat(),

@@ -36,7 +36,7 @@ def _create_analysis_with_precedent(
             name='Analise de precedentes',
             folder_id=None,
             account_id=account_id,
-            type=AnalysisType.LAWYER.value,
+            type=AnalysisType.FIRST_INSTANCE.value,
             status=AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value,
             is_archived=False,
             created_at=datetime.now(UTC),

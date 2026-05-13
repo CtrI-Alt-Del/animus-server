@@ -3,7 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Response
 
 from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.interfaces import AnalysisDocumentsRepository, AnalisysesRepository
+from animus.core.intake.interfaces import (
+    AnalysisDocumentsRepository,
+    AnalisysesRepository,
+)
 from animus.core.intake.use_cases import RequestCaseSummaryUseCase
 from animus.core.shared.interfaces import Broker
 from animus.pipes.database_pipe import DatabasePipe

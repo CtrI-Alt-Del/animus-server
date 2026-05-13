@@ -25,7 +25,7 @@ class TestUpdateAnalysisStatusController:
 
         response = client.patch(
             f'/intake/analyses/{analysis.id}/status',
-            json={'status': 'failed'},
+            json={'status': 'FAILED'},
             headers=build_auth_headers(account.id),
         )
 
@@ -90,5 +90,8 @@ class TestUpdateAnalysisStatusController:
         assert response.status_code == 400
         assert response.json() == {
             'title': 'Erro de validação',
-            'message': 'Status de analise invalido: invalid_status',
+            'message': (
+                'Status de analise invalido para analise de case assessment '
+                'ou primeira instancia: invalid_status'
+            ),
         }

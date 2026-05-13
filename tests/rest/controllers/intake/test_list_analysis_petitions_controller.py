@@ -4,13 +4,15 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
 from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.models.intake import (
+    AnalysisDocumentModel,
     AnalysisModel,
-    PetitionModel,
-    PetitionSummaryModel,
+    CaseSummaryModel,
 )
 from animus.providers.auth.jwt.jose.jose_jwt_provider import JoseJwtProvider
 from tests.fixtures.auth_fixtures import CreateAccountFixture
@@ -21,13 +23,12 @@ def _build_auth_headers(account_id: str) -> dict[str, str]:
     return {'Authorization': f'Bearer {access_token}'}
 
 
-def _create_analysis_with_petition_summary(
+def _create_analysis_with_document_summary(
     sqlalchemy_session_factory: sessionmaker[Session],
     *,
     account_id: str,
-) -> tuple[str, str]:
+) -> str:
     analysis_id = str(ULID())
-    petition_id = str(ULID())
     session = sqlalchemy_session_factory()
     session.add(
         AnalysisModel(
@@ -35,24 +36,23 @@ def _create_analysis_with_petition_summary(
             name='Analise de precedentes',
             folder_id=None,
             account_id=account_id,
-            type=AnalysisType.LAWYER.value,
-            status=AnalysisStatusValue.WAITING_PETITION.value,
+            type=AnalysisType.FIRST_INSTANCE.value,
+            status=CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value,
             is_archived=False,
             created_at=datetime.now(UTC),
         )
     )
     session.add(
-        PetitionModel(
-            id=petition_id,
+        AnalysisDocumentModel(
             analysis_id=analysis_id,
             uploaded_at=datetime(2026, 3, 27, 10, 30, tzinfo=UTC),
-            document_file_path='petitions/initial-petition.pdf',
-            document_name='Peticao inicial.pdf',
+            document_file_path='documents/initial-document.pdf',
+            document_name='Documento inicial.pdf',
         )
     )
     session.add(
-        PetitionSummaryModel(
-            petition_id=petition_id,
+        CaseSummaryModel(
+            analysis_id=analysis_id,
             case_summary='Resumo objetivo da peticao inicial',
             legal_issue='Controversia sobre inadimplemento contratual',
             central_question='Ha inadimplemento apto a justificar condenacao?',
@@ -64,7 +64,7 @@ def _create_analysis_with_petition_summary(
     session.commit()
     session.close()
 
-    return analysis_id, petition_id
+    return analysis_id
 
 
 class TestListAnalysisPetitionsController:
@@ -75,7 +75,7 @@ class TestListAnalysisPetitionsController:
         sqlalchemy_session_factory: sessionmaker[Session],
     ) -> None:
         account = create_account(is_verified=True, is_active=True)
-        analysis_id, petition_id = _create_analysis_with_petition_summary(
+        analysis_id = _create_analysis_with_document_summary(
             sqlalchemy_session_factory,
             account_id=account.id,
         )
@@ -89,16 +89,13 @@ class TestListAnalysisPetitionsController:
 
         assert response.status_code == 200
         assert len(response_payload['items']) == 1
-        assert response_payload['items'][0]['petition'] == {
-            'id': petition_id,
+        assert response_payload['items'][0]['document'] == {
             'analysis_id': analysis_id,
             'uploaded_at': '2026-03-27T10:30:00+00:00',
-            'document': {
-                'file_path': 'petitions/initial-petition.pdf',
-                'name': 'Peticao inicial.pdf',
-            },
+            'file_path': 'documents/initial-document.pdf',
+            'name': 'Documento inicial.pdf',
         }
-        assert response_payload['items'][0]['summary'] == {
+        assert response_payload['items'][0]['case_summary'] == {
             'case_summary': 'Resumo objetivo da peticao inicial',
             'legal_issue': 'Controversia sobre inadimplemento contratual',
             'central_question': 'Ha inadimplemento apto a justificar condenacao?',

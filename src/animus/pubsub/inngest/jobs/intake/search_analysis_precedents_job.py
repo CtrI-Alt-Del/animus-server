@@ -1,6 +1,6 @@
 import asyncio
 from dataclasses import asdict, dataclass
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from inngest import Context, Inngest, TriggerEvent
 
@@ -18,9 +18,6 @@ from animus.core.intake.use_cases import (
     SearchAnalysisPrecedentsUseCase,
     UpdateAnalysisStatusUseCase,
 )
-from animus.core.intake.interfaces.petition_summaries_repository import (
-    PetitionSummariesRepository,
-)
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalisysesRepository,
     SqlalchemyAnalysisPrecedentsRepository,
@@ -36,6 +33,11 @@ from animus.pubsub.inngest.inngest_job import InngestJob
 from animus.database.qdrant.qdrant_precedents_embeddings_repository import (
     QdrantPrecedentsEmbeddingsRepository,
 )
+
+if TYPE_CHECKING:
+    from animus.core.intake.interfaces.petition_summaries_repository import (
+        PetitionSummariesRepository,
+    )
 
 
 def _build_precedents_embeddings_repository() -> QdrantPrecedentsEmbeddingsRepository:
@@ -94,13 +96,11 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                     ),
                 )
                 if isinstance(search_result_data, dict):
-                    search_result_data_dict = cast(dict[str, Any], search_result_data)
+                    search_result_data_dict = cast('dict[str, Any]', search_result_data)
                     analysis_precedents_data = list(
                         cast(
-                            list[dict[str, Any]],
-                            search_result_data_dict.get(
-                                'analysis_precedents_data', []
-                            ),
+                            'list[dict[str, Any]]',
+                            search_result_data_dict.get('analysis_precedents_data', []),
                         )
                     )
                     account_id = str(search_result_data_dict.get('account_id', ''))
@@ -187,9 +187,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     ) -> list[dict[str, Any]]:
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
-            case_summaries_repository = SqlalchemyCaseSummariesRepository(
-                session
-            )
+            case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             precedents_repository = SqlalchemyPrecedentsRepository(session)
             UpdateAnalysisStatusUseCase(analisyses_repository).execute(
                 analysis_id=payload.analysis_id,
@@ -199,7 +197,9 @@ class SearchAnalysisPrecedentsJob(InngestJob):
 
             analysis_precedents = SearchAnalysisPrecedentsUseCase(
                 case_summaries_repository=case_summaries_repository,
-                case_summary_embeddings_provider=(OpenAICaseSummaryEmbeddingsProvider()),
+                case_summary_embeddings_provider=(
+                    OpenAICaseSummaryEmbeddingsProvider()
+                ),
                 precedents_embeddings_repository=(
                     _build_precedents_embeddings_repository()
                 ),
@@ -209,7 +209,9 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 dto=payload.filters_dto,
             )
 
-        return [asdict(analysis_precedent) for analysis_precedent in analysis_precedents]
+        return [
+            asdict(analysis_precedent) for analysis_precedent in analysis_precedents
+        ]
 
     @staticmethod
     async def _get_analysis_account_id(payload: _Payload) -> str:
@@ -276,9 +278,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
 
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
-            case_summaries_repository = SqlalchemyCaseSummariesRepository(
-                session
-            )
+            case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
                 session
             )
@@ -291,7 +291,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
 
             workflow = AiPipe.get_synthesize_analysis_precedents_workflow(
                 petition_summaries_repository=cast(
-                    PetitionSummariesRepository,
+                    'PetitionSummariesRepository',
                     case_summaries_repository,
                 ),
                 analysis_precedents_repository=analysis_precedents_repository,

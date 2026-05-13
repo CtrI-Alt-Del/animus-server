@@ -2,30 +2,27 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from animus.core.intake.domain.structures.dtos import AnalysisReportDto
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
-from animus.core.intake.interfaces.analysis_precedents_repository import (
-    AnalysisPrecedentsRepository,
-)
-from animus.core.intake.interfaces.case_summaries_repository import (
-    CaseSummariesRepository,
-)
-from animus.core.intake.interfaces.analysis_documents_repository import (
+from animus.core.intake.domain.structures.dtos import FirstInstanceAnalysisReportDto
+from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
+    AnalysisPrecedentsRepository,
+    AnalisysesRepository,
+    CaseSummariesRepository,
+    JudgmentDraftsRepository,
 )
-from animus.core.intake.use_cases import GetAnalysisReportUseCase
+from animus.core.intake.use_cases import GetFirstInstanceAnalysisReportUseCase
 from animus.core.shared.domain.structures import Id
 from animus.pipes.auth_pipe import AuthPipe
 from animus.pipes.database_pipe import DatabasePipe
 
 
-class GetAnalysisReportController:
+class GetFirstInstanceAnalysisReportController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/analyses/{analysis_id}/report',
+            '/analyses/{analysis_id}/first-instance-report',
             status_code=200,
-            response_model=AnalysisReportDto,
+            response_model=FirstInstanceAnalysisReportDto,
         )
         def _(
             analysis_id: str,
@@ -46,12 +43,17 @@ class GetAnalysisReportController:
                 AnalysisPrecedentsRepository,
                 Depends(DatabasePipe.get_analysis_precedents_repository_from_request),
             ],
-        ) -> AnalysisReportDto:
-            use_case = GetAnalysisReportUseCase(
+            judgment_drafts_repository: Annotated[
+                JudgmentDraftsRepository,
+                Depends(DatabasePipe.get_judgment_drafts_repository_from_request),
+            ],
+        ) -> FirstInstanceAnalysisReportDto:
+            use_case = GetFirstInstanceAnalysisReportUseCase(
                 analisyses_repository=analisyses_repository,
                 analysis_documents_repository=analysis_documents_repository,
                 case_summaries_repository=case_summaries_repository,
                 analysis_precedents_repository=analysis_precedents_repository,
+                judgment_drafts_repository=judgment_drafts_repository,
             )
 
             return use_case.execute(

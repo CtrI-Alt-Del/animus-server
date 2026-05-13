@@ -1,7 +1,11 @@
 from animus.core.intake.domain.entities.analysis import Analysis
 from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
-from animus.core.intake.domain.entities.lawyer_analysis_status import LawyerAnalysisStatus
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.entities.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.structures import Datetime, Id, Logical
@@ -14,20 +18,20 @@ class CreateAnalysisUseCase:
     def execute(
         self,
         account_id: str,
-        type: str = AnalysisType.LAWYER.value,
+        type: str = AnalysisType.FIRST_INSTANCE.value,
         folder_id: str | None = None,
     ) -> AnalysisDto:
         normalized_account_id = Id.create(account_id)
-        normalized_type = AnalysisType(type)
+        normalized_type = AnalysisType.normalize(type)
         normalized_folder_id = Id.create(folder_id) if folder_id is not None else None
         next_number = self._analisyses_repository.find_next_generated_name_number(
             normalized_account_id
         )
 
         initial_status = (
-            LawyerAnalysisStatus.WAITING_DOCUMENT_UPLOAD
-            if normalized_type == AnalysisType.LAWYER
-            else JudgeAnalysisStatus.WAITING_DOCUMENT_UPLOAD
+            CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD
+            if normalized_type.uses_case_assessment_or_first_instance_flow()
+            else SecondInstanceAnalysisStatus.WAITING_DOCUMENT_UPLOAD
         )
 
         analysis = Analysis.create(

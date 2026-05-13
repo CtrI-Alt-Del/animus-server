@@ -6,7 +6,10 @@ from pydantic import BaseModel
 from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
     AnalysisDocumentDto,
 )
-from animus.core.intake.interfaces import AnalysisDocumentsRepository, AnalisysesRepository
+from animus.core.intake.interfaces import (
+    AnalysisDocumentsRepository,
+    AnalisysesRepository,
+)
 from animus.core.intake.use_cases import CreateAnalysisDocumentUseCase
 from animus.core.shared.domain.structures import Id
 from animus.core.shared.interfaces import Broker

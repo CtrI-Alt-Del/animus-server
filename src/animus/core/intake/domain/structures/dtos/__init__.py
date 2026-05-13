@@ -4,14 +4,13 @@ from typing import Any
 
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
-        'AnalysisReportDto': ('.analysis_report_dto', 'AnalysisReportDto'),
-        'JudgeAnalysisReportDto': (
-            '.judge_analysis_report_dto',
-            'JudgeAnalysisReportDto',
+        'CaseAssessmentAnalysisReportDto': (
+            '.case_assessment_analysis_report_dto',
+            'CaseAssessmentAnalysisReportDto',
         ),
-        'LawerAnalysisReportDto': (
-            '.lawer_analysis_report_dto',
-            'LawerAnalysisReportDto',
+        'FirstInstanceAnalysisReportDto': (
+            '.first_instance_analysis_report_dto',
+            'FirstInstanceAnalysisReportDto',
         ),
         'AnalysisDocumentDto': ('.analysis_document_dto', 'AnalysisDocumentDto'),
         'PetitionSummaryEmbeddingDto': (
@@ -44,6 +43,10 @@ def __getattr__(name: str) -> Any:
         'PrecedentIdentifierDto': (
             '.precedent_identifier_dto',
             'PrecedentIdentifierDto',
+        ),
+        'SecondInstanceAnalysisReportDto': (
+            '.second_instance_analysis_report_dto',
+            'SecondInstanceAnalysisReportDto',
         ),
     }
 

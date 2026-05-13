@@ -3,8 +3,12 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
-from animus.core.intake.domain.entities.lawyer_analysis_status import LawyerAnalysisStatus
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.entities.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
@@ -64,8 +68,8 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         processing_statuses = [
             status.value
             for status in (
-                *LawyerAnalysisStatus.get_processing_statuses(),
-                *JudgeAnalysisStatus.get_processing_statuses(),
+                *CaseAssessmentAnalysisStatus.get_processing_statuses(),
+                *SecondInstanceAnalysisStatus.get_processing_statuses(),
             )
         ]
 

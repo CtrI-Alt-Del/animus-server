@@ -1,7 +1,13 @@
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
-from animus.core.intake.domain.entities.lawyer_analysis_status import LawyerAnalysisStatus
-from animus.core.intake.domain.errors import AnalysisDocumentNotFoundError, AnalysisNotFoundError
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.entities.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
+from animus.core.intake.domain.errors import (
+    AnalysisDocumentNotFoundError,
+    AnalysisNotFoundError,
+)
 from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
 from animus.core.intake.interfaces import (
@@ -51,10 +57,10 @@ class CreateCaseSummaryUseCase:
         if analysis is None:
             raise AnalysisNotFoundError
 
-        if analysis.type == AnalysisType.LAWYER:
-            analysis.set_status(LawyerAnalysisStatus.CASE_ANALYZED)
+        if analysis.type.uses_case_assessment_or_first_instance_flow():
+            analysis.set_status(CaseAssessmentAnalysisStatus.CASE_ANALYZED)
         else:
-            analysis.set_status(JudgeAnalysisStatus.CASE_ANALYZED)
+            analysis.set_status(SecondInstanceAnalysisStatus.CASE_ANALYZED)
 
         self._analisyses_repository.replace(analysis)
         return case_summary.dto

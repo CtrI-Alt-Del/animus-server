@@ -29,7 +29,7 @@ def _create_petition_with_summary(
             name='Analise da peticao',
             folder_id=None,
             account_id=account_id,
-            type=AnalysisType.LAWYER.value,
+            type=AnalysisType.FIRST_INSTANCE.value,
             status=AnalysisStatusValue.PETITION_UPLOADED.value,
             is_archived=False,
             created_at=datetime.now(UTC),

@@ -1,4 +1,6 @@
-from animus.core.intake.domain.structures.dtos.petition_draft_dto import PetitionDraftDto
+from animus.core.intake.domain.structures.dtos.petition_draft_dto import (
+    PetitionDraftDto,
+)
 from animus.core.intake.domain.structures.petition_draft import PetitionDraft
 from animus.database.sqlalchemy.models.intake.petition_draft_model import (
     PetitionDraftModel,

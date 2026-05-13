@@ -1,13 +1,19 @@
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
-from animus.core.intake.domain.entities.lawyer_analysis_status import LawyerAnalysisStatus
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.entities.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.core.intake.domain.events import PetitionReplacedEvent
 from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
     AnalysisDocumentDto,
 )
-from animus.core.intake.interfaces import AnalysisDocumentsRepository, AnalisysesRepository
+from animus.core.intake.interfaces import (
+    AnalysisDocumentsRepository,
+    AnalisysesRepository,
+)
 from animus.core.shared.domain.structures import Id
 from animus.core.shared.interfaces import Broker
 
@@ -58,10 +64,10 @@ class CreateAnalysisDocumentUseCase:
         )
         operation(document)
 
-        if analysis.type == AnalysisType.LAWYER:
-            analysis.set_status(LawyerAnalysisStatus.DOCUMENT_UPLOADED)
+        if analysis.type.uses_case_assessment_or_first_instance_flow():
+            analysis.set_status(CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED)
         else:
-            analysis.set_status(JudgeAnalysisStatus.DOCUMENT_UPLOADED)
+            analysis.set_status(SecondInstanceAnalysisStatus.DOCUMENT_UPLOADED)
         self._analisyses_repository.replace(analysis)
 
         return document.dto

@@ -57,8 +57,12 @@ class TestListAnalysisPetitionsUseCase:
             )
         )
 
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = document
-        self.case_summaries_repository_mock.find_by_analysis_id.return_value = case_summary
+        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
+            document
+        )
+        self.case_summaries_repository_mock.find_by_analysis_id.return_value = (
+            case_summary
+        )
 
         result = self.use_case.execute(analysis_id=analysis_id)
 

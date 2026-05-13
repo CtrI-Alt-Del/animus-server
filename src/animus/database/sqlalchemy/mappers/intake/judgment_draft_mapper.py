@@ -1,4 +1,6 @@
-from animus.core.intake.domain.structures.dtos.judgment_draft_dto import JudgmentDraftDto
+from animus.core.intake.domain.structures.dtos.judgment_draft_dto import (
+    JudgmentDraftDto,
+)
 from animus.core.intake.domain.structures.judgment_draft import JudgmentDraft
 from animus.database.sqlalchemy.models.intake.judgment_draft_model import (
     JudgmentDraftModel,

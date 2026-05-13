@@ -8,12 +8,14 @@ from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
 from animus.core.intake.domain.structures.dtos.case_summary_dto import (
     CaseSummaryDto,
 )
-from animus.core.intake.domain.structures.dtos.petition_draft_dto import PetitionDraftDto
+from animus.core.intake.domain.structures.dtos.petition_draft_dto import (
+    PetitionDraftDto,
+)
 from animus.core.shared.domain.decorators import dto
 
 
 @dto
-class LawerAnalysisReportDto:
+class CaseAssessmentAnalysisReportDto:
     analysis: AnalysisDto
     document: AnalysisDocumentDto
     case_summary: CaseSummaryDto

@@ -81,8 +81,8 @@ class SummarizeCaseJob(InngestJob):
             except Exception:
                 await context.step.run(
                     'mark_analysis_as_failed',
-                    lambda payload=payload: (
-                        SummarizeCaseJob._mark_analysis_as_failed(payload)
+                    lambda payload=payload: SummarizeCaseJob._mark_analysis_as_failed(
+                        payload
                     ),
                 )
                 raise
@@ -104,12 +104,16 @@ class SummarizeCaseJob(InngestJob):
     @staticmethod
     def _summarize_case_sync(payload: _Payload) -> dict[str, str]:
         with Sqlalchemy.session() as session:
-            analysis_documents_repository = SqlalchemyAnalysisDocumentsRepository(session)
+            analysis_documents_repository = SqlalchemyAnalysisDocumentsRepository(
+                session
+            )
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
 
             analysis_id = Id.create(payload.analysis_id)
-            analysis_document = analysis_documents_repository.find_by_analysis_id(analysis_id)
+            analysis_document = analysis_documents_repository.find_by_analysis_id(
+                analysis_id
+            )
             if analysis_document is None:
                 return {'analysis_id': analysis_id.value, 'account_id': ''}
 
@@ -157,7 +161,9 @@ class SummarizeCaseJob(InngestJob):
             if analysis is None:
                 return
 
-            UpdateAnalysisStatusUseCase(SqlalchemyAnalisysesRepository(session)).execute(
+            UpdateAnalysisStatusUseCase(
+                SqlalchemyAnalisysesRepository(session)
+            ).execute(
                 analysis_id=analysis_id.value,
                 status='FAILED',
             )

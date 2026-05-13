@@ -4,8 +4,8 @@ import pytest
 
 from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.lawyer_analysis_status import (
-    LawyerAnalysisStatus,
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos import AnalysisDto, PrecedentDto
 from animus.core.intake.domain.errors.analysis_not_found_error import (
@@ -76,8 +76,8 @@ class TestChooseAnalysisPrecedentUseCase:
                 name='Analise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
-                type=AnalysisType.LAWYER.value,
-                status=LawyerAnalysisStatus.SEARCHING_PRECEDENTS.value,
+                type=AnalysisType.FIRST_INSTANCE,
+                status=CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value,
                 is_archived=False,
                 created_at='2026-03-31T10:30:00+00:00',
             )
@@ -105,7 +105,10 @@ class TestChooseAnalysisPrecedentUseCase:
         )
         self.analisyses_repository_mock.replace.assert_called_once()
         updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
-        assert updated_analysis.status == LawyerAnalysisStatus.SEARCHING_PRECEDENTS.value
+        assert (
+            updated_analysis.status
+            == CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value
+        )
         assert result.value == updated_analysis.status
 
     def test_should_raise_precedent_not_found_error_when_identifier_does_not_exist(

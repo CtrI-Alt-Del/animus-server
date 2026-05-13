@@ -28,7 +28,7 @@ class TestCreateAnalysisController:
         response = client.post(
             '/intake/analyses',
             json={
-                'type': 'LAWYER',
+                'type': 'FIRST_INSTANCE',
                 'folder_id': '01BX5ZZKBKACTAV9WEVGEMMVRZ',
             },
             headers=build_auth_headers(account.id),
@@ -50,7 +50,7 @@ class TestCreateAnalysisController:
             'name': 'Nova analise #3',
             'folder_id': '01BX5ZZKBKACTAV9WEVGEMMVRZ',
             'account_id': account.id,
-            'type': 'LAWYER',
+            'type': 'FIRST_INSTANCE',
             'status': 'WAITING_DOCUMENT_UPLOAD',
             'is_archived': False,
             'precedents_search_filters': None,
@@ -67,7 +67,7 @@ class TestCreateAnalysisController:
 
         response = client.post(
             '/intake/analyses',
-            json={'type': 'LAWYER', 'folder_id': 'invalid-folder-id'},
+            json={'type': 'FIRST_INSTANCE', 'folder_id': 'invalid-folder-id'},
             headers=build_auth_headers(account.id),
         )
 

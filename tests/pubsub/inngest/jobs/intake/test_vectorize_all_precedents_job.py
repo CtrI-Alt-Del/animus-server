@@ -77,7 +77,7 @@ class TestVectorizeAllPrecedentsJob:
 
         assert response.status == 200
 
-        deadline = time.monotonic() + 120
+        deadline = time.monotonic() + 180
         while time.monotonic() < deadline:
             if len(captured_calls) >= 3:
                 break

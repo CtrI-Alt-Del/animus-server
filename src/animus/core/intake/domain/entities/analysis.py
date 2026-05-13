@@ -1,7 +1,14 @@
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.entities.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
+from animus.core.intake.domain.entities.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.judge_analysis_status import JudgeAnalysisStatus
-from animus.core.intake.domain.entities.lawyer_analysis_status import LawyerAnalysisStatus
 from animus.core.intake.domain.structures.analysis_precedents_search_filters import (
     AnalysisPrecedentsSearchFilters,
 )
@@ -13,7 +20,11 @@ from animus.core.shared.domain.decorators import entity
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Datetime, Id, Logical, Name
 
-AnalysisStatus = LawyerAnalysisStatus | JudgeAnalysisStatus
+AnalysisStatus = (
+    CaseAssessmentAnalysisStatus
+    | FirstInstanceAnalysisStatus
+    | SecondInstanceAnalysisStatus
+)
 
 
 @entity
@@ -41,7 +52,7 @@ class Analysis(Entity):
             name=Name.create(dto.name),
             folder_id=folder_id,
             account_id=Id.create(dto.account_id),
-            type=AnalysisType(dto.type),
+            type=AnalysisType.normalize(dto.type),
             status=cls._normalize_status(dto.type, dto.status),
             is_archived=Logical.create(dto.is_archived),
             precedents_search_filters=precedents_search_filters,
@@ -87,44 +98,49 @@ class Analysis(Entity):
     @staticmethod
     def _normalize_status(
         analysis_type: AnalysisType,
-        status: str | LawyerAnalysisStatus | JudgeAnalysisStatus,
+        status: str | CaseAssessmentAnalysisStatus | SecondInstanceAnalysisStatus,
     ) -> AnalysisStatus:
         normalized_status = Analysis._normalize_legacy_status(status)
 
-        if analysis_type == AnalysisType.LAWYER:
+        normalized_analysis_type = AnalysisType.normalize(analysis_type)
+
+        if normalized_analysis_type.uses_case_assessment_or_first_instance_flow():
             try:
-                return LawyerAnalysisStatus(normalized_status)
+                return CaseAssessmentAnalysisStatus(normalized_status)
             except ValueError as error:
                 raise ValidationError(
-                    f'Status de analise invalido para advogado: {normalized_status}'
+                    'Status de analise invalido para analise de case '
+                    'assessment ou primeira '
+                    f'instancia: {normalized_status}'
                 ) from error
 
         try:
-            return JudgeAnalysisStatus(normalized_status)
+            return SecondInstanceAnalysisStatus(normalized_status)
         except ValueError as error:
             raise ValidationError(
-                f'Status de analise invalido para juiz: {normalized_status}'
+                'Status de analise invalido para analise de segunda '
+                f'instancia: {normalized_status}'
             ) from error
 
     @staticmethod
     def _normalize_legacy_status(
-        status: str | LawyerAnalysisStatus | JudgeAnalysisStatus,
+        status: str | CaseAssessmentAnalysisStatus | SecondInstanceAnalysisStatus,
     ) -> str:
         legacy_mapping = {
-            'WAITING_PETITION': LawyerAnalysisStatus.WAITING_DOCUMENT_UPLOAD.value,
-            'PETITION_UPLOADED': LawyerAnalysisStatus.DOCUMENT_UPLOADED.value,
-            'ANALYZING_PETITION': LawyerAnalysisStatus.ANALYZING_CASE.value,
-            'PETITION_ANALYZED': LawyerAnalysisStatus.CASE_ANALYZED.value,
-            'WAITING_PRECEDENT_CHOISE': LawyerAnalysisStatus.DONE.value,
-            'PRECEDENT_CHOSED': LawyerAnalysisStatus.DONE.value,
+            'WAITING_PETITION': CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD.value,
+            'PETITION_UPLOADED': CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value,
+            'ANALYZING_PETITION': CaseAssessmentAnalysisStatus.ANALYZING_CASE.value,
+            'PETITION_ANALYZED': CaseAssessmentAnalysisStatus.CASE_ANALYZED.value,
+            'WAITING_PRECEDENT_CHOISE': CaseAssessmentAnalysisStatus.DONE.value,
+            'PRECEDENT_CHOSED': CaseAssessmentAnalysisStatus.DONE.value,
             'ANALYZING_PRECEDENTS_SIMILARITY': (
-                LawyerAnalysisStatus.SEARCHING_PRECEDENTS.value
+                CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value
             ),
             'ANALYZING_PRECEDENTS_APPLICABILITY': (
-                LawyerAnalysisStatus.SEARCHING_PRECEDENTS.value
+                CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value
             ),
             'GENERATING_SYNTHESIS': (
-                LawyerAnalysisStatus.GENERATING_PETITION_DRAFT.value
+                CaseAssessmentAnalysisStatus.GENERATING_PETITION_DRAFT.value
             ),
         }
 

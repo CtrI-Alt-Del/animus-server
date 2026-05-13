@@ -14,7 +14,15 @@ from .create_petition_summary_use_case import CreatePetitionSummaryUseCase
 from .create_petition_use_case import CreatePetitionUseCase
 from .get_analysis_document_use_case import GetAnalysisDocumentUseCase
 from .get_analysis_petition_use_case import GetAnalysisPetitionUseCase
-from .get_analysis_report_use_case import GetAnalysisReportUseCase
+from .get_case_assessment_analysis_report_use_case import (
+    GetCaseAssessmentAnalysisReportUseCase,
+)
+from .get_first_instance_analysis_report_use_case import (
+    GetFirstInstanceAnalysisReportUseCase,
+)
+from .get_second_instance_analysis_report_use_case import (
+    GetSecondInstanceAnalysisReportUseCase,
+)
 from .get_analysis_use_case import GetAnalysisUseCase
 from .get_case_summary_use_case import GetCaseSummaryUseCase
 from .get_petition_summary_use_case import GetPetitionSummaryUseCase
@@ -46,10 +54,12 @@ __all__ = [
     'CreatePetitionSummaryUseCase',
     'GetAnalysisDocumentUseCase',
     'GetAnalysisPetitionUseCase',
-    'GetAnalysisReportUseCase',
+    'GetCaseAssessmentAnalysisReportUseCase',
     'GetAnalysisUseCase',
     'GetCaseSummaryUseCase',
+    'GetFirstInstanceAnalysisReportUseCase',
     'GetPetitionSummaryUseCase',
+    'GetSecondInstanceAnalysisReportUseCase',
     'ListAnalysesUseCase',
     'ListUnfolderedAnalysesUseCase',
     'ListAnalysisPetitionsUseCase',

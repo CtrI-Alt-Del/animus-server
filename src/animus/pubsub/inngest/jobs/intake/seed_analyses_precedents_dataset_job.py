@@ -3,7 +3,7 @@ import shutil
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from inngest import Context, Inngest, TriggerEvent
 
@@ -20,9 +20,6 @@ from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentDatasetRowDto,
     AnalysisPrecedentsSearchFiltersDto,
-)
-from animus.core.intake.interfaces.petition_summaries_repository import (
-    PetitionSummariesRepository,
 )
 from animus.core.intake.use_cases import (
     CreateAnalysisDocumentUseCase,
@@ -53,6 +50,11 @@ from animus.providers.storage import (
     PypdfPdfProvider,
     PythonDocxProvider,
 )
+
+if TYPE_CHECKING:
+    from animus.core.intake.interfaces.petition_summaries_repository import (
+        PetitionSummariesRepository,
+    )
 
 
 class _NoopBroker:
@@ -175,7 +177,9 @@ class SeedAnalysesPrecedentsDatasetJob:
     ) -> list[dict[str, Any]]:
         with Sqlalchemy.session() as session:
             analisyses_repository = SqlalchemyAnalisysesRepository(session)
-            analysis_documents_repository = SqlalchemyAnalysisDocumentsRepository(session)
+            analysis_documents_repository = SqlalchemyAnalysisDocumentsRepository(
+                session
+            )
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
                 session
@@ -188,7 +192,7 @@ class SeedAnalysesPrecedentsDatasetJob:
             if existing_document is None:
                 analysis = CreateAnalysisUseCase(analisyses_repository).execute(
                     account_id=account_id,
-                    type=AnalysisType.LAWYER.value,
+                    type=AnalysisType.FIRST_INSTANCE.value,
                 )
                 session.flush()
                 analysis_id = Id.create(analysis.id).value
@@ -257,7 +261,7 @@ class SeedAnalysesPrecedentsDatasetJob:
 
                 AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
                     petition_summaries_repository=cast(
-                        PetitionSummariesRepository,
+                        'PetitionSummariesRepository',
                         case_summaries_repository,
                     ),
                     analysis_precedents_repository=analysis_precedents_repository,

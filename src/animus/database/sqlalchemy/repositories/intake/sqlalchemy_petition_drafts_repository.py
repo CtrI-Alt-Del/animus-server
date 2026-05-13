@@ -28,7 +28,9 @@ class SqlalchemyPetitionDraftsRepository(PetitionDraftsRepository):
         self._sqlalchemy.add(PetitionDraftMapper.to_model(petition_draft))
 
     def replace(self, petition_draft: PetitionDraft) -> None:
-        model = self._sqlalchemy.get(PetitionDraftModel, petition_draft.analysis_id.value)
+        model = self._sqlalchemy.get(
+            PetitionDraftModel, petition_draft.analysis_id.value
+        )
         if model is None:
             self.add(petition_draft)
             return

@@ -23,7 +23,9 @@ def upgrade() -> None:
         sa.Column('type', sa.String(length=20), nullable=True),
     )
 
-    op.execute(sa.text("UPDATE analyses SET type = 'LAWYER' WHERE type IS NULL"))
+    op.execute(
+        sa.text("UPDATE analyses SET type = 'CASE_ASSESSMENT' WHERE type IS NULL")
+    )
 
     op.execute(
         sa.text(

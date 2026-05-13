@@ -3,8 +3,8 @@ from unittest.mock import create_autospec
 import pytest
 
 from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.lawyer_analysis_status import (
-    LawyerAnalysisStatus,
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.use_cases.create_analysis_use_case import CreateAnalysisUseCase
@@ -45,8 +45,8 @@ class TestCreateAnalysisUseCase:
         assert result.name == 'Nova analise #3'
         assert result.account_id == '01ARZ3NDEKTSV4RRFFQ69G5FAV'
         assert result.folder_id == '01BX5ZZKBKACTAV9WEVGEMMVRZ'
-        assert result.type == AnalysisType.LAWYER
-        assert result.status == LawyerAnalysisStatus.WAITING_DOCUMENT_UPLOAD
+        assert result.type == AnalysisType.FIRST_INSTANCE
+        assert result.status == CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD
         assert result.is_archived is False
         assert result.id is not None
 

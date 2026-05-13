@@ -2,7 +2,12 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.entities.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.intake.use_cases.list_unfoldered_analyses_use_case import (
     ListUnfolderedAnalysesUseCase,
@@ -55,7 +60,18 @@ class TestListUnfolderedAnalysesUseCase:
         assert kwargs['limit'] == Integer.create(10)
         assert kwargs['is_archived'] == Logical.create_false()
         assert kwargs['only_unfoldered'] == Logical.create_true()
-        assert kwargs['statuses'] == tuple(AnalysisStatusValue)
+        assert kwargs['statuses'] == (
+            CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
+            CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED,
+            CaseAssessmentAnalysisStatus.CASE_ANALYZED,
+            CaseAssessmentAnalysisStatus.DONE,
+            CaseAssessmentAnalysisStatus.FAILED,
+            SecondInstanceAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
+            SecondInstanceAnalysisStatus.DOCUMENT_UPLOADED,
+            SecondInstanceAnalysisStatus.CASE_ANALYZED,
+            SecondInstanceAnalysisStatus.DONE,
+            SecondInstanceAnalysisStatus.FAILED,
+        )
 
         assert result.items == [analysis.dto]
         assert result.next_cursor == next_cursor

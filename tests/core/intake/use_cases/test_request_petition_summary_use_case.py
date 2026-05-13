@@ -2,8 +2,8 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.lawyer_analysis_status import (
-    LawyerAnalysisStatus,
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.petition_document_dto import (
     PetitionDocumentDto,
@@ -53,7 +53,7 @@ class TestRequestPetitionSummaryUseCase:
         )
         analysis = AnalysesFaker.fake(
             analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
-            status=LawyerAnalysisStatus.DOCUMENT_UPLOADED.value,
+            status=CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value,
         )
         self.petitions_repository_mock.find_by_id.return_value = petition
         self.analisyses_repository_mock.find_by_id.return_value = analysis
@@ -72,7 +72,9 @@ class TestRequestPetitionSummaryUseCase:
         updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
         published_event = self.broker_mock.publish.call_args.args[0]
 
-        assert updated_analysis.status == LawyerAnalysisStatus.ANALYZING_CASE.value
+        assert (
+            updated_analysis.status == CaseAssessmentAnalysisStatus.ANALYZING_CASE.value
+        )
         assert isinstance(published_event, PetitionSummaryRequestedEvent)
         assert published_event.payload.petition_id == petition_id
 

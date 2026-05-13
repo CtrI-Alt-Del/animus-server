@@ -1,18 +1,20 @@
 from enum import StrEnum
 
 
-class LawyerAnalysisStatus(StrEnum):
+class CaseAssessmentAnalysisStatus(StrEnum):
     WAITING_DOCUMENT_UPLOAD = 'WAITING_DOCUMENT_UPLOAD'
     DOCUMENT_UPLOADED = 'DOCUMENT_UPLOADED'
     ANALYZING_CASE = 'ANALYZING_CASE'
     CASE_ANALYZED = 'CASE_ANALYZED'
     SEARCHING_PRECEDENTS = 'SEARCHING_PRECEDENTS'
+    ANALYZING_PRECEDENTS_SIMILARITY = 'ANALYZING_PRECEDENTS_SIMILARITY'
+    ANALYZING_PRECEDENTS_APPLICABILITY = 'ANALYZING_PRECEDENTS_APPLICABILITY'
     GENERATING_PETITION_DRAFT = 'GENERATING_PETITION_DRAFT'
     DONE = 'DONE'
     FAILED = 'FAILED'
 
     @classmethod
-    def get_processing_statuses(cls) -> tuple['LawyerAnalysisStatus', ...]:
+    def get_processing_statuses(cls) -> tuple['CaseAssessmentAnalysisStatus', ...]:
         return (
             cls.ANALYZING_CASE,
             cls.SEARCHING_PRECEDENTS,

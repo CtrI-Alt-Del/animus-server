@@ -64,7 +64,9 @@ class SqlalchemyCaseSummariesRepository(CaseSummariesRepository):
             else None
         )
         model.requested_relief = [item.value for item in case_summary.requested_relief]
-        model.procedural_issues = [item.value for item in case_summary.procedural_issues]
+        model.procedural_issues = [
+            item.value for item in case_summary.procedural_issues
+        ]
         model.excluded_or_accessory_topics = [
             item.value for item in case_summary.excluded_or_accessory_topics
         ]

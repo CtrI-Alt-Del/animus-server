@@ -7,7 +7,9 @@ from animus.core.shared.domain.structures import Id
 
 
 class GetAnalysisDocumentUseCase:
-    def __init__(self, analysis_documents_repository: AnalysisDocumentsRepository) -> None:
+    def __init__(
+        self, analysis_documents_repository: AnalysisDocumentsRepository
+    ) -> None:
         self._analysis_documents_repository = analysis_documents_repository
 
     def execute(self, analysis_id: str) -> AnalysisDocumentDto:

@@ -28,7 +28,9 @@ class SqlalchemyJudgmentDraftsRepository(JudgmentDraftsRepository):
         self._sqlalchemy.add(JudgmentDraftMapper.to_model(judgment_draft))
 
     def replace(self, judgment_draft: JudgmentDraft) -> None:
-        model = self._sqlalchemy.get(JudgmentDraftModel, judgment_draft.analysis_id.value)
+        model = self._sqlalchemy.get(
+            JudgmentDraftModel, judgment_draft.analysis_id.value
+        )
         if model is None:
             self.add(judgment_draft)
             return
