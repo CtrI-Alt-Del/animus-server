@@ -24,8 +24,31 @@ class TestUnarchiveAnalysisUseCase:
             analisyses_repository=self.analisyses_repository_mock,
         )
 
-    def test_should_unarchive_analysis_idempotently_and_persist_it(self) -> None:
+    def test_should_unarchive_analysis_and_persist_it(self) -> None:
         analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
+        account_id = '01BX5ZZKBKACTAV9WEVGEMMVRZ'
+        analysis = AnalysesFaker.fake(
+            analysis_id=analysis_id,
+            account_id=account_id,
+            is_archived=True,
+        )
+        self.analisyses_repository_mock.find_by_id.return_value = analysis
+
+        result = self.use_case.execute(
+            account_id=account_id,
+            analysis_id=analysis_id,
+        )
+
+        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+            Id.create(analysis_id)
+        )
+        self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
+        assert result.is_archived is False
+
+    def test_should_keep_unarchive_idempotent_when_analysis_is_already_unarchived(
+        self,
+    ) -> None:
+        analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAW'
         account_id = '01BX5ZZKBKACTAV9WEVGEMMVRZ'
         analysis = AnalysesFaker.fake(
             analysis_id=analysis_id,

@@ -12,6 +12,33 @@ CreateAnalysisFixture = Callable[..., AnalysisModel]
 
 
 class TestUnarchiveAnalysisController:
+    def test_should_return_200_and_unarchive_analysis(
+        self,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        create_analysis: CreateAnalysisFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+        sqlalchemy_session_factory: sessionmaker[Session],
+    ) -> None:
+        account = create_account(is_verified=True, is_active=True)
+        analysis = create_analysis(account_id=account.id, is_archived=True)
+
+        response = client.patch(
+            f'/intake/analyses/{analysis.id}/unarchive',
+            headers=build_auth_headers(account.id),
+        )
+
+        inspection_session = sqlalchemy_session_factory()
+        persisted_analysis = inspection_session.scalar(
+            select(AnalysisModel).where(AnalysisModel.id == analysis.id)
+        )
+        inspection_session.close()
+
+        assert response.status_code == 200
+        assert persisted_analysis is not None
+        assert persisted_analysis.is_archived is False
+        assert response.json()['is_archived'] is False
+
     def test_should_return_200_and_keep_unarchive_idempotent(
         self,
         client: TestClient,
