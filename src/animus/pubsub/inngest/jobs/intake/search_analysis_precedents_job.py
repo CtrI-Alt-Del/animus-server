@@ -91,13 +91,11 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                     ),
                 )
                 if isinstance(search_result_data, dict):
-                    search_result_data_dict = cast(dict[str, Any], search_result_data)
+                    search_result_data_dict = cast('dict[str, Any]', search_result_data)
                     analysis_precedents_data = list(
                         cast(
-                            list[dict[str, Any]],
-                            search_result_data_dict.get(
-                                'analysis_precedents_data', []
-                            ),
+                            'list[dict[str, Any]]',
+                            search_result_data_dict.get('analysis_precedents_data', []),
                         )
                     )
                     account_id = str(search_result_data_dict.get('account_id', ''))
@@ -208,7 +206,9 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 dto=payload.filters_dto,
             )
 
-        return [asdict(analysis_precedent) for analysis_precedent in analysis_precedents]
+        return [
+            asdict(analysis_precedent) for analysis_precedent in analysis_precedents
+        ]
 
     @staticmethod
     async def _get_analysis_account_id(payload: _Payload) -> str:

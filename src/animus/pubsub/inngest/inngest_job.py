@@ -16,4 +16,4 @@ class InngestJob:
         if not isinstance(data_raw, dict):
             return {}
 
-        return cast(dict[str, Any], data_raw)
+        return cast('dict[str, Any]', data_raw)

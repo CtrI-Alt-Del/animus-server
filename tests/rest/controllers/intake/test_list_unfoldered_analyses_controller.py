@@ -69,7 +69,10 @@ class TestListUnfolderedAnalysesController:
         assert len(payload['items']) == 1
 
         item = payload['items'][0]
-        allowed_analyses = {first_analysis.id: first_analysis, second_unfoldered_analysis.id: second_unfoldered_analysis}
+        allowed_analyses = {
+            first_analysis.id: first_analysis,
+            second_unfoldered_analysis.id: second_unfoldered_analysis,
+        }
         assert item['id'] in allowed_analyses
 
         expected_analysis = allowed_analyses[item['id']]
