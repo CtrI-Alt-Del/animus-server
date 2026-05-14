@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.models.intake import (
@@ -34,6 +35,7 @@ def create_analysis(
         account_id: str,
         analysis_id: str | None = None,
         name: str = 'Analise inicial',
+        analysis_type: str = AnalysisType.FIRST_INSTANCE.value,
         status: str = AnalysisStatusValue.WAITING_PETITION.value,
         folder_id: str | None = None,
         is_archived: bool = False,
@@ -44,6 +46,7 @@ def create_analysis(
             name=name,
             folder_id=folder_id,
             account_id=account_id,
+            type=analysis_type,
             status=status,
             is_archived=is_archived,
             created_at=datetime.now(UTC),
@@ -178,7 +181,7 @@ class TestCreatePetitionController:
         assert removed_petition is None
         assert removed_summary is None
         assert persisted_analysis is not None
-        assert persisted_analysis.status == AnalysisStatusValue.PETITION_UPLOADED.value
+        assert persisted_analysis.status == 'DOCUMENT_UPLOADED'
         assert response.json() == {
             'id': persisted_petitions[0].id,
             'analysis_id': analysis.id,

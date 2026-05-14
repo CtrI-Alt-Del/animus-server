@@ -6,15 +6,15 @@ from animus.core.intake.domain.entities import Precedent
 from animus.core.intake.domain.entities.dtos import PrecedentDto
 from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentsSearchFiltersDto,
-    PetitionSummaryDto,
+    CaseSummaryDto,
     PrecedentEmbeddingDto,
     PrecedentIdentifierDto,
 )
-from animus.core.intake.domain.structures.petition_summary import PetitionSummary
+from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.precedent_embedding import PrecedentEmbedding
 from animus.core.intake.interfaces import (
-    PetitionSummariesRepository,
-    PetitionSummaryEmbeddingsProvider,
+    CaseSummariesRepository,
+    CaseSummaryEmbeddingsProvider,
     PrecedentsEmbeddingsRepository,
     PrecedentsRepository,
 )
@@ -28,12 +28,12 @@ from animus.core.shared.responses import ListResponse
 class TestSearchAnalysisPrecedentsUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.petition_summaries_repository_mock = create_autospec(
-            PetitionSummariesRepository,
+        self.case_summaries_repository_mock = create_autospec(
+            CaseSummariesRepository,
             instance=True,
         )
-        self.petition_summary_embeddings_provider_mock = create_autospec(
-            PetitionSummaryEmbeddingsProvider,
+        self.case_summary_embeddings_provider_mock = create_autospec(
+            CaseSummaryEmbeddingsProvider,
             instance=True,
         )
         self.precedents_embeddings_repository_mock = create_autospec(
@@ -45,8 +45,8 @@ class TestSearchAnalysisPrecedentsUseCase:
             instance=True,
         )
         self.use_case = SearchAnalysisPrecedentsUseCase(
-            petition_summaries_repository=self.petition_summaries_repository_mock,
-            petition_summary_embeddings_provider=self.petition_summary_embeddings_provider_mock,
+            case_summaries_repository=self.case_summaries_repository_mock,
+            case_summary_embeddings_provider=self.case_summary_embeddings_provider_mock,
             precedents_embeddings_repository=self.precedents_embeddings_repository_mock,
             precedents_repository=self.precedents_repository_mock,
         )
@@ -72,8 +72,8 @@ class TestSearchAnalysisPrecedentsUseCase:
             thesis='Para casos de doenca profissional ou do trabalho, aplica-se a disciplina do art. 23 da Lei 8.213/1991.',
         )
 
-        self.petition_summaries_repository_mock.find_by_analysis_id.return_value = PetitionSummary.create(
-            PetitionSummaryDto(
+        self.case_summaries_repository_mock.find_by_analysis_id.return_value = CaseSummary.create(
+            CaseSummaryDto(
                 case_summary='Acao de indenizacao por danos morais e materiais decorrentes de acidente de trabalho com obito, proposta por sucessores e dependentes.',
                 legal_issue='Competencia da Justica do Trabalho e legitimidade dos sucessores para buscar responsabilizacao civil subjetiva do empregador por culpa e falha em normas de seguranca.',
                 central_question='A Justica do Trabalho e competente para julgar a demanda proposta por sucessores de trabalhador falecido e, no merito, a culpa patronal por inobservancia de normas de seguranca gera dever de indenizar?',
@@ -88,7 +88,7 @@ class TestSearchAnalysisPrecedentsUseCase:
                 ],
             )
         )
-        self.petition_summary_embeddings_provider_mock.generate.return_value = []
+        self.case_summary_embeddings_provider_mock.generate.return_value = []
         self.precedents_embeddings_repository_mock.find_many.return_value = (
             ListResponse(
                 items=[
@@ -135,8 +135,8 @@ class TestSearchAnalysisPrecedentsUseCase:
             thesis='E constitucional a responsabilizacao objetiva do empregador quando a atividade normalmente desenvolvida apresentar exposicao habitual a risco especial.',
         )
 
-        self.petition_summaries_repository_mock.find_by_analysis_id.return_value = PetitionSummary.create(
-            PetitionSummaryDto(
+        self.case_summaries_repository_mock.find_by_analysis_id.return_value = CaseSummary.create(
+            CaseSummaryDto(
                 case_summary='Acao de indenizacao por acidente de trabalho em atividade de risco, com pedido de reparacao civil.',
                 legal_issue='Responsabilidade objetiva do empregador por atividade de risco e exposicao habitual a risco especial.',
                 central_question='A atividade de risco normalmente desenvolvida pelo trabalhador autoriza a responsabilizacao objetiva do empregador nos termos do art. 927, paragrafo unico, do Codigo Civil?',
@@ -147,7 +147,7 @@ class TestSearchAnalysisPrecedentsUseCase:
                 search_terms=['responsabilidade objetiva atividade de risco'],
             )
         )
-        self.petition_summary_embeddings_provider_mock.generate.return_value = []
+        self.case_summary_embeddings_provider_mock.generate.return_value = []
         self.precedents_embeddings_repository_mock.find_many.return_value = (
             ListResponse(
                 items=[

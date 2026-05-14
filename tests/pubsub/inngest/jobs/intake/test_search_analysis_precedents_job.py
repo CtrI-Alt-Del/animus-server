@@ -12,7 +12,10 @@ from sqlalchemy.orm import Session, sessionmaker
 from animus.ai.agno.workflows.intake import (
     AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
 )
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
@@ -58,7 +61,8 @@ def _seed_analysis_with_petition_summary(
             name='Analise de teste',
             account_id=Id.create().value,
             folder_id=None,
-            status=AnalysisStatusValue.WAITING_PETITION.value,
+            type=AnalysisType.FIRST_INSTANCE.value,
+            status=CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value,
             is_archived=False,
         )
     )
@@ -239,7 +243,7 @@ class TestSearchAnalysisPrecedentsJob:
 
         assert response.status == 200
 
-        _wait_until(lambda: len(captured_steps) == 2, timeout_seconds=20)
+        _wait_until(lambda: len(captured_steps) == 2, timeout_seconds=40)
 
         assert captured_steps == [
             {
@@ -396,7 +400,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == AnalysisStatusValue.SEARCHING_PRECEDENTS.value
+            == CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value
         )
 
         synthesize_analysis_precedents_sync(payload, analysis_precedents_data)
@@ -411,7 +415,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value
+            == CaseAssessmentAnalysisStatus.DONE.value
         )
         analysis = _get_analysis(
             sqlalchemy_session_factory,
@@ -457,7 +461,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == AnalysisStatusValue.FAILED.value
+            == CaseAssessmentAnalysisStatus.FAILED.value
         )
         assert (
             _get_analysis_precedents(

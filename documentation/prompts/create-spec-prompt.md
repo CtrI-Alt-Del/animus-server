@@ -56,6 +56,7 @@ Use **Serena** para localizar arquivos e implementações similares. Reporte:
 - Contratos existentes que a feature deve respeitar (interfaces, schemas, DTOs)
 - Fluxo de dados atual e onde ele precisa ser estendido ou alterado
 - Pontos de atenção: acoplamentos, riscos, arquivos que provavelmente serão impactados
+- Impacto em `seeders` da camada `database` e em paths de dados persistidos/gerados, quando aplicável
 - Lacunas: o que não foi encontrado e seria esperado
 
 **1.4 Síntese e decisões**
@@ -226,6 +227,7 @@ detalhe e marque explicitamente como **novo arquivo**.]
 - **Interface implementada:** port do `core`
 - **Dependências:** `Session` SQLAlchemy
 - **Métodos:** assinatura com tipos e responsabilidade
+- **Seeders da camada database (quando aplicável):** listar `seeders` impactados em `src/animus/database/**/seeders/`, arquivos de entrada/saída e paths persistidos gerados ou consumidos
 
 ## Camada Validation (Schemas Pydantic de Saída)
 
@@ -279,6 +281,7 @@ detalhe e marque explicitamente como **novo arquivo**.]
 - **Dependências:** use cases e providers instanciados no job
 - **Passos (`step.run`):** sequência de ações do job
 - **Idempotência:** como garantir que re-execuções são seguras
+
 
 ## Camada WebSocket (Channels)
 

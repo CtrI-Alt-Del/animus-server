@@ -60,7 +60,8 @@ class TestListAnalysesController:
                     'name': second_analysis.name,
                     'folder_id': None,
                     'account_id': account.id,
-                    'status': 'WAITING_PETITION',
+                    'type': 'FIRST_INSTANCE',
+                    'status': 'WAITING_DOCUMENT_UPLOAD',
                     'is_archived': False,
                     'precedents_search_filters': None,
                     'created_at': second_analysis.created_at.replace(

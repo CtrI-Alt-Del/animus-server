@@ -5,7 +5,10 @@ import pytest
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.models.intake import AnalysisModel
 from animus.database.sqlalchemy.models.library import FolderModel
@@ -36,7 +39,8 @@ def create_analysis(
         account_id: str,
         analysis_id: str | None = None,
         name: str = 'Analise inicial',
-        status: str = AnalysisStatusValue.WAITING_PETITION.value,
+        analysis_type: str = AnalysisType.FIRST_INSTANCE.value,
+        status: str = CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD.value,
         folder_id: str | None = None,
         is_archived: bool = False,
     ) -> AnalysisModel:
@@ -46,6 +50,7 @@ def create_analysis(
             name=name,
             folder_id=folder_id,
             account_id=account_id,
+            type=analysis_type,
             status=status,
             is_archived=is_archived,
             created_at=datetime.now(UTC),

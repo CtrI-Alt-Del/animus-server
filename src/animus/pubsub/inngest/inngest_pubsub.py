@@ -10,15 +10,16 @@ from animus.pubsub.inngest.jobs.auth.send_password_reset_email_job import (
     SendPasswordResetEmailJob,
 )
 from animus.pubsub.inngest.jobs.intake import (
+    ExtractPetitionJob,
     RemovePetitionDocumentFileJob,
     SearchAnalysisPrecedentsJob,
     SeedAnalysesPrecedentsDatasetJob,
-    SummarizePetitionJob,
+    SummarizeCaseJob,
     VectorizeAllPrecedentsJob,
     VectorizePrecedentsJob,
 )
 from animus.pubsub.inngest.jobs.notification import (
-    SendPetitionSummaryFinishedNotificationJob,
+    SendCaseSummaryFinishedNotificationJob,
     SendPrecedentsSearchFinishedNotificationJob,
 )
 
@@ -51,17 +52,18 @@ class InngestPubSub:
         return [
             SendAccountVerificationEmailJob.handle(inngest),
             SendPasswordResetEmailJob.handle(inngest),
-            SendPetitionSummaryFinishedNotificationJob.handle(inngest),
+            SendCaseSummaryFinishedNotificationJob.handle(inngest),
             SendPrecedentsSearchFinishedNotificationJob.handle(inngest),
         ]
 
     @staticmethod
     def register_intake_jobs(inngest: Inngest) -> list[Any]:
         return [
+            ExtractPetitionJob.handle(inngest),
             RemovePetitionDocumentFileJob.handle(inngest),
             SearchAnalysisPrecedentsJob.handle(inngest),
             SeedAnalysesPrecedentsDatasetJob.handle(inngest),
-            SummarizePetitionJob.handle(inngest),
+            SummarizeCaseJob.handle(inngest),
             VectorizeAllPrecedentsJob.handle(inngest),
             VectorizePrecedentsJob.handle(inngest),
         ]

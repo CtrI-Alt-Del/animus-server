@@ -7,7 +7,7 @@ from agno.workflow import Step, StepInput, StepOutput, Workflow
 from animus.ai.agno.outputs.intake.analysis_precedents_synthesis_output import (
     AnalysisPrecedentsSynthesisOutput,
 )
-from animus.ai.agno.teams import IntakeSquad
+from animus.ai.agno.squads import IntakeSquad
 from animus.core.intake.domain.errors import (
     PetitionSummaryUnavailableError,
 )

@@ -15,6 +15,7 @@ class AnalysisModel(Model):
     name: Mapped[str] = mapped_column(String, nullable=False)
     folder_id: Mapped[str | None] = mapped_column(String(26), nullable=True, index=True)
     account_id: Mapped[str] = mapped_column(String(26), nullable=False, index=True)
+    type: Mapped[str] = mapped_column(String(20), nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
     is_archived: Mapped[bool] = mapped_column(Boolean, nullable=False)
     precedents_search_courts: Mapped[list[str] | None] = mapped_column(
@@ -30,6 +31,38 @@ class AnalysisModel(Model):
         nullable=True,
     )
 
+    document: Mapped[Any] = relationship(
+        'AnalysisDocumentModel',
+        back_populates='analysis',
+        uselist=False,
+        cascade='all, delete-orphan',
+    )
+    case_summary: Mapped[Any] = relationship(
+        'CaseSummaryModel',
+        back_populates='analysis',
+        uselist=False,
+        cascade='all, delete-orphan',
+    )
+    extracted_petition: Mapped[Any] = relationship(
+        'ExtractedPetitionModel',
+        back_populates='analysis',
+        uselist=False,
+        cascade='all, delete-orphan',
+    )
+    petition_draft: Mapped[Any] = relationship(
+        'PetitionDraftModel',
+        back_populates='analysis',
+        uselist=False,
+        cascade='all, delete-orphan',
+    )
+    judgment_draft: Mapped[Any] = relationship(
+        'JudgmentDraftModel',
+        back_populates='analysis',
+        uselist=False,
+        cascade='all, delete-orphan',
+    )
     petitions: Mapped[list[Any]] = relationship(
-        'PetitionModel', back_populates='analysis'
+        'PetitionModel',
+        back_populates='analysis',
+        cascade='all, delete-orphan',
     )

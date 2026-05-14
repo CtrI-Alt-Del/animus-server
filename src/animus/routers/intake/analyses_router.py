@@ -4,15 +4,21 @@ from animus.rest.controllers.intake import (
     ArchiveAnalysesController,
     ChooseAnalysisPrecedentController,
     CreateAnalysisController,
+    CreateAnalysisDocumentController,
     GetAnalysisController,
-    GetAnalysisReportController,
+    GetCaseAssessmentAnalysisReportController,
+    GetAnalysisDocumentController,
+    GetFirstInstanceAnalysisReportController,
     GetAnalysisStatusController,
+    GetCaseSummaryController,
+    GetSecondInstanceAnalysisReportController,
     ListAnalysesController,
     ListAnalysisPetitionsController,
     ListAnalysisPrecedentsController,
     ListUnfolderedAnalysesController,
     MoveAnalysesToFolderController,
     RenameAnalysisController,
+    RequestCaseSummaryController,
     SearchAnalysisPrecedentsController,
     UpdateAnalysisStatusController,
 )
@@ -31,7 +37,13 @@ class AnalysesRouter:
         ListAnalysesController.handle(router)
         ListUnfolderedAnalysesController.handle(router)
         GetAnalysisController.handle(router)
-        GetAnalysisReportController.handle(router)
+        CreateAnalysisDocumentController.handle(router)
+        GetAnalysisDocumentController.handle(router)
+        RequestCaseSummaryController.handle(router)
+        GetCaseSummaryController.handle(router)
+        GetCaseAssessmentAnalysisReportController.handle(router)
+        GetFirstInstanceAnalysisReportController.handle(router)
+        GetSecondInstanceAnalysisReportController.handle(router)
         RenameAnalysisController.handle(router)
         ArchiveAnalysesController.handle(router)
         ListAnalysisPetitionsController.handle(router)

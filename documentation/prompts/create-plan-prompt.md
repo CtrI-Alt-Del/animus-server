@@ -26,12 +26,15 @@
      1. **Core**: DTOs, structures, Entidades, Interfaces e Use Cases.
      2. **Drivers/Infra**: implementacoes de Repositories, Providers e PubSub.
      3. **API layer**: Middlewares, Pipes, Schemas, Controllers e Routers.
+   - Inclua no plano uma tarefa obrigatoria de validacao operacional para executar migrations no ambiente local: `uv run alembic upgrade head`.
 
 > ⚠️ **Regra** Se uma tarefa exige outra (ex: um Controller depende de um Use Case), a tarefa dependente deve aparecer depois e referenciar explicitamente a dependencia.
 
 > ⚠️ **Regra** Não leia desnecessariamente os arquivos especificados na `spec`, pois a spec já foi validada.
 
 > ⚠️ **Regra** Não incluir testes automatizados.
+
+> ⚠️ **Regra** Sempre planejar a execucao de migration com `uv run alembic upgrade head`, mesmo quando nao houver nova migration no escopo.
 
 ## Saida esperada
 

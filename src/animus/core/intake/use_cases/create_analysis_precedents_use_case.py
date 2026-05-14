@@ -1,6 +1,11 @@
 from typing import cast
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.entities.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures import AnalysisPrecedent
 from animus.core.intake.domain.structures.dtos.analysies_precedent_legal_features_dto import (
@@ -63,7 +68,10 @@ class CreateAnalysisPrecedentsUseCase:
             raise AnalysisNotFoundError
 
         analysis.set_precedents_search_filters(filters_dto)
-        analysis.set_status(AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value)
+        if analysis.type.uses_case_assessment_or_first_instance_flow():
+            analysis.set_status(CaseAssessmentAnalysisStatus.DONE)
+        else:
+            analysis.set_status(SecondInstanceAnalysisStatus.DONE)
         self._analisyses_repository.replace(analysis)
 
         return [

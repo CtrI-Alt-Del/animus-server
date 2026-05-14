@@ -1,6 +1,6 @@
 # Regras da Camada AI
 
-> 💡 Use este documento ao criar ou revisar implementacoes de `workflows`, `teams` e `toolkits` com Agno em `src/animus/ai/agno/`.
+> 💡 Use este documento ao criar ou revisar implementacoes de `workflows`, `squads` e `toolkits` com Agno em `src/animus/ai/agno/`.
 
 ## Visao Geral
 
@@ -9,14 +9,14 @@
 | Aspecto | Diretriz |
 |---|---|
 | **Objetivo** | Concentrar implementacoes concretas de AI usando o framework Agno em `src/animus/ai/agno/`. |
-| **Papel arquitetural** | Ser o adaptador de AI: implementar contratos `*Workflow` definidos no `core` usando agentes, times e ferramentas do Agno. |
+| **Papel arquitetural** | Ser o adaptador de AI: implementar contratos `*Workflow` definidos no `core` usando agentes, squads e ferramentas do Agno. |
 | **Entrada principal** | Dados de dominio tipados (DTOs, structures) vindos de `use_cases` via `pipes`. |
 | **Saida principal** | DTOs de dominio conforme o contrato `*Workflow` definido no `core`. |
 
 ### Responsabilidades principais
 
 - Implementar interfaces `*Workflow` definidas em `core/{contexto}/interfaces/`.
-- Compor `Teams` (classes com agentes como `@property`) especializados por dominio.
+- Compor `Squads` (classes com agentes como `@property`) especializados por dominio.
 - Compor `Toolkits` (subclasses de `agno.tools.Toolkit`) especializados por dominio.
 - Orquestrar a execucao de tarefas AI via `Workflows` que montam steps sequenciais e paralelos.
 
@@ -37,9 +37,9 @@
 
 ```
 src/animus/ai/agno/
-├── teams/
+├── squads/
 │   ├── __init__.py
-│   └── {dominio}_teams.py          # ex.: profiling_teams.py, intake_teams.py
+│   └── {dominio}_squad.py          # ex.: profiling_squad.py, intake_squad.py
 ├── toolkits/
 │   ├── __init__.py
 │   └── {dominio}_toolkit.py        # ex.: profiling_toolkit.py, intake_toolkit.py
@@ -51,12 +51,12 @@ src/animus/ai/agno/
 
 ### Regras de organizacao e nomeacao
 
-- `teams/` contem classes de agentes Agno, agrupadas por dominio de negocio.
+- `squads/` contem classes de agentes Agno, agrupadas por dominio de negocio.
 - `toolkits/` contem subclasses de `agno.tools.Toolkit`, agrupadas por dominio de negocio.
 - `workflows/` contem implementacoes concretas de `*Workflow`, organizadas em sub-pastas por dominio.
-- Arquivos em `teams/` e `toolkits/` devem ser prefixados com o nome do dominio: `{dominio}_teams.py`, `{dominio}_toolkit.py`.
+- Arquivos em `squads/` e `toolkits/` devem ser prefixados com o nome do dominio: `{dominio}_squad.py`, `{dominio}_toolkit.py`.
 - Arquivos em `workflows/{dominio}/` devem ser prefixados com o framework: `agno_{nome}_workflow.py`.
-- Classes devem seguir a convencao `Agno*Workflow`, `*Team`, `*Toolkit`.
+- Classes devem seguir a convencao `Agno*Workflow`, `*Squad`, `*Toolkit`.
 - `__init__.py` deve expor apenas os contratos publicos do modulo.
 - Nao especificar arquivos especificos, pois isso muda constantemente.
 
@@ -67,7 +67,7 @@ src/animus/ai/agno/
 | Termo | Definicao |
 |---|---|
 | `Workflow` | Implementacao concreta de uma interface `*Workflow` do `core`. Monta e executa um `agno.Workflow` internamente no metodo `run()`. |
-| `Team` | Classe que expoe agentes Agno como `@property`. Cada propriedade retorna um `Agent` configurado com modelo e instrucoes. |
+| `Squad` | Classe que expoe agentes Agno como `@property`. Cada propriedade retorna um `Agent` configurado com modelo e instrucoes. |
 | `Toolkit` | Subclasse de `agno.tools.Toolkit`. Registra ferramentas Python no construtor e pode chamar `use_cases` do `core`. |
 | `Step` | Etapa interna do `agno.Workflow`. Pode ter `executor` (metodo Python) ou `agent` (agente Agno). |
 | `Parallel` | Agrupador de `Steps` que devem executar concorrentemente dentro do `agno.Workflow`. |
@@ -83,7 +83,7 @@ src/animus/ai/agno/
 ```
 Workflow
   ├── usa: _StepNames (constantes de nome)
-  ├── usa: Team (instanciado no construtor)
+  ├── usa: Squad (instanciado no construtor)
   │    └── @property agent usa: Toolkit (passado via tools=[])
   ├── steps com executor (metodos Python) acessam session_state
   └── steps com agent delegam ao agente Agno
@@ -99,7 +99,7 @@ O `Workflow` concreto implementa a interface `*Workflow` do `core`. Ele monta um
 
 - Implementa exatamente o metodo definido na interface `*Workflow` do `core`.
 - Recebe dependencias por injecao no construtor (ex.: `Repository`, `UseCase`).
-- Instancia o `Team` no construtor; monta o `agno.Workflow` dentro de `run()`.
+- Instancia o `Squad` no construtor; monta o `agno.Workflow` dentro de `run()`.
 - Usa `_StepNames` como `NamedTuple` interno para evitar strings magicas nos nomes de steps.
 - Steps com logica Python usam `executor=cast(StepExecutor, self._metodo)`.
 - Steps que delegam ao LLM usam `agent=self._team.{agent_property}`.
@@ -125,7 +125,7 @@ class _StepNames(NamedTuple):
 class AgnoGenerateIcebreakerWorkflow(GenerateIcebreakerWorkflow):
     def __init__(self, repository: HorsesRepository) -> None:
         self._repository = repository
-        self._team = ProfilingTeam()
+        self._team = ProfilingSquad()
         self._step_names = _StepNames()
 
     def run(self, sender_id: str, recipient_id: str) -> str:
@@ -169,16 +169,16 @@ class AgnoGenerateIcebreakerWorkflow(GenerateIcebreakerWorkflow):
 
 ---
 
-### Team
+### Squad
 
-O `Team` e uma classe simples cujos **agentes sao expostos como `@property`**. Cada propriedade retorna um `Agent` Agno configurado com modelo, instrucoes e, quando necessario, ferramentas.
+O `Squad` e uma classe simples cujos **agentes sao expostos como `@property`**. Cada propriedade retorna um `Agent` Agno configurado com modelo, instrucoes e, quando necessario, ferramentas.
 
 **Regras:**
 
 - Cada agente e uma `@property` que retorna uma nova instancia de `Agent` a cada acesso.
 - Instrucoes devem ser declarativas e focadas no comportamento esperado do agente, nao em regra de negocio.
 - Use `textwrap.dedent` para instrucoes multi-linha.
-- O `Team` nao conhece `repository` nem `use_case` diretamente — esses sao responsabilidade do `Toolkit` ou do `Workflow`.
+- O `Squad` nao conhece `repository` nem `use_case` diretamente — esses sao responsabilidade do `Toolkit` ou do `Workflow`.
 
 **Exemplo:**
 
@@ -188,7 +188,7 @@ from agno.agent import Agent
 from agno.models.google import Gemini
 
 
-class ProfilingTeam:
+class ProfilingSquad:
     @property
     def icebreaker_agent(self) -> Agent:
         return Agent(
@@ -333,7 +333,7 @@ class AiPipe:
 - [ ] O `agno.Workflow` e montado *dentro* do `run()`, nao no construtor.
 - [ ] Steps com logica Python usam `executor=cast(StepExecutor, self._metodo)`.
 - [ ] Steps que delegam ao LLM usam `agent=self._team.{agent_property}`.
-- [ ] O `Team` esta em `src/animus/ai/agno/teams/{dominio}_teams.py` com agentes como `@property`.
+- [ ] O `Squad` esta em `src/animus/ai/agno/squads/{dominio}_squad.py` com agentes como `@property`.
 - [ ] O `Toolkit` (se necessario) esta em `src/animus/ai/agno/toolkits/{dominio}_toolkit.py` e estende `agno.tools.Toolkit`.
 - [ ] Cada ferramenta do `Toolkit` tem **docstring completa** com secoes `Args` e `Returns`.
 - [ ] O `AiPipe` tem um metodo dedicado que retorna a interface do `core`.
@@ -344,7 +344,7 @@ class AiPipe:
 ## ✅ O que DEVE conter
 
 - Implementacoes concretas de interfaces `*Workflow` do `core`.
-- `Teams` com agentes como `@property`, configurados com modelo, instrucoes e `textwrap.dedent`.
+- `Squads` com agentes como `@property`, configurados com modelo, instrucoes e `textwrap.dedent`.
 - `Toolkits` subclasses de `agno.tools.Toolkit` com ferramentas documentadas por docstring.
 - `_StepNames` como `NamedTuple` para centralizar nomes de steps sem strings magicas.
 - Injecao de `repository` ou `use_case` no construtor do `Workflow` e do `Toolkit`.
@@ -352,7 +352,7 @@ class AiPipe:
 
 ## ❌ O que NUNCA deve conter
 
-- Regra de negocio de dominio dentro do `Workflow`, `Team` ou `Toolkit`.
+- Regra de negocio de dominio dentro do `Workflow`, `Squad` ou `Toolkit`.
 - Acesso direto a banco de dados ou `session` SQLAlchemy — use `repository` injetado.
 - Imports de `FastAPI`, `request`, `response` ou mecanismos de transporte HTTP.
 - Instanciacao de `Workflow` fora do `AiPipe`.

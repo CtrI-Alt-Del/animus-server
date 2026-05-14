@@ -21,7 +21,7 @@ class TestGeneratePetitionUploadUrlUseCase:
         self.use_case = GeneratePetitionUploadUrlUseCase(
             file_storage_provider=self.file_storage_provider_mock,
         )
-        self.mock_file_path = FilePath.create('analyses/123/petitions/fake-ulid.pdf')
+        self.mock_file_path = FilePath.create('analyses/123/documents/fake-ulid.pdf')
         self.mock_upload_url = UploadUrl.create(
             url=Url.create('https://storage.googleapis.com/signed-url'),
             token=Text.create('fake-token'),
@@ -39,7 +39,7 @@ class TestGeneratePetitionUploadUrlUseCase:
         document_type = 'pdf'
 
         expected_raw_path = (
-            f'intake/analyses/{analysis_id}/petitions/FAKE_ULID_123.{document_type}'
+            f'intake/analyses/{analysis_id}/documents/FAKE_ULID_123.{document_type}'
         )
         expected_file_path = FilePath.create(expected_raw_path)
 
@@ -70,7 +70,7 @@ class TestGeneratePetitionUploadUrlUseCase:
         analysis_id = 'analysis-xyz'
         document_type = 'docx'
         expected_raw_path = (
-            f'intake/analyses/{analysis_id}/petitions/FAKE_ULID_DOCX.{document_type}'
+            f'intake/analyses/{analysis_id}/documents/FAKE_ULID_DOCX.{document_type}'
         )
         expected_file_path = FilePath.create(expected_raw_path)
 

@@ -202,3 +202,5 @@ gha-creds-*.json
 
 # Terminal Paste Image folder
 .cp-images/
+
+documentation/ticket.md
