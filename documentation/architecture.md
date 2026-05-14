@@ -24,7 +24,7 @@ O animus Server usa arquitetura em camadas inspirada em Clean Architecture e Hex
 - **Validation (`src/animus/validation/`)**: Schemas Pydantic de entrada/saida e conversao para DTO.
 - **Database (`src/animus/database/`)**: Models SQLAlchemy, mappers e implementacoes concretas de repositorios.
 - **Providers (`src/animus/providers/`)**: Adaptadores de infraestrutura.
-- **AI (`src/animus/ai/`)**: Workflows, teams e saídas estruturadas com Agno/Gemini para casos de uso síncronos guiados pelo `core`.
+- **AI (`src/animus/ai/`)**: Workflows, squads e saídas estruturadas com Agno/Gemini para casos de uso síncronos guiados pelo `core`.
 - **PubSub (`src/animus/pubsub/`)**: Orquestracao assincrona por eventos (Inngest).
 
 ## Fluxo de Dados (resumo)
@@ -50,7 +50,7 @@ Fluxos de intake ja implementados:
 - `GET /intake/analyses/{analysis_id}/petition` -> `GetAnalysisPetitionController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `GetAnalysisPetitionUseCase` -> `PetitionsRepository` -> PostgreSQL (`petitions`) -> `PetitionDto`.
 - `POST /intake/analysis/{analysis_id}/document` -> `CreateAnalysisDocumentController` -> `AuthPipe` / `DatabasePipe` / `PubSubPipe` -> `CreateAnalysisDocumentUseCase` -> `AnalysisDocumentsRepository` / `AnalisysesRepository` / `Broker` -> PostgreSQL (`analysis_documents`, `analyses`) -> `AnalysisDocumentDto`.
 - `GET /intake/analysis/{analysis_id}/document` -> `GetAnalysisDocumentController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `GetAnalysisDocumentUseCase` -> `AnalysisDocumentsRepository` -> PostgreSQL (`analysis_documents`) -> `AnalysisDocumentDto`.
-- `POST /intake/analysis/{analysis_id}/case-summaries` -> `RequestCaseSummaryController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `RequestCaseSummaryUseCase` -> `AnalysisDocumentsRepository` / `AnalisysesRepository` / `Broker` -> `CaseSummaryRequestedEvent`.
+- `POST /intake/analysis/{analysis_id}/case-summaries` -> `RequestCaseSummaryController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `RequestCaseSummaryUseCase` -> `AnalysisDocumentsRepository` / `AnalisysesRepository` / `Broker` -> `CaseSummaryRequestedEvent` ou `PetitionExtractionRequestedEvent`, conforme `Analysis.type`.
 - `GET /intake/analysis/{analysis_id}/case-summaries` -> `GetCaseSummaryController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `GetCaseSummaryUseCase` -> `CaseSummariesRepository` -> PostgreSQL (`case_summaries`) -> `CaseSummaryDto`.
 - `POST /intake/petitions/{petition_id}/summary` -> `SummarizePetitionController` -> `AuthPipe` / `IntakePipe.verify_petition_document_path_by_account(...)` -> `StoragePipe` -> `GetDocumentContentUseCase` -> `FileStorageProvider` / `PdfProvider` / `DocxProvider` -> `SummarizePetitionWorkflow` -> `CreatePetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
 - `GET /intake/petitions/{petition_id}/summary` -> `GetPetitionSummaryController` -> `IntakePipe.verify_petition_by_account(...)` -> `GetPetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
@@ -65,6 +65,9 @@ Fluxos de intake ja implementados:
 
 Fluxo assincrono de resumo do caso:
 - `CaseSummaryRequestedEvent` -> `SummarizeCaseJob` -> `GetDocumentContentUseCase` -> `AgnoSummarizeCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent`.
+
+Fluxo assincrono de segunda instancia:
+- `PetitionExtractionRequestedEvent` -> `ExtractPetitionJob` -> `AnalysisDocumentsRepository` / `FileStorageProvider` / `PdfProvider` -> cache em `ExtractedPetitionsRepository` -> `AgnoExtractPetitionWorkflow` -> `AgnoSummarizeSecondInstanceCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent`.
 
 Fluxo assincrono de precedentes:
 - `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratacao de precedentes.
