@@ -9,6 +9,7 @@ from .analysis_precedent_model import AnalysisPrecedentModel
 from .analysis_document_model import AnalysisDocumentModel
 from .analysis_model import AnalysisModel
 from .case_summary_model import CaseSummaryModel
+from .extracted_petition_model import ExtractedPetitionModel
 from .judgment_draft_model import JudgmentDraftModel
 from .petition_model import PetitionModel
 from .petition_draft_model import PetitionDraftModel
@@ -23,6 +24,7 @@ __all__ = [
     'AnalysisDocumentModel',
     'AnalysisModel',
     'CaseSummaryModel',
+    'ExtractedPetitionModel',
     'JudgmentDraftModel',
     'PetitionModel',
     'PetitionDraftModel',

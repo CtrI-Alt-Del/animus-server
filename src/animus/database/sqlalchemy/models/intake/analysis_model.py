@@ -43,6 +43,12 @@ class AnalysisModel(Model):
         uselist=False,
         cascade='all, delete-orphan',
     )
+    extracted_petition: Mapped[Any] = relationship(
+        'ExtractedPetitionModel',
+        back_populates='analysis',
+        uselist=False,
+        cascade='all, delete-orphan',
+    )
     petition_draft: Mapped[Any] = relationship(
         'PetitionDraftModel',
         back_populates='analysis',

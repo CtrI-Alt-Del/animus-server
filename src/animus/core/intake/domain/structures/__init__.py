@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from .case_summary import CaseSummary
     from .court import Court, CourtValue
     from .first_instance_analysis_report import FirstInstanceAnalysisReport
+    from .extracted_petition import ExtractedPetition
     from .judgment_draft import JudgmentDraft
     from .petition_draft import PetitionDraft
     from .petition_document import PetitionDocument
@@ -47,6 +48,7 @@ __all__ = [
     'Court',
     'CourtValue',
     'FirstInstanceAnalysisReport',
+    'ExtractedPetition',
     'JudgmentDraft',
     'PetitionDraft',
     'PetitionDocument',
@@ -101,6 +103,7 @@ def __getattr__(name: str) -> Any:
             '.first_instance_analysis_report',
             'FirstInstanceAnalysisReport',
         ),
+        'ExtractedPetition': ('.extracted_petition', 'ExtractedPetition'),
         'JudgmentDraft': ('.judgment_draft', 'JudgmentDraft'),
         'PetitionDocument': ('.petition_document', 'PetitionDocument'),
         'PetitionDraft': ('.petition_draft', 'PetitionDraft'),

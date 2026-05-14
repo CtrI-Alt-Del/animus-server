@@ -14,6 +14,9 @@ from animus.core.intake.interfaces.analisyses_repository import AnalisysesReposi
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
+from animus.core.intake.interfaces.extracted_petitions_repository import (
+    ExtractedPetitionsRepository,
+)
 from animus.core.intake.interfaces.judgment_drafts_repository import (
     JudgmentDraftsRepository,
 )
@@ -31,6 +34,7 @@ from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyAnalisysesRepository,
     SqlalchemyCaseSummariesRepository,
+    SqlalchemyExtractedPetitionsRepository,
     SqlalchemyJudgmentDraftsRepository,
     SqlalchemyPetitionDraftsRepository,
     SqlalchemyPetitionSummariesRepository,
@@ -61,6 +65,12 @@ class DatabasePipe:
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
     ) -> CaseSummariesRepository:
         return SqlalchemyCaseSummariesRepository(sqlalchemy)
+
+    @staticmethod
+    def get_extracted_petitions_repository_from_request(
+        sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
+    ) -> ExtractedPetitionsRepository:
+        return SqlalchemyExtractedPetitionsRepository(sqlalchemy)
 
     @staticmethod
     def get_petitions_repository_from_request(

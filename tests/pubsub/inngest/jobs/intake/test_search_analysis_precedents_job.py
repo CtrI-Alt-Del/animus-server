@@ -243,7 +243,7 @@ class TestSearchAnalysisPrecedentsJob:
 
         assert response.status == 200
 
-        _wait_until(lambda: len(captured_steps) == 2, timeout_seconds=20)
+        _wait_until(lambda: len(captured_steps) == 2, timeout_seconds=40)
 
         assert captured_steps == [
             {

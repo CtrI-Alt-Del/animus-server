@@ -8,7 +8,9 @@ from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.entities.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.domain.events import CaseSummaryRequestedEvent
+from animus.core.intake.domain.events import (
+    PetitionExtractionRequestedEvent,
+)
 from animus.core.intake.domain.errors import (
     AnalysisDocumentNotFoundError,
     AnalysisNotFoundError,
@@ -81,9 +83,10 @@ class TestRequestCaseSummaryUseCase:
         published_event = self.broker_mock.publish.call_args.args[0]
 
         assert (
-            updated_analysis.status == SecondInstanceAnalysisStatus.ANALYZING_CASE.value
+            updated_analysis.status
+            == SecondInstanceAnalysisStatus.EXTRACTING_PETITION.value
         )
-        assert isinstance(published_event, CaseSummaryRequestedEvent)
+        assert isinstance(published_event, PetitionExtractionRequestedEvent)
         assert published_event.payload.analysis_id == analysis_id
 
     def test_should_raise_analysis_document_not_found_error_when_document_does_not_exist(

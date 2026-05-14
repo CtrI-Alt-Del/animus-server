@@ -12,6 +12,8 @@ from .classify_analysis_precedents_applicability_workflow import (
 )
 from .case_summaries_repository import CaseSummariesRepository
 from .case_summary_embeddings_provider import CaseSummaryEmbeddingsProvider
+from .extract_petition_workflow import ExtractPetitionWorkflow
+from .extracted_petitions_repository import ExtractedPetitionsRepository
 from .judgment_drafts_repository import JudgmentDraftsRepository
 from .petition_embeddings_provider import PetitionSummaryEmbeddingsProvider
 from .petition_drafts_repository import PetitionDraftsRepository
@@ -34,6 +36,8 @@ __all__ = [
     'ClassifyAnalysisPrecedentsApplicabilityWorkflow',
     'CaseSummariesRepository',
     'CaseSummaryEmbeddingsProvider',
+    'ExtractPetitionWorkflow',
+    'ExtractedPetitionsRepository',
     'JudgmentDraftsRepository',
     'PetitionsRepository',
     'PetitionDraftsRepository',

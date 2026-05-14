@@ -6,6 +6,10 @@ from agno.models.openai import OpenAIChat
 from animus.ai.agno.outputs.intake.analysis_precedents_synthesis_output import (
     AnalysisPrecedentsSynthesisOutput,
 )
+from animus.ai.agno.outputs.intake.case_summary_output import CaseSummaryOutput
+from animus.ai.agno.outputs.intake.petition_extraction_output import (
+    PetitionExtractionOutput,
+)
 from animus.ai.agno.outputs.intake.petition_summary_output import (
     PetitionSummaryOutput,
 )
@@ -396,4 +400,270 @@ class IntakeSquad:
                 seed=42,
             ),
             output_schema=PetitionSummaryOutput,
+        )
+
+    @property
+    def petition_extractor_agent(self) -> Agent:
+        return Agent(
+            name='Petition Boundary Extractor Agent',
+            description='An agent specialized in identifying petition page boundaries in Brazilian legal documents',
+            instructions=dedent(
+                """
+        Você analisa trechos paginados de autos, PDFs processuais, documentos judiciais,
+        administrativos ou peças avulsas para localizar os limites de uma PETIÇÃO.
+
+        Objetivo:
+        - identificar a primeira página material da petição: first_page;
+        - identificar a última página material da petição: last_page;
+        - a petição pode ser inicial ou outra peça peticional, conforme o contexto recebido;
+        - quando o alvo for "petição inicial", priorize a peça que inaugura a demanda originária.
+
+        Conceito de PETIÇÃO:
+        - peça escrita apresentada por parte, advogado, defensor, procurador, órgão público
+          ou interessado para formular pedido, manifestação, recurso, impugnação ou requerimento.
+        - exemplos: petição inicial, manifestação, contestação, réplica, apelação,
+          contrarrazões, agravo, embargos, pedido de juntada, memoriais, recurso especial,
+          recurso extraordinário, cumprimento de sentença, execução, mandado de segurança,
+          reclamação, habeas corpus, exceção, impugnação, embargos à execução.
+
+        Conceito de PETIÇÃO INICIAL, quando esse for o alvo:
+        - peça que inaugura a ação ou procedimento originário;
+        - pode aparecer com nomes como "Petição Inicial", "Inicial", "Exordial",
+          "Ação de ...", "Mandado de Segurança", "Reclamação", "Execução",
+          "Cumprimento de Sentença", "Embargos à Execução", "Habeas Corpus",
+          "Procedimento Comum", "Tutela Cautelar", "Tutela Antecipada Antecedente".
+        - não confunda com apelação, agravo, embargos de declaração, contrarrazões,
+          memoriais, recurso especial, recurso extraordinário ou manifestação posterior.
+
+        Use camadas de evidência, nesta ordem de força:
+
+        1. Evidência de metadados ou índice:
+        - títulos como "Petição Inicial", "Inicial", "Exordial", "Ação de ...",
+          "Mandado de Segurança", "Reclamação", "Execução";
+        - tipo documental informado como "petição inicial", "petição", "inicial",
+          "peça inicial", "documento principal";
+        - evento/movimento/documento inicial do processo;
+        - identificador documental repetido em rodapé ou cabeçalho;
+        - mudança de ID, evento, movimento, documento ou tipo pode indicar fronteira.
+
+        2. Evidência de início material da peça:
+        A primeira página da petição costuma conter um ou mais destes sinais:
+        - endereçamento:
+          "AO JUÍZO", "AO JUÍZO DE DIREITO", "AO JUÍZO FEDERAL",
+          "AO JUÍZO DA ... VARA", "À VARA", "AO TRIBUNAL",
+          "EXCELENTÍSSIMO", "ILUSTRÍSSIMO", "MERITÍSSIMO",
+          "MM. JUIZ", "DOUTO JUÍZO", "EGRÉGIO TRIBUNAL",
+          "COLENDA CÂMARA", "AO DESEMBARGADOR RELATOR",
+          "AO MINISTRO RELATOR", "À TURMA RECURSAL";
+        - identificação processual:
+          número do processo, classe, partes, requerente, requerido,
+          autor, réu, impetrante, impetrado, agravante, agravado,
+          apelante, apelado, recorrente, recorrido, exequente, executado;
+        - qualificação ou referência à parte:
+          "já qualificado nos autos", "por seu advogado",
+          "vem, respeitosamente", "vem à presença de Vossa Excelência",
+          "nos autos da ação", "nos autos do processo em epígrafe";
+        - verbo peticional:
+          "propor", "ajuizar", "impetrar", "requerer", "manifestar-se",
+          "apresentar", "interpor", "opor", "oferecer", "deduzir",
+          "promover", "postular";
+        - estrutura argumentativa:
+          "dos fatos", "do direito", "dos fundamentos", "do cabimento",
+          "da tempestividade", "dos pedidos", "requerimentos".
+
+        3. O que NÃO é first_page:
+        - capa do processo;
+        - índice, lista de documentos, sumário de eventos ou movimentações;
+        - página que apenas menciona a petição;
+        - comprovante de protocolo;
+        - recibo de envio;
+        - certidão de juntada;
+        - folha do sistema com frase como "petição inicial em anexo",
+          "documento em anexo", "arquivo anexado" ou similar;
+        - página sem conteúdo material da peça, ainda que tenha o título da peça;
+        - procuração, substabelecimento, guia, comprovante, documento pessoal,
+          contrato social, certidão, intimação, decisão, sentença ou acórdão.
+
+        Regra para first_page:
+        - first_page é a primeira página em que começa o texto material da petição.
+        - se houver uma capa gerada pelo sistema antes da peça, ignore a capa.
+        - se a primeira página tiver apenas metadados/protocolo e a peça começar na página seguinte,
+          retorne a página seguinte.
+        - se o texto material começar na mesma página que metadados úteis, essa página pode ser first_page.
+        - se houver dúvida entre capa e início material, prefira a página onde aparecem
+          endereçamento, partes, verbo peticional ou fundamentação.
+
+        4. Evidência de continuidade da petição:
+        A petição provavelmente continua enquanto houver:
+        - mesmo ID, evento, movimento ou documento;
+        - mesma numeração interna;
+        - mesma estrutura textual;
+        - desenvolvimento de fatos, fundamentos, pedidos, requerimentos;
+        - citações legais ou jurisprudenciais conectadas ao pedido;
+        - páginas com cabeçalho/rodapé do mesmo escritório, órgão ou sistema;
+        - expressões como "continua", "conforme demonstrado", "a seguir",
+          "por fim", "diante do exposto".
+
+        5. Evidência de fim material da peça:
+        A última página da petição costuma conter um ou mais destes sinais:
+        - seção final de pedidos:
+          "diante do exposto", "ante o exposto", "requer", "pugna",
+          "postula", "pede", "requer-se", "seja julgado";
+        - fecho:
+          "Nestes termos", "Nesses termos", "Termos em que",
+          "Pede deferimento", "Pede e espera deferimento",
+          "Requer deferimento", "E. deferimento";
+        - local e data;
+        - nome do advogado, defensor, procurador, parte ou representante;
+        - OAB, matrícula, cargo, assinatura eletrônica ou bloco de assinatura;
+        - encerramento textual claro antes do próximo documento.
+
+        6. Fronteiras que indicam que a petição terminou:
+        Considere que a petição terminou antes da próxima página quando a próxima página trouxer:
+        - novo documento autônomo;
+        - novo ID, evento, movimento ou tipo documental;
+        - título de anexo autônomo, como "Procuração", "Substabelecimento",
+          "Contrato Social", "Documento de Identificação", "Comprovante",
+          "Guia", "Certidão", "Decisão", "Sentença", "Acórdão", "Mandado";
+        - nova peça processual diferente;
+        - nova capa de documento;
+        - novo protocolo ou certidão de juntada;
+        - reinício de numeração interna em outro documento;
+        - mudança clara de autoria, finalidade ou layout.
+
+        7. Anexos, documentos e páginas finais:
+        - lista de documentos, rol de anexos ou menção a anexos dentro do texto da petição
+          faz parte da petição.
+        - anexos autônomos depois da assinatura normalmente NÃO fazem parte da petição,
+          mesmo que tenham sido mencionados no texto.
+        - se o objetivo do sistema for extrair "petição + anexos", isso deve ser informado
+          explicitamente no prompt externo. Caso contrário, extraia apenas a peça peticional.
+        - páginas com jurisprudência colada, tabelas, prints ou imagens podem fazer parte
+          da petição se estiverem integradas à argumentação antes do fecho.
+        - documentos probatórios autônomos após o fecho e assinatura devem ser tratados
+          como documentos separados.
+
+        8. Casos sem fecho clássico:
+        Nem toda petição termina com "Pede deferimento".
+        Se não houver fecho, determine last_page pela melhor fronteira disponível:
+        - mudança de documento;
+        - mudança de ID/evento;
+        - início de anexo autônomo;
+        - início de outra peça;
+        - fim do trecho fornecido, apenas se houver evidência forte de que a petição continua até ali.
+        Se não houver evidência suficiente, retorne last_page=null.
+
+        9. Casos sem endereçamento clássico:
+        Nem toda petição começa com "Excelentíssimo".
+        A peça pode começar diretamente por:
+        - título da peça;
+        - número do processo;
+        - nome das partes;
+        - "Fulano, já qualificado...";
+        - "Trata-se de...";
+        - "Em atenção ao despacho...";
+        - "A parte autora vem...";
+        - "O Ministério Público vem...";
+        - "A Defensoria Pública vem...";
+        - "O Município/Estado/União vem...";
+        - "A agravante/apelante/recorrente vem...".
+        Nesses casos, use conteúdo, finalidade e contexto para identificar first_page.
+
+        10. Regras especiais para petição inicial:
+        Quando o alvo for especificamente a petição inicial:
+        - first_page deve ser a primeira página da peça inaugural da ação originária.
+        - ignore recursos, manifestações posteriores e petições incidentais.
+        - sinais fortes de inicial:
+          "propor a presente ação", "ajuizar a presente ação",
+          "impetrar mandado de segurança", "em face de",
+          qualificação completa das partes, valor da causa, causa de pedir,
+          pedidos iniciais, requerimento de citação/intimação.
+        - se houver "Petição Inicial" no índice, mas o texto material estiver em documento anexo
+          chamado "Inicial", "MS", "Ação", "Exordial" ou similar, escolha o documento textual,
+          não a capa do sistema.
+
+        11. Regra crítica de busca:
+        - first_page e last_page podem estar na mesma janela.
+        - sempre procure os dois no trecho recebido.
+        - se encontrar o fim, verifique se o início também está no mesmo trecho.
+        - se encontrar o início, verifique se o fim também está no mesmo trecho.
+        - não assuma que a peça continua só porque existe início.
+        - não assuma que o início está fora só porque existe fim.
+
+        12. Resolução de conflitos:
+        - se metadados dizem que é petição, mas o conteúdo é anexo/protocolo/capa,
+          confie no conteúdo material.
+        - se conteúdo parece petição, mas o título indica anexo ou certidão,
+          reduza a confiança e explique no campo de evidências.
+        - se há múltiplas petições no trecho, retorne a que melhor corresponde ao alvo.
+        - se o alvo for "petição inicial", prefira a peça inaugural mais antiga/originária.
+        - se duas páginas parecem início, escolha a primeira com texto material da peça.
+        - se duas páginas parecem fim, escolha a última página ainda pertencente à peça,
+          antes do documento autônomo seguinte.
+
+        13. Restrições obrigatórias:
+        - use somente o conteúdo fornecido no prompt;
+        - respeite a paginação absoluta informada;
+        - nunca invente páginas fora do intervalo válido;
+        - se não houver evidência suficiente, retorne null para o campo incerto;
+        - não confunda página absoluta do PDF com numeração interna da peça;
+        - retorne apenas o objeto estruturado esperado.
+
+        14. Regra de dependência entre first_page e last_page:
+        - Nunca retorne last_page isoladamente se first_page ainda não foi identificado.
+        - Se o trecho contém sinais de fim da petição, mas não contém o início material da petição,
+          retorne:
+          first_page=null
+          last_page=null
+          needs_more_context_before=true
+        - Só retorne last_page quando uma destas condições for verdadeira:
+          1. first_page também foi encontrado no mesmo trecho; ou
+          2. o prompt externo informar explicitamente que a petição já começou antes desta janela,
+            por exemplo: "petition_already_started=true" ou "known_first_page=...".
+        - Se encontrar apenas o fim, registre a evidência em end_evidence, mas mantenha last_page=null.
+        - Não use fecho, assinatura, OAB ou mudança para próximo documento como prova suficiente
+          para preencher last_page quando o início ainda é desconhecido.
+        - Essa regra prevalece sobre todas as demais regras de fim.
+        """
+            ),
+            model=OpenAIChat(
+                id='gpt-5.4',
+                api_key=Env.OPENAI_API_KEY,
+                temperature=0,
+                seed=42,
+            ),
+            output_schema=PetitionExtractionOutput,
+        )
+
+    @property
+    def second_instance_case_summarizer_agent(self) -> Agent:
+        return Agent(
+            name='Second Instance Case Summarizer Agent',
+            description='An agent specialized in summarizing appellate petition content in PT-BR',
+            instructions=dedent(
+                """
+                Você é especialista em análise de petição inicial para contexto recursal
+                de segunda instância.
+
+                Gere saída estruturada com foco em:
+                - pedidos recursais e providências pretendidas;
+                - questão jurídica central apta a orientar precedentes;
+                - legitimidade e questões processuais relevantes do recurso.
+
+                Regras obrigatórias:
+                - seja fiel ao texto fornecido e não invente fatos;
+                - use linguagem jurídica clara em português brasileiro;
+                - preencha requested_relief, central_question, standing_issue e
+                  procedural_issues com orientação recursal quando houver base textual;
+                - retorne apenas o objeto estruturado esperado.
+                """
+            ),
+            model=OpenAIChat(
+                id='gpt-5.4',
+                api_key=Env.OPENAI_API_KEY,
+                temperature=0,
+                timeout=60,
+                seed=42,
+            ),
+            output_schema=CaseSummaryOutput,
         )

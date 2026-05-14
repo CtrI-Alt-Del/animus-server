@@ -65,6 +65,7 @@ class TestListAnalysesUseCase:
             SecondInstanceAnalysisStatus.DOCUMENT_UPLOADED,
             SecondInstanceAnalysisStatus.CASE_ANALYZED,
             SecondInstanceAnalysisStatus.DONE,
+            SecondInstanceAnalysisStatus.PETITION_NOT_FOUND,
             SecondInstanceAnalysisStatus.FAILED,
         )
 

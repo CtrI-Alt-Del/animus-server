@@ -6,6 +6,7 @@ from .case_summary_finished_event import CaseSummaryFinishedEvent
 from .case_summary_requested_event import CaseSummaryRequestedEvent
 from .precedents_searching_started_event import PrecedentsSearchingStartedEvent
 from .petition_replaced_event import PetitionReplacedEvent
+from .petition_extraction_requested_event import PetitionExtractionRequestedEvent
 from .petition_summary_requested_event import PetitionSummaryRequestedEvent
 from .petition_summary_finished_event import PetitionSummaryFinishedEvent
 from .precedents_search_finished_event import PrecedentsSearchFinishedEvent
@@ -16,6 +17,7 @@ __all__ = [
     'CaseSummaryRequestedEvent',
     'CaseSummaryFinishedEvent',
     'PetitionReplacedEvent',
+    'PetitionExtractionRequestedEvent',
     'PetitionSummaryRequestedEvent',
     'PetitionSummaryFinishedEvent',
     'PrecedentsSearchingStartedEvent',

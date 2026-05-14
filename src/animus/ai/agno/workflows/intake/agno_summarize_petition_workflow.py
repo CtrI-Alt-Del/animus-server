@@ -5,7 +5,7 @@ from agno.run.base import RunContext
 from agno.workflow import Step, StepInput, StepOutput, Workflow
 
 from animus.ai.agno.outputs import PetitionSummaryOutput
-from animus.ai.agno.teams import IntakeSquad
+from animus.ai.agno.squads import IntakeSquad
 from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
     PetitionSummaryDto,
 )

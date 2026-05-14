@@ -9,7 +9,7 @@ from agno.workflow import Step, StepInput, StepOutput, Workflow
 from animus.ai.agno.outputs.intake.analysis_precedents_applicability_classification_output import (
     AnalysisPrecedentsApplicabilityClassificationOutput,
 )
-from animus.ai.agno.teams import IntakeSquad
+from animus.ai.agno.squads import IntakeSquad
 from animus.core.intake.domain.errors import PetitionSummaryUnavailableError
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_row_dto import (
     AnalysisPrecedentDatasetRowDto as AnalysisPrecedentDatasetRowDto,

@@ -13,6 +13,7 @@ def __getattr__(name: str) -> Any:
             'FirstInstanceAnalysisReportDto',
         ),
         'AnalysisDocumentDto': ('.analysis_document_dto', 'AnalysisDocumentDto'),
+        'ExtractedPetitionDto': ('.extracted_petition_dto', 'ExtractedPetitionDto'),
         'PetitionSummaryEmbeddingDto': (
             '.petition_summary_embedding_dto',
             'PetitionSummaryEmbeddingDto',
@@ -39,6 +40,10 @@ def __getattr__(name: str) -> Any:
         'CaseSummaryDto': ('.case_summary_dto', 'CaseSummaryDto'),
         'JudgmentDraftDto': ('.judgment_draft_dto', 'JudgmentDraftDto'),
         'PetitionDraftDto': ('.petition_draft_dto', 'PetitionDraftDto'),
+        'PetitionExtractionDto': (
+            '.petition_extraction_dto',
+            'PetitionExtractionDto',
+        ),
         'PetitionSummaryDto': ('.petition_summary_dto', 'PetitionSummaryDto'),
         'PrecedentIdentifierDto': (
             '.precedent_identifier_dto',

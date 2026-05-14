@@ -4,11 +4,15 @@ from animus.core.intake.domain.entities.case_assessment_analysis_status import (
 from animus.core.intake.domain.entities.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
+from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     AnalysisDocumentNotFoundError,
 )
-from animus.core.intake.domain.events import CaseSummaryRequestedEvent
+from animus.core.intake.domain.events import (
+    CaseSummaryRequestedEvent,
+    PetitionExtractionRequestedEvent,
+)
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
     AnalisysesRepository,
@@ -43,10 +47,15 @@ class RequestCaseSummaryUseCase:
 
         if analysis.type.uses_case_assessment_or_first_instance_flow():
             analysis.set_status(CaseAssessmentAnalysisStatus.ANALYZING_CASE)
+            event = CaseSummaryRequestedEvent(analysis_id=analysis_id_entity.value)
+        elif analysis.type == AnalysisType.SECOND_INSTANCE:
+            analysis.set_status(SecondInstanceAnalysisStatus.EXTRACTING_PETITION)
+            event = PetitionExtractionRequestedEvent(
+                analysis_id=analysis_id_entity.value
+            )
         else:
-            analysis.set_status(SecondInstanceAnalysisStatus.ANALYZING_CASE)
+            msg = f'Tipo de analise invalido para solicitar resumo: {analysis.type}'
+            raise ValueError(msg)
 
         self._analisyses_repository.replace(analysis)
-        self._broker.publish(
-            CaseSummaryRequestedEvent(analysis_id=analysis_id_entity.value)
-        )
+        self._broker.publish(event)

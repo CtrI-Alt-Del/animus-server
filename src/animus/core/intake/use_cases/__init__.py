@@ -10,6 +10,7 @@ from .create_analysis_precedent_dataset_row_use_case import (
 )
 from .create_analysis_precedents_use_case import CreateAnalysisPrecedentsUseCase
 from .create_case_summary_use_case import CreateCaseSummaryUseCase
+from .create_extracted_petition_use_case import CreateExtractedPetitionUseCase
 from .create_petition_summary_use_case import CreatePetitionSummaryUseCase
 from .create_petition_use_case import CreatePetitionUseCase
 from .get_analysis_document_use_case import GetAnalysisDocumentUseCase
@@ -50,6 +51,7 @@ __all__ = [
     'CreateAnalysisPrecedentDatasetRowUseCase',
     'CreateAnalysisPrecedentsUseCase',
     'CreateCaseSummaryUseCase',
+    'CreateExtractedPetitionUseCase',
     'CreatePetitionUseCase',
     'CreatePetitionSummaryUseCase',
     'GetAnalysisDocumentUseCase',
