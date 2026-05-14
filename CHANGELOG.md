@@ -1,3 +1,14 @@
+# [1.27.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.26.0...v1.27.0) (2026-05-14)
+
+
+### Features
+
+* ANI-92 add case summary and analysis document workflows ([4b5cdbe](https://github.com/CtrI-Alt-Del/animus-server/commit/4b5cdbeb28027c2e7cb24225664e70f9c5f947ba))
+* ANI-92 add intake analysis report structures ([1962611](https://github.com/CtrI-Alt-Del/animus-server/commit/19626116711f619ed8ae449ff5af06757d3029db))
+* ANI-92 add intake analysis report structures ([86a40f1](https://github.com/CtrI-Alt-Del/animus-server/commit/86a40f1b623d3fb156fded28bb57af2bc03655c5))
+* ANI-92 add second instance petition extraction flow ([d785cf4](https://github.com/CtrI-Alt-Del/animus-server/commit/d785cf4c7c37031f37fbf113a25665c87ccd143a))
+* ANI-92 finalize typed intake analysis flows ([3ba4c0e](https://github.com/CtrI-Alt-Del/animus-server/commit/3ba4c0eb021e2fc92875ac64c11df6ceb8e10871))
+
 # [1.26.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.25.0...v1.26.0) (2026-05-04)
 
 
