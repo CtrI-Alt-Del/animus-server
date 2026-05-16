@@ -10,13 +10,13 @@ from inngest import Context, Inngest, TriggerEvent
 from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
     AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
 )
-from animus.ai.agno.workflows.intake.agno_summarize_case_workflow import (
-    AgnoSummarizeCaseWorkflow,
+from animus.ai.agno.workflows.intake.agno_summarize_first_instance_case_workflow import (
+    AgnoSummarizeFirstInstanceCaseWorkflow,
 )
 from animus.constants import Env
 from animus.core.auth.domain.errors import AccountNotFoundError
 from animus.core.auth.domain.structures import Email
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentDatasetRowDto,
     AnalysisPrecedentsSearchFiltersDto,
@@ -192,7 +192,7 @@ class SeedAnalysesPrecedentsDatasetJob:
             if existing_document is None:
                 analysis = CreateAnalysisUseCase(analisyses_repository).execute(
                     account_id=account_id,
-                    type=AnalysisType.FIRST_INSTANCE.value,
+                    type=AnalysisType.create_as_first_instance().dto,
                 )
                 session.flush()
                 analysis_id = Id.create(analysis.id).value
@@ -215,7 +215,7 @@ class SeedAnalysesPrecedentsDatasetJob:
                     docx_provider=PythonDocxProvider(),
                 ).execute(file_path=FilePath.create(document_file_path))
 
-                AgnoSummarizeCaseWorkflow(
+                AgnoSummarizeFirstInstanceCaseWorkflow(
                     case_summaries_repository=case_summaries_repository,
                     analysis_documents_repository=analysis_documents_repository,
                     analisyses_repository=analisyses_repository,

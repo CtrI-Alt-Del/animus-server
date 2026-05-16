@@ -2,8 +2,8 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.dtos.petition_document_dto import (
-    PetitionDocumentDto,
+from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
+    AnalysisDocumentDto,
 )
 from animus.core.intake.domain.errors import PetitionNotFoundError
 from animus.core.intake.interfaces import PetitionsRepository
@@ -30,7 +30,9 @@ class TestGetAnalysisPetitionUseCase:
         petition = PetitionsFaker.fake(
             petition_id='01BX5ZZKBKACTAV9WEVGEMMVRZ',
             analysis_id=analysis_id,
-            document=PetitionDocumentDto(
+            document=AnalysisDocumentDto(
+                analysis_id=analysis_id,
+                uploaded_at='2026-03-27T10:30:00+00:00',
                 file_path='petitions/analysis-petition.pdf',
                 name='analysis-petition.pdf',
             ),

@@ -1,8 +1,8 @@
 from faker import Faker
 
 from animus.core.intake.domain.structures import PetitionSummary
-from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
-    PetitionSummaryDto,
+from animus.core.intake.domain.structures.dtos.case_summary_dto import (
+    CaseSummaryDto,
 )
 
 
@@ -37,7 +37,7 @@ class PetitionSummariesFaker:
         relevant_laws: list[str] | None = None,
         key_facts: list[str] | None = None,
         search_terms: list[str] | None = None,
-    ) -> PetitionSummaryDto:
+    ) -> CaseSummaryDto:
         generated_relevant_laws = relevant_laws or [
             f'Lei {PetitionSummariesFaker._faker.random_int(min=1000, max=99999)}'
             for _ in range(2)
@@ -49,7 +49,7 @@ class PetitionSummariesFaker:
             PetitionSummariesFaker._faker.word() for _ in range(6)
         ]
 
-        return PetitionSummaryDto(
+        return CaseSummaryDto(
             case_summary=(
                 case_summary or PetitionSummariesFaker._faker.paragraph(nb_sentences=4)
             ),
@@ -70,5 +70,5 @@ class PetitionSummariesFaker:
         return [PetitionSummariesFaker.fake() for _ in range(count)]
 
     @staticmethod
-    def fake_many_dto(count: int) -> list[PetitionSummaryDto]:
+    def fake_many_dto(count: int) -> list[CaseSummaryDto]:
         return [PetitionSummariesFaker.fake_dto() for _ in range(count)]

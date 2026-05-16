@@ -61,4 +61,4 @@ class ChooseAnalysisPrecedentUseCase:
 
         self._analisyses_repository.replace(analysis)
 
-        return AnalysisStatusDto(value=analysis.status.value)
+        return AnalysisStatusDto(value=analysis.status.dto)

@@ -11,7 +11,7 @@ from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
     AnalisysesRepository,
     CaseSummariesRepository,
-    SummarizeCaseWorkflow,
+    SummarizeFirstInstanceCaseWorkflow,
 )
 from animus.core.intake.use_cases import CreateCaseSummaryUseCase
 from animus.core.shared.domain.errors import AppError
@@ -26,7 +26,7 @@ class _StepNames(NamedTuple):
     SUMMARIZE_CASE: str = 'summarize-case'
 
 
-class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeCaseWorkflow):
+class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeFirstInstanceCaseWorkflow):
     def __init__(
         self,
         case_summaries_repository: CaseSummariesRepository,

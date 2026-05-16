@@ -3,15 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from animus.core.intake.domain.structures.dtos import SecondInstanceAnalysisReportDto
-from animus.core.intake.interfaces.analysis_precedents_repository import (
-    AnalysisPrecedentsRepository,
-)
-from animus.core.intake.interfaces.analysis_documents_repository import (
+from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-)
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
-from animus.core.intake.interfaces.case_summaries_repository import (
+    AnalysisPrecedentsRepository,
+    AnalisysesRepository,
     CaseSummariesRepository,
+    SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.intake.use_cases import GetSecondInstanceAnalysisReportUseCase
 from animus.core.shared.domain.structures import Id
@@ -46,12 +43,17 @@ class GetSecondInstanceAnalysisReportController:
                 AnalysisPrecedentsRepository,
                 Depends(DatabasePipe.get_analysis_precedents_repository_from_request),
             ],
+            judgment_drafts_repository: Annotated[
+                SecondInstanceJudgmentDraftsRepository,
+                Depends(DatabasePipe.get_judgment_drafts_repository_from_request),
+            ],
         ) -> SecondInstanceAnalysisReportDto:
             use_case = GetSecondInstanceAnalysisReportUseCase(
                 analisyses_repository=analisyses_repository,
                 analysis_documents_repository=analysis_documents_repository,
                 case_summaries_repository=case_summaries_repository,
                 analysis_precedents_repository=analysis_precedents_repository,
+                judgment_drafts_repository=judgment_drafts_repository,
             )
 
             return use_case.execute(

@@ -1,9 +1,12 @@
 from typing import cast
 
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.errors import AnalysisNotFoundError
@@ -68,10 +71,14 @@ class CreateAnalysisPrecedentsUseCase:
             raise AnalysisNotFoundError
 
         analysis.set_precedents_search_filters(filters_dto)
-        if analysis.type.uses_case_assessment_or_first_instance_flow():
-            analysis.set_status(CaseAssessmentAnalysisStatus.DONE)
-        else:
-            analysis.set_status(SecondInstanceAnalysisStatus.DONE)
+
+        if analysis.type.is_case_analysis.is_true:
+            analysis.set_status(CaseAssessmentAnalysisStatus.create_as_done())
+        elif analysis.type.is_first_instance.is_true:
+            analysis.set_status(FirstInstanceAnalysisStatus.create_as_done())
+        elif analysis.type.is_second_instance.is_true:
+            analysis.set_status(SecondInstanceAnalysisStatus.create_as_done())
+
         self._analisyses_repository.replace(analysis)
 
         return [
@@ -276,10 +283,11 @@ class CreateAnalysisPrecedentsUseCase:
         analysis_precedent_entities: list[AnalysisPrecedent] = []
 
         for rank, dto in enumerate(reranked_dtos, start=1):
+            should_choose_by_default = dto.applicability_level == 2
             final_dto = AnalysisPrecedentDto(
                 analysis_id=dto.analysis_id,
                 precedent=dto.precedent,
-                is_chosen=dto.is_chosen,
+                is_chosen=should_choose_by_default,
                 similarity_score=dto.similarity_score,
                 thesis_similarity_score=dto.thesis_similarity_score,
                 enunciation_similarity_score=dto.enunciation_similarity_score,

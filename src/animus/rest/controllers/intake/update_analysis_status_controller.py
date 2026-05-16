@@ -36,4 +36,4 @@ class UpdateAnalysisStatusController:
             analysis.set_status(body.status)
             analisyses_repository.replace(analysis)
 
-            return AnalysisStatusDto(value=analysis.status.value)
+            return AnalysisStatusDto(value=analysis.status.dto)

@@ -1,9 +1,9 @@
 from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
@@ -18,7 +18,7 @@ class CreateAnalysisUseCase:
     def execute(
         self,
         account_id: str,
-        type: str = AnalysisType.FIRST_INSTANCE.value,
+        type: str = 'FIRST_INSTANCE',
         folder_id: str | None = None,
     ) -> AnalysisDto:
         normalized_account_id = Id.create(account_id)
@@ -29,9 +29,9 @@ class CreateAnalysisUseCase:
         )
 
         initial_status = (
-            CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD
-            if normalized_type.uses_case_assessment_or_first_instance_flow()
-            else SecondInstanceAnalysisStatus.WAITING_DOCUMENT_UPLOAD
+            SecondInstanceAnalysisStatus.create_as_waiting_document_upload()
+            if normalized_type.is_second_instance.is_true
+            else CaseAssessmentAnalysisStatus.create_as_waiting_document_upload()
         )
 
         analysis = Analysis.create(
@@ -43,8 +43,8 @@ class CreateAnalysisUseCase:
                     else None
                 ),
                 account_id=normalized_account_id.value,
-                type=normalized_type,
-                status=initial_status,
+                type=normalized_type.dto,
+                status=initial_status.dto,
                 is_archived=Logical.create_false().value,
                 created_at=Datetime.create_at_now().value.isoformat(),
             )

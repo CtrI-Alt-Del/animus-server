@@ -3,7 +3,12 @@ from datetime import UTC
 
 from fastapi.testclient import TestClient
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.database.sqlalchemy.models.intake import AnalysisModel
 from tests.fixtures.auth_fixtures import CreateAccountFixture
 
@@ -30,28 +35,30 @@ class TestListProcessingAnalysesController:
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA1',
             name='Analise buscando precedentes',
-            status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
+            status=CaseAssessmentAnalysisStatus.create('SEARCHING_PRECEDENTS').dto,
         )
 
         analysis_2 = create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA2',
             name='Analise similaridade',
-            status=AnalysisStatusValue.ANALYZING_PRECEDENTS_SIMILARITY.value,
+            status=CaseAssessmentAnalysisStatus.create(
+                'ANALYZING_PRECEDENTS_SIMILARITY'
+            ).dto,
         )
 
         create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA3',
             name='Analise aguardando',
-            status=AnalysisStatusValue.WAITING_PETITION.value,
+            status=CaseAssessmentAnalysisStatus.create_as_waiting_document_upload().dto,
         )
 
         create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA4',
             name='Analise arquivada',
-            status=AnalysisStatusValue.GENERATING_SYNTHESIS.value,
+            status=CaseAssessmentAnalysisStatus.create_as_generating_petition_draft().dto,
             is_archived=True,
         )
 
@@ -59,7 +66,7 @@ class TestListProcessingAnalysesController:
             account_id=other_account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA5',
             name='Analise de outra conta',
-            status=AnalysisStatusValue.ANALYZING_PETITION.value,
+            status=SecondInstanceAnalysisStatus.create_as_analyzing_case().dto,
         )
 
         response = client.get(
@@ -75,7 +82,9 @@ class TestListProcessingAnalysesController:
                 'folder_id': None,
                 'account_id': account.id,
                 'type': 'FIRST_INSTANCE',
-                'status': AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
+                'status': CaseAssessmentAnalysisStatus.create(
+                    'ANALYZING_PRECEDENTS_SIMILARITY'
+                ).dto,
                 'is_archived': False,
                 'precedents_search_filters': None,
                 'created_at': analysis_2.created_at.replace(tzinfo=UTC).isoformat(),
@@ -86,7 +95,9 @@ class TestListProcessingAnalysesController:
                 'folder_id': None,
                 'account_id': account.id,
                 'type': 'FIRST_INSTANCE',
-                'status': AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
+                'status': CaseAssessmentAnalysisStatus.create(
+                    'SEARCHING_PRECEDENTS'
+                ).dto,
                 'is_archived': False,
                 'precedents_search_filters': None,
                 'created_at': analysis_1.created_at.replace(tzinfo=UTC).isoformat(),
@@ -106,7 +117,7 @@ class TestListProcessingAnalysesController:
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA1',
             name='Analise finalizada',
-            status=AnalysisStatusValue.WAITING_PRECEDENT_CHOISE.value,
+            status=CaseAssessmentAnalysisStatus.create_as_done().dto,
         )
 
         response = client.get(

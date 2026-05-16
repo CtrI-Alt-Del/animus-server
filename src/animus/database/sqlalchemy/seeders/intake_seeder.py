@@ -2,13 +2,13 @@ from datetime import UTC, datetime
 
 from animus.core.intake.domain.entities.analysis import Analysis
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
-from animus.core.intake.domain.entities.dtos.petition_document_dto import (
-    PetitionDocumentDto,
-)
-from animus.core.intake.domain.entities.dtos.petition_dto import PetitionDto
 from animus.core.intake.domain.entities.petition import Petition
-from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
-    PetitionSummaryDto,
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
+from animus.core.intake.domain.structures.dtos.case_summary_dto import (
+    CaseSummaryDto,
 )
 from animus.core.intake.domain.structures.petition_summary import PetitionSummary
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
@@ -39,27 +39,24 @@ class IntakeSeeder:
                 id='01KMQTN9YCHWG20ZZEPNBRYW87',
                 name='Analise de exemplo',
                 account_id=account_ids[0].value,
-                status='WAITING_PETITION',
+                type=AnalysisType.create_as_first_instance().dto,
+                status=FirstInstanceAnalysisStatus.create_as_document_uploaded().dto,
                 created_at=datetime.now(UTC).isoformat(),
             )
         )
         self._analisyses_repository.add(analysis)
 
         petition = Petition.create(
-            PetitionDto(
-                id='01KMQV3F09J22AWX0P7X21D9PK',
-                analysis_id=analysis.id.value,
-                uploaded_at=datetime.now(UTC).isoformat(),
-                document=PetitionDocumentDto(
-                    file_path=f'intake/analises/{analysis.id.value}/petitions/Ação Cobrança Lei 12855 Tema Repetitivo 974 SIRDR 3 STJ.pdf',
-                    name='peticao-inicial.pdf',
-                ),
-            )
+            petition_id='01KMQV3F09J22AWX0P7X21D9PK',
+            analysis_id=analysis.id.value,
+            uploaded_at=datetime.now(UTC).isoformat(),
+            file_path=f'intake/analises/{analysis.id.value}/petitions/Ação Cobrança Lei 12855 Tema Repetitivo 974 SIRDR 3 STJ.pdf',
+            name='peticao-inicial.pdf',
         )
         self._petitions_repository.add(petition)
 
         petition_summary = PetitionSummary.create(
-            PetitionSummaryDto(
+            CaseSummaryDto(
                 case_summary='Resumo de seed da peticao inicial',
                 legal_issue='Controvérsia sobre cobrança em contrato de prestação de serviço',
                 central_question='Há inadimplemento contratual apto a justificar a cobrança requerida?',

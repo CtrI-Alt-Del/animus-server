@@ -14,8 +14,10 @@ from .case_summaries_repository import CaseSummariesRepository
 from .case_summary_embeddings_provider import CaseSummaryEmbeddingsProvider
 from .extract_petition_workflow import ExtractPetitionWorkflow
 from .extracted_petitions_repository import ExtractedPetitionsRepository
-from .judgment_drafts_repository import JudgmentDraftsRepository
-from .petition_embeddings_provider import PetitionSummaryEmbeddingsProvider
+from .generate_judgment_draft_workflow import (
+    GenerateSecondInstanceJudgmentDraftWorkflow,
+)
+from .judgment_drafts_repository import SecondInstanceJudgmentDraftsRepository
 from .petition_drafts_repository import PetitionDraftsRepository
 from .petition_summaries_repository import PetitionSummariesRepository
 from .petitions_repository import PetitionsRepository
@@ -23,7 +25,7 @@ from .precedent_embeddings_provider import PrecedentEmbeddingsProvider
 from .precedents_embeddings_repository import PrecedentsEmbeddingsRepository
 from .precedents_repository import PrecedentsRepository
 from .pangea_service import PangeaService
-from .summarize_case_workflow import SummarizeCaseWorkflow
+from .summarize_case_workflow import SummarizeFirstInstanceCaseWorkflow
 from .synthesize_analysis_precedents_workflow import (
     SynthesizeAnalysisPrecedentsWorkflow,
 )
@@ -38,16 +40,17 @@ __all__ = [
     'CaseSummaryEmbeddingsProvider',
     'ExtractPetitionWorkflow',
     'ExtractedPetitionsRepository',
-    'JudgmentDraftsRepository',
+    'GenerateSecondInstanceJudgmentDraftWorkflow',
+    'SecondInstanceJudgmentDraftsRepository',
     'PetitionsRepository',
     'PetitionDraftsRepository',
     'PrecedentsRepository',
     'PrecedentsEmbeddingsRepository',
     'AnalisysesRepository',
-    'PetitionSummaryEmbeddingsProvider',
+    'CaseSummaryEmbeddingsProvider',
     'PrecedentEmbeddingsProvider',
     'PetitionSummariesRepository',
-    'SummarizeCaseWorkflow',
+    'SummarizeFirstInstanceCaseWorkflow',
     'SynthesizeAnalysisPrecedentsWorkflow',
     'PangeaService',
 ]

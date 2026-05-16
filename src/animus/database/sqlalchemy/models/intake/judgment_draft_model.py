@@ -8,8 +8,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from animus.database.sqlalchemy.models.model import Model
 
 
-class JudgmentDraftModel(Model):
-    __tablename__ = 'judgment_drafts'
+class SecondInstanceJudgmentDraftModel(Model):
+    __tablename__ = 'second_instance_judgment_drafts'
 
     analysis_id: Mapped[str] = mapped_column(
         String(26),

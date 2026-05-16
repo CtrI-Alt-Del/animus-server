@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session, sessionmaker
 from animus.ai.agno.workflows.intake import (
     AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
 )
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
@@ -61,8 +61,8 @@ def _seed_analysis_with_petition_summary(
             name='Analise de teste',
             account_id=Id.create().value,
             folder_id=None,
-            type=AnalysisType.FIRST_INSTANCE.value,
-            status=CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value,
+            type=AnalysisType.create_as_first_instance().dto,
+            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
             is_archived=False,
         )
     )
@@ -400,7 +400,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value
+            == CaseAssessmentAnalysisStatus.create('SEARCHING_PRECEDENTS').dto
         )
 
         synthesize_analysis_precedents_sync(payload, analysis_precedents_data)
@@ -415,7 +415,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == CaseAssessmentAnalysisStatus.DONE.value
+            == CaseAssessmentAnalysisStatus.create_as_done().dto
         )
         analysis = _get_analysis(
             sqlalchemy_session_factory,
@@ -461,7 +461,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == CaseAssessmentAnalysisStatus.FAILED.value
+            == CaseAssessmentAnalysisStatus.create_as_failed().dto
         )
         assert (
             _get_analysis_precedents(

@@ -15,7 +15,9 @@ from .sqlalchemy_case_summaries_repository import SqlalchemyCaseSummariesReposit
 from .sqlalchemy_extracted_petitions_repository import (
     SqlalchemyExtractedPetitionsRepository,
 )
-from .sqlalchemy_judgment_drafts_repository import SqlalchemyJudgmentDraftsRepository
+from .sqlalchemy_judgment_drafts_repository import (
+    SqlalchemySecondInstanceJudgmentDraftsRepository,
+)
 from .sqlalchemy_petition_summaries_repository import (
     SqlalchemyPetitionSummariesRepository,
 )
@@ -31,7 +33,7 @@ __all__ = [
     'SqlalchemyAnalisysesRepository',
     'SqlalchemyCaseSummariesRepository',
     'SqlalchemyExtractedPetitionsRepository',
-    'SqlalchemyJudgmentDraftsRepository',
+    'SqlalchemySecondInstanceJudgmentDraftsRepository',
     'SqlalchemyPetitionsRepository',
     'SqlalchemyPetitionDraftsRepository',
     'SqlalchemyPetitionSummariesRepository',

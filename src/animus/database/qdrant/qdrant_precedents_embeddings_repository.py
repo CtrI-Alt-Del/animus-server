@@ -28,8 +28,8 @@ from animus.core.intake.domain.structures.dtos.precedent_embedding_dto import (
 from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
     PrecedentIdentifierDto,
 )
-from animus.core.intake.domain.structures.petition_summary_embedding import (
-    PetitionSummaryEmbedding,
+from animus.core.intake.domain.structures.case_summary_embedding import (
+    CaseSummaryEmbedding,
 )
 from animus.core.intake.domain.structures.precedent_embedding import PrecedentEmbedding
 from animus.core.intake.interfaces.precedents_embeddings_repository import (
@@ -145,21 +145,21 @@ class QdrantPrecedentsEmbeddingsRepository(PrecedentsEmbeddingsRepository):
 
     def find_many(
         self,
-        petition_summary_embeddings: list[PetitionSummaryEmbedding],
+        case_summary_embeddings: list[CaseSummaryEmbedding],
         filters: AnalysisPrecedentsSearchFilters,
         limit: Integer,
     ) -> ListResponse[PrecedentEmbedding]:
-        if not petition_summary_embeddings:
+        if not case_summary_embeddings:
             return ListResponse(items=[])
 
         query_filter = self._build_query_filter(filters)
         results: list[PrecedentEmbedding] = []
 
-        for petition_embedding in petition_summary_embeddings:
+        for case_summary_embedding in case_summary_embeddings:
             dense_vector = [
-                float(decimal.value) for decimal in petition_embedding.vector
+                float(decimal.value) for decimal in case_summary_embedding.vector
             ]
-            sparse_vector = self._encode_sparse(petition_embedding.chunk.value)
+            sparse_vector = self._encode_sparse(case_summary_embedding.chunk.value)
 
             for target_field in ('enunciation', 'thesis'):
                 query_response = self._client.query_points(
