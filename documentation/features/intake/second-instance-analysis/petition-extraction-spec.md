@@ -16,13 +16,13 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 
 - Criar o domínio `ExtractedPetition` para persistir `analysis_id`, `first_page` e `last_page`.
 - Criar port e repositório SQLAlchemy para cache de extração por `analysis_id`.
-- Criar `PetitionExtractionRequestedEvent` para acionar o job assíncrono.
-- Alterar `RequestCaseSummaryUseCase` para publicar `PetitionExtractionRequestedEvent` quando a análise for `SECOND_INSTANCE`.
+- Criar `SecondInstanceCaseSummarizationTriggeredEvent` para acionar o job assíncrono.
+- Alterar `RequestCaseSummaryUseCase` para publicar `SecondInstanceCaseSummarizationTriggeredEvent` quando a análise for `SECOND_INSTANCE`.
 - Reutilizar o endpoint existente `POST /intake/analysis/{analysis_id}/case-summaries` como gatilho HTTP do processamento.
 - Estender `PdfProvider` com contagem de páginas e extração de intervalo de páginas.
 - Criar `ExtractPetitionWorkflow` e implementação `AgnoExtractPetitionWorkflow` para identificar páginas da petição inicial.
 - Criar `AgnoSummarizeSecondInstanceCaseWorkflow` para resumir a petição extraída com prompt orientado a recurso de segunda instância.
-- Criar `ExtractPetitionJob` para orquestrar extração, cache, sumarização, atualização de status e publicação de evento de conclusão.
+- Criar `SummarizeSecondInstanceCaseJob` para orquestrar extração, cache, sumarização, atualização de status e publicação de evento de conclusão.
 - Registrar o novo job na composição Inngest.
 - Criar migration Alembic para a tabela `extracted_petitions`.
 
@@ -71,7 +71,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **`CaseSummaryDto`** (`src/animus/core/intake/domain/structures/dtos/case_summary_dto.py`) - DTO retornado por workflows e use cases de sumarização.
 - **`AnalysisDocumentsRepository`** (`src/animus/core/intake/interfaces/analysis_documents_repository.py`) - port para buscar o documento por `analysis_id`.
 - **`CaseSummariesRepository`** (`src/animus/core/intake/interfaces/case_summaries_repository.py`) - port para adicionar, substituir e buscar resumo por `analysis_id`.
-- **`SummarizeCaseWorkflow`** (`src/animus/core/intake/interfaces/summarize_case_workflow.py`) - contrato atual de sumarização geral: `run(analysis_id: str, document_content: Text) -> CaseSummaryDto`.
+- **`SummarizeFirstInstanceCaseWorkflow`** (`src/animus/core/intake/interfaces/summarize_case_workflow.py`) - contrato atual de sumarização geral: `run(analysis_id: str, document_content: Text) -> CaseSummaryDto`.
 - **`RequestCaseSummaryUseCase`** (`src/animus/core/intake/use_cases/request_case_summary_use_case.py`) - use case que hoje atualiza status e publica `CaseSummaryRequestedEvent`.
 - **`CreateCaseSummaryUseCase`** (`src/animus/core/intake/use_cases/create_case_summary_use_case.py`) - cria ou substitui `CaseSummary` e atualiza status para `CASE_ANALYZED`.
 - **`UpdateAnalysisStatusUseCase`** (`src/animus/core/intake/use_cases/update_analysis_status_use_case.py`) - altera status da analysis via `AnalisysesRepository`.
@@ -90,7 +90,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 
 - **`CaseSummaryOutput`** (`src/animus/ai/agno/outputs/intake/case_summary_output.py`) - schema Pydantic usado para normalizar a saída do agente de resumo.
 - **`IntakeSquad`** (`src/animus/ai/agno/teams/intake_squad.py`) - team Agno que concentra agentes de intake como propriedades `@property`.
-- **`AgnoSummarizeCaseWorkflow`** (`src/animus/ai/agno/workflows/intake/agno_summarize_case_workflow.py`) - workflow análogo para sumarização geral de documento jurídico.
+- **`AgnoSummarizeFirstInstanceCaseWorkflow`** (`src/animus/ai/agno/workflows/intake/agno_summarize_case_workflow.py`) - workflow análogo para sumarização geral de documento jurídico.
 
 ## Database
 
@@ -107,7 +107,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 
 ## PubSub
 
-- **`SummarizeCaseJob`** (`src/animus/pubsub/inngest/jobs/intake/summarize_case_job.py`) - padrão de job Inngest com `_normalize_payload`, execução síncrona em executor, tratamento de falha e publicação de evento final.
+- **`SummarizeFirstInstanceCaseJob`** (`src/animus/pubsub/inngest/jobs/intake/summarize_case_job.py`) - padrão de job Inngest com `_normalize_payload`, execução síncrona em executor, tratamento de falha e publicação de evento final.
 - **`SearchAnalysisPrecedentsJob`** (`src/animus/pubsub/inngest/jobs/intake/search_analysis_precedents_job.py`) - referência de job de intake com múltiplos steps e status de erro.
 - **`InngestPubSub`** (`src/animus/pubsub/inngest/inngest_pubsub.py`) - composition root onde jobs de intake são registrados.
 
@@ -196,7 +196,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **Fluxo resumido:** contar páginas, extrair ranges sequenciais em janelas fixas de `5` páginas, chamar `IntakeSquad.petition_extractor_agent`, manter histórico de mensagens entre iterações, validar `PetitionExtractionOutput` interno e retornar `PetitionExtractionDto`.
 
 - **Localização:** `src/animus/ai/agno/workflows/intake/agno_summarize_second_instance_case_workflow.py` (**novo arquivo**)
-- **Interface implementada:** `SummarizeCaseWorkflow`
+- **Interface implementada:** `SummarizeFirstInstanceCaseWorkflow`
 - **Dependências:** `CaseSummariesRepository`, `AnalysisDocumentsRepository`, `AnalisysesRepository`
 - **Método principal:** `run(analysis_id: str, document_content: Text) -> CaseSummaryDto` - sumariza a petição extraída com contexto de recurso e persiste via `CreateCaseSummaryUseCase`.
 - **Fluxo resumido:** montar prompt especializado, chamar `IntakeSquad.second_instance_case_summarizer_agent`, normalizar `CaseSummaryOutput`, executar `CreateCaseSummaryUseCase.execute(...)`.
@@ -217,7 +217,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 ## Camada PubSub (Jobs Inngest)
 
 - **Localização:** `src/animus/pubsub/inngest/jobs/intake/extract_petition_job.py` (**novo arquivo**)
-- **Evento consumido:** `PetitionExtractionRequestedEvent.name` com payload `analysis_id`.
+- **Evento consumido:** `SecondInstanceCaseSummarizationTriggeredEvent.name` com payload `analysis_id`.
 - **Dependências:** `SqlalchemyAnalysisDocumentsRepository`, `SqlalchemyCaseSummariesRepository`, `SqlalchemyAnalisysesRepository`, `SqlalchemyExtractedPetitionsRepository`, `GcsFileStorageProvider`, `PypdfPdfProvider`, `AgnoExtractPetitionWorkflow`, `AgnoSummarizeSecondInstanceCaseWorkflow`, `CreateExtractedPetitionUseCase`, `UpdateAnalysisStatusUseCase`, `InngestBroker`.
 - **Passos (`step.run`):** `normalize_payload`; `extract_and_summarize`; `publish_finished_event`; em exceção, `mark_analysis_as_failed`.
 - **Métodos:** `handle(inngest: Inngest) -> Any` - registra function Inngest; `_normalize_payload(data: dict[str, Any]) -> dict[str, str]` - normaliza payload; `_extract_and_summarize(payload: _Payload) -> dict[str, str]` - delega execução bloqueante para executor; `_extract_and_summarize_sync(payload: _Payload) -> dict[str, str]` - executa transação de extração e sumarização; `_mark_petition_as_not_found(payload: _Payload) -> None` - delega marcação de ausência de petição; `_mark_petition_as_not_found_sync(payload: _Payload) -> None` - atualiza status para `PETITION_NOT_FOUND` e comita; `_mark_analysis_as_failed(payload: _Payload) -> None` - delega marcação de falha; `_mark_analysis_as_failed_sync(payload: _Payload) -> None` - atualiza status para `FAILED` e comita; `_handle_failure(context: Context) -> None` - trata falhas capturadas pelo Inngest.
@@ -234,11 +234,11 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 ## Core
 
 - **Arquivo:** `src/animus/core/intake/use_cases/request_case_summary_use_case.py`
-- **Mudança:** concentrar o branching por `AnalysisType`; quando `analysis.type.uses_case_assessment_or_first_instance_flow()` for `True`, manter status `ANALYZING_CASE` e publicar `CaseSummaryRequestedEvent`; quando `analysis.type == AnalysisType.SECOND_INSTANCE`, setar `SecondInstanceAnalysisStatus.EXTRACTING_PETITION` e publicar `PetitionExtractionRequestedEvent`.
+- **Mudança:** concentrar o branching por `AnalysisType`; quando `analysis.type.uses_case_assessment_or_first_instance_flow()` for `True`, manter status `ANALYZING_CASE` e publicar `CaseSummaryRequestedEvent`; quando `analysis.type == AnalysisType.SECOND_INSTANCE`, setar `SecondInstanceAnalysisStatus.EXTRACTING_PETITION` e publicar `SecondInstanceCaseSummarizationTriggeredEvent`.
 - **Justificativa:** o endpoint existente continua sendo o gatilho do processamento, mas o fluxo de segunda instância precisa extrair a petição dos autos antes da sumarização.
 
 - **Arquivo:** `src/animus/core/intake/domain/events/__init__.py`
-- **Mudança:** exportar `PetitionExtractionRequestedEvent` em imports e `__all__`.
+- **Mudança:** exportar `SecondInstanceCaseSummarizationTriggeredEvent` em imports e `__all__`.
 - **Justificativa:** manter padrão de exports públicos dos eventos de intake.
 
 - **Arquivo:** `src/animus/core/intake/domain/structures/__init__.py`
@@ -308,12 +308,12 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 ## PubSub
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/__init__.py`
-- **Mudança:** exportar `ExtractPetitionJob`.
+- **Mudança:** exportar `SummarizeSecondInstanceCaseJob`.
 - **Justificativa:** permitir registro no composition root do Inngest.
 
 - **Arquivo:** `src/animus/pubsub/inngest/inngest_pubsub.py`
-- **Mudança:** importar e registrar `ExtractPetitionJob.handle(inngest)` em `register_intake_jobs(...)`.
-- **Justificativa:** tornar o consumidor de `PetitionExtractionRequestedEvent` ativo no runtime Inngest.
+- **Mudança:** importar e registrar `SummarizeSecondInstanceCaseJob.handle(inngest)` em `register_intake_jobs(...)`.
+- **Justificativa:** tornar o consumidor de `SecondInstanceCaseSummarizationTriggeredEvent` ativo no runtime Inngest.
 
 # 7. O que deve ser removido?
 
@@ -327,7 +327,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **Impactos / trade-offs:** evita mudança de contrato de status para o app; diverge do rascunho técnico do Jira e precisa ficar registrado para revisão.
 
 - **Decisão:** usar o endpoint existente `POST /intake/analysis/{analysis_id}/case-summaries` como gatilho.
-- **Alternativas consideradas:** publicar `PetitionExtractionRequestedEvent` diretamente em `CreateAnalysisDocumentUseCase` após upload.
+- **Alternativas consideradas:** publicar `SecondInstanceCaseSummarizationTriggeredEvent` diretamente em `CreateAnalysisDocumentUseCase` após upload.
 - **Motivo da escolha:** preserva o fluxo atual da API, no qual upload de metadados e solicitação de processamento são ações separadas.
 - **Impactos / trade-offs:** a extração não inicia automaticamente apenas com `POST /document`; o app precisa continuar chamando o endpoint de request de resumo.
 
@@ -341,12 +341,12 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **Motivo da escolha:** cache é resultado de processamento, não metadado de upload; tabela própria evita misturar responsabilidades.
 - **Impactos / trade-offs:** exige migration e novo repository, mas mantém `analysis_documents` focado no documento original.
 
-- **Decisão:** implementar `AgnoSummarizeSecondInstanceCaseWorkflow` separado de `AgnoSummarizeCaseWorkflow`.
+- **Decisão:** implementar `AgnoSummarizeSecondInstanceCaseWorkflow` separado de `AgnoSummarizeFirstInstanceCaseWorkflow`.
 - **Alternativas consideradas:** parametrizar o prompt do workflow existente por tipo de análise.
 - **Motivo da escolha:** o prompt de segunda instância tem semântica recursal própria e deve evoluir sem risco de regressão nos fluxos `CASE_ASSESSMENT` e `FIRST_INSTANCE`.
 - **Impactos / trade-offs:** há alguma duplicação controlada de normalização de `CaseSummaryOutput`, compensada por isolamento de comportamento.
 
-- **Decisão:** `ExtractPetitionJob` publica `CaseSummaryFinishedEvent` somente após a sumarização persistir com sucesso.
+- **Decisão:** `SummarizeSecondInstanceCaseJob` publica `CaseSummaryFinishedEvent` somente após a sumarização persistir com sucesso.
 - **Alternativas consideradas:** publicar evento específico de extração concluída antes da sumarização.
 - **Motivo da escolha:** ANI-116 define um job único para extração e sumarização; o evento relevante para consumidores existentes é a conclusão do resumo.
 - **Impactos / trade-offs:** a etapa intermediária de extração não fica observável por evento dedicado além do status persistido e do cache.
@@ -378,15 +378,15 @@ HTTP Request
        Broker.publish(CaseSummaryRequestedEvent)
   -> [SECOND_INSTANCE]
        status = EXTRACTING_PETITION
-       Broker.publish(PetitionExtractionRequestedEvent)
+       Broker.publish(SecondInstanceCaseSummarizationTriggeredEvent)
   -> Response 202
 ```
 
 - **Fluxo assíncrono:**
 
 ```text
-PetitionExtractionRequestedEvent(analysis_id)
-  -> ExtractPetitionJob
+SecondInstanceCaseSummarizationTriggeredEvent(analysis_id)
+  -> SummarizeSecondInstanceCaseJob
   -> SqlalchemyAnalysisDocumentsRepository.find_by_analysis_id(...)
   -> GcsFileStorageProvider.get_file(document.file_path)
   -> SqlalchemyExtractedPetitionsRepository.find_by_analysis_id(...)
@@ -407,7 +407,7 @@ PetitionExtractionRequestedEvent(analysis_id)
 - **Fluxo de falha:**
 
 ```text
-ExtractPetitionJob exception
+SummarizeSecondInstanceCaseJob exception
   -> mark_analysis_as_failed
   -> UpdateAnalysisStatusUseCase.execute(analysis_id, 'FAILED')
   -> session.commit()
@@ -415,7 +415,7 @@ ExtractPetitionJob exception
 ```
 
 ```text
-ExtractPetitionJob sem limites de peticao
+SummarizeSecondInstanceCaseJob sem limites de peticao
   -> mark_petition_as_not_found
   -> UpdateAnalysisStatusUseCase.execute(analysis_id, 'PETITION_NOT_FOUND')
   -> session.commit()
@@ -424,7 +424,7 @@ ExtractPetitionJob sem limites de peticao
 
 - **Referências:**
 
-- `src/animus/pubsub/inngest/jobs/intake/summarize_case_job.py` - padrão principal para `ExtractPetitionJob`.
+- `src/animus/pubsub/inngest/jobs/intake/summarize_case_job.py` - padrão principal para `SummarizeSecondInstanceCaseJob`.
 - `src/animus/pubsub/inngest/jobs/intake/search_analysis_precedents_job.py` - referência para jobs com múltiplos steps e marcação de falha.
 - `src/animus/ai/agno/workflows/intake/agno_summarize_case_workflow.py` - base para `AgnoSummarizeSecondInstanceCaseWorkflow`.
 - `src/animus/ai/agno/teams/intake_squad.py` - local dos novos agents.

@@ -5,22 +5,7 @@
 @file_name = peticao-inicial.pdf
 @petition_id = 01KNFAPYAQC9NYFD3NYQC2GSXS
 
-### Criar petição (CreatePetitionController)
-POST {{url}}/petitions
-Authorization: Bearer {{ACCESS_TOKEN}}
-Content-Type: application/json
-
-{
-  "analysis_id": "{{analysis_id}}",
-  "uploaded_at": "{{uploaded_at}}",
-  "document": {
-    "file_path": "{{file_path}}",
-    "name": "{{file_name}}"
-  }
-}
-
 ### Gerar resumo da peticao (SummarizePetitionController)
 POST {{url}}/petitions/{{petition_id}}/summary
 Authorization: Bearer {{ACCESS_TOKEN}}
 Content-Type: application/json
-

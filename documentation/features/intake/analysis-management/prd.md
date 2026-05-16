@@ -12,7 +12,7 @@ Consolidar o fluxo de analise inicial para diferentes contextos processuais, per
 - [x] Foram adicionados endpoints dedicados para upload/leitura de documento e request/leitura de resumo do caso no fluxo centrado em `analysis`.
 - [x] Os relatorios finais passaram a ser separados por tipo de analise: `case-assessment`, `first-instance` e `second-instance`.
 - [x] O dominio agora diferencia tipos e status de analise para suportar fluxos distintos de advogado e magistrado.
-- [x] Os contratos persistidos de `PetitionDraft` e `JudgmentDraft` foram preparados para as entregas assíncronas futuras.
+- [x] Os contratos persistidos de `PetitionDraft` e `SecondInstanceJudgmentDraft` foram preparados para as entregas assíncronas futuras.
 - [x] O processamento assíncrono e as notificacoes do resumo do caso foram renomeados para refletir `case_summary`.
 
 ## Valor entregue
@@ -24,8 +24,8 @@ Consolidar o fluxo de analise inicial para diferentes contextos processuais, per
 ## Pendencias conhecidas fora deste escopo
 
 - Geracao automatica de `PetitionDraft` permanece dependente do `ANI-93`.
-- Geracao automatica de `JudgmentDraft` permanece dependente do `ANI-94`.
-- Endpoint de leitura de `JudgmentDraft` permanece dependente do `ANI-114`.
+- Geracao automatica de `SecondInstanceJudgmentDraft` permanece dependente do `ANI-94`.
+- Endpoint de leitura de `SecondInstanceJudgmentDraft` permanece dependente do `ANI-114`.
 
 ## Divergencias consolidadas em relacao ao planejamento original
 

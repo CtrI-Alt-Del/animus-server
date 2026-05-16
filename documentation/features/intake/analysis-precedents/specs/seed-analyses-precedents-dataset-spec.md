@@ -112,7 +112,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - **`GcsFileStorageProvider`** (`src/animus/providers/storage/file_storage/gcs/gcs_file_storage_provider.py`) - provider concreto de `GCS`, com `client`, `get_file(...)` e `upload_files(...)`.
 - **`GetDocumentContentUseCase`** (`src/animus/core/storage/use_cases/get_document_content_use_case.py`) - leitura reutilizavel de PDF/DOCX a partir de `FileStorageProvider`.
 - **`StorageSeeder`** (`src/animus/database/sqlalchemy/seeders/storage_seeder.py`) - referencia de acesso direto ao `client` do `GcsFileStorageProvider` para operacoes de bucket/prefixo.
-- **`OpenAIPetitionSummaryEmbeddingsProvider`** (`src/animus/providers/intake/petition_summary_embeddings/openai/openai_petition_summary_embeddings_provider.py`) - provider atual de embeddings do resumo.
+- **`OpenAICaseSummaryEmbeddingsProvider`** (`src/animus/providers/intake/petition_summary_embeddings/openai/openai_petition_summary_embeddings_provider.py`) - provider atual de embeddings do resumo.
 
 ## PubSub
 

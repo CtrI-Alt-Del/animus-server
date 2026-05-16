@@ -300,7 +300,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Interface implementada (port):** nao aplicavel
 - **Biblioteca/SDK utilizado:** `agno`, `agno.models.google.Gemini`
 - **Metodos:**
-  - `petition_summarizer_agent -> Agent` - agente especializado em resumir peticoes em PT-BR, com `output_schema` estruturado para `PetitionSummaryDto`.
+  - `first_instance_case_summarizer_agent -> Agent` - agente especializado em resumir peticoes em PT-BR, com `output_schema` estruturado para `PetitionSummaryDto`.
 
 - **Localizacao:** `src/animus/ai/agno/outputs/intake/petition_summary_output.py` (**novo arquivo**)
 - **Interface implementada (port):** nao aplicavel

@@ -3,12 +3,12 @@ title: ANI-92 - Case summary, analysis document, reports e status tipado por tip
 prd: documentation/features/intake/analysis-management/prd.md
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-92
 status: closed
-last_updated_at: 2026-05-13
+last_updated_at: 2026-05-16
 ---
 
 # 1. Objetivo
 
-Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **CaseAssessmentAnalysis**, **FirstInstanceAnalysis** e **SecondInstanceAnalysis**, removendo o conceito legado de `Petition` como agregado principal de documento, introduzindo `AnalysisDocument` como artefato unico por analise, renomeando `PetitionSummary` para `CaseSummary`, tipando `Analysis.type` por `AnalysisType` e `Analysis.status` por contratos de status por tipo, adicionando os contratos persistidos de `PetitionDraft` e `JudgmentDraft`, e expandindo a superficie HTTP com relatorios separados por tipo. Nesta etapa, `LAWYER` e normalizado para `CASE_ASSESSMENT`, `JUDGE` e normalizado para `SECOND_INSTANCE`, e `FIRST_INSTANCE` reaproveita temporariamente o mesmo conjunto de status de `CASE_ASSESSMENT` ate existir um contrato dedicado.
+Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **CaseAssessmentAnalysis**, **FirstInstanceAnalysis** e **SecondInstanceAnalysis**, removendo o conceito legado de `Petition` como agregado principal de documento, introduzindo `AnalysisDocument` como artefato unico por analise, renomeando `PetitionSummary` para `CaseSummary`, tipando `Analysis.type` por `AnalysisType` e `Analysis.status` por contratos de status por tipo, adicionando os contratos persistidos de `PetitionDraft` e `SecondInstanceJudgmentDraft`, e expandindo a superficie HTTP com relatorios separados por tipo. Nesta etapa, `LAWYER` e normalizado para `CASE_ASSESSMENT`, `JUDGE` e normalizado para `SECOND_INSTANCE`, e `FIRST_INSTANCE` possui contrato dedicado de status sem reutilizar mais o tipo concreto de `CASE_ASSESSMENT`.
 
 ---
 
@@ -19,9 +19,9 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - Renomear `PetitionSummary*` para `CaseSummary*` em `core`, `database`, `rest`, `pipes`, `pubsub`, `providers`, `ai` e exports publicos.
 - Substituir o conceito `Petition` por `AnalysisDocument` nos fluxos sincronos e assincronos do resumo do caso.
 - Criar `AnalysisDocument` e seu contrato de persistencia, leitura e escrita por `analysis_id`.
-- Criar `PetitionDraft`, `PetitionDraftDto`, `PetitionDraftsRepository`, `JudgmentDraft`, `JudgmentDraftDto` e `JudgmentDraftsRepository` como contratos persistidos do novo dominio.
+- Criar `PetitionDraft`, `PetitionDraftDto`, `PetitionDraftsRepository`, `SecondInstanceJudgmentDraft`, `SecondInstanceJudgmentDraftDto` e `SecondInstanceJudgmentDraftsRepository` como contratos persistidos do novo dominio.
 - Adicionar `Analysis.type` em `Analysis` e `AnalysisDto`, com valores `CASE_ASSESSMENT`, `FIRST_INSTANCE` e `SECOND_INSTANCE`.
-- Remover `AnalysisStatus` e `AnalysisStatusValue` como abstrações canonicas do dominio e substitui-los por contratos tipados de status, com `CaseAssessmentAnalysisStatus | SecondInstanceAnalysisStatus` no estado atual do codigo.
+- Remover `AnalysisStatus` e `AnalysisStatusValue` como abstrações canonicas do dominio e substitui-los por contratos tipados de status, com `CaseAssessmentAnalysisStatus | FirstInstanceAnalysisStatus | SecondInstanceAnalysisStatus` no estado atual do codigo.
 - Renomear `WAITING_PETITION` para `WAITING_DOCUMENT_UPLOAD` em todos os fluxos e contratos de dominio.
 - Atualizar os fluxos atuais de upload/substituicao de documento, request de resumo, leitura de resumo, busca de precedentes, listagem, polling de processamento, relatorio e notificacao para os novos contratos.
 - Adicionar endpoints de report dedicados por tipo de analise: `case-assessment-report`, `first-instance-report` e `second-instance-report`.
@@ -30,8 +30,8 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 ## 2.2 Out-of-scope
 
 - Implementar o job de geracao de `PetitionDraft`; esta entrega cria o contrato e a persistencia, mas nao o pipeline do `ANI-93`.
-- Implementar o job de geracao de `JudgmentDraft`; esta entrega cria o contrato e a persistencia, mas nao o pipeline do `ANI-94`.
-- Implementar o endpoint de leitura de `JudgmentDraft`; isso continua dependente do `ANI-114`.
+- Implementar o job de geracao de `SecondInstanceJudgmentDraft`; esta entrega cria o contrato e a persistencia, mas nao o pipeline do `ANI-94`.
+- Implementar o endpoint de leitura de `SecondInstanceJudgmentDraft`; isso continua dependente do `ANI-114`.
 - Alterar o algoritmo de busca vetorial, ranking ou classificacao de precedentes.
 - Alterar autenticacao, ownership ou regras globais de traducao de erro ja existentes.
 
@@ -49,9 +49,9 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - O request assíncrono de resumo deve partir de `analysis_id`, buscar `AnalysisDocument`, mover a analise para o status de processamento adequado e publicar `CaseSummaryRequestedEvent`.
 - O dominio de `CASE_ASSESSMENT` deve aceitar os status `WAITING_DOCUMENT_UPLOAD`, `DOCUMENT_UPLOADED`, `ANALYZING_CASE`, `CASE_ANALYZED`, `SEARCHING_PRECEDENTS`, `GENERATING_PETITION_DRAFT`, `DONE` e `FAILED`.
 - O dominio de `SECOND_INSTANCE` deve aceitar os status `WAITING_DOCUMENT_UPLOAD`, `DOCUMENT_UPLOADED`, `EXTRACTING_PETITION`, `ANALYZING_CASE`, `CASE_ANALYZED`, `SEARCHING_PRECEDENTS`, `GENERATING_JUDGMENT_DRAFT`, `DONE` e `FAILED`.
-- `FIRST_INSTANCE` reaproveita temporariamente o mesmo conjunto de status de `CASE_ASSESSMENT` no agregado `Analysis`.
-- `Analysis.status` deve passar a ser serializado a partir de `CaseAssessmentAnalysisStatus | SecondInstanceAnalysisStatus`, sem wrapper `AnalysisStatus` como fonte canonica.
-- Os artefatos `PetitionDraft` e `JudgmentDraft` devem existir como contratos de leitura/escrita por `analysis_id`, mesmo que seus pipelines de geracao sejam entregues depois.
+- `FIRST_INSTANCE` deve usar `FirstInstanceAnalysisStatus` como contrato concreto de status no agregado `Analysis`.
+- `Analysis.status` deve passar a ser serializado a partir de `CaseAssessmentAnalysisStatus | FirstInstanceAnalysisStatus | SecondInstanceAnalysisStatus`, sem wrapper `AnalysisStatus` como fonte canonica.
+- Os artefatos `PetitionDraft` e `SecondInstanceJudgmentDraft` devem existir como contratos de leitura/escrita por `analysis_id`, mesmo que seus pipelines de geracao sejam entregues depois.
 - Os fluxos centrados em `analysis` devem ser expostos por:
 - `POST /intake/analysis/{analysis_id}/document`
 - `GET /intake/analysis/{analysis_id}/document`
@@ -93,8 +93,8 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **`GetPetitionSummaryUseCase`** (`src/animus/core/intake/use_cases/get_petition_summary_use_case.py`) - leitura do resumo por `petition_id`.
 - **`SearchAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/search_analysis_precedents_use_case.py`) - depende de `PetitionSummariesRepository` e do provider de embeddings do resumo.
 - **`GetCaseAssessmentAnalysisReportUseCase`** (`src/animus/core/intake/use_cases/get_case_assessment_analysis_report_use_case.py`) - agrega `Analysis`, `AnalysisDocument`, `CaseSummary`, precedentes e `PetitionDraft`.
-- **`GetFirstInstanceAnalysisReportUseCase`** (`src/animus/core/intake/use_cases/get_first_instance_analysis_report_use_case.py`) - agrega `Analysis`, `AnalysisDocument`, `CaseSummary`, precedentes e `JudgmentDraft`.
-- **`GetSecondInstanceAnalysisReportUseCase`** (`src/animus/core/intake/use_cases/get_second_instance_analysis_report_use_case.py`) - agrega `Analysis`, `AnalysisDocument`, `CaseSummary` e precedentes com `chosen_precedent`.
+- **`GetFirstInstanceAnalysisReportUseCase`** (`src/animus/core/intake/use_cases/get_first_instance_analysis_report_use_case.py`) - agrega `Analysis`, `AnalysisDocument`, `CaseSummary`, precedentes e `SecondInstanceJudgmentDraft`.
+- **`GetSecondInstanceAnalysisReportUseCase`** (`src/animus/core/intake/use_cases/get_second_instance_analysis_report_use_case.py`) - agrega `Analysis`, `AnalysisDocument`, `CaseSummary`, `precedents` e `draft` opcional.
 
 ## Database
 
@@ -131,7 +131,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **`PetitionSummaryRequestedEvent`** (`src/animus/core/intake/domain/events/petition_summary_requested_event.py`) - evento atual do resumo.
 - **`PetitionSummaryFinishedEvent`** (`src/animus/core/intake/domain/events/petition_summary_finished_event.py`) - evento atual de conclusao do resumo.
 - **`SummarizePetitionJob`** (`src/animus/pubsub/inngest/jobs/intake/summarize_petition_job.py`) - job atual de resumo.
-- **`OpenAIPetitionSummaryEmbeddingsProvider`** (`src/animus/providers/intake/petition_summary_embeddings/openai/openai_petition_summary_embeddings_provider.py`) - provider atual de embeddings do resumo.
+- **`OpenAICaseSummaryEmbeddingsProvider`** (`src/animus/providers/intake/petition_summary_embeddings/openai/openai_petition_summary_embeddings_provider.py`) - provider atual de embeddings do resumo.
 - **`SendPetitionSummaryFinishedNotificationJob`** (`src/animus/pubsub/inngest/jobs/notification/send_petition_summary_finished_notification_job.py`) - job atual de notificacao do resumo.
 - **`OneSignalPushNotificationProvider`** (`src/animus/providers/notification/push_notification/one_signal/one_signal_push_notification_provider.py`) - provider atual com metodo `send_petition_summary_finished_message(...)`.
 
@@ -171,7 +171,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/core/intake/domain/structures/second_instance_analysis_report.py` (**novo arquivo**)
 - **Tipo:** `@structure`
-- **Atributos:** `analysis`, `document`, `case_summary`, `precedents`, `chosen_precedent`
+- **Atributos:** `analysis`, `document`, `case_summary`, `precedents`, `draft`
 
 - **Localizacao:** `src/animus/core/intake/domain/structures/dtos/case_assessment_analysis_report_dto.py` (**novo arquivo**)
 - **Tipo:** `@dto`
@@ -183,7 +183,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/core/intake/domain/structures/dtos/second_instance_analysis_report_dto.py` (**novo arquivo**)
 - **Tipo:** `@dto`
-- **Atributos:** `analysis`, `document`, `case_summary`, `precedents`, `chosen_precedent`
+- **Atributos:** `analysis`, `document`, `case_summary`, `precedents`, `draft`
 
 - **Localizacao:** `src/animus/core/intake/domain/structures/analysis_document.py` (**novo arquivo**)
 - **Tipo:** `@structure`
@@ -215,7 +215,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Localizacao:** `src/animus/core/intake/domain/structures/judgment_draft.py` (**novo arquivo**)
 - **Tipo:** `@structure`
 - **Atributos:** `analysis_id: Id`, `content: Text`
-- **Metodos / factory:** `create(dto: JudgmentDraftDto) -> JudgmentDraft` - cria o rascunho da sentenca; `dto -> JudgmentDraftDto` - expõe o contrato serializavel.
+- **Metodos / factory:** `create(dto: SecondInstanceJudgmentDraftDto) -> SecondInstanceJudgmentDraft` - cria o rascunho da sentenca; `dto -> SecondInstanceJudgmentDraftDto` - expõe o contrato serializavel.
 
 - **Localizacao:** `src/animus/core/intake/domain/structures/dtos/judgment_draft_dto.py` (**novo arquivo**)
 - **Tipo:** `@dto`
@@ -237,7 +237,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/core/intake/domain/errors/judgment_draft_unavailable_error.py` (**novo arquivo**)
 - **Classe base:** `NotFoundError`
-- **Motivo:** deve ser levantado quando o report de `FIRST_INSTANCE` exigir `JudgmentDraft` e ele ainda nao existir.
+- **Motivo:** deve ser levantado quando o report de `FIRST_INSTANCE` exigir `SecondInstanceJudgmentDraft` e ele ainda nao existir.
 
 ## Camada Core (Interfaces / Ports)
 
@@ -248,13 +248,13 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodos:** `find_by_analysis_id(analysis_id: Id) -> CaseSummary | None` - busca o resumo por analise; `add(analysis_id: Id, case_summary: CaseSummary) -> None` - persiste resumo novo; `replace(analysis_id: Id, case_summary: CaseSummary) -> None` - substitui resumo existente.
 
 - **Localizacao:** `src/animus/core/intake/interfaces/case_summary_embeddings_provider.py` (**novo arquivo**)
-- **Metodos:** `generate(case_summary: CaseSummary) -> list[PetitionSummaryEmbedding]` - gera embeddings do resumo do caso para a busca vetorial de precedentes.
+- **Metodos:** `generate(case_summary: CaseSummary) -> list[CaseSummaryEmbedding]` - gera embeddings do resumo do caso para a busca vetorial de precedentes.
 
 - **Localizacao:** `src/animus/core/intake/interfaces/petition_drafts_repository.py` (**novo arquivo**)
 - **Metodos:** `find_by_analysis_id(analysis_id: Id) -> PetitionDraft | None` - busca o rascunho de peticao da analise; `add(petition_draft: PetitionDraft) -> None` - persiste rascunho novo; `replace(petition_draft: PetitionDraft) -> None` - substitui rascunho existente.
 
 - **Localizacao:** `src/animus/core/intake/interfaces/judgment_drafts_repository.py` (**novo arquivo**)
-- **Metodos:** `find_by_analysis_id(analysis_id: Id) -> JudgmentDraft | None` - busca o rascunho de sentenca da analise; `add(judgment_draft: JudgmentDraft) -> None` - persiste rascunho novo; `replace(judgment_draft: JudgmentDraft) -> None` - substitui rascunho existente.
+- **Metodos:** `find_by_analysis_id(analysis_id: Id) -> SecondInstanceJudgmentDraft | None` - busca o rascunho de sentenca da analise; `add(judgment_draft: SecondInstanceJudgmentDraft) -> None` - persiste rascunho novo; `replace(judgment_draft: SecondInstanceJudgmentDraft) -> None` - substitui rascunho existente.
 
 - **Localizacao:** `src/animus/core/intake/interfaces/summarize_case_workflow.py` (**novo arquivo**)
 - **Metodos:** `run(analysis_id: str, document_content: Text) -> CaseSummaryDto` - executa a sumarizacao do caso a partir do documento da analise.
@@ -289,7 +289,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodo principal:** `execute(analysis_id: str, account_id: str) -> CaseAssessmentAnalysisReportDto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_first_instance_analysis_report_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`, `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `JudgmentDraftsRepository`
+- **Dependencias (ports injetados):** `AnalisysesRepository`, `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `SecondInstanceJudgmentDraftsRepository`
 - **Metodo principal:** `execute(analysis_id: str, account_id: str) -> FirstInstanceAnalysisReportDto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_second_instance_analysis_report_use_case.py` (**novo arquivo**)
@@ -314,7 +314,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Relacionamentos:** `analysis: relationship('AnalysisModel', back_populates='petition_draft')`
 
 - **Localizacao:** `src/animus/database/sqlalchemy/models/intake/judgment_draft_model.py` (**novo arquivo**)
-- **Tabela:** `judgment_drafts`
+- **Tabela:** `second_instance_judgment_drafts`
 - **Colunas:** `analysis_id`, `content`, `created_at`, `updated_at`
 - **Relacionamentos:** `analysis: relationship('AnalysisModel', back_populates='judgment_draft')`
 
@@ -330,7 +330,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodos:** `to_entity(model: PetitionDraftModel) -> PetitionDraft` - traduz o model persistido para o rascunho de peticao; `to_model(petition_draft: PetitionDraft) -> PetitionDraftModel` - traduz para persistencia.
 
 - **Localizacao:** `src/animus/database/sqlalchemy/mappers/intake/judgment_draft_mapper.py` (**novo arquivo**)
-- **Metodos:** `to_entity(model: JudgmentDraftModel) -> JudgmentDraft` - traduz o model persistido para o rascunho de sentenca; `to_model(judgment_draft: JudgmentDraft) -> JudgmentDraftModel` - traduz para persistencia.
+- **Metodos:** `to_entity(model: SecondInstanceJudgmentDraftModel) -> SecondInstanceJudgmentDraft` - traduz o model persistido para o rascunho de sentenca; `to_model(judgment_draft: SecondInstanceJudgmentDraft) -> SecondInstanceJudgmentDraftModel` - traduz para persistencia.
 
 ## Camada Database (Repositorios)
 
@@ -350,7 +350,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodos:** `find_by_analysis_id(...)`, `add(...)`, `replace(...)`
 
 - **Localizacao:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_judgment_drafts_repository.py` (**novo arquivo**)
-- **Interface implementada:** `JudgmentDraftsRepository`
+- **Interface implementada:** `SecondInstanceJudgmentDraftsRepository`
 - **Dependencias:** `Session`
 - **Metodos:** `find_by_analysis_id(...)`, `add(...)`, `replace(...)`
 
@@ -429,7 +429,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/pubsub/inngest/jobs/intake/summarize_case_job.py` (**novo arquivo**)
 - **Evento consumido:** `CaseSummaryRequestedEvent.NAME`
-- **Dependencias:** `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalisysesRepository`, `SummarizeCaseWorkflow`
+- **Dependencias:** `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalisysesRepository`, `SummarizeFirstInstanceCaseWorkflow`
 - **Passos (`step.run`):** normalizar payload -> carregar `AnalysisDocument` -> ler conteudo do arquivo -> executar workflow -> persistir `CaseSummary` -> publicar `CaseSummaryFinishedEvent`
 - **Idempotencia:** resumo e atualizado por `replace(...)` quando a analise ja possuir `CaseSummary`; reexecucoes nao criam duplicata.
 
@@ -470,7 +470,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Justificativa:** polling continua no mesmo endpoint, mas sobre novo conjunto de status.
 
 - **Arquivo:** `src/animus/core/intake/use_cases/search_analysis_precedents_use_case.py`
-- **Mudanca:** trocar `PetitionSummariesRepository` por `CaseSummariesRepository` e `PetitionSummaryEmbeddingsProvider` por `CaseSummaryEmbeddingsProvider`.
+- **Mudanca:** trocar `PetitionSummariesRepository` por `CaseSummariesRepository` e `CaseSummaryEmbeddingsProvider` por `CaseSummaryEmbeddingsProvider`.
 - **Justificativa:** a busca de precedentes passa a partir do `CaseSummary` por `analysis_id`.
 
 - **Arquivo:** `src/animus/core/intake/use_cases/request_analysis_precedents_search_use_case.py`
@@ -490,7 +490,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Justificativa:** o report passa a refletir explicitamente os artefatos do fluxo de cada tipo de analise.
 
 - **Arquivo:** `src/animus/core/intake/interfaces/__init__.py`
-- **Mudanca:** exportar `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `CaseSummaryEmbeddingsProvider`, `PetitionDraftsRepository`, `JudgmentDraftsRepository`, `SummarizeCaseWorkflow`; remover exports de `PetitionsRepository`, `PetitionSummariesRepository` e `SummarizePetitionWorkflow`.
+- **Mudanca:** exportar `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `CaseSummaryEmbeddingsProvider`, `PetitionDraftsRepository`, `SecondInstanceJudgmentDraftsRepository`, `SummarizeFirstInstanceCaseWorkflow`; remover exports de `PetitionsRepository`, `PetitionSummariesRepository` e `SummarizePetitionWorkflow`.
 - **Justificativa:** estabilizar o novo surface publico do bounded context.
 
 - **Arquivo:** `src/animus/core/intake/use_cases/__init__.py`
@@ -512,11 +512,11 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Justificativa:** a persistencia de analises e o ponto central dos filtros de listagem e polling.
 
 - **Arquivo:** `src/animus/database/sqlalchemy/models/intake/__init__.py`
-- **Mudanca:** exportar `AnalysisDocumentModel`, `CaseSummaryModel`, `PetitionDraftModel` e `JudgmentDraftModel`; remover `PetitionModel` e `PetitionSummaryModel` como nomes canonicos.
+- **Mudanca:** exportar `AnalysisDocumentModel`, `CaseSummaryModel`, `PetitionDraftModel` e `SecondInstanceJudgmentDraftModel`; remover `PetitionModel` e `PetitionSummaryModel` como nomes canonicos.
 - **Justificativa:** os exports publicos precisam refletir o novo dominio.
 
 - **Arquivo:** `src/animus/database/sqlalchemy/repositories/intake/__init__.py`
-- **Mudanca:** exportar `SqlalchemyAnalysisDocumentsRepository`, `SqlalchemyCaseSummariesRepository`, `SqlalchemyPetitionDraftsRepository` e `SqlalchemyJudgmentDraftsRepository`; remover nomes legados.
+- **Mudanca:** exportar `SqlalchemyAnalysisDocumentsRepository`, `SqlalchemyCaseSummariesRepository`, `SqlalchemyPetitionDraftsRepository` e `SqlalchemySecondInstanceJudgmentDraftsRepository`; remover nomes legados.
 - **Justificativa:** alinhar o package de repositorios ao dominio novo.
 
 ## REST
@@ -554,7 +554,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 ## Pipes
 
 - **Arquivo:** `src/animus/pipes/database_pipe.py`
-- **Mudanca:** adicionar factories para `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `PetitionDraftsRepository` e `JudgmentDraftsRepository`; remover factories legadas de `PetitionsRepository` e `PetitionSummariesRepository`.
+- **Mudanca:** adicionar factories para `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `PetitionDraftsRepository` e `SecondInstanceJudgmentDraftsRepository`; remover factories legadas de `PetitionsRepository` e `PetitionSummariesRepository`.
 - **Justificativa:** `Depends(...)` deve expor os contratos novos do dominio.
 
 ## Providers / AI / PubSub
@@ -568,7 +568,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Justificativa:** o workflow passa a operar sobre o documento da analise, nao sobre `petition_id`.
 
 - **Arquivo:** `src/animus/ai/agno/workflows/intake/agno_summarize_petition_workflow.py`
-- **Mudanca:** renomear arquivo/classe para `AgnoSummarizeCaseWorkflow`; trocar `CreatePetitionSummaryUseCase` por `CreateCaseSummaryUseCase`; trocar `PetitionSummaryDto` por `CaseSummaryDto`.
+- **Mudanca:** renomear arquivo/classe para `AgnoSummarizeFirstInstanceCaseWorkflow`; trocar `CreatePetitionSummaryUseCase` por `CreateCaseSummaryUseCase`; trocar `PetitionSummaryDto` por `CaseSummaryDto`.
 - **Justificativa:** alinhar o workflow ao nome canonico do resumo.
 
 - **Arquivo:** `src/animus/ai/agno/outputs/intake/petition_summary_output.py`
@@ -580,7 +580,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Justificativa:** o provider deve refletir o novo artefato canonico.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/summarize_petition_job.py`
-- **Mudanca:** renomear arquivo/classe para `summarize_case_job.py` / `SummarizeCaseJob`; trocar payload para `analysis_id`; buscar `AnalysisDocument` em vez de `Petition`; trocar evento trigger para `CaseSummaryRequestedEvent`; publicar `CaseSummaryFinishedEvent`.
+- **Mudanca:** renomear arquivo/classe para `summarize_case_job.py` / `SummarizeFirstInstanceCaseJob`; trocar payload para `analysis_id`; buscar `AnalysisDocument` em vez de `Petition`; trocar evento trigger para `CaseSummaryRequestedEvent`; publicar `CaseSummaryFinishedEvent`.
 - **Justificativa:** o job de resumo deixa de depender de `petition_id`.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/notification/send_petition_summary_finished_notification_job.py`
@@ -696,15 +696,15 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 ## Providers / AI / PubSub
 
 - **Arquivo:** `src/animus/core/intake/interfaces/summarize_petition_workflow.py`
-- **Motivo da remocao:** substituido por `SummarizeCaseWorkflow`.
+- **Motivo da remocao:** substituido por `SummarizeFirstInstanceCaseWorkflow`.
 - **Impacto esperado:** atualizar `AiPipe` e workflow concreto.
 
 - **Arquivo:** `src/animus/ai/agno/workflows/intake/agno_summarize_petition_workflow.py`
-- **Motivo da remocao:** substituido por `AgnoSummarizeCaseWorkflow`.
+- **Motivo da remocao:** substituido por `AgnoSummarizeFirstInstanceCaseWorkflow`.
 - **Impacto esperado:** atualizar imports no job e no `AiPipe`.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/summarize_petition_job.py`
-- **Motivo da remocao:** substituido por `SummarizeCaseJob`.
+- **Motivo da remocao:** substituido por `SummarizeFirstInstanceCaseJob`.
 - **Impacto esperado:** atualizar bootstrap do `Inngest` e eventos publicados.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/notification/send_petition_summary_finished_notification_job.py`
@@ -740,7 +740,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Motivo da escolha:** a rota, o request assíncrono e o agregado principal passam a ser centrados em `analysis`; manter `petition_id` criaria um vazamento desnecessario do modelo legado.
 - **Impactos / trade-offs:** a migration de `petition_summaries` precisa alterar FK/chave de lookup e os jobs passam a buscar `AnalysisDocument` antes do workflow.
 
-- **Decisao:** incluir `PetitionDraft` e `JudgmentDraft` no escopo apenas como contratos e persistencia.
+- **Decisao:** incluir `PetitionDraft` e `SecondInstanceJudgmentDraft` no escopo apenas como contratos e persistencia.
 - **Alternativas consideradas:** deixar drafts totalmente fora do `ANI-92`; implementar tambem jobs e endpoints de leitura na mesma entrega.
 - **Motivo da escolha:** a atualizacao do dominio/base de dados precisa preparar esses artefatos para `ANI-93`, `ANI-94` e `ANI-114`, mas o ticket desta spec ainda e de groundwork estrutural.
 - **Impactos / trade-offs:** o PR cria tabelas e portas novas sem expor ainda toda a superficie HTTP correspondente.
@@ -770,9 +770,9 @@ POST /intake/analysis/{analysis_id}/case-summaries
      -> AnalisysesRepository.replace
      -> Broker.publish(CaseSummaryRequestedEvent)
 
-Inngest -> SummarizeCaseJob
+Inngest -> SummarizeFirstInstanceCaseJob
   -> AnalysisDocumentsRepository.find_by_analysis_id
-  -> SummarizeCaseWorkflow.run(...)
+  -> SummarizeFirstInstanceCaseWorkflow.run(...)
   -> CreateCaseSummaryUseCase.execute(analysis_id, dto)
      -> CaseSummariesRepository.add|replace
      -> AnalisysesRepository.find_by_id
@@ -792,8 +792,8 @@ GET /intake/analysis/{analysis_id}/case-summaries
 ```text
 RequestCaseSummaryUseCase
   -> Broker.publish(CaseSummaryRequestedEvent)
-  -> SummarizeCaseJob
-     -> SummarizeCaseWorkflow
+  -> SummarizeFirstInstanceCaseJob
+     -> SummarizeFirstInstanceCaseWorkflow
      -> CreateCaseSummaryUseCase
      -> Broker.publish(CaseSummaryFinishedEvent)
   -> SendCaseSummaryFinishedNotificationJob
@@ -846,7 +846,7 @@ RequestCaseSummaryUseCase
 - **Nao inclua testes automatizados na spec.**
 - O `core` nao deve depender de `FastAPI`, `SQLAlchemy`, `Redis`, `Inngest` ou qualquer detalhe de infraestrutura.
 - Todos os caminhos citados existem no projeto ou estao explicitamente marcados como **novo arquivo**.
-- **Nao invente** jobs ou endpoints de geracao/leitura de drafts fora do que foi explicitamente colocado em escopo; `PetitionDraft` e `JudgmentDraft` entram aqui como contratos e persistencia base.
+- **Nao invente** jobs ou endpoints de geracao/leitura de drafts fora do que foi explicitamente colocado em escopo; `PetitionDraft` e `SecondInstanceJudgmentDraft` entram aqui como contratos e persistencia base.
 - Toda referencia a codigo existente usa caminho relativo real em `src/animus/...` ou `migrations/...`.
 - Se uma camada nao se aplica, ela foi preenchida explicitamente com **Nao aplicavel**.
 - Schemas `*Body` de entrada continuam definidos no proprio controller que os utiliza.
