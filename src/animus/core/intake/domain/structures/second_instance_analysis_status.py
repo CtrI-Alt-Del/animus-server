@@ -18,6 +18,7 @@ class SecondInstanceAnalysisStatusValue(StrEnum):
     ANALYZING_PRECEDENTS_APPLICABILITY = 'ANALYZING_PRECEDENTS_APPLICABILITY'
     GENERATING_JUDGMENT_DRAFT = 'GENERATING_JUDGMENT_DRAFT'
     GENERATING_SYNTHESIS = 'GENERATING_SYNTHESIS'
+    PRECEDENTS_SEARCHED = 'PRECEDENTS_SEARCHED'
     DONE = 'DONE'
     PETITION_NOT_FOUND = 'PETITION_NOT_FOUND'
     FAILED = 'FAILED'
@@ -66,6 +67,10 @@ class SecondInstanceAnalysisStatus(Structure):
     @classmethod
     def create_as_petition_not_found(cls) -> SecondInstanceAnalysisStatus:
         return cls(SecondInstanceAnalysisStatusValue.PETITION_NOT_FOUND)
+
+    @classmethod
+    def create_as_precedents_searched(cls) -> SecondInstanceAnalysisStatus:
+        return cls(SecondInstanceAnalysisStatusValue.PRECEDENTS_SEARCHED)
 
     @classmethod
     def create_as_failed(cls) -> SecondInstanceAnalysisStatus:

@@ -24,7 +24,7 @@ def _create_analysis_with_petition(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de peticao',
+            name='Analise de petição',
             folder_id=None,
             account_id=account_id,
             type=AnalysisType.create_as_first_instance().dto,

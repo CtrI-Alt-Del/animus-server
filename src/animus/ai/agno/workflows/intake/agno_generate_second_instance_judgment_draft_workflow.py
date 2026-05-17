@@ -127,11 +127,12 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
             f"""
             Elabore minuta de julgamento para segunda instância com base no caso e precedentes abaixo.
             Retorne saída estruturada com os campos:
-            - relatorio
-            - fundamentacao
-            - analise_de_aderencia_ou_distincao
-            - dispositivo_sugerido
-            - aviso_ausencia_precedente_aplicavel (opcional)
+            - report
+            - merit_analysis
+            - precedent_adherence_analysis
+            - ruling
+            - preliminary_issues (opcional)
+            - no_applicable_precedent_notice (opcional)
 
             Resumo do caso:
             - case_summary: {case_summary_dto.case_summary}
@@ -163,25 +164,12 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
             msg = 'Invalid output type from second instance judgment draft generator agent'
             raise AppError('Erro de execucao do workflow', msg)
 
-        stable_sections = [
-            'RELATORIO',
-            output.relatorio,
-            'FUNDAMENTACAO',
-            output.fundamentacao,
-            'ANALISE_DE_ADERENCIA_OU_DISTINCAO',
-            output.analise_de_aderencia_ou_distincao,
-            'DISPOSITIVO_SUGERIDO',
-            output.dispositivo_sugerido,
-        ]
-        if output.aviso_ausencia_precedente_aplicavel is not None:
-            stable_sections.extend(
-                [
-                    'AVISO_AUSENCIA_PRECEDENTE_APLICAVEL',
-                    output.aviso_ausencia_precedente_aplicavel,
-                ]
-            )
-
         return SecondInstanceJudgmentDraftDto(
             analysis_id=analysis_id,
-            content='\n\n'.join(stable_sections).strip(),
+            report=output.report,
+            merit_analysis=output.merit_analysis,
+            precedent_adherence_analysis=output.precedent_adherence_analysis,
+            ruling=output.ruling,
+            preliminary_issues=output.preliminary_issues,
+            no_applicable_precedent_notice=output.no_applicable_precedent_notice,
         )

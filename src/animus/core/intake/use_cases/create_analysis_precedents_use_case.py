@@ -73,11 +73,17 @@ class CreateAnalysisPrecedentsUseCase:
         analysis.set_precedents_search_filters(filters_dto)
 
         if analysis.type.is_case_analysis.is_true:
-            analysis.set_status(CaseAssessmentAnalysisStatus.create_as_done())
+            analysis.set_status(
+                CaseAssessmentAnalysisStatus.create_as_precedents_searched()
+            )
         elif analysis.type.is_first_instance.is_true:
-            analysis.set_status(FirstInstanceAnalysisStatus.create_as_done())
+            analysis.set_status(
+                FirstInstanceAnalysisStatus.create_as_precedents_searched()
+            )
         elif analysis.type.is_second_instance.is_true:
-            analysis.set_status(SecondInstanceAnalysisStatus.create_as_done())
+            analysis.set_status(
+                SecondInstanceAnalysisStatus.create_as_precedents_searched()
+            )
 
         self._analisyses_repository.replace(analysis)
 

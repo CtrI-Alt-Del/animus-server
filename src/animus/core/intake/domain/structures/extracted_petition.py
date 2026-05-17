@@ -17,12 +17,12 @@ class ExtractedPetition(Structure):
     def create(cls, dto: ExtractedPetitionDto) -> 'ExtractedPetition':
         if dto.first_page < 1:
             raise ValidationError(
-                'Primeira pagina da peticao deve ser maior ou igual a 1'
+                'Primeira pagina da petição deve ser maior ou igual a 1'
             )
 
         if dto.last_page < dto.first_page:
             raise ValidationError(
-                'Ultima pagina da peticao deve ser maior ou igual a primeira pagina'
+                'Ultima pagina da petição deve ser maior ou igual a primeira pagina'
             )
 
         return cls(

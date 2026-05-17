@@ -52,7 +52,7 @@ class TestTriggerFirstInstanceCaseSummarizationController:
         )
 
         response = client.post(
-            f'/intake/analysis/{analysis.id}/case-summaries',
+            f'/intake/analyses/{analysis.id}/case-summaries',
             headers=build_auth_headers(account.id),
         )
 
@@ -84,7 +84,7 @@ class TestTriggerFirstInstanceCaseSummarizationController:
         analysis = create_analysis(account_id=account.id, status='DOCUMENT_UPLOADED')
 
         response = client.post(
-            f'/intake/analysis/{analysis.id}/case-summaries',
+            f'/intake/analyses/{analysis.id}/case-summaries',
             headers=build_auth_headers(account.id),
         )
 

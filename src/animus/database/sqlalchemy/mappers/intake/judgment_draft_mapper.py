@@ -17,7 +17,12 @@ class SecondInstanceJudgmentDraftMapper:
         return SecondInstanceJudgmentDraft.create(
             SecondInstanceJudgmentDraftDto(
                 analysis_id=model.analysis_id,
-                content=model.content,
+                report=model.report,
+                merit_analysis=model.merit_analysis,
+                precedent_adherence_analysis=model.precedent_adherence_analysis,
+                ruling=model.ruling,
+                preliminary_issues=model.preliminary_issues,
+                no_applicable_precedent_notice=model.no_applicable_precedent_notice,
             )
         )
 
@@ -27,5 +32,18 @@ class SecondInstanceJudgmentDraftMapper:
     ) -> SecondInstanceJudgmentDraftModel:
         return SecondInstanceJudgmentDraftModel(
             analysis_id=judgment_draft.analysis_id.value,
-            content=judgment_draft.content.value,
+            report=judgment_draft.report.value,
+            merit_analysis=judgment_draft.merit_analysis.value,
+            precedent_adherence_analysis=judgment_draft.precedent_adherence_analysis.value,
+            ruling=[item.value for item in judgment_draft.ruling],
+            preliminary_issues=(
+                judgment_draft.preliminary_issues.value
+                if judgment_draft.preliminary_issues is not None
+                else None
+            ),
+            no_applicable_precedent_notice=(
+                judgment_draft.no_applicable_precedent_notice.value
+                if judgment_draft.no_applicable_precedent_notice is not None
+                else None
+            ),
         )

@@ -27,6 +27,8 @@ class IntakePipe:
         ],
     ) -> Analysis:
         analysis = analisyses_repository.find_by_id(Id.create(analysis_id))
+        print(f'analisys_repository.find_by_id({analysis_id})')
+        print(analysis)
         if analysis is None:
             raise AnalysisNotFoundError
 

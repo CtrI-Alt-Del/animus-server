@@ -75,7 +75,7 @@ def _seed_second_instance_analysis_with_summary_and_precedents(
             PrecedentModel(
                 id=precedent_id,
                 court='STJ',
-                kind='RESP',
+                kind='RG',
                 number=number,
                 status='vigente',
                 enunciation=f'Enunciado {number}',
@@ -176,7 +176,10 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
                 )
                 return SecondInstanceJudgmentDraftDto(
                     analysis_id=analysis_id,
-                    content='RELATORIO\n\nFUNDAMENTACAO\n\nDISPOSITIVO',
+                    report='Relatorio',
+                    merit_analysis='Fundamentacao',
+                    precedent_adherence_analysis='Aderencia',
+                    ruling=['Dispositivo'],
                 )
 
         monkeypatch.setattr(
@@ -218,10 +221,12 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
             == SecondInstanceAnalysisStatus.create_as_done().dto
         )
         assert persisted_judgment_draft is not None
+        assert persisted_judgment_draft.report == 'Relatorio'
+        assert persisted_judgment_draft.merit_analysis == 'Fundamentacao'
         assert (
-            persisted_judgment_draft.content
-            == 'RELATORIO\n\nFUNDAMENTACAO\n\nDISPOSITIVO'
+            persisted_judgment_draft.precedent_adherence_analysis == 'Aderencia'
         )
+        assert persisted_judgment_draft.ruling == ['Dispositivo']
 
     def test_should_mark_analysis_as_failed_when_failure_handler_receives_event_payload(
         self,

@@ -232,7 +232,7 @@ class TestSearchAnalysisPrecedentsJob:
         )
 
         response = inngest_runtime.post_event(
-            name='intake/analysis.precedents.search.requested',
+            name='intake/analyses.precedents.search.requested',
             data={
                 'analysis_id': seeded_data['analysis_id'],
                 'courts': ['STF'],

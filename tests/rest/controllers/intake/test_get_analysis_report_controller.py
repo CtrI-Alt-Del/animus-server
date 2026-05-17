@@ -66,14 +66,17 @@ def _create_report_analysis(
         session.add(
             PetitionDraftModel(
                 analysis_id=analysis_id,
-                content='Minuta de peticao',
+                content='Minuta de petição',
             )
         )
     if with_judgment_draft:
         session.add(
             SecondInstanceJudgmentDraftModel(
                 analysis_id=analysis_id,
-                content='Minuta de julgamento',
+                report='Relatorio',
+                merit_analysis='Fundamentacao',
+                precedent_adherence_analysis='Aderencia',
+                ruling=['Dispositivo'],
             )
         )
     session.add(
@@ -135,7 +138,12 @@ class TestGetSecondInstanceAnalysisReportController:
         assert payload['precedents'][0]['analysis_id'] == analysis_id
         assert payload['draft'] == {
             'analysis_id': analysis_id,
-            'content': 'Minuta de julgamento',
+            'report': 'Relatorio',
+            'merit_analysis': 'Fundamentacao',
+            'precedent_adherence_analysis': 'Aderencia',
+            'ruling': ['Dispositivo'],
+            'preliminary_issues': None,
+            'no_applicable_precedent_notice': None,
         }
 
     def test_should_return_200_without_draft_when_second_instance_analysis_has_no_draft(
@@ -189,7 +197,7 @@ class TestGetCaseAssessmentAnalysisReportController:
         )
         assert payload['petition_draft'] == {
             'analysis_id': analysis_id,
-            'content': 'Minuta de peticao',
+            'content': 'Minuta de petição',
         }
 
 
@@ -221,5 +229,10 @@ class TestGetFirstInstanceAnalysisReportController:
         )
         assert payload['judgment_draft'] == {
             'analysis_id': analysis_id,
-            'content': 'Minuta de julgamento',
+            'report': 'Relatorio',
+            'merit_analysis': 'Fundamentacao',
+            'precedent_adherence_analysis': 'Aderencia',
+            'ruling': ['Dispositivo'],
+            'preliminary_issues': None,
+            'no_applicable_precedent_notice': None,
         }

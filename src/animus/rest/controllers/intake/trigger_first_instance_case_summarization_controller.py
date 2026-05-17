@@ -17,7 +17,7 @@ from animus.pipes.pubsub_pipe import PubSubPipe
 class TriggerFirstInstanceCaseSummarizationController:
     @staticmethod
     def handle(router: APIRouter) -> None:
-        @router.post('/analysis/{analysis_id}/case-summaries', status_code=202)
+        @router.post('/analyses/{analysis_id}/case-summaries', status_code=202)
         def _(
             analysis: Annotated[
                 Analysis,

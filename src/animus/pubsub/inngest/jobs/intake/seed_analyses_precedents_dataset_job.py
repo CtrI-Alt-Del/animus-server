@@ -65,8 +65,8 @@ class _NoopBroker:
 class SeedAnalysesPrecedentsDatasetJob:
     _ACCOUNT_EMAIL = 'animus.ctrlaltdel@gmail.com'
     _DOCUMENTS_PREFIX = 'intake/xertica/documents/'
-    _DATASET_PATH_PREFIX = 'intake/datasets/analysis-precedents/'
-    _LOCAL_DATASET_PREFIX = 'tmp/intake/datasets/analysis-precedents/'
+    _DATASET_PATH_PREFIX = 'intake/datasets/analyses-precedents/'
+    _LOCAL_DATASET_PREFIX = 'tmp/intake/datasets/analyses-precedents/'
 
     @staticmethod
     def handle(inngest: Inngest) -> Any:

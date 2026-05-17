@@ -7,18 +7,18 @@ from animus.core.storage.domain.structures import UploadUrl
 from animus.core.storage.domain.structures.url import Url
 from animus.core.storage.interfaces import FileStorageProvider
 from animus.core.storage.use_cases.generate_petition_upload_url_use_case import (
-    GeneratePetitionUploadUrlUseCase,
+    GenerateAnalysisDocumentUploadUrlUseCase,
 )
 
 
-class TestGeneratePetitionUploadUrlUseCase:
+class TestGenerateAnalysisDocumentUploadUrlUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
         self.file_storage_provider_mock = create_autospec(
             FileStorageProvider,
             instance=True,
         )
-        self.use_case = GeneratePetitionUploadUrlUseCase(
+        self.use_case = GenerateAnalysisDocumentUploadUrlUseCase(
             file_storage_provider=self.file_storage_provider_mock,
         )
         self.mock_file_path = FilePath.create('analyses/123/documents/fake-ulid.pdf')

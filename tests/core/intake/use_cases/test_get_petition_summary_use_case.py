@@ -27,7 +27,7 @@ class TestGetPetitionSummaryUseCase:
     def test_should_return_petition_summary_dto_when_summary_exists(self) -> None:
         petition_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
         petition_summary = PetitionSummariesFaker.fake(
-            case_summary='Resumo consolidado da peticao.',
+            case_summary='Resumo consolidado da petição.',
             legal_issue='Discussao sobre inadimplemento contratual.',
             central_question='Existe responsabilidade contratual no caso?',
             relevant_laws=['Codigo Civil, Art. 389'],

@@ -20,6 +20,9 @@ from .get_case_assessment_analysis_report_use_case import (
 from .get_first_instance_analysis_report_use_case import (
     GetFirstInstanceAnalysisReportUseCase,
 )
+from .get_second_instance_judgment_draft_use_case import (
+    GetSecondInstanceJudgmentDraftUseCase,
+)
 from .get_second_instance_analysis_report_use_case import (
     GetSecondInstanceAnalysisReportUseCase,
 )
@@ -67,6 +70,7 @@ __all__ = [
     'GetAnalysisUseCase',
     'GetCaseSummaryUseCase',
     'GetFirstInstanceAnalysisReportUseCase',
+    'GetSecondInstanceJudgmentDraftUseCase',
     'GetPetitionSummaryUseCase',
     'GetSecondInstanceAnalysisReportUseCase',
     'ListAnalysesUseCase',

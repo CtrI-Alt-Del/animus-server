@@ -4,7 +4,7 @@ from animus.core.storage.domain.structures.dtos.upload_url_dto import UploadUrlD
 from animus.core.storage.interfaces.file_storage_provider import FileStorageProvider
 
 
-class GeneratePetitionUploadUrlUseCase:
+class GenerateAnalysisDocumentUploadUrlUseCase:
     def __init__(self, file_storage_provider: FileStorageProvider) -> None:
         self._file_storage_provider = file_storage_provider
 

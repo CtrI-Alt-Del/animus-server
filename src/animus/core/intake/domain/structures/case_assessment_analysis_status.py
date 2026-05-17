@@ -16,6 +16,7 @@ class CaseAssessmentAnalysisStatusValue(StrEnum):
     ANALYZING_PRECEDENTS_SIMILARITY = 'ANALYZING_PRECEDENTS_SIMILARITY'
     ANALYZING_PRECEDENTS_APPLICABILITY = 'ANALYZING_PRECEDENTS_APPLICABILITY'
     GENERATING_PETITION_DRAFT = 'GENERATING_PETITION_DRAFT'
+    PRECEDENTS_SEARCHED = 'PRECEDENTS_SEARCHED'
     DONE = 'DONE'
     FAILED = 'FAILED'
 
@@ -47,6 +48,10 @@ class CaseAssessmentAnalysisStatus(Structure):
     @classmethod
     def create_as_case_analyzed(cls) -> CaseAssessmentAnalysisStatus:
         return cls(CaseAssessmentAnalysisStatusValue.CASE_ANALYZED)
+
+    @classmethod
+    def create_as_precedents_searched(cls) -> CaseAssessmentAnalysisStatus:
+        return cls(CaseAssessmentAnalysisStatusValue.PRECEDENTS_SEARCHED)
 
     @classmethod
     def create_as_done(cls) -> CaseAssessmentAnalysisStatus:

@@ -36,7 +36,12 @@ class CreateSecondInstanceJudgmentDraftUseCase:
 
         normalized_dto = SecondInstanceJudgmentDraftDto(
             analysis_id=analysis_id_entity.value,
-            content=dto.content,
+            report=dto.report,
+            merit_analysis=dto.merit_analysis,
+            precedent_adherence_analysis=dto.precedent_adherence_analysis,
+            ruling=dto.ruling,
+            preliminary_issues=dto.preliminary_issues,
+            no_applicable_precedent_notice=dto.no_applicable_precedent_notice,
         )
 
         judgment_draft = SecondInstanceJudgmentDraft.create(normalized_dto)

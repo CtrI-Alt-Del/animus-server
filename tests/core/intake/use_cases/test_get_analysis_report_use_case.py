@@ -130,7 +130,7 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
             )
         )
         petition_draft = PetitionDraft.create(
-            PetitionDraftDto(analysis_id=analysis_id, content='Minuta de peticao')
+            PetitionDraftDto(analysis_id=analysis_id, content='Minuta de petição')
         )
 
         self.analisyses_repository_mock.find_by_id.return_value = analysis
@@ -252,7 +252,11 @@ class TestGetFirstInstanceAnalysisReportUseCase:
         )
         judgment_draft = SecondInstanceJudgmentDraft.create(
             SecondInstanceJudgmentDraftDto(
-                analysis_id=analysis_id, content='Minuta de julgamento'
+                analysis_id=analysis_id,
+                report='Relatorio',
+                merit_analysis='Fundamentacao',
+                precedent_adherence_analysis='Aderencia',
+                ruling=['Dispositivo'],
             )
         )
 
@@ -472,7 +476,10 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         judgment_draft = SecondInstanceJudgmentDraft.create(
             SecondInstanceJudgmentDraftDto(
                 analysis_id=analysis_id,
-                content='Minuta de julgamento',
+                report='Relatorio',
+                merit_analysis='Fundamentacao',
+                precedent_adherence_analysis='Aderencia',
+                ruling=['Dispositivo'],
             )
         )
 

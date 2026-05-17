@@ -51,13 +51,13 @@ class IntakeSeeder:
             analysis_id=analysis.id.value,
             uploaded_at=datetime.now(UTC).isoformat(),
             file_path=f'intake/analises/{analysis.id.value}/petitions/Ação Cobrança Lei 12855 Tema Repetitivo 974 SIRDR 3 STJ.pdf',
-            name='peticao-inicial.pdf',
+            name='petição-inicial.pdf',
         )
         self._petitions_repository.add(petition)
 
         petition_summary = PetitionSummary.create(
             CaseSummaryDto(
-                case_summary='Resumo de seed da peticao inicial',
+                case_summary='Resumo de seed da petição inicial',
                 legal_issue='Controvérsia sobre cobrança em contrato de prestação de serviço',
                 central_question='Há inadimplemento contratual apto a justificar a cobrança requerida?',
                 relevant_laws=[

@@ -9,16 +9,16 @@ from animus.core.storage.interfaces.file_storage_provider import FileStorageProv
 from animus.pipes.intake_pipe import IntakePipe
 from animus.pipes.providers_pipe import ProvidersPipe
 from animus.rest.controllers.storage.generate_petition_upload_url_controller import (
-    GeneratePetitionUploadUrlController,
+    GenerateAnalysisDocumentUploadUrlController,
 )
 
 
-class TestGeneratePetitionUploadUrlController:
+class TestGenerateAnalysisDocumentUploadUrlController:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
         self.app = FastAPI()
         self.router = APIRouter()
-        GeneratePetitionUploadUrlController.handle(self.router)
+        GenerateAnalysisDocumentUploadUrlController.handle(self.router)
         self.app.include_router(self.router, prefix='/storage')
 
         self.client = TestClient(self.app)

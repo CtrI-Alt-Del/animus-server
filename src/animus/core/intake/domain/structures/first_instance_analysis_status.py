@@ -16,6 +16,7 @@ class FirstInstanceAnalysisStatusValue(StrEnum):
     ANALYZING_PRECEDENTS_SIMILARITY = 'ANALYZING_PRECEDENTS_SIMILARITY'
     ANALYZING_PRECEDENTS_APPLICABILITY = 'ANALYZING_PRECEDENTS_APPLICABILITY'
     GENERATING_SYNTHESIS = 'GENERATING_SYNTHESIS'
+    PRECEDENTS_SEARCHED = 'PRECEDENTS_SEARCHED'
     DONE = 'DONE'
     FAILED = 'FAILED'
 
@@ -47,6 +48,10 @@ class FirstInstanceAnalysisStatus(Structure):
     @classmethod
     def create_as_case_analyzed(cls) -> FirstInstanceAnalysisStatus:
         return cls(FirstInstanceAnalysisStatusValue.CASE_ANALYZED)
+
+    @classmethod
+    def create_as_precedents_searched(cls) -> FirstInstanceAnalysisStatus:
+        return cls(FirstInstanceAnalysisStatusValue.PRECEDENTS_SEARCHED)
 
     @classmethod
     def create_as_done(cls) -> FirstInstanceAnalysisStatus:

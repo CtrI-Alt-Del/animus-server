@@ -53,7 +53,7 @@ def _create_analysis_with_document_summary(
     session.add(
         CaseSummaryModel(
             analysis_id=analysis_id,
-            case_summary='Resumo objetivo da peticao inicial',
+            case_summary='Resumo objetivo da petição inicial',
             legal_issue='Controversia sobre inadimplemento contratual',
             central_question='Ha inadimplemento apto a justificar condenacao?',
             relevant_laws=['Codigo Civil, Art. 389'],
@@ -96,7 +96,7 @@ class TestListAnalysisPetitionsController:
             'name': 'Documento inicial.pdf',
         }
         assert response_payload['items'][0]['case_summary'] == {
-            'case_summary': 'Resumo objetivo da peticao inicial',
+            'case_summary': 'Resumo objetivo da petição inicial',
             'legal_issue': 'Controversia sobre inadimplemento contratual',
             'central_question': 'Ha inadimplemento apto a justificar condenacao?',
             'relevant_laws': ['Codigo Civil, Art. 389'],

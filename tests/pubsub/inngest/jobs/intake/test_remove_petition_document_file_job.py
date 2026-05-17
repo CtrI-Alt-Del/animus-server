@@ -19,7 +19,7 @@ class TestRemovePetitionDocumentFileJob:
         monkeypatch: MonkeyPatch,
         inngest_runtime: Any,
     ) -> None:
-        expected_path = 'petitions/analysis-123/original-document.pdf'
+        expected_path = 'petitions/analyses-123/original-document.pdf'
         captured_calls: list[list[str]] = []
 
         def _remove_files(

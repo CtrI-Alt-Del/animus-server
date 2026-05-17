@@ -66,12 +66,22 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
         assert persisted_judgment_draft == SecondInstanceJudgmentDraft.create(
             SecondInstanceJudgmentDraftDto(
                 analysis_id=analysis_id,
-                content=dto.content,
+                report=dto.report,
+                merit_analysis=dto.merit_analysis,
+                precedent_adherence_analysis=dto.precedent_adherence_analysis,
+                ruling=dto.ruling,
+                preliminary_issues=dto.preliminary_issues,
+                no_applicable_precedent_notice=dto.no_applicable_precedent_notice,
             )
         )
         assert result == SecondInstanceJudgmentDraftDto(
             analysis_id=analysis_id,
-            content=dto.content,
+            report=dto.report,
+            merit_analysis=dto.merit_analysis,
+            precedent_adherence_analysis=dto.precedent_adherence_analysis,
+            ruling=dto.ruling,
+            preliminary_issues=dto.preliminary_issues,
+            no_applicable_precedent_notice=dto.no_applicable_precedent_notice,
         )
         assert analysis.status == SecondInstanceAnalysisStatus.create_as_done()
 
@@ -154,5 +164,10 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
     def _create_judgment_draft_dto(analysis_id: str) -> SecondInstanceJudgmentDraftDto:
         return SecondInstanceJudgmentDraftDto(
             analysis_id=analysis_id,
-            content='RELATORIO\n\nFUNDAMENTACAO\n\nDISPOSITIVO',
+            report='Relatorio',
+            merit_analysis='Fundamentacao',
+            precedent_adherence_analysis='Aderencia',
+            ruling=['Dispositivo 1', 'Dispositivo 2'],
+            preliminary_issues='Preliminar',
+            no_applicable_precedent_notice='Aviso',
         )

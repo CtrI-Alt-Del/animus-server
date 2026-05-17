@@ -33,7 +33,7 @@ class TestGetAnalysisPetitionUseCase:
             document=AnalysisDocumentDto(
                 analysis_id=analysis_id,
                 uploaded_at='2026-03-27T10:30:00+00:00',
-                file_path='petitions/analysis-petition.pdf',
+                file_path='petitions/analyses-petition.pdf',
                 name='analysis-petition.pdf',
             ),
         )

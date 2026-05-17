@@ -43,4 +43,19 @@ class SqlalchemySecondInstanceJudgmentDraftsRepository(
             self.add(judgment_draft)
             return
 
-        model.content = judgment_draft.content.value
+        model.report = judgment_draft.report.value
+        model.merit_analysis = judgment_draft.merit_analysis.value
+        model.precedent_adherence_analysis = (
+            judgment_draft.precedent_adherence_analysis.value
+        )
+        model.ruling = [item.value for item in judgment_draft.ruling]
+        model.preliminary_issues = (
+            judgment_draft.preliminary_issues.value
+            if judgment_draft.preliminary_issues is not None
+            else None
+        )
+        model.no_applicable_precedent_notice = (
+            judgment_draft.no_applicable_precedent_notice.value
+            if judgment_draft.no_applicable_precedent_notice is not None
+            else None
+        )
