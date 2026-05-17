@@ -92,8 +92,8 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 GET {{url}}/analyses/unfoldered?limit=10&search=&is_archived=false
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Criar/atualizar documento principal da analise (CreateAnalysisDocumentController)
-POST {{url}}/analysis/{{analysis_id}}/document
+### Criar/atualizar documento da analise (CreateAnalysisDocumentController)
+POST {{url}}/analyses/{{analysis_id}}/documents
 Authorization: Bearer {{ACCESS_TOKEN}}
 Content-Type: application/json
 
@@ -104,7 +104,7 @@ Content-Type: application/json
 }
 
 ### Obter documento principal da analise (GetAnalysisDocumentController)
-GET {{url}}/analysis/{{analysis_id}}/document
+GET {{url}}/analyses/{{analysis_id}}/document
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Listar precedentes da analise (ListAnalysisPrecedentsController)
@@ -112,11 +112,11 @@ GET {{url}}/analyses/{{analysis_id}}/precedents
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar resumo de caso jurídico de primeira instância (TriggerFirstInstanceCaseSummarizationController)
-POST {{url}}/analysis/{{analysis_id}}/case-summaries
+POST {{url}}/analyses/{{analysis_id}}/case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar resumo de caso jurídico de segunda instância (SecondInstanceCaseSummarizationController)
-POST {{url}}/analysis/{{analysis_id}}/petition-extraction
+POST {{url}}/analyses/{{analysis_id}}/petition-extraction
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar geração/regeneração de minuta de julgamento de 2a instancia (TriggerSecondInstanceJudgmentDraftGenerationController)
@@ -124,7 +124,7 @@ POST {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Obter resumo de caso da analise (GetCaseSummaryController)
-GET {{url}}/analysis/{{analysis_id}}/case-summaries
+GET {{url}}/analyses/{{analysis_id}}/case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Escolher precedente da analise (ChooseAnalysisPrecedentController)

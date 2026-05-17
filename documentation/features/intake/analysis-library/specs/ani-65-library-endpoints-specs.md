@@ -85,7 +85,7 @@ Entregar os 5 endpoints REST do modulo `library` para gerenciamento de pastas em
 
 ## Camada Intake relacionada
 
-- **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) - entidade ja integrada a `folder_id`, o que confirma o vinculo funcional entre analise e pasta.
+- **`Analysis`** (`src/animus/core/intake/domain/entities/analyses.py`) - entidade ja integrada a `folder_id`, o que confirma o vinculo funcional entre analise e pasta.
 - **`CreateAnalysisUseCase`** (`src/animus/core/intake/use_cases/create_analysis_use_case.py`) - referencia de caso de uso que ja aceita `folder_id` opcional na criacao de analise.
 - **`AnalysisModel`** (`src/animus/database/sqlalchemy/models/intake/analysis_model.py`) - model SQLAlchemy com coluna `folder_id`, reutilizada para calcular `analysis_count`.
 - **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) - referencia de repository paginado com `CursorPaginationResponse`.

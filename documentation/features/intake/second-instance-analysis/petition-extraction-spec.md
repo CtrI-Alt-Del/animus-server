@@ -18,7 +18,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - Criar port e repositório SQLAlchemy para cache de extração por `analysis_id`.
 - Criar `SecondInstanceCaseSummarizationTriggeredEvent` para acionar o job assíncrono.
 - Alterar `RequestCaseSummaryUseCase` para publicar `SecondInstanceCaseSummarizationTriggeredEvent` quando a análise for `SECOND_INSTANCE`.
-- Reutilizar o endpoint existente `POST /intake/analysis/{analysis_id}/case-summaries` como gatilho HTTP do processamento.
+- Reutilizar o endpoint existente `POST /intake/analyses/{analysis_id}/case-summaries` como gatilho HTTP do processamento.
 - Estender `PdfProvider` com contagem de páginas e extração de intervalo de páginas.
 - Criar `ExtractPetitionWorkflow` e implementação `AgnoExtractPetitionWorkflow` para identificar páginas da petição inicial.
 - Criar `AgnoSummarizeSecondInstanceCaseWorkflow` para resumir a petição extraída com prompt orientado a recurso de segunda instância.
@@ -55,7 +55,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **Segurança:** o job deve processar somente documentos vinculados à `analysis_id` persistida; a autorização do usuário permanece no endpoint existente via `IntakePipe.verify_analysis_by_account_from_request(...)`.
 - **Idempotência:** reexecuções do job devem reutilizar `ExtractedPetition` quando existir e substituir `CaseSummary` existente via fluxo já suportado por `CreateCaseSummaryUseCase`.
 - **Resiliência:** exceções na extração, leitura de PDF, sumarização ou persistência devem resultar em status `FAILED` na analysis, exceto quando a petição inicial não for encontrada, caso em que o status deve ser `PETITION_NOT_FOUND`.
-- **Compatibilidade retroativa:** o endpoint `POST /intake/analysis/{analysis_id}/case-summaries` deve manter o mesmo contrato HTTP e continuar publicando `CaseSummaryRequestedEvent` para `CASE_ASSESSMENT` e `FIRST_INSTANCE`.
+- **Compatibilidade retroativa:** o endpoint `POST /intake/analyses/{analysis_id}/case-summaries` deve manter o mesmo contrato HTTP e continuar publicando `CaseSummaryRequestedEvent` para `CASE_ASSESSMENT` e `FIRST_INSTANCE`.
 - **Compatibilidade de fluxo:** a diferenciação entre jobs deve acontecer no `RequestCaseSummaryUseCase`, com branching por `AnalysisType` e publicação de eventos distintos, sem criar novo endpoint.
 - **Compatibilidade de dados:** a nova tabela `extracted_petitions` deve usar `analysis_id` como chave primária e `ON DELETE CASCADE` para acompanhar o ciclo de vida de `analyses`.
 
@@ -63,7 +63,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 
 ## Core
 
-- **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) - entidade que normaliza `AnalysisType` e status por tipo de análise.
+- **`Analysis`** (`src/animus/core/intake/domain/entities/analyses.py`) - entidade que normaliza `AnalysisType` e status por tipo de análise.
 - **`AnalysisType`** (`src/animus/core/intake/domain/entities/analysis_type.py`) - enum com `CASE_ASSESSMENT`, `FIRST_INSTANCE` e `SECOND_INSTANCE`; expõe `uses_case_assessment_or_first_instance_flow()`.
 - **`SecondInstanceAnalysisStatus`** (`src/animus/core/intake/domain/entities/second_instance_analysis_status.py`) - status de segunda instância; já contém `EXTRACTING_PETITION`, `ANALYZING_CASE`, `CASE_ANALYZED`, `PETITION_NOT_FOUND` e `FAILED`.
 - **`AnalysisDocument`** (`src/animus/core/intake/domain/structures/analysis_document.py`) - structure do documento principal da análise.
@@ -102,7 +102,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 
 ## REST
 
-- **`RequestCaseSummaryController`** (`src/animus/rest/controllers/intake/request_case_summary_controller.py`) - expõe `POST /analysis/{analysis_id}/case-summaries` e delega para `RequestCaseSummaryUseCase`.
+- **`RequestCaseSummaryController`** (`src/animus/rest/controllers/intake/request_case_summary_controller.py`) - expõe `POST /analyses/{analysis_id}/case-summaries` e delega para `RequestCaseSummaryUseCase`.
 - **`CreateAnalysisDocumentController`** (`src/animus/rest/controllers/intake/create_analysis_document_controller.py`) - persiste metadados do documento principal; não deve ser alterado para esta spec.
 
 ## PubSub
@@ -326,12 +326,12 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **Motivo da escolha:** a codebase já possui `EXTRACTING_PETITION` no enum de segunda instância e esse nome descreve melhor a etapa específica do job.
 - **Impactos / trade-offs:** evita mudança de contrato de status para o app; diverge do rascunho técnico do Jira e precisa ficar registrado para revisão.
 
-- **Decisão:** usar o endpoint existente `POST /intake/analysis/{analysis_id}/case-summaries` como gatilho.
+- **Decisão:** usar o endpoint existente `POST /intake/analyses/{analysis_id}/case-summaries` como gatilho.
 - **Alternativas consideradas:** publicar `SecondInstanceCaseSummarizationTriggeredEvent` diretamente em `CreateAnalysisDocumentUseCase` após upload.
 - **Motivo da escolha:** preserva o fluxo atual da API, no qual upload de metadados e solicitação de processamento são ações separadas.
 - **Impactos / trade-offs:** a extração não inicia automaticamente apenas com `POST /document`; o app precisa continuar chamando o endpoint de request de resumo.
 
-- **Decisão:** diferenciar o job acionado no `POST /intake/analysis/{analysis_id}/case-summaries` por `AnalysisType`, dentro de `RequestCaseSummaryUseCase`.
+- **Decisão:** diferenciar o job acionado no `POST /intake/analyses/{analysis_id}/case-summaries` por `AnalysisType`, dentro de `RequestCaseSummaryUseCase`.
 - **Alternativas consideradas:** criar endpoint dedicado para segunda instância; publicar sempre o mesmo evento e decidir o fluxo dentro de um único job.
 - **Motivo da escolha:** mantém a superfície HTTP estável e usa o tipo de análise, que já é informação de domínio persistida, para escolher o evento correto.
 - **Impactos / trade-offs:** o branching fica centralizado no `UseCase`; em contrapartida, a observabilidade precisa considerar dois eventos possíveis partindo do mesmo endpoint.
@@ -415,7 +415,7 @@ SummarizeSecondInstanceCaseJob exception
 ```
 
 ```text
-SummarizeSecondInstanceCaseJob sem limites de peticao
+SummarizeSecondInstanceCaseJob sem limites de petição
   -> mark_petition_as_not_found
   -> UpdateAnalysisStatusUseCase.execute(analysis_id, 'PETITION_NOT_FOUND')
   -> session.commit()

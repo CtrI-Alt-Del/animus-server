@@ -68,7 +68,7 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
 
 ## Core
 
-- **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) — entidade que normaliza `AnalysisType` e valida status por tipo de análise.
+- **`Analysis`** (`src/animus/core/intake/domain/entities/analyses.py`) — entidade que normaliza `AnalysisType` e valida status por tipo de análise.
 - **`AnalysisType`** (`src/animus/core/intake/domain/entities/analysis_type.py`) — enum que diferencia `CASE_ASSESSMENT`, `FIRST_INSTANCE` e `SECOND_INSTANCE`.
 - **`SecondInstanceAnalysisStatus`** (`src/animus/core/intake/domain/entities/second_instance_analysis_status.py`) — já possui `GENERATING_JUDGMENT_DRAFT`, `DONE` e `FAILED`.
 - **`CaseSummary`** (`src/animus/core/intake/domain/structures/case_summary.py`) — structure do resumo que alimenta o prompt da minuta.

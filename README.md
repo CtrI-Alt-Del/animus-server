@@ -323,7 +323,7 @@ southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
 Com base na documentacao funcional, os modulos centrais do produto sao:
 
 - **Auth:** identidade do usuario, login com email/senha ou Google, perfil e recuperacao de senha.
-- **Intake:** recebimento da peticao inicial, extracao de informacoes e busca de precedentes juridicos relevantes.
+- **Intake:** recebimento da petição inicial, extracao de informacoes e busca de precedentes juridicos relevantes.
 - **Storage:** historico, organizacao em pastas, nomeacao e exportacao das analises.
 - **Notification:** comunicacao assincrona quando uma analise e concluida ou um relatorio e gerado.
 

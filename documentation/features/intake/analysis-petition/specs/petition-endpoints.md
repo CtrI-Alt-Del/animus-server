@@ -1,5 +1,5 @@
 ---
-title: Endpoints de peticoes e resumo da peticao
+title: Endpoints de peticoes e resumo da petição
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/CID5
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-45
 status: closed
@@ -16,7 +16,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 ## 2.1 In-scope
 
-- Criar o fluxo HTTP de cadastro de peticao em `POST /intake/petitions` com retorno de `PetitionDto`.
+- Criar o fluxo HTTP de cadastro de petição em `POST /intake/petitions` com retorno de `PetitionDto`.
 - Criar o fluxo HTTP de resumo em `POST /intake/petitions/{petition_id}/summary` com retorno de `PetitionSummaryDto`.
 - Criar os `use_cases`, `ports`, `repositories`, `models`, `mappers`, `pipes`, `router` e providers diretamente necessarios para o fluxo de peticoes.
 - Estender `storage` para baixar o arquivo e extrair texto por tipo de documento (`PDF` e `DOCX`).
@@ -27,7 +27,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 - O endpoint de signed URL de upload (`ANI-44`) e toda a superficie HTTP de `storage/upload`.
 - OCR, leitura de imagens, suporte a documentos escaneados sem camada de texto e qualquer processamento multimodal.
-- Busca de precedentes, embeddings, RAG e qualquer comportamento de `RF 03` alem da producao do resumo da peticao.
+- Busca de precedentes, embeddings, RAG e qualquer comportamento de `RF 03` alem da producao do resumo da petição.
 - Edicao manual do resumo, versionamento de resumos ou historico de reprocessamentos bem-sucedidos.
 - Qualquer definicao completa de CRUD/listagem de `Analysis` ou de `Folder` alem do necessario para ownership check.
 
@@ -37,12 +37,12 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 ## 3.1 Funcionais
 
-- `POST /intake/petitions` deve receber `analysis_id`, `uploaded_at` e `document { file_path, name }`, persistir a peticao e retornar `201` com `PetitionDto` contendo o `id` gerado.
-- `POST /intake/petitions` deve validar que a `Analysis` informada pertence ao usuario autenticado antes de persistir a peticao.
-- `POST /intake/petitions/{petition_id}/summary` deve validar ownership da peticao a partir da `Analysis` relacionada antes de acessar o documento no storage.
+- `POST /intake/petitions` deve receber `analysis_id`, `uploaded_at` e `document { file_path, name }`, persistir a petição e retornar `201` com `PetitionDto` contendo o `id` gerado.
+- `POST /intake/petitions` deve validar que a `Analysis` informada pertence ao usuario autenticado antes de persistir a petição.
+- `POST /intake/petitions/{petition_id}/summary` deve validar ownership da petição a partir da `Analysis` relacionada antes de acessar o documento no storage.
 - O resumo deve ser gerado a partir do conteudo textual do documento armazenado, com suporte a arquivos `PDF` e `DOCX`.
 - O `workflow` de AI deve retornar `PetitionSummaryDto { case_summary, legal_issue, central_question, relevant_laws, key_facts, search_terms }`, persistir o resumo associado a `petition_id` e atualizar a `Analysis` relacionada para status `PETITION_ANALYZED`.
-- O resumo deve refletir os elementos centrais da peticao descritos no PRD: fatos, fundamento juridico e pedido, sem impor campos fixos ao usuario da API.
+- O resumo deve refletir os elementos centrais da petição descritos no PRD: fatos, fundamento juridico e pedido, sem impor campos fixos ao usuario da API.
 - Falhas de leitura de arquivo corrompido ou ilegivel devem interromper o fluxo antes da chamada ao `workflow` de AI.
 - O fluxo de resumo deve permanecer manual e sincrono: a analise so acontece quando o endpoint de `summary` e chamado.
 
@@ -60,11 +60,11 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 ## Camada Core
 
-- **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) - entidade de dominio usada para ownership check; expoe `account_id`, `status`, `summary` e `folder_id`.
-- **`Petition`** (`src/animus/core/intake/domain/entities/petition.py`) - entidade de peticao ja pronta, com `analysis_id`, `uploaded_at` e `document`.
-- **`PetitionDocument`** (`src/animus/core/intake/domain/structures/petition_document.py`) - `Structure` do documento associado a peticao com `file_path` e `name`.
-- **`PetitionDto`** (`src/animus/core/intake/domain/entities/dtos/petition_dto.py`) - DTO de saida da peticao, com `id` opcional para suportar criacao.
-- **`PetitionSummary`** (`src/animus/core/intake/domain/structures/petition_summary.py`) - `Structure` do resumo da peticao ja existente, com `case_summary`, `legal_issue`, `central_question`, `relevant_laws`, `key_facts` e `search_terms`.
+- **`Analysis`** (`src/animus/core/intake/domain/entities/analyses.py`) - entidade de dominio usada para ownership check; expoe `account_id`, `status`, `summary` e `folder_id`.
+- **`Petition`** (`src/animus/core/intake/domain/entities/petition.py`) - entidade de petição ja pronta, com `analysis_id`, `uploaded_at` e `document`.
+- **`PetitionDocument`** (`src/animus/core/intake/domain/structures/petition_document.py`) - `Structure` do documento associado a petição com `file_path` e `name`.
+- **`PetitionDto`** (`src/animus/core/intake/domain/entities/dtos/petition_dto.py`) - DTO de saida da petição, com `id` opcional para suportar criacao.
+- **`PetitionSummary`** (`src/animus/core/intake/domain/structures/petition_summary.py`) - `Structure` do resumo da petição ja existente, com `case_summary`, `legal_issue`, `central_question`, `relevant_laws`, `key_facts` e `search_terms`.
 - **`PetitionSummaryDto`** (`src/animus/core/intake/domain/structures/dtos/petition_summary_dto.py`) - DTO do resumo ja existente.
 - **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) - port ja existente para persistencia de peticoes; hoje so expoe listagem por `analysis_id` e escrita.
 - **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) - port ja existente para consultas de `Analysis`; ainda sem adaptador concreto na branch atual.
@@ -116,7 +116,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 - **Localizacao:** `src/animus/core/intake/domain/errors/analysis_not_found_error.py` (**novo arquivo**)
 - **Classe base:** `NotFoundError`
-- **Motivo:** quando `analysis_id` nao existir durante o ownership check de criacao da peticao.
+- **Motivo:** quando `analysis_id` nao existir durante o ownership check de criacao da petição.
 
 - **Localizacao:** `src/animus/core/intake/domain/errors/petition_not_found_error.py` (**novo arquivo**)
 - **Classe base:** `NotFoundError`
@@ -124,7 +124,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 - **Localizacao:** `src/animus/core/intake/domain/errors/unsupported_petition_document_type_error.py` (**novo arquivo**)
 - **Classe base:** `ValidationError`
-- **Motivo:** quando o `file_path` da peticao nao terminar com `.pdf` ou `.docx`.
+- **Motivo:** quando o `file_path` da petição nao terminar com `.pdf` ou `.docx`.
 
 - **Localizacao:** `src/animus/core/intake/domain/errors/unreadable_petition_document_error.py` (**novo arquivo**)
 - **Classe base:** `ValidationError`
@@ -132,7 +132,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 - **Localizacao:** `src/animus/core/intake/domain/errors/petition_document_not_found_error.py` (**novo arquivo**)
 - **Classe base:** `NotFoundError`
-- **Motivo:** quando o arquivo referenciado pela peticao nao existir no storage.
+- **Motivo:** quando o arquivo referenciado pela petição nao existir no storage.
 
 - **Localizacao:** `src/animus/core/intake/domain/errors/__init__.py` (**novo arquivo**)
 - **Classe base:** nao aplicavel
@@ -142,9 +142,9 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 - **Localizacao:** `src/animus/core/intake/interfaces/petition_summaries_repository.py` (**novo arquivo**)
 - **Metodos:**
-  - `find_by_petition_id(petition_id: Id) -> PetitionSummary | None` - consulta o resumo atual associado a peticao.
-  - `add(petition_id: Id, petition_summary: PetitionSummary) -> None` - persiste um novo resumo da peticao.
-  - `replace(petition_id: Id, petition_summary: PetitionSummary) -> None` - substitui o resumo ja existente da peticao.
+  - `find_by_petition_id(petition_id: Id) -> PetitionSummary | None` - consulta o resumo atual associado a petição.
+  - `add(petition_id: Id, petition_summary: PetitionSummary) -> None` - persiste um novo resumo da petição.
+  - `replace(petition_id: Id, petition_summary: PetitionSummary) -> None` - substitui o resumo ja existente da petição.
 
 - **Localizacao:** `src/animus/core/storage/interfaces/docx_provider.py` (**novo arquivo**)
 - **Metodos:**
@@ -192,12 +192,12 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Localizacao:** `src/animus/database/sqlalchemy/mappers/intake/petition_mapper.py` (**novo arquivo**)
 - **Metodos:**
   - `to_entity(model: PetitionModel) -> Petition` - reconstrui a entidade de dominio a partir do model ORM.
-  - `to_model(entity: Petition) -> PetitionModel` - cria o model ORM da peticao a partir da entidade.
+  - `to_model(entity: Petition) -> PetitionModel` - cria o model ORM da petição a partir da entidade.
 
 - **Localizacao:** `src/animus/database/sqlalchemy/mappers/intake/petition_summary_mapper.py` (**novo arquivo**)
 - **Metodos:**
   - `to_entity(model: PetitionSummaryModel) -> PetitionSummary` - reconstrui a `Structure` de resumo a partir do model ORM.
-  - `to_model(petition_id: Id, petition_summary: PetitionSummary) -> PetitionSummaryModel` - cria o model ORM 1:1 do resumo associado a uma peticao.
+  - `to_model(petition_id: Id, petition_summary: PetitionSummary) -> PetitionSummaryModel` - cria o model ORM 1:1 do resumo associado a uma petição.
 
 - **Localizacao:** `src/animus/database/sqlalchemy/mappers/intake/__init__.py` (**novo arquivo**)
 - **Metodos:** nao aplicavel - exporta `PetitionMapper` e `PetitionSummaryMapper`.
@@ -208,9 +208,9 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Interface implementada:** `PetitionsRepository`
 - **Dependencias:** `Session` SQLAlchemy, `PetitionMapper`
 - **Metodos:**
-  - `find_by_id(petition_id: Id) -> Petition | None` - busca a peticao por `id` e retorna `None` quando ausente; a traducao para erro de dominio ocorre na camada de orquestracao (`pipes/use_cases`).
+  - `find_by_id(petition_id: Id) -> Petition | None` - busca a petição por `id` e retorna `None` quando ausente; a traducao para erro de dominio ocorre na camada de orquestracao (`pipes/use_cases`).
   - `find_all_by_analysis_id_ordered_by_uploaded_at(analysis_id: Id) -> ListResponse[Petition]` - lista peticoes da analise em ordem cronologica de upload.
-  - `add(petition: Petition) -> None` - persiste uma nova peticao.
+  - `add(petition: Petition) -> None` - persiste uma nova petição.
   - `add_many(petitions: list[Petition]) -> None` - persiste varias peticoes em lote.
 
 - **Localizacao:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petition_summaries_repository.py` (**novo arquivo**)
@@ -265,7 +265,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Localizacao:** `src/animus/pipes/intake_pipe.py` (**novo arquivo**)
 - **Metodo `Depends`:**
   - `verify_analysis_by_account(analysis_id: str, account_id: Id, analisyses_repository: AnalisysesRepository) -> Analysis` - valida que a analise existe e pertence ao usuario autenticado.
-  - `verify_petition_document_path_by_account(petition_id: str, account_id: Annotated[Id, Depends(AuthPipe.get_account_id)], petitions_repository: Annotated[PetitionsRepository, Depends(DatabasePipe.get_petitions_repository_from_request)], analisyses_repository: Annotated[AnalisysesRepository, Depends(DatabasePipe.get_analisyses_repository_from_request)]) -> Text` - valida ownership da peticao via analise relacionada e devolve `petition.document.file_path`.
+  - `verify_petition_document_path_by_account(petition_id: str, account_id: Annotated[Id, Depends(AuthPipe.get_account_id)], petitions_repository: Annotated[PetitionsRepository, Depends(DatabasePipe.get_petitions_repository_from_request)], analisyses_repository: Annotated[AnalisysesRepository, Depends(DatabasePipe.get_analisyses_repository_from_request)]) -> Text` - valida ownership da petição via analise relacionada e devolve `petition.document.file_path`.
 - **Sessao SQLAlchemy:** obtida indiretamente pelos repositories fornecidos por `DatabasePipe`.
 
 - **Localizacao:** `src/animus/pipes/storage_pipe.py` (**novo arquivo**)
@@ -332,7 +332,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 - **Arquivo:** `src/animus/core/intake/interfaces/petitions_repository.py`
 - **Mudanca:** adicionar `find_by_id(petition_id: Id) -> Petition | None` ao port existente, preservando os metodos de listagem e escrita ja publicados.
-- **Justificativa:** o fluxo de resumo precisa localizar uma peticao pelo `petition_id` de path antes de acessar o storage.
+- **Justificativa:** o fluxo de resumo precisa localizar uma petição pelo `petition_id` de path antes de acessar o storage.
 
 - **Arquivo:** `src/animus/core/intake/interfaces/analisyses_repository.py`
 - **Mudanca:** corrigir a semantica do parametro de `find_by_id(...)` para `analysis_id: Id` e padronizar retorno `Analysis | None` quando nao encontrada.
@@ -476,8 +476,8 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
   - **Impactos / trade-offs:** `PetitionSummaryDto` pode ser reutilizado diretamente como contrato estruturado do `workflow` e do provider de AI; o cuidado passa a ser apenas manter os exports e imports publicos do contexto consistentes.
 
 - **Decisao:** manter `PetitionsRepository.find_all_by_analysis_id_ordered_by_uploaded_at(...)` sem impor unicidade de `analysis_id` na tabela `petitions`.
-  - **Alternativas consideradas:** tornar `analysis_id` unico e bloquear historico; sobrescrever sempre a peticao anterior da mesma analise.
-  - **Motivo da escolha:** o port ja publicado no `core` assume potencial pluralidade de peticoes por analise, e o endpoint de resumo trabalha com `petition_id` explicito, nao com "peticao atual" implicita.
+  - **Alternativas consideradas:** tornar `analysis_id` unico e bloquear historico; sobrescrever sempre a petição anterior da mesma analise.
+  - **Motivo da escolha:** o port ja publicado no `core` assume potencial pluralidade de peticoes por analise, e o endpoint de resumo trabalha com `petition_id` explicito, nao com "petição atual" implicita.
   - **Impactos / trade-offs:** o backend preserva historico tecnico de uploads por analise, enquanto a regra de UI do PRD continua limitando um envio por interacao do usuario.
 
 ---

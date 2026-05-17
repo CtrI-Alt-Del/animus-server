@@ -1,6 +1,6 @@
 ---
 title: ANI-92 - Case summary, analysis document, reports e status tipado por tipo de analise no intake
-prd: documentation/features/intake/analysis-management/prd.md
+prd: documentation/features/intake/analyses-management/prd.md
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-92
 status: closed
 last_updated_at: 2026-05-16
@@ -53,10 +53,10 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - `Analysis.status` deve passar a ser serializado a partir de `CaseAssessmentAnalysisStatus | FirstInstanceAnalysisStatus | SecondInstanceAnalysisStatus`, sem wrapper `AnalysisStatus` como fonte canonica.
 - Os artefatos `PetitionDraft` e `SecondInstanceJudgmentDraft` devem existir como contratos de leitura/escrita por `analysis_id`, mesmo que seus pipelines de geracao sejam entregues depois.
 - Os fluxos centrados em `analysis` devem ser expostos por:
-- `POST /intake/analysis/{analysis_id}/document`
-- `GET /intake/analysis/{analysis_id}/document`
-- `POST /intake/analysis/{analysis_id}/case-summaries`
-- `GET /intake/analysis/{analysis_id}/case-summaries`
+- `POST /intake/analyses/{analysis_id}/document`
+- `GET /intake/analyses/{analysis_id}/document`
+- `POST /intake/analyses/{analysis_id}/case-summaries`
+- `GET /intake/analyses/{analysis_id}/case-summaries`
 - `GET /intake/analyses/{analysis_id}/case-assessment-report`
 - `GET /intake/analyses/{analysis_id}/first-instance-report`
 - `GET /intake/analyses/{analysis_id}/second-instance-report`
@@ -77,7 +77,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 ## Core
 
-- **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) - agregado principal da analise; hoje ja possui `type`, normalizacao de valores legados (`LAWYER` -> `CASE_ASSESSMENT`, `JUDGE` -> `SECOND_INSTANCE`) e serializacao direta de status por tipo.
+- **`Analysis`** (`src/animus/core/intake/domain/entities/analyses.py`) - agregado principal da analise; hoje ja possui `type`, normalizacao de valores legados (`LAWYER` -> `CASE_ASSESSMENT`, `JUDGE` -> `SECOND_INSTANCE`) e serializacao direta de status por tipo.
 - **`AnalysisStatus` e `AnalysisStatusValue`** (`src/animus/core/intake/domain/entities/analysis_status.py`) - contrato legado ainda existente para compatibilidade e testes, mas nao e mais a fonte canonica do dominio.
 - **`AnalysisDto`** (`src/animus/core/intake/domain/entities/dtos/analysis_dto.py`) - contrato publico de analise; ja possui `type`.
 - **`Petition`** (`src/animus/core/intake/domain/entities/petition.py`) - entidade atual do documento da analise; sera substituida por `AnalysisDocument`.
@@ -206,7 +206,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Localizacao:** `src/animus/core/intake/domain/structures/petition_draft.py` (**novo arquivo**)
 - **Tipo:** `@structure`
 - **Atributos:** `analysis_id: Id`, `content: Text`
-- **Metodos / factory:** `create(dto: PetitionDraftDto) -> PetitionDraft` - cria o rascunho da peticao; `dto -> PetitionDraftDto` - expõe o contrato serializavel.
+- **Metodos / factory:** `create(dto: PetitionDraftDto) -> PetitionDraft` - cria o rascunho da petição; `dto -> PetitionDraftDto` - expõe o contrato serializavel.
 
 - **Localizacao:** `src/animus/core/intake/domain/structures/dtos/petition_draft_dto.py` (**novo arquivo**)
 - **Tipo:** `@dto`
@@ -251,7 +251,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodos:** `generate(case_summary: CaseSummary) -> list[CaseSummaryEmbedding]` - gera embeddings do resumo do caso para a busca vetorial de precedentes.
 
 - **Localizacao:** `src/animus/core/intake/interfaces/petition_drafts_repository.py` (**novo arquivo**)
-- **Metodos:** `find_by_analysis_id(analysis_id: Id) -> PetitionDraft | None` - busca o rascunho de peticao da analise; `add(petition_draft: PetitionDraft) -> None` - persiste rascunho novo; `replace(petition_draft: PetitionDraft) -> None` - substitui rascunho existente.
+- **Metodos:** `find_by_analysis_id(analysis_id: Id) -> PetitionDraft | None` - busca o rascunho de petição da analise; `add(petition_draft: PetitionDraft) -> None` - persiste rascunho novo; `replace(petition_draft: PetitionDraft) -> None` - substitui rascunho existente.
 
 - **Localizacao:** `src/animus/core/intake/interfaces/judgment_drafts_repository.py` (**novo arquivo**)
 - **Metodos:** `find_by_analysis_id(analysis_id: Id) -> SecondInstanceJudgmentDraft | None` - busca o rascunho de sentenca da analise; `add(judgment_draft: SecondInstanceJudgmentDraft) -> None` - persiste rascunho novo; `replace(judgment_draft: SecondInstanceJudgmentDraft) -> None` - substitui rascunho existente.
@@ -327,7 +327,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodos:** `to_entity(model: CaseSummaryModel) -> CaseSummary` - traduz o resumo persistido para a estrutura de dominio; `to_model(analysis_id: Id, case_summary: CaseSummary) -> CaseSummaryModel` - traduz para persistencia.
 
 - **Localizacao:** `src/animus/database/sqlalchemy/mappers/intake/petition_draft_mapper.py` (**novo arquivo**)
-- **Metodos:** `to_entity(model: PetitionDraftModel) -> PetitionDraft` - traduz o model persistido para o rascunho de peticao; `to_model(petition_draft: PetitionDraft) -> PetitionDraftModel` - traduz para persistencia.
+- **Metodos:** `to_entity(model: PetitionDraftModel) -> PetitionDraft` - traduz o model persistido para o rascunho de petição; `to_model(petition_draft: PetitionDraft) -> PetitionDraftModel` - traduz para persistencia.
 
 - **Localizacao:** `src/animus/database/sqlalchemy/mappers/intake/judgment_draft_mapper.py` (**novo arquivo**)
 - **Metodos:** `to_entity(model: SecondInstanceJudgmentDraftModel) -> SecondInstanceJudgmentDraft` - traduz o model persistido para o rascunho de sentenca; `to_model(judgment_draft: SecondInstanceJudgmentDraft) -> SecondInstanceJudgmentDraftModel` - traduz para persistencia.
@@ -358,7 +358,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/rest/controllers/intake/create_analysis_document_controller.py` (**novo arquivo**)
 - **`*Body`:** `_Body(uploaded_at: str, file_path: str, name: str)`
-- **Metodo HTTP e path:** `POST /analysis/{analysis_id}/document`
+- **Metodo HTTP e path:** `POST /analyses/{analysis_id}/document`
 - **`status_code`:** `201`
 - **`response_model`:** `AnalysisDocumentDto`
 - **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalisysesRepository`; `AnalysisDocumentsRepository`; `Broker`
@@ -366,7 +366,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/rest/controllers/intake/get_analysis_document_controller.py` (**novo arquivo**)
 - **`*Body`:** nao aplicavel
-- **Metodo HTTP e path:** `GET /analysis/{analysis_id}/document`
+- **Metodo HTTP e path:** `GET /analyses/{analysis_id}/document`
 - **`status_code`:** `200`
 - **`response_model`:** `AnalysisDocumentDto`
 - **Dependencias injetadas via `Depends`:** `Analysis` por `IntakePipe.verify_analysis_by_account_from_request`; `AnalysisDocumentsRepository`
@@ -374,7 +374,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/rest/controllers/intake/request_case_summary_controller.py` (**novo arquivo**)
 - **`*Body`:** nao aplicavel
-- **Metodo HTTP e path:** `POST /analysis/{analysis_id}/case-summaries`
+- **Metodo HTTP e path:** `POST /analyses/{analysis_id}/case-summaries`
 - **`status_code`:** `202`
 - **`response_model`:** nao aplicavel
 - **Dependencias injetadas via `Depends`:** `Analysis` por `IntakePipe.verify_analysis_by_account_from_request`; `AnalysisDocumentsRepository`; `AnalisysesRepository`; `Broker`
@@ -382,7 +382,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/rest/controllers/intake/get_case_summary_controller.py` (**novo arquivo**)
 - **`*Body`:** nao aplicavel
-- **Metodo HTTP e path:** `GET /analysis/{analysis_id}/case-summaries`
+- **Metodo HTTP e path:** `GET /analyses/{analysis_id}/case-summaries`
 - **`status_code`:** `200`
 - **`response_model`:** `CaseSummaryDto`
 - **Dependencias injetadas via `Depends`:** `Analysis` por `IntakePipe.verify_analysis_by_account_from_request`; `CaseSummariesRepository`
@@ -445,7 +445,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 ## Core
 
-- **Arquivo:** `src/animus/core/intake/domain/entities/analysis.py`
+- **Arquivo:** `src/animus/core/intake/domain/entities/analyses.py`
 - **Mudanca:** adicionar `type: AnalysisType`; trocar `status: AnalysisStatus` por `status: CaseAssessmentAnalysisStatus | SecondInstanceAnalysisStatus`; fazer `create(...)` e `dto` serializarem `type` e status direto; atualizar `set_status(status: str) -> None` para validar contra o enum do tipo correto, com `FIRST_INSTANCE` reaproveitando temporariamente o contrato de `CASE_ASSESSMENT`.
 - **Justificativa:** o agregado `Analysis` passa a ser a fonte de verdade do fluxo por perfil.
 
@@ -679,15 +679,15 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Arquivo:** `src/animus/rest/controllers/intake/get_analysis_petition_controller.py`
 - **Motivo da remocao:** substituido por `GetAnalysisDocumentController`.
-- **Impacto esperado:** leitura do documento passa a usar `/analysis/{analysis_id}/document`.
+- **Impacto esperado:** leitura do documento passa a usar `/analyses/{analysis_id}/document`.
 
 - **Arquivo:** `src/animus/rest/controllers/intake/summarize_petition_controller.py`
 - **Motivo da remocao:** substituido por `RequestCaseSummaryController`.
-- **Impacto esperado:** request do resumo passa a usar `/analysis/{analysis_id}/case-summaries`.
+- **Impacto esperado:** request do resumo passa a usar `/analyses/{analysis_id}/case-summaries`.
 
 - **Arquivo:** `src/animus/rest/controllers/intake/get_petition_summary_controller.py`
 - **Motivo da remocao:** substituido por `GetCaseSummaryController`.
-- **Impacto esperado:** leitura do resumo passa a usar `/analysis/{analysis_id}/case-summaries`.
+- **Impacto esperado:** leitura do resumo passa a usar `/analyses/{analysis_id}/case-summaries`.
 
 - **Arquivo:** `src/animus/routers/intake/petitions_router.py`
 - **Motivo da remocao:** nao deve restar mais superficie HTTP de `petitions`.
@@ -752,7 +752,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Fluxo de dados:**
 
 ```text
-POST /intake/analysis/{analysis_id}/document
+POST /intake/analyses/{analysis_id}/document
   -> CreateAnalysisDocumentController
   -> CreateAnalysisDocumentUseCase.execute(...)
      -> AnalysisDocumentsRepository.find_by_analysis_id
@@ -761,7 +761,7 @@ POST /intake/analysis/{analysis_id}/document
      -> Analysis.set_status(DOCUMENT_UPLOADED)
      -> AnalisysesRepository.replace
 
-POST /intake/analysis/{analysis_id}/case-summaries
+POST /intake/analyses/{analysis_id}/case-summaries
   -> RequestCaseSummaryController
   -> RequestCaseSummaryUseCase.execute(analysis_id)
      -> AnalysisDocumentsRepository.find_by_analysis_id
@@ -780,7 +780,7 @@ Inngest -> SummarizeFirstInstanceCaseJob
      -> AnalisysesRepository.replace
   -> Broker.publish(CaseSummaryFinishedEvent)
 
-GET /intake/analysis/{analysis_id}/case-summaries
+GET /intake/analyses/{analysis_id}/case-summaries
   -> GetCaseSummaryController
   -> GetCaseSummaryUseCase
   -> CaseSummariesRepository.find_by_analysis_id
@@ -802,7 +802,7 @@ RequestCaseSummaryUseCase
 ```
 
 - **Referencias:**
-- `src/animus/core/intake/domain/entities/analysis.py` - agregado principal a ser tipado por perfil.
+- `src/animus/core/intake/domain/entities/analyses.py` - agregado principal a ser tipado por perfil.
 - `src/animus/core/intake/domain/entities/petition.py` - referencia direta do que deve virar `AnalysisDocument`.
 - `src/animus/core/intake/use_cases/create_petition_use_case.py` - referencia do fluxo atual de upsert do documento.
 - `src/animus/core/intake/use_cases/request_petition_summary_use_case.py` - referencia do fluxo atual de request do resumo, a ser centrado em `analysis_id`.
@@ -819,7 +819,7 @@ RequestCaseSummaryUseCase
 
 # 10. Pendencias / Duvidas
 
-- **Descricao da pendencia:** o PRD local esperado em `documentation/features/intake/analysis-management/prd.md` nao existe no repositorio.
+- **Descricao da pendencia:** o PRD local esperado em `documentation/features/intake/analyses-management/prd.md` nao existe no repositorio.
 - **Impacto na implementacao:** a frontmatter nao consegue apontar para um caminho local canonico e a rastreabilidade documental fica dependente de Confluence/Jira.
 - **Acao sugerida:** criar posteriormente um `prd.md` local consolidando `RF 07` e o recorte estrutural de `ANI-92`.
 
@@ -835,7 +835,7 @@ RequestCaseSummaryUseCase
 - **Impacto na implementacao:** a codebase fica com drift entre metadata ORM e migrations, impedindo considerar o schema plenamente consistente.
 - **Acao sugerida:** remover ou isolar os models legados de `petitions` e alinhar tipos/indices remanescentes ate o `alembic check` ficar limpo.
 
-- **Descricao da pendencia:** a spec assume que `POST /intake/analysis/{analysis_id}/document` continua com semantica de upsert, preservando o comportamento atual de substituicao do documento existente.
+- **Descricao da pendencia:** a spec assume que `POST /intake/analyses/{analysis_id}/document` continua com semantica de upsert, preservando o comportamento atual de substituicao do documento existente.
 - **Impacto na implementacao:** se o cliente desejar semantica estritamente idempotente, pode ser preferivel `PUT` em vez de `POST`.
 - **Acao sugerida:** alinhar com mobile antes do merge final do contrato HTTP; se nao houver preferencia, manter `POST` para minimizar churn na borda.
 
