@@ -60,7 +60,7 @@ class TestGetCaseSummaryController:
         )
 
         response = client.get(
-            f'/intake/analysis/{analysis_id}/case-summaries',
+            f'/intake/analyses/{analysis_id}/case-summaries',
             headers=build_auth_headers(account.id),
         )
 
@@ -91,7 +91,7 @@ class TestGetCaseSummaryController:
         account = create_account(is_verified=True, is_active=True)
 
         response = client.get(
-            '/intake/analysis/invalid-analysis-id/case-summaries',
+            '/intake/analyses/invalid-analysis-id/case-summaries',
             headers=build_auth_headers(account.id),
         )
 

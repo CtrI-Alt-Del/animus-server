@@ -3,17 +3,17 @@ import time
 from openai import OpenAI
 
 from animus.constants.env import Env
-from animus.core.intake.domain.structures.petition_summary import PetitionSummary
-from animus.core.intake.domain.structures.petition_summary_embedding import (
-    PetitionSummaryEmbedding,
+from animus.core.intake.domain.structures.case_summary import CaseSummary
+from animus.core.intake.domain.structures.case_summary_embedding import (
+    CaseSummaryEmbedding,
 )
-from animus.core.intake.interfaces.petition_embeddings_provider import (
-    PetitionSummaryEmbeddingsProvider,
+from animus.core.intake.interfaces.case_summary_embeddings_provider import (
+    CaseSummaryEmbeddingsProvider,
 )
 from animus.core.shared.domain.structures import Decimal, Text
 
 
-class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider):
+class OpenAICaseSummaryEmbeddingsProvider(CaseSummaryEmbeddingsProvider):
     _BATCH_SIZE = 10
     _BATCH_DELAY: float = 0.5
 
@@ -23,13 +23,13 @@ class OpenAIPetitionSummaryEmbeddingsProvider(PetitionSummaryEmbeddingsProvider)
 
     def generate(
         self,
-        petition_summary: PetitionSummary,
-    ) -> list[PetitionSummaryEmbedding]:
-        texts = _ChunkBuilder(petition_summary).build()
+        case_summary: CaseSummary,
+    ) -> list[CaseSummaryEmbedding]:
+        texts = _ChunkBuilder(case_summary).build()
         vectors = self._embed(texts)
 
         return [
-            PetitionSummaryEmbedding.create(
+            CaseSummaryEmbedding.create(
                 vector=[Decimal.create(float(v)) for v in vector],
                 chunk=Text.create(chunk),
             )
@@ -67,8 +67,8 @@ class _ChunkBuilder:
     é relevante aumentaria ruído na busca vetorial e poderia atrair falsos positivos.
     """
 
-    def __init__(self, petition_summary: PetitionSummary) -> None:
-        self._summary = petition_summary
+    def __init__(self, case_summary: CaseSummary) -> None:
+        self._summary = case_summary
         self._texts: list[str] = []
         self._seen: set[str] = set()
 

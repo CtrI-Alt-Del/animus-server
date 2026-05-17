@@ -29,7 +29,7 @@ class CreateAnalysisDocumentController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.post(
-            '/analysis/{analysis_id}/document',
+            '/analyses/{analysis_id}/documents',
             status_code=201,
             response_model=AnalysisDocumentDto,
         )

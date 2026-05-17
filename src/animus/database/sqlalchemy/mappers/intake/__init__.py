@@ -10,7 +10,7 @@ from .analysis_document_mapper import AnalysisDocumentMapper
 from .analysis_mapper import AnalysisMapper
 from .case_summary_mapper import CaseSummaryMapper
 from .extracted_petition_mapper import ExtractedPetitionMapper
-from .judgment_draft_mapper import JudgmentDraftMapper
+from .judgment_draft_mapper import SecondInstanceJudgmentDraftMapper
 from .petition_mapper import PetitionMapper
 from .petition_draft_mapper import PetitionDraftMapper
 from .petition_summary_mapper import PetitionSummaryMapper
@@ -25,7 +25,7 @@ __all__ = [
     'AnalysisMapper',
     'CaseSummaryMapper',
     'ExtractedPetitionMapper',
-    'JudgmentDraftMapper',
+    'SecondInstanceJudgmentDraftMapper',
     'PetitionMapper',
     'PetitionDraftMapper',
     'PetitionSummaryMapper',

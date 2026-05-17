@@ -3,12 +3,12 @@ from unittest.mock import create_autospec
 import pytest
 
 from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.errors import (
@@ -78,9 +78,9 @@ class TestCreateCaseSummaryUseCase:
                 id=analysis_id,
                 name='Analise',
                 account_id=Id.create().value,
-                status=CaseAssessmentAnalysisStatus.ANALYZING_CASE.value,
+                status=CaseAssessmentAnalysisStatus.create_as_analyzing_case().dto,
                 created_at='2026-03-31T10:30:00+00:00',
-                type=AnalysisType.CASE_ASSESSMENT,
+                type=AnalysisType.create_as_case_assessment().dto,
             )
         )
 
@@ -100,7 +100,8 @@ class TestCreateCaseSummaryUseCase:
 
         assert result == CaseSummary.create(dto).dto
         assert (
-            updated_analysis.status == CaseAssessmentAnalysisStatus.CASE_ANALYZED.value
+            updated_analysis.status
+            == CaseAssessmentAnalysisStatus.create_as_case_analyzed()
         )
 
     def test_should_replace_case_summary_and_update_second_instance_status(
@@ -121,9 +122,9 @@ class TestCreateCaseSummaryUseCase:
                 id=analysis_id,
                 name='Analise',
                 account_id=Id.create().value,
-                status=SecondInstanceAnalysisStatus.ANALYZING_CASE.value,
+                status=SecondInstanceAnalysisStatus.create_as_analyzing_case().dto,
                 created_at='2026-03-31T10:30:00+00:00',
-                type=AnalysisType.SECOND_INSTANCE,
+                type=AnalysisType.create_as_second_instance().dto,
             )
         )
 
@@ -143,7 +144,8 @@ class TestCreateCaseSummaryUseCase:
 
         assert result == CaseSummary.create(dto).dto
         assert (
-            updated_analysis.status == SecondInstanceAnalysisStatus.CASE_ANALYZED.value
+            updated_analysis.status
+            == SecondInstanceAnalysisStatus.create_as_case_analyzed()
         )
 
     def test_should_raise_analysis_document_not_found_error_when_document_does_not_exist(

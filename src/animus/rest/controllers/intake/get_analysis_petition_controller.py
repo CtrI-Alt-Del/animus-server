@@ -3,7 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.domain.entities.dtos.petition_dto import PetitionDto
+from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
+    AnalysisDocumentDto,
+)
 from animus.core.intake.interfaces import PetitionsRepository
 from animus.core.intake.use_cases import GetAnalysisPetitionUseCase
 from animus.pipes.database_pipe import DatabasePipe
@@ -16,7 +18,7 @@ class GetAnalysisPetitionController:
         @router.get(
             '/analyses/{analysis_id}/petition',
             status_code=200,
-            response_model=PetitionDto,
+            response_model=AnalysisDocumentDto,
         )
         def _(
             analysis: Annotated[
@@ -27,7 +29,7 @@ class GetAnalysisPetitionController:
                 PetitionsRepository,
                 Depends(DatabasePipe.get_petitions_repository_from_request),
             ],
-        ) -> PetitionDto:
+        ) -> AnalysisDocumentDto:
             use_case = GetAnalysisPetitionUseCase(
                 petitions_repository=petitions_repository,
             )

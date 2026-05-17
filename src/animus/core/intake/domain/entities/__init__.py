@@ -1,14 +1,15 @@
 from .analysis import Analysis
-from .analysis_type import AnalysisType
-from .analysis_status import AnalysisStatus, AnalysisStatusValue
-from .case_assessment_analysis_status import CaseAssessmentAnalysisStatus
-from .second_instance_analysis_status import SecondInstanceAnalysisStatus
 from .petition import Petition
 from .precedent import Precedent
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 
 __all__ = [
-    'AnalysisStatus',
-    'AnalysisStatusValue',
     'AnalysisType',
     'CaseAssessmentAnalysisStatus',
     'SecondInstanceAnalysisStatus',

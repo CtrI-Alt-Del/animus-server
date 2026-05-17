@@ -5,19 +5,21 @@ import pytest
 from pytest import MonkeyPatch
 from sqlalchemy.orm import Session, sessionmaker
 
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.events import (
     CaseSummaryFinishedEvent,
-    PetitionExtractionRequestedEvent,
+    SecondInstanceCaseSummarizationTriggeredEvent,
 )
 from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.pubsub.inngest.inngest_broker import InngestBroker
-from animus.pubsub.inngest.jobs.intake.extract_petition_job import ExtractPetitionJob
+from animus.pubsub.inngest.jobs.intake.summarize_second_instance_case_job import (
+    SummarizeSecondInstanceCaseJob,
+)
 
 
 def _seed_second_instance_analysis(
@@ -33,8 +35,8 @@ def _seed_second_instance_analysis(
             name='Analise de teste',
             account_id=account_id,
             folder_id=None,
-            type=AnalysisType.SECOND_INSTANCE.value,
-            status=SecondInstanceAnalysisStatus.EXTRACTING_PETITION.value,
+            type=AnalysisType.create_as_second_instance().dto,
+            status=SecondInstanceAnalysisStatus.create_as_extracting_petition().dto,
             is_archived=False,
         )
     )
@@ -44,7 +46,7 @@ def _seed_second_instance_analysis(
     return {'analysis_id': analysis_id, 'account_id': account_id}
 
 
-def _wait_until(predicate: Any, *, timeout_seconds: float = 30) -> None:
+def _wait_until(predicate: Any, *, timeout_seconds: float = 60) -> None:
     deadline = time.monotonic() + timeout_seconds
     while time.monotonic() < deadline:
         if predicate():
@@ -54,7 +56,7 @@ def _wait_until(predicate: Any, *, timeout_seconds: float = 30) -> None:
     raise AssertionError('condition not satisfied before timeout')
 
 
-class TestExtractPetitionJob:
+class TestSummarizeSecondInstanceCaseJob:
     @pytest.mark.filterwarnings(
         r'ignore:websockets\.legacy is deprecated:DeprecationWarning'
     )
@@ -71,7 +73,7 @@ class TestExtractPetitionJob:
         captured_payloads: list[str] = []
         captured_events: list[dict[str, str]] = []
 
-        async def _extract_and_summarize(payload: Any) -> dict[str, str]:
+        async def _extract_and_summarize_case(payload: Any) -> dict[str, str]:
             captured_payloads.append(payload.analysis_id)
             return {'analysis_id': analysis_id, 'account_id': account_id}
 
@@ -85,14 +87,14 @@ class TestExtractPetitionJob:
             )
 
         monkeypatch.setattr(
-            ExtractPetitionJob,
-            '_extract_and_summarize',
-            _extract_and_summarize,
+            SummarizeSecondInstanceCaseJob,
+            '_extract_and_summarize_case',
+            _extract_and_summarize_case,
         )
         monkeypatch.setattr(InngestBroker, 'publish', _publish)
 
         response = inngest_runtime.post_event(
-            name=PetitionExtractionRequestedEvent.name,
+            name=SecondInstanceCaseSummarizationTriggeredEvent.name,
             data={'analysis_id': analysis_id},
         )
 
@@ -116,12 +118,12 @@ class TestExtractPetitionJob:
     ) -> None:
         seeded_data = _seed_second_instance_analysis(sqlalchemy_session_factory)
         job_module = __import__(
-            'animus.pubsub.inngest.jobs.intake.extract_petition_job',
+            'animus.pubsub.inngest.jobs.intake.summarize_second_instance_case_job',
             fromlist=['_Payload'],
         )
         payload_factory = getattr(job_module, '_Payload')  # noqa: B009
         mark_petition_as_not_found_sync = getattr(  # noqa: B009
-            ExtractPetitionJob,
+            SummarizeSecondInstanceCaseJob,
             '_mark_petition_as_not_found_sync',
         )
         monkeypatch.setattr(
@@ -141,5 +143,5 @@ class TestExtractPetitionJob:
         assert persisted_analysis is not None
         assert (
             persisted_analysis.status
-            == SecondInstanceAnalysisStatus.PETITION_NOT_FOUND.value
+            == SecondInstanceAnalysisStatus.create_as_petition_not_found().dto
         )

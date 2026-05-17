@@ -27,6 +27,8 @@ class IntakePipe:
         ],
     ) -> Analysis:
         analysis = analisyses_repository.find_by_id(Id.create(analysis_id))
+        print(f'analisys_repository.find_by_id({analysis_id})')
+        print(analysis)
         if analysis is None:
             raise AnalysisNotFoundError
 
@@ -55,7 +57,7 @@ class IntakePipe:
             analisyses_repository=analisyses_repository,
         )
 
-        return petition.document.file_path
+        return petition.file_path
 
     @staticmethod
     def verify_petition_by_account(

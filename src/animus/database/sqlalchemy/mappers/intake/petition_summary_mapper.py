@@ -1,6 +1,6 @@
 from animus.core.intake.domain.structures.petition_summary import PetitionSummary
-from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
-    PetitionSummaryDto,
+from animus.core.intake.domain.structures.dtos.case_summary_dto import (
+    CaseSummaryDto,
 )
 from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.models.intake.petition_summary_model import (
@@ -12,7 +12,7 @@ class PetitionSummaryMapper:
     @staticmethod
     def to_entity(model: PetitionSummaryModel) -> PetitionSummary:
         return PetitionSummary.create(
-            PetitionSummaryDto(
+            CaseSummaryDto(
                 case_summary=model.case_summary,
                 legal_issue=model.legal_issue,
                 central_question=model.central_question,

@@ -2,6 +2,9 @@ from animus.core.intake.domain.entities.analysis import Analysis
 from animus.core.intake.domain.structures.analysis_precedent import AnalysisPrecedent
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.case_summary import CaseSummary
+from animus.core.intake.domain.structures.second_instance_judgment_draft import (
+    SecondInstanceJudgmentDraft,
+)
 from animus.core.intake.domain.structures.dtos.second_instance_analysis_report_dto import (
     SecondInstanceAnalysisReportDto,
 )
@@ -15,7 +18,7 @@ class SecondInstanceAnalysisReport(Structure):
     document: AnalysisDocument
     case_summary: CaseSummary
     precedents: list[AnalysisPrecedent]
-    chosen_precedent: AnalysisPrecedent | None
+    draft: SecondInstanceJudgmentDraft | None = None
 
     @classmethod
     def create(
@@ -26,9 +29,9 @@ class SecondInstanceAnalysisReport(Structure):
             document=AnalysisDocument.create(dto.document),
             case_summary=CaseSummary.create(dto.case_summary),
             precedents=[AnalysisPrecedent.create(item) for item in dto.precedents],
-            chosen_precedent=(
-                AnalysisPrecedent.create(dto.chosen_precedent)
-                if dto.chosen_precedent is not None
+            draft=(
+                SecondInstanceJudgmentDraft.create(dto.draft)
+                if dto.draft is not None
                 else None
             ),
         )
@@ -40,7 +43,5 @@ class SecondInstanceAnalysisReport(Structure):
             document=self.document.dto,
             case_summary=self.case_summary.dto,
             precedents=[item.dto for item in self.precedents],
-            chosen_precedent=(
-                self.chosen_precedent.dto if self.chosen_precedent is not None else None
-            ),
+            draft=self.draft.dto if self.draft is not None else None,
         )

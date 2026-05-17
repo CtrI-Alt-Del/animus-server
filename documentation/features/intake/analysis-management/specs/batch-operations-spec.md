@@ -1,6 +1,6 @@
 ---
 title: ANI-66 - Operações em lote para movimentação e arquivamento de análises
-prd: documentation/features/intake/analysis-management/prd.md
+prd: documentation/features/intake/analyses-management/prd.md
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-66
 status: open
 last_updated_at: 2026-04-29
@@ -57,7 +57,7 @@ Implementar suporte a operações em lote no `animus-server` para permitir que o
 
 ## Core
 
-- **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) — entidade que possui `folder_id` e `is_archived`.
+- **`Analysis`** (`src/animus/core/intake/domain/entities/analyses.py`) — entidade que possui `folder_id` e `is_archived`.
 - **`Folder`** (`src/animus/core/library/domain/entities/folder.py`) — entidade de pasta.
 - **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) — possui `find_by_id` e `replace`.
 - **`FoldersRepository`** (`src/animus/core/library/interfaces/folders_repository.py`) — possui `find_by_id`.
@@ -129,7 +129,7 @@ Implementar suporte a operações em lote no `animus-server` para permitir que o
 
 ## Camada Core (Entidades)
 
-- **Arquivo:** `src/animus/core/intake/domain/entities/analysis.py`
+- **Arquivo:** `src/animus/core/intake/domain/entities/analyses.py`
 - **Mudança:** Adicionar método `move_to_folder(self, folder_id: Id | None) -> None`.
 - **Justificativa:** Encapsular a alteração de estado da pasta na entidade de domínio.
 
@@ -203,7 +203,7 @@ PATCH /intake/analyses/folder { analysis_ids, folder_id }
 
 - **Referências:**
   - `src/animus/core/intake/use_cases/rename_analysis_use_case.py` (validação de ownership)
-  - `src/animus/core/intake/domain/entities/analysis.py` (propriedades da entidade)
+  - `src/animus/core/intake/domain/entities/analyses.py` (propriedades da entidade)
 
 ---
 

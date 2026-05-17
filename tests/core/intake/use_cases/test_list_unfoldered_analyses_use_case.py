@@ -2,10 +2,10 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
@@ -61,17 +61,17 @@ class TestListUnfolderedAnalysesUseCase:
         assert kwargs['is_archived'] == Logical.create_false()
         assert kwargs['only_unfoldered'] == Logical.create_true()
         assert kwargs['statuses'] == (
-            CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
-            CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED,
-            CaseAssessmentAnalysisStatus.CASE_ANALYZED,
-            CaseAssessmentAnalysisStatus.DONE,
-            CaseAssessmentAnalysisStatus.FAILED,
-            SecondInstanceAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
-            SecondInstanceAnalysisStatus.DOCUMENT_UPLOADED,
-            SecondInstanceAnalysisStatus.CASE_ANALYZED,
-            SecondInstanceAnalysisStatus.DONE,
-            SecondInstanceAnalysisStatus.PETITION_NOT_FOUND,
-            SecondInstanceAnalysisStatus.FAILED,
+            CaseAssessmentAnalysisStatus.create_as_waiting_document_upload().dto,
+            CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+            CaseAssessmentAnalysisStatus.create_as_case_analyzed().dto,
+            CaseAssessmentAnalysisStatus.create_as_done().dto,
+            CaseAssessmentAnalysisStatus.create_as_failed().dto,
+            SecondInstanceAnalysisStatus.create_as_waiting_document_upload().dto,
+            SecondInstanceAnalysisStatus.create_as_document_uploaded().dto,
+            SecondInstanceAnalysisStatus.create_as_case_analyzed().dto,
+            SecondInstanceAnalysisStatus.create_as_done().dto,
+            SecondInstanceAnalysisStatus.create_as_petition_not_found().dto,
+            SecondInstanceAnalysisStatus.create_as_failed().dto,
         )
 
         assert result.items == [analysis.dto]

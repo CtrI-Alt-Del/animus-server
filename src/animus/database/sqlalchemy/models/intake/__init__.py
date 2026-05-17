@@ -10,7 +10,7 @@ from .analysis_document_model import AnalysisDocumentModel
 from .analysis_model import AnalysisModel
 from .case_summary_model import CaseSummaryModel
 from .extracted_petition_model import ExtractedPetitionModel
-from .judgment_draft_model import JudgmentDraftModel
+from .judgment_draft_model import SecondInstanceJudgmentDraftModel
 from .petition_model import PetitionModel
 from .petition_draft_model import PetitionDraftModel
 from .petition_summary_model import PetitionSummaryModel
@@ -25,7 +25,7 @@ __all__ = [
     'AnalysisModel',
     'CaseSummaryModel',
     'ExtractedPetitionModel',
-    'JudgmentDraftModel',
+    'SecondInstanceJudgmentDraftModel',
     'PetitionModel',
     'PetitionDraftModel',
     'PetitionSummaryModel',

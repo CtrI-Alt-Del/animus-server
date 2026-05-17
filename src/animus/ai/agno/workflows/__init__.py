@@ -1,3 +1,9 @@
-from .intake import AgnoSummarizeCaseWorkflow
+from .intake import (
+    AgnoGenerateSecondInstanceJudgmentDraftWorkflow,
+    AgnoSummarizeFirstInstanceCaseWorkflow,
+)
 
-__all__ = ['AgnoSummarizeCaseWorkflow']
+__all__ = [
+    'AgnoGenerateSecondInstanceJudgmentDraftWorkflow',
+    'AgnoSummarizeFirstInstanceCaseWorkflow',
+]

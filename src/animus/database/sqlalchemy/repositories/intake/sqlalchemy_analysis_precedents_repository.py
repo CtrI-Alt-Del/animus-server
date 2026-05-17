@@ -83,14 +83,23 @@ class SqlalchemyAnalysisPrecedentsRepository(AnalysisPrecedentsRepository):
     ) -> None:
         self._sqlalchemy.execute(
             update(AnalysisPrecedentModel)
-            .where(AnalysisPrecedentModel.analysis_id == analysis_id.value)
-            .values(is_chosen=False)
+            .where(
+                AnalysisPrecedentModel.analysis_id == analysis_id.value,
+                AnalysisPrecedentModel.precedent_id == precedent_id.value,
+            )
+            .values(is_chosen=True)
         )
+
+    def unchoose_by_analysis_id_and_precedent_id(
+        self,
+        analysis_id: Id,
+        precedent_id: Id,
+    ) -> None:
         self._sqlalchemy.execute(
             update(AnalysisPrecedentModel)
             .where(
                 AnalysisPrecedentModel.analysis_id == analysis_id.value,
                 AnalysisPrecedentModel.precedent_id == precedent_id.value,
             )
-            .values(is_chosen=True)
+            .values(is_chosen=False)
         )

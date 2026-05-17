@@ -3,10 +3,13 @@ from sqlalchemy import cast, func, select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
@@ -69,6 +72,7 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
             status.value
             for status in (
                 *CaseAssessmentAnalysisStatus.get_processing_statuses(),
+                *FirstInstanceAnalysisStatus.get_processing_statuses(),
                 *SecondInstanceAnalysisStatus.get_processing_statuses(),
             )
         ]
@@ -130,7 +134,7 @@ class SqlalchemyAnalisysesRepository(AnalisysesRepository):
         )
         model.account_id = analysis.account_id.value
         model.type = analysis.type.value
-        model.status = analysis.status.value
+        model.status = analysis.status.dto
         model.is_archived = analysis.is_archived.value
 
         if analysis.precedents_search_filters is None:

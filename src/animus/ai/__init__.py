@@ -1,7 +1,7 @@
-from .agno import AgnoSummarizeCaseWorkflow, CaseSummaryOutput, IntakeSquad
+from .agno import AgnoSummarizeFirstInstanceCaseWorkflow, CaseSummaryOutput, IntakeSquad
 
 __all__ = [
     'IntakeSquad',
     'CaseSummaryOutput',
-    'AgnoSummarizeCaseWorkflow',
+    'AgnoSummarizeFirstInstanceCaseWorkflow',
 ]

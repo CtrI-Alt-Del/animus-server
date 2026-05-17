@@ -16,7 +16,7 @@ class GetAnalysisDocumentController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/analysis/{analysis_id}/document',
+            '/analyses/{analysis_id}/documents',
             status_code=200,
             response_model=AnalysisDocumentDto,
         )

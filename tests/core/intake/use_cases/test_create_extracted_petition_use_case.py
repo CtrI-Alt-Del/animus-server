@@ -76,7 +76,7 @@ class TestCreateExtractedPetitionUseCase:
     ) -> None:
         with pytest.raises(
             ValidationError,
-            match='Primeira pagina da peticao deve ser maior ou igual a 1',
+            match='Primeira pagina da petição deve ser maior ou igual a 1',
         ):
             self.use_case.execute(
                 analysis_id=Id.create().value,

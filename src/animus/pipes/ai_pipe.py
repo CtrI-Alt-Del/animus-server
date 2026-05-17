@@ -12,11 +12,14 @@ from animus.core.intake.interfaces.analisyses_repository import AnalisysesReposi
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
+from animus.core.intake.interfaces.generate_judgment_draft_workflow import (
+    GenerateSecondInstanceJudgmentDraftWorkflow,
+)
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
 )
 from animus.core.intake.interfaces.summarize_case_workflow import (
-    SummarizeCaseWorkflow,
+    SummarizeFirstInstanceCaseWorkflow,
 )
 from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
     SynthesizeAnalysisPrecedentsWorkflow,
@@ -39,12 +42,12 @@ class AiPipe:
             AnalisysesRepository,
             Depends(DatabasePipe.get_analisyses_repository_from_request),
         ],
-    ) -> SummarizeCaseWorkflow:
-        from animus.ai.agno.workflows.intake.agno_summarize_case_workflow import (
-            AgnoSummarizeCaseWorkflow,
+    ) -> SummarizeFirstInstanceCaseWorkflow:
+        from animus.ai.agno.workflows.intake.agno_summarize_first_instance_case_workflow import (
+            AgnoSummarizeFirstInstanceCaseWorkflow,
         )
 
-        return AgnoSummarizeCaseWorkflow(
+        return AgnoSummarizeFirstInstanceCaseWorkflow(
             case_summaries_repository=case_summaries_repository,
             analysis_documents_repository=analysis_documents_repository,
             analisyses_repository=analisyses_repository,
@@ -65,3 +68,13 @@ class AiPipe:
             analysis_precedents_repository=analysis_precedents_repository,
             analisyses_repository=analisyses_repository,
         )
+
+    @staticmethod
+    def get_generate_judgment_draft_workflow() -> (
+        GenerateSecondInstanceJudgmentDraftWorkflow
+    ):
+        from animus.ai.agno.workflows.intake.agno_generate_second_instance_judgment_draft_workflow import (
+            AgnoGenerateSecondInstanceJudgmentDraftWorkflow,
+        )
+
+        return AgnoGenerateSecondInstanceJudgmentDraftWorkflow()

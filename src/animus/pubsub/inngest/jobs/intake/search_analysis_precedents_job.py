@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 from inngest import Context, Inngest, TriggerEvent
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.events import (
     PrecedentsSearchFinishedEvent,
     AnalysisPrecedentsSearchRequestedEvent,
@@ -191,7 +190,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
             precedents_repository = SqlalchemyPrecedentsRepository(session)
             UpdateAnalysisStatusUseCase(analisyses_repository).execute(
                 analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
+                status='SEARCHING_PRECEDENTS',
             )
             session.commit()
 
@@ -251,7 +250,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 SqlalchemyAnalisysesRepository(session)
             ).execute(
                 analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.ANALYZING_PRECEDENTS_SIMILARITY.value,
+                status='ANALYZING_PRECEDENTS_SIMILARITY',
             )
             session.commit()
 
@@ -285,7 +284,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
 
             UpdateAnalysisStatusUseCase(analisyses_repository).execute(
                 analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.GENERATING_SYNTHESIS.value,
+                status='GENERATING_SYNTHESIS',
             )
             session.commit()
 
@@ -323,7 +322,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 SqlalchemyAnalisysesRepository(session)
             ).execute(
                 analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.FAILED.value,
+                status='FAILED',
             )
             session.commit()
 

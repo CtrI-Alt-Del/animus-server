@@ -3,10 +3,6 @@ from unittest.mock import create_autospec
 import pytest
 
 from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
-    CaseAssessmentAnalysisStatus,
-)
 from animus.core.intake.domain.entities.dtos import AnalysisDto, PrecedentDto
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
@@ -15,6 +11,10 @@ from animus.core.intake.domain.errors.precedent_not_found_error import (
     PrecedentNotFoundError,
 )
 from animus.core.intake.domain.structures import AnalysisPrecedent
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
 from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentDto,
     PrecedentIdentifierDto,
@@ -44,7 +44,7 @@ class TestChooseAnalysisPrecedentUseCase:
             analisyses_repository=self.analisyses_repository_mock,
         )
 
-    def test_should_choose_precedent_and_update_analysis_status_when_identifier_exists(
+    def test_should_choose_precedent_without_unchoosing_others_when_identifier_exists(
         self,
     ) -> None:
         analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
@@ -76,8 +76,8 @@ class TestChooseAnalysisPrecedentUseCase:
                 name='Analise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
-                type=AnalysisType.FIRST_INSTANCE,
-                status=CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value,
+                type=AnalysisType.create_as_first_instance().dto,
+                status=CaseAssessmentAnalysisStatus.create_as_done().dto,
                 is_archived=False,
                 created_at='2026-03-31T10:30:00+00:00',
             )
@@ -103,13 +103,8 @@ class TestChooseAnalysisPrecedentUseCase:
         self.analisyses_repository_mock.find_by_id.assert_called_once_with(
             Id.create(analysis_id)
         )
-        self.analisyses_repository_mock.replace.assert_called_once()
-        updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
-        assert (
-            updated_analysis.status
-            == CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value
-        )
-        assert result.value == updated_analysis.status
+        self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
+        assert result.value == analysis.status.dto
 
     def test_should_raise_precedent_not_found_error_when_identifier_does_not_exist(
         self,

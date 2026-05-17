@@ -79,13 +79,13 @@ class SearchAnalysisPrecedentsUseCase:
         if case_summary is None:
             raise CaseSummaryUnavailableError
 
-        petition_summary_embeddings = self._case_summary_embeddings_provider.generate(
+        case_summary_embeddings = self._case_summary_embeddings_provider.generate(
             case_summary,
         )
 
         candidate_limit = Integer.create(filters.limit.value * 10)
         precedent_embeddings = self._precedents_embeddings_repository.find_many(
-            petition_summary_embeddings=petition_summary_embeddings,
+            case_summary_embeddings=case_summary_embeddings,
             filters=filters,
             limit=candidate_limit,
         )
