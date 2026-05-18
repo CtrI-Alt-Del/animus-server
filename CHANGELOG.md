@@ -1,3 +1,15 @@
+# [1.28.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.27.0...v1.28.0) (2026-05-18)
+
+
+### Bug Fixes
+
+* ANI-95 resolve pr conversation ([fafcf1a](https://github.com/CtrI-Alt-Del/animus-server/commit/fafcf1a43751e1fb9f5242278144e2d1c132ec14))
+
+
+### Features
+
+* ANI-95 endpoint unarchive ([341bf6d](https://github.com/CtrI-Alt-Del/animus-server/commit/341bf6d4043bacbdd658d22aa2f03425f38a1027))
+
 # [1.27.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.26.0...v1.27.0) (2026-05-14)
 
 
