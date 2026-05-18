@@ -1,6 +1,7 @@
 from .archive_analyses_use_case import ArchiveAnalysesUseCase
 from .choose_analysis_precedent_use_case import ChooseAnalysisPrecedentUseCase
 from .create_analysis_use_case import CreateAnalysisUseCase
+from .create_analysis_document_use_case import CreateAnalysisDocumentUseCase
 from .create_analysis_precedent_applicability_feedback_use_case import (
     CreateAnalysisPrecedentApplicabilityFeedbackUseCase,
 )
@@ -8,11 +9,23 @@ from .create_analysis_precedent_dataset_row_use_case import (
     CreateAnalysisPrecedentDatasetRowUseCase,
 )
 from .create_analysis_precedents_use_case import CreateAnalysisPrecedentsUseCase
+from .create_case_summary_use_case import CreateCaseSummaryUseCase
+from .create_extracted_petition_use_case import CreateExtractedPetitionUseCase
 from .create_petition_summary_use_case import CreatePetitionSummaryUseCase
 from .create_petition_use_case import CreatePetitionUseCase
+from .get_analysis_document_use_case import GetAnalysisDocumentUseCase
 from .get_analysis_petition_use_case import GetAnalysisPetitionUseCase
-from .get_analysis_report_use_case import GetAnalysisReportUseCase
+from .get_case_assessment_analysis_report_use_case import (
+    GetCaseAssessmentAnalysisReportUseCase,
+)
+from .get_first_instance_analysis_report_use_case import (
+    GetFirstInstanceAnalysisReportUseCase,
+)
+from .get_second_instance_analysis_report_use_case import (
+    GetSecondInstanceAnalysisReportUseCase,
+)
 from .get_analysis_use_case import GetAnalysisUseCase
+from .get_case_summary_use_case import GetCaseSummaryUseCase
 from .get_petition_summary_use_case import GetPetitionSummaryUseCase
 from .list_analyses_use_case import ListAnalysesUseCase
 from .list_unfoldered_analyses_use_case import ListUnfolderedAnalysesUseCase
@@ -23,6 +36,7 @@ from .rename_analysis_use_case import RenameAnalysisUseCase
 from .request_analysis_precedents_search_use_case import (
     RequestAnalysisPrecedentsSearchUseCase,
 )
+from .request_case_summary_use_case import RequestCaseSummaryUseCase
 from .request_petition_summary_use_case import RequestPetitionSummaryUseCase
 from .search_analysis_precedents_use_case import SearchAnalysisPrecedentsUseCase
 from .unarchive_analysis_use_case import UnarchiveAnalysisUseCase
@@ -33,15 +47,22 @@ __all__ = [
     'ArchiveAnalysesUseCase',
     'ChooseAnalysisPrecedentUseCase',
     'CreateAnalysisUseCase',
+    'CreateAnalysisDocumentUseCase',
     'CreateAnalysisPrecedentApplicabilityFeedbackUseCase',
     'CreateAnalysisPrecedentDatasetRowUseCase',
     'CreateAnalysisPrecedentsUseCase',
+    'CreateCaseSummaryUseCase',
+    'CreateExtractedPetitionUseCase',
     'CreatePetitionUseCase',
     'CreatePetitionSummaryUseCase',
+    'GetAnalysisDocumentUseCase',
     'GetAnalysisPetitionUseCase',
-    'GetAnalysisReportUseCase',
+    'GetCaseAssessmentAnalysisReportUseCase',
     'GetAnalysisUseCase',
+    'GetCaseSummaryUseCase',
+    'GetFirstInstanceAnalysisReportUseCase',
     'GetPetitionSummaryUseCase',
+    'GetSecondInstanceAnalysisReportUseCase',
     'ListAnalysesUseCase',
     'ListUnfolderedAnalysesUseCase',
     'ListAnalysisPetitionsUseCase',
@@ -49,6 +70,7 @@ __all__ = [
     'MoveAnalysesToFolderUseCase',
     'RenameAnalysisUseCase',
     'RequestAnalysisPrecedentsSearchUseCase',
+    'RequestCaseSummaryUseCase',
     'RequestPetitionSummaryUseCase',
     'SearchAnalysisPrecedentsUseCase',
     'UnarchiveAnalysisUseCase',

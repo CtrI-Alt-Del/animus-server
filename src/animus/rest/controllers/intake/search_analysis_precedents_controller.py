@@ -7,7 +7,7 @@ from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.domain.structures.analysis_precedents_search_filters import (
     AnalysisPrecedentsSearchFiltersDto,
 )
-from animus.core.intake.interfaces import PetitionSummariesRepository
+from animus.core.intake.interfaces import CaseSummariesRepository
 from animus.core.intake.use_cases import RequestAnalysisPrecedentsSearchUseCase
 from animus.core.shared.interfaces import Broker
 from animus.pipes.database_pipe import DatabasePipe
@@ -40,14 +40,14 @@ class SearchAnalysisPrecedentsController:
                 Analysis,
                 Depends(IntakePipe.verify_analysis_by_account_from_request),
             ],
-            petition_summaries_repository: Annotated[
-                PetitionSummariesRepository,
-                Depends(DatabasePipe.get_petition_summaries_repository_from_request),
+            case_summaries_repository: Annotated[
+                CaseSummariesRepository,
+                Depends(DatabasePipe.get_case_summaries_repository_from_request),
             ],
             broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
         ) -> Response:
             use_case = RequestAnalysisPrecedentsSearchUseCase(
-                petition_summaries_repository=petition_summaries_repository,
+                case_summaries_repository=case_summaries_repository,
                 broker=broker,
             )
             use_case.execute(analysis_id=analysis_id, dto=body.to_dto())

@@ -28,7 +28,7 @@ class StorageSeeder:
 
         files_to_upload = [
             FilePath.create(
-                f'intake/analises/{analysis_id.value}/petitions/{pdf_path.name}'
+                f'intake/analises/{analysis_id.value}/documents/{pdf_path.name}'
             )
             for pdf_path in sorted(self._PDFS_DIR.glob('*.pdf'))
         ]

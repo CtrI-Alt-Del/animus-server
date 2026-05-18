@@ -4,7 +4,16 @@ from typing import Any
 
 def __getattr__(name: str) -> Any:
     exports: dict[str, tuple[str, str]] = {
-        'AnalysisReportDto': ('.analysis_report_dto', 'AnalysisReportDto'),
+        'CaseAssessmentAnalysisReportDto': (
+            '.case_assessment_analysis_report_dto',
+            'CaseAssessmentAnalysisReportDto',
+        ),
+        'FirstInstanceAnalysisReportDto': (
+            '.first_instance_analysis_report_dto',
+            'FirstInstanceAnalysisReportDto',
+        ),
+        'AnalysisDocumentDto': ('.analysis_document_dto', 'AnalysisDocumentDto'),
+        'ExtractedPetitionDto': ('.extracted_petition_dto', 'ExtractedPetitionDto'),
         'PetitionSummaryEmbeddingDto': (
             '.petition_summary_embedding_dto',
             'PetitionSummaryEmbeddingDto',
@@ -28,10 +37,21 @@ def __getattr__(name: str) -> Any:
             '.analysis_precedents_search_filters_dto',
             'AnalysisPrecedentsSearchFiltersDto',
         ),
+        'CaseSummaryDto': ('.case_summary_dto', 'CaseSummaryDto'),
+        'JudgmentDraftDto': ('.judgment_draft_dto', 'JudgmentDraftDto'),
+        'PetitionDraftDto': ('.petition_draft_dto', 'PetitionDraftDto'),
+        'PetitionExtractionDto': (
+            '.petition_extraction_dto',
+            'PetitionExtractionDto',
+        ),
         'PetitionSummaryDto': ('.petition_summary_dto', 'PetitionSummaryDto'),
         'PrecedentIdentifierDto': (
             '.precedent_identifier_dto',
             'PrecedentIdentifierDto',
+        ),
+        'SecondInstanceAnalysisReportDto': (
+            '.second_instance_analysis_report_dto',
+            'SecondInstanceAnalysisReportDto',
         ),
     }
 

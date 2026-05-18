@@ -2,7 +2,7 @@ import math
 from collections.abc import Iterable
 from typing import TypedDict
 
-from animus.core.intake.domain.errors import PetitionSummaryUnavailableError
+from animus.core.intake.domain.errors import CaseSummaryUnavailableError
 from animus.core.intake.domain.structures import AnalysisPrecedent
 from animus.core.intake.domain.structures.analysis_precedents_search_filters import (
     AnalysisPrecedentsSearchFilters,
@@ -21,8 +21,8 @@ from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
 )
 from animus.core.intake.interfaces import (
-    PetitionSummariesRepository,
-    PetitionSummaryEmbeddingsProvider,
+    CaseSummariesRepository,
+    CaseSummaryEmbeddingsProvider,
     PrecedentsEmbeddingsRepository,
     PrecedentsRepository,
 )
@@ -55,15 +55,13 @@ class _IdentifierScore(TypedDict):
 class SearchAnalysisPrecedentsUseCase:
     def __init__(
         self,
-        petition_summaries_repository: PetitionSummariesRepository,
-        petition_summary_embeddings_provider: PetitionSummaryEmbeddingsProvider,
+        case_summaries_repository: CaseSummariesRepository,
+        case_summary_embeddings_provider: CaseSummaryEmbeddingsProvider,
         precedents_embeddings_repository: PrecedentsEmbeddingsRepository,
         precedents_repository: PrecedentsRepository,
     ) -> None:
-        self._petition_summaries_repository = petition_summaries_repository
-        self._petition_summary_embeddings_provider = (
-            petition_summary_embeddings_provider
-        )
+        self._case_summaries_repository = case_summaries_repository
+        self._case_summary_embeddings_provider = case_summary_embeddings_provider
         self._precedents_embeddings_repository = precedents_embeddings_repository
         self._precedents_repository = precedents_repository
 
@@ -75,16 +73,14 @@ class SearchAnalysisPrecedentsUseCase:
         analysis_id_entity = Id.create(analysis_id)
         filters = AnalysisPrecedentsSearchFilters.create(dto)
 
-        petition_summary = self._petition_summaries_repository.find_by_analysis_id(
+        case_summary = self._case_summaries_repository.find_by_analysis_id(
             analysis_id=analysis_id_entity,
         )
-        if petition_summary is None:
-            raise PetitionSummaryUnavailableError
+        if case_summary is None:
+            raise CaseSummaryUnavailableError
 
-        petition_summary_embeddings = (
-            self._petition_summary_embeddings_provider.generate(
-                petition_summary,
-            )
+        petition_summary_embeddings = self._case_summary_embeddings_provider.generate(
+            case_summary,
         )
 
         candidate_limit = Integer.create(filters.limit.value * 10)

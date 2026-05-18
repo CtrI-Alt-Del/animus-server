@@ -3,7 +3,6 @@ from datetime import UTC
 
 from fastapi.testclient import TestClient
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.database.sqlalchemy.models.intake import AnalysisModel
 from tests.fixtures.auth_fixtures import CreateAccountFixture
 
@@ -82,7 +81,8 @@ class TestListUnfolderedAnalysesController:
             'name': expected_analysis.name,
             'folder_id': None,
             'account_id': account.id,
-            'status': AnalysisStatusValue.WAITING_PETITION.value,
+            'type': 'FIRST_INSTANCE',
+            'status': 'WAITING_DOCUMENT_UPLOAD',
             'is_archived': False,
             'precedents_search_filters': None,
             'created_at': expected_analysis.created_at.replace(tzinfo=UTC).isoformat(),

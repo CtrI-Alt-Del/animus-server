@@ -1,6 +1,7 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KQ5CG4D1VSKXJXJ8W4YBRYFX
+@analysis_id = 01KRKEW0MNECWS8AQAJGFGZPC0
 @petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
+@folder_id = 01KQ5CG4D6QY8A1X7R2M4N8P0B
 @precedent_court = STJ
 @precedent_kind = RR
 @precedent_number = 974
@@ -8,9 +9,56 @@
 @list_is_archived = false
 @list_cursor = 01KPW7VM9WPZMPX7QHJNKF1Z43
 
+### Criar analise (CreateAnalysisController)
+POST {{url}}/analyses
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "folder_id": null,
+  "type": "SECOND_INSTANCE"
+}
+
 ### Listar analises (ListAnalysesController)
 GET {{url}}/analyses?limit={{list_limit}}&is_archived={{list_is_archived}}&cursor={{list_cursor}}
 Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Obter analise por id (GetAnalysisController)
+GET {{url}}/analyses/{{analysis_id}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Renomear analise (RenameAnalysisController)
+PATCH {{url}}/analyses/{{analysis_id}}/name
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "name": "Analise renomeada via REST Client"
+}
+
+### Arquivar analises (ArchiveAnalysesController)
+PATCH {{url}}/analyses/archive
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "analysis_ids": [
+    "{{analysis_id}}"
+  ],
+  "is_archived": true
+}
+
+### Mover analises para pasta (MoveAnalysesToFolderController)
+PATCH {{url}}/analyses/folder
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "analysis_ids": [
+    "{{analysis_id}}"
+  ],
+  "folder_id": "{{folder_id}}"
+}
 
 ### Solicitar busca assincrona de precedentes (SearchAnalysisPrecedentsController)
 POST {{url}}/analyses/{{analysis_id}}/precedents/search
@@ -44,12 +92,42 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 GET {{url}}/analyses/unfoldered?limit=10&search=&is_archived=false
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Criar/atualizar documento principal da analise (CreateAnalysisDocumentController)
+POST {{url}}/analysis/{{analysis_id}}/document
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "file_path": "intake/analyses/{{analysis_id}}/documents/processo.pdf",
+  "name": "processo.pdf",
+  "uploaded_at": "2026-05-14T12:00:00+00:00"
+}
+
+### Obter documento principal da analise (GetAnalysisDocumentController)
+GET {{url}}/analysis/{{analysis_id}}/document
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Obter peticao atual da analise (GetAnalysisPetitionController)
 GET {{url}}/analyses/{{analysis_id}}/petition
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Listar peticoes da analise (ListAnalysisPetitionsController)
+GET {{url}}/analyses/{{analysis_id}}/petitions
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Listar precedentes da analise (ListAnalysisPrecedentsController)
 GET {{url}}/analyses/{{analysis_id}}/precedents
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Solicitar resumo de caso (RequestCaseSummaryController)
+POST {{url}}/analysis/{{analysis_id}}/case-summaries
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{}
+
+### Obter resumo de caso da analise (GetCaseSummaryController)
+GET {{url}}/analysis/{{analysis_id}}/case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Obter resumo da peticao (GetPetitionSummaryController)
@@ -60,6 +138,14 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 PATCH {{url}}/analyses/{{analysis_id}}/precedents/choose?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Obter relatorio completo da analise (GetAnalysisReportController)
-GET {{url}}/analyses/{{analysis_id}}/report
+### Obter relatorio de case assessment (GetCaseAssessmentAnalysisReportController)
+GET {{url}}/analyses/{{analysis_id}}/case-assessment-report
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Obter relatorio de primeira instancia (GetFirstInstanceAnalysisReportController)
+GET {{url}}/analyses/{{analysis_id}}/first-instance-report
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Obter relatorio de segunda instancia (GetSecondInstanceAnalysisReportController)
+GET {{url}}/analyses/{{analysis_id}}/second-instance-report
 Authorization: Bearer {{ACCESS_TOKEN}}

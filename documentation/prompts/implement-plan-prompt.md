@@ -58,11 +58,19 @@ description: Implementar um plano de implementacao derivado de uma spec tecnica.
 
 5. **Verificacao (obrigatorio) ao final de cada fase**
    - Garanta que o projeto compila e que fluxos impactados funcionam.
-   - Rode checks existentes (ex.: analyzers/tests) quando aplicavel e corrija falhas antes de liberar a fase para as dependentes.
+   - Rode checks existentes e corrija falhas antes de liberar a fase para as dependentes.
+   - **Obrigatorio:** rode migrations no ambiente local com `uv run alembic upgrade head` em toda execucao do plano.
+   - **Obrigatorio:** rode testes automatizados do projeto ao menos uma vez na execucao do plano.
+   - Quando a fase alterar fluxo critico, rode testes focados da area alem dos checks de lint/typecheck.
 
 6. **Progresso e reporte**
    - Ao concluir cada fase, consolide o resultado do subagent no checklist principal.
    - Ao final de todas as fases, reporte: o que foi implementado, arquivos principais tocados, pendencias e proximos passos.
+
+7. **Atualizacao de REST Client (obrigatorio quando aplicavel)**
+   - Se qualquer endpoint HTTP for adicionado ou alterado, atualize os arquivos correspondentes em `rest-client/` ao final da implementacao.
+   - Inclua exemplos minimos para validar o endpoint (metodo, path, headers e payload quando aplicavel).
+   - Se nenhum endpoint foi alterado/adicionado, declare isso explicitamente no reporte final.
 
 ## Saida esperada
 

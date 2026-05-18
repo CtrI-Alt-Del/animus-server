@@ -24,7 +24,7 @@ O animus Server usa arquitetura em camadas inspirada em Clean Architecture e Hex
 - **Validation (`src/animus/validation/`)**: Schemas Pydantic de entrada/saida e conversao para DTO.
 - **Database (`src/animus/database/`)**: Models SQLAlchemy, mappers e implementacoes concretas de repositorios.
 - **Providers (`src/animus/providers/`)**: Adaptadores de infraestrutura.
-- **AI (`src/animus/ai/`)**: Workflows, teams e saídas estruturadas com Agno/Gemini para casos de uso síncronos guiados pelo `core`.
+- **AI (`src/animus/ai/`)**: Workflows, squads e saídas estruturadas com Agno/Gemini para casos de uso síncronos guiados pelo `core`.
 - **PubSub (`src/animus/pubsub/`)**: Orquestracao assincrona por eventos (Inngest).
 
 ## Fluxo de Dados (resumo)
@@ -48,6 +48,10 @@ Fluxos de intake ja implementados:
 - `PATCH /intake/analyses/folder` -> `MoveAnalysesToFolderController` -> `AuthPipe` / `DatabasePipe` -> `MoveAnalysesToFolderUseCase` -> `AnalisysesRepository` / `FoldersRepository` -> PostgreSQL (`analyses`, `folders`) -> `list[AnalysisDto]`.
 - `POST /intake/petitions` -> `CreatePetitionController` -> `AuthPipe` / `IntakePipe.verify_analysis_by_account(...)` -> `CreatePetitionUseCase` -> `PetitionsRepository` / `AnalisysesRepository` / `Broker` -> PostgreSQL (`petitions`, `petition_summaries`, `analyses`) -> `PetitionDto`.
 - `GET /intake/analyses/{analysis_id}/petition` -> `GetAnalysisPetitionController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `GetAnalysisPetitionUseCase` -> `PetitionsRepository` -> PostgreSQL (`petitions`) -> `PetitionDto`.
+- `POST /intake/analysis/{analysis_id}/document` -> `CreateAnalysisDocumentController` -> `AuthPipe` / `DatabasePipe` / `PubSubPipe` -> `CreateAnalysisDocumentUseCase` -> `AnalysisDocumentsRepository` / `AnalisysesRepository` / `Broker` -> PostgreSQL (`analysis_documents`, `analyses`) -> `AnalysisDocumentDto`.
+- `GET /intake/analysis/{analysis_id}/document` -> `GetAnalysisDocumentController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `GetAnalysisDocumentUseCase` -> `AnalysisDocumentsRepository` -> PostgreSQL (`analysis_documents`) -> `AnalysisDocumentDto`.
+- `POST /intake/analysis/{analysis_id}/case-summaries` -> `RequestCaseSummaryController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `RequestCaseSummaryUseCase` -> `AnalysisDocumentsRepository` / `AnalisysesRepository` / `Broker` -> `CaseSummaryRequestedEvent` ou `PetitionExtractionRequestedEvent`, conforme `Analysis.type`.
+- `GET /intake/analysis/{analysis_id}/case-summaries` -> `GetCaseSummaryController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `GetCaseSummaryUseCase` -> `CaseSummariesRepository` -> PostgreSQL (`case_summaries`) -> `CaseSummaryDto`.
 - `POST /intake/petitions/{petition_id}/summary` -> `SummarizePetitionController` -> `AuthPipe` / `IntakePipe.verify_petition_document_path_by_account(...)` -> `StoragePipe` -> `GetDocumentContentUseCase` -> `FileStorageProvider` / `PdfProvider` / `DocxProvider` -> `SummarizePetitionWorkflow` -> `CreatePetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
 - `GET /intake/petitions/{petition_id}/summary` -> `GetPetitionSummaryController` -> `IntakePipe.verify_petition_by_account(...)` -> `GetPetitionSummaryUseCase` -> `PetitionSummariesRepository` -> PostgreSQL (`petition_summaries`) -> `PetitionSummaryDto`.
 - `GET /intake/analyses/{analysis_id}/petitions` -> `ListAnalysisPetitionsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ListAnalysisPetitionsUseCase` -> `PetitionsRepository` / `PetitionSummariesRepository` -> PostgreSQL (`petitions`, `petition_summaries`) -> `ListResponse[AnalysisPetitionDto]`.
@@ -55,7 +59,15 @@ Fluxos de intake ja implementados:
 - `GET /intake/analyses/{analysis_id}/precedents` -> `ListAnalysisPrecedentsController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ListAnalysisPrecedentsUseCase` -> `AnalysisPrecedentsRepository` -> PostgreSQL (`analysis_precedents`) -> `list[AnalysisPrecedentDto]`.
 - `GET /intake/analyses/{analysis_id}/status` -> `GetAnalysisStatusController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `Analysis.status` -> `AnalysisStatusDto`.
 - `PATCH /intake/analyses/{analysis_id}/precedents/choose` -> `ChooseAnalysisPrecedentController` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> `ChooseAnalysisPrecedentUseCase` -> `AnalysisPrecedentsRepository` / `AnalisysesRepository` -> PostgreSQL (`analysis_precedents`, `analyses`) -> `AnalysisStatusDto`.
-- `GET /intake/analyses/{analysis_id}/report` -> `GetAnalysisReportController` -> `AuthPipe` / `DatabasePipe` -> `GetAnalysisReportUseCase` -> `AnalisysesRepository` / `PetitionsRepository` / `PetitionSummariesRepository` / `AnalysisPrecedentsRepository` -> PostgreSQL (`analyses`, `petitions`, `petition_summaries`, `analysis_precedents`) -> `AnalysisReportDto`.
+- `GET /intake/analyses/{analysis_id}/case-assessment-report` -> `GetCaseAssessmentAnalysisReportController` -> `AuthPipe` / `DatabasePipe` -> `GetCaseAssessmentAnalysisReportUseCase` -> `AnalisysesRepository` / `AnalysisDocumentsRepository` / `CaseSummariesRepository` / `AnalysisPrecedentsRepository` / `PetitionDraftsRepository` -> PostgreSQL (`analyses`, `analysis_documents`, `case_summaries`, `analysis_precedents`, `petition_drafts`) -> `CaseAssessmentAnalysisReportDto`.
+- `GET /intake/analyses/{analysis_id}/first-instance-report` -> `GetFirstInstanceAnalysisReportController` -> `AuthPipe` / `DatabasePipe` -> `GetFirstInstanceAnalysisReportUseCase` -> `AnalisysesRepository` / `AnalysisDocumentsRepository` / `CaseSummariesRepository` / `AnalysisPrecedentsRepository` / `JudgmentDraftsRepository` -> PostgreSQL (`analyses`, `analysis_documents`, `case_summaries`, `analysis_precedents`, `judgment_drafts`) -> `FirstInstanceAnalysisReportDto`.
+- `GET /intake/analyses/{analysis_id}/second-instance-report` -> `GetSecondInstanceAnalysisReportController` -> `AuthPipe` / `DatabasePipe` -> `GetSecondInstanceAnalysisReportUseCase` -> `AnalisysesRepository` / `AnalysisDocumentsRepository` / `CaseSummariesRepository` / `AnalysisPrecedentsRepository` -> PostgreSQL (`analyses`, `analysis_documents`, `case_summaries`, `analysis_precedents`) -> `SecondInstanceAnalysisReportDto`.
+
+Fluxo assincrono de resumo do caso:
+- `CaseSummaryRequestedEvent` -> `SummarizeCaseJob` -> `GetDocumentContentUseCase` -> `AgnoSummarizeCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent`.
+
+Fluxo assincrono de segunda instancia:
+- `PetitionExtractionRequestedEvent` -> `ExtractPetitionJob` -> `AnalysisDocumentsRepository` / `FileStorageProvider` / `PdfProvider` -> cache em `ExtractedPetitionsRepository` -> `AgnoExtractPetitionWorkflow` -> `AgnoSummarizeSecondInstanceCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent`.
 
 Fluxo assincrono de precedentes:
 - `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratacao de precedentes.

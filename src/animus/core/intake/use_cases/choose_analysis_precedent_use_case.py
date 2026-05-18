@@ -1,4 +1,3 @@
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.entities.dtos import AnalysisStatusDto
 from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
@@ -60,7 +59,6 @@ class ChooseAnalysisPrecedentUseCase:
         if analysis is None:
             raise AnalysisNotFoundError
 
-        analysis.set_status(AnalysisStatusValue.PRECEDENT_CHOSED.value)
         self._analisyses_repository.replace(analysis)
 
-        return analysis.status.dto
+        return AnalysisStatusDto(value=analysis.status.value)

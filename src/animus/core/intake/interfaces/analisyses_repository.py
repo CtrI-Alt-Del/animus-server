@@ -1,7 +1,6 @@
 from typing import Protocol
 
 from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
 
@@ -17,7 +16,7 @@ class AnalisysesRepository(Protocol):
         limit: Integer,
         is_archived: Logical,
         only_unfoldered: Logical,
-        statuses: tuple[AnalysisStatusValue, ...],
+        statuses: tuple[str, ...],
     ) -> CursorPaginationResponse[Analysis]: ...
 
     def find_many_in_processing(self, account_id: Id) -> list[Analysis]: ...

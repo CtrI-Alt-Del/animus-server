@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.entities.dtos.petition_document_dto import (
     PetitionDocumentDto,
 )
@@ -86,7 +85,7 @@ class TestSummarizePetitionController:
         session.close()
 
         assert analysis is not None
-        assert analysis.status.value == AnalysisStatusValue.ANALYZING_PETITION
+        assert analysis.status.value == 'ANALYZING_CASE'
 
     def test_should_return_404_when_petition_does_not_exist(
         self,

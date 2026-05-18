@@ -12,6 +12,7 @@ from animus.pipes.database_pipe import DatabasePipe
 
 
 class _Body(BaseModel):
+    type: str
     folder_id: str | None = None
 
 
@@ -33,5 +34,6 @@ class CreateAnalysisController:
 
             return use_case.execute(
                 account_id=account_id.value,
+                type=body.type,
                 folder_id=body.folder_id,
             )

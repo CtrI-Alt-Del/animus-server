@@ -1,5 +1,10 @@
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
+from animus.core.intake.domain.entities.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
@@ -7,8 +12,20 @@ from animus.core.shared.responses import CursorPaginationResponse
 
 
 class ListUnfolderedAnalysesUseCase:
-    _ALLOWED_ANALYSIS_STATUSES: tuple[AnalysisStatusValue, ...] = tuple(
-        AnalysisStatusValue
+    _ALLOWED_ANALYSIS_STATUSES: tuple[
+        CaseAssessmentAnalysisStatus | SecondInstanceAnalysisStatus, ...
+    ] = (
+        CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
+        CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED,
+        CaseAssessmentAnalysisStatus.CASE_ANALYZED,
+        CaseAssessmentAnalysisStatus.DONE,
+        CaseAssessmentAnalysisStatus.FAILED,
+        SecondInstanceAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
+        SecondInstanceAnalysisStatus.DOCUMENT_UPLOADED,
+        SecondInstanceAnalysisStatus.CASE_ANALYZED,
+        SecondInstanceAnalysisStatus.DONE,
+        SecondInstanceAnalysisStatus.PETITION_NOT_FOUND,
+        SecondInstanceAnalysisStatus.FAILED,
     )
 
     def __init__(self, analisyses_repository: AnalisysesRepository) -> None:

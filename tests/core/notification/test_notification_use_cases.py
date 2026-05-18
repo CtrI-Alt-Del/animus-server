@@ -17,7 +17,7 @@ class TestNotificationUseCases:
 
         use_case.execute(account_id=account_id, analysis_id=analysis_id)
 
-        push_notification_provider.send_petition_summary_finished_message.assert_called_once_with(
+        push_notification_provider.send_case_summary_finished_message.assert_called_once_with(
             recipient_id=account_id,
             analysis_id=analysis_id,
         )
