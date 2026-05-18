@@ -17,7 +17,6 @@ class CaseAssessmentAnalysisReport(Structure):
     case_summary: CaseSummary
     precedents: list[AnalysisPrecedent]
     petition_draft: PetitionDraft
-    chosen_precedent: AnalysisPrecedent | None
 
     @classmethod
     def create(
@@ -29,11 +28,6 @@ class CaseAssessmentAnalysisReport(Structure):
             case_summary=CaseSummary.create(dto.case_summary),
             precedents=[AnalysisPrecedent.create(item) for item in dto.precedents],
             petition_draft=PetitionDraft.create(dto.petition_draft),
-            chosen_precedent=(
-                AnalysisPrecedent.create(dto.chosen_precedent)
-                if dto.chosen_precedent is not None
-                else None
-            ),
         )
 
     @property
@@ -44,7 +38,4 @@ class CaseAssessmentAnalysisReport(Structure):
             case_summary=self.case_summary.dto,
             precedents=[item.dto for item in self.precedents],
             petition_draft=self.petition_draft.dto,
-            chosen_precedent=(
-                self.chosen_precedent.dto if self.chosen_precedent is not None else None
-            ),
         )

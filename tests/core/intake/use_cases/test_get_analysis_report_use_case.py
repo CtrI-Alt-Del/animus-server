@@ -153,7 +153,6 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
         assert result.document == document.dto
         assert result.case_summary == case_summary.dto
         assert result.petition_draft == petition_draft.dto
-        assert result.chosen_precedent is None
 
     def test_should_raise_petition_draft_unavailable_error_when_petition_draft_does_not_exist(
         self,
@@ -195,73 +194,6 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
 
         with pytest.raises(PetitionDraftUnavailableError):
             self.use_case.execute(analysis_id=analysis_id, account_id=account_id)
-
-    def test_should_return_case_assessment_analysis_report_with_chosen_precedent(
-        self,
-    ) -> None:
-        analysis_id = Id.create().value
-        account_id = Id.create().value
-        analysis = _make_analysis(
-            analysis_id=analysis_id,
-            account_id=account_id,
-            analysis_type=AnalysisType.CASE_ASSESSMENT,
-        )
-        document = AnalysisDocument.create(
-            AnalysisDocumentDto(
-                analysis_id=analysis_id,
-                uploaded_at='2026-04-04T10:00:00Z',
-                file_path='path/to/file.pdf',
-                name='file.pdf',
-            )
-        )
-        case_summary = CaseSummary.create(
-            CaseSummaryDto(
-                case_summary='Resumo do caso',
-                legal_issue='Questao legal',
-                central_question='Pergunta central',
-                relevant_laws=['Lei 1'],
-                key_facts=['Fato 1'],
-                search_terms=['termo 1'],
-            )
-        )
-        petition_draft = PetitionDraft.create(
-            PetitionDraftDto(analysis_id=analysis_id, content='Minuta de peticao')
-        )
-        precedent = AnalysisPrecedent.create(
-            AnalysisPrecedentDto(
-                analysis_id=analysis_id,
-                precedent=PrecedentDto(
-                    id=Id.create().value,
-                    identifier=PrecedentIdentifierDto(court='STF', kind='RG', number=1),
-                    status='vigente',
-                    enunciation='E',
-                    thesis='T',
-                    last_updated_in_pangea_at='2026-04-04T10:00:00Z',
-                ),
-                similarity_score=90.0,
-                is_chosen=True,
-                synthesis='S',
-            )
-        )
-
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
-            document
-        )
-        self.case_summaries_repository_mock.find_by_analysis_id.return_value = (
-            case_summary
-        )
-        self.petition_drafts_repository_mock.find_by_analysis_id.return_value = (
-            petition_draft
-        )
-        self.analysis_precedents_repository_mock.find_many_by_analysis_id.return_value = ListResponse(
-            items=[precedent]
-        )
-
-        result = self.use_case.execute(analysis_id=analysis_id, account_id=account_id)
-
-        assert result.chosen_precedent is not None
-        assert result.chosen_precedent.precedent.id == precedent.precedent.id.value
 
 
 class TestGetFirstInstanceAnalysisReportUseCase:

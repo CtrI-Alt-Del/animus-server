@@ -80,18 +80,12 @@ class GetCaseAssessmentAnalysisReportUseCase:
             id_analysis
         ).items
 
-        chosen_precedent = next(
-            (precedent for precedent in precedents if precedent.is_chosen.is_true),
-            None,
-        )
-
         report = CaseAssessmentAnalysisReport(
             analysis=analysis,
             document=document,
             case_summary=case_summary,
             precedents=precedents,
             petition_draft=petition_draft,
-            chosen_precedent=chosen_precedent,
         )
 
         return report.dto

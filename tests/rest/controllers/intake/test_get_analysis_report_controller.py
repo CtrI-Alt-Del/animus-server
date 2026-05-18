@@ -199,8 +199,6 @@ class TestGetCaseAssessmentAnalysisReportController:
             'analysis_id': analysis_id,
             'content': 'Minuta de petição',
         }
-        assert payload['chosen_precedent'] is not None
-        assert payload['chosen_precedent']['is_chosen'] is True
 
 
 class TestGetFirstInstanceAnalysisReportController:

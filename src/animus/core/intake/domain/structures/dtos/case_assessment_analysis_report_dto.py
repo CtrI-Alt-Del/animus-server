@@ -21,4 +21,3 @@ class CaseAssessmentAnalysisReportDto:
     case_summary: CaseSummaryDto
     precedents: list[AnalysisPrecedentDto]
     petition_draft: PetitionDraftDto
-    chosen_precedent: AnalysisPrecedentDto | None
