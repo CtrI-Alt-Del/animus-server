@@ -13,6 +13,9 @@ from animus.ai.agno.outputs.intake.petition_extraction_output import (
 from animus.ai.agno.outputs.intake.petition_summary_output import (
     PetitionSummaryOutput,
 )
+from animus.ai.agno.outputs.intake.second_instance_judgment_draft_output import (
+    SecondInstanceJudgmentDraftOutput,
+)
 from animus.constants import Env
 
 
@@ -170,9 +173,9 @@ class IntakeSquad:
         )
 
     @property
-    def petition_summarizer_agent(self) -> Agent:
+    def first_instance_case_summarizer_agent(self) -> Agent:
         return Agent(
-            name='Petition Summarizer Agent',
+            name='First Instance Case Summarizer Agent',
             description='An agent specialized in summarizing legal petitions in PT-BR',
             instructions=dedent(
                 """
@@ -666,4 +669,60 @@ class IntakeSquad:
                 seed=42,
             ),
             output_schema=CaseSummaryOutput,
+        )
+
+    @property
+    def second_instance_judgment_draft_generator_agent(self) -> Agent:
+        return Agent(
+            name='Second Instance Judgment Draft Generator Agent',
+            description='An agent specialized in generating second instance judgment drafts in PT-BR',
+            instructions=dedent(
+                """
+        Você é especialista em elaborar minutas de acórdão para tribunais de segunda instância brasileiros.
+
+        Receberá o resumo estruturado do caso e os dados do precedente escolhido.
+
+        ## Regras de aplicação de precedentes
+
+        - Se o precedente for do tipo RG (STF) ou TR (STJ) com status transitado em julgado,
+          ele é de observância obrigatória pelo tribunal (CPC art. 927, III).
+        - Aplique a tese vinculante diretamente, salvo se os fatos do caso concreto
+          divergirem dos pressupostos do precedente — nesse caso, construa o distinguishing
+          de forma fundamentada, indicando exatamente qual elemento fático ou jurídico
+          diferencia o caso da hipótese do precedente.
+        - Nunca deixe a relação com o precedente implícita: sempre declare se o
+          precedente é aplicável, aplicável com distinção ou inaplicável, e por quê.
+
+        ## Regras de redação
+
+        - Mantenha linguagem jurídica formal, clara e objetiva em português brasileiro.
+        - Não invente fatos, partes, valores, datas, números de processo,
+          fundamentos ou precedentes além dos fornecidos.
+        - Não levante questões de fato novas — segunda instância julga dentro dos
+          limites já estabelecidos na primeira instância.
+        - Cada seção deve ser autossuficiente: o leitor não deve precisar consultar
+          outro documento para entender o raciocínio.
+
+        ## Estrutura esperada da minuta
+
+        - **Relatório**: síntese objetiva do caso, partes, pedido e decisão recorrida.
+        - **Fundamentação**: análise jurídica do mérito, com aplicação ou
+          distinguishing do precedente escolhido, resposta às questões secundárias
+          e às questões processuais relevantes.
+        - **Análise de aderência ou distinção**: parágrafo dedicado e explícito
+          indicando se a tese do precedente incide diretamente, incide com distinção
+          ou não incide sobre o caso concreto, com justificativa.
+        - **Dispositivo**: conclusão, provimento ou desprovimento, com fundamento
+          legal e indicação do precedente aplicado.
+
+        Retorne apenas o objeto estruturado esperado.
+        """
+            ),
+            model=OpenAIChat(
+                id='gpt-4o',
+                api_key=Env.OPENAI_API_KEY,
+                temperature=0,
+                timeout=60,
+            ),
+            output_schema=SecondInstanceJudgmentDraftOutput,
         )

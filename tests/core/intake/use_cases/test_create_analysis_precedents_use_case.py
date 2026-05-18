@@ -4,9 +4,12 @@ from unittest.mock import create_autospec
 import pytest
 
 from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
+)
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos import AnalysisDto, PrecedentDto
 from animus.core.intake.domain.errors import AnalysisNotFoundError
@@ -88,7 +91,7 @@ class TestCreateAnalysisPrecedentsUseCase:
         )
         self.analisyses_repository_mock.replace.assert_called_once()
         updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
-        assert updated_analysis.status == CaseAssessmentAnalysisStatus.DONE.value
+        assert updated_analysis.status == FirstInstanceAnalysisStatus.create_as_done()
         assert updated_analysis.precedents_search_filters is not None
         assert updated_analysis.precedents_search_filters.dto == filters_dto
 
@@ -115,6 +118,7 @@ class TestCreateAnalysisPrecedentsUseCase:
                     kind='RG',
                     number=101,
                     synthesis='  Sintese final  ',
+                    applicability_level=2,
                     legal_features=SimpleNamespace(
                         central_issue_match=2,
                         structural_issue_match=1,
@@ -144,6 +148,69 @@ class TestCreateAnalysisPrecedentsUseCase:
         assert saved_precedents[0].synthesis.value == 'Sintese final'
         assert saved_precedents[0].legal_features is not None
         assert saved_precedents[0].legal_features.central_issue_match.value == 2
+        assert saved_precedents[0].is_chosen.is_true
+
+    def test_should_choose_by_default_only_precedents_with_applicability_level_two(
+        self,
+    ) -> None:
+        analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
+        filters_dto = AnalysisPrecedentsSearchFiltersDto(
+            courts=['STF'],
+            precedent_kinds=['RG'],
+            limit=10,
+        )
+        analysis_precedents = [
+            self._create_analysis_precedent_dto(
+                analysis_id=analysis_id,
+                number=101,
+                similarity_score=84.5,
+                similarity_rank=1,
+                synthesis=None,
+            ),
+            self._create_analysis_precedent_dto(
+                analysis_id=analysis_id,
+                number=102,
+                similarity_score=82.0,
+                similarity_rank=2,
+                synthesis=None,
+            ),
+            self._create_analysis_precedent_dto(
+                analysis_id=analysis_id,
+                number=103,
+                similarity_score=80.0,
+                similarity_rank=3,
+                synthesis=None,
+            ),
+        ]
+        synthesis_output = SimpleNamespace(
+            items=[
+                self._create_synthesis_item(number=101, applicability_level=2),
+                self._create_synthesis_item(number=102, applicability_level=1),
+                self._create_synthesis_item(number=103, applicability_level=0),
+            ]
+        )
+        self.analisyses_repository_mock.find_by_id.return_value = (
+            self._create_analysis_entity(analysis_id)
+        )
+
+        self.use_case.execute(
+            analysis_id=analysis_id,
+            filters_dto=filters_dto,
+            analysis_precedents=analysis_precedents,
+            synthesis_output=synthesis_output,
+        )
+
+        saved_precedents = self.analysis_precedents_repository_mock.add_many_by_analysis_id.call_args.kwargs[
+            'analysis_precedents'
+        ]
+        precedents_by_number = {
+            precedent.precedent.identifier.number.value: precedent
+            for precedent in saved_precedents
+        }
+
+        assert precedents_by_number[101].is_chosen.is_true
+        assert precedents_by_number[102].is_chosen.is_false
+        assert precedents_by_number[103].is_chosen.is_false
 
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
         self,
@@ -260,9 +327,28 @@ class TestCreateAnalysisPrecedentsUseCase:
                 name='Analise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
-                type=AnalysisType.FIRST_INSTANCE,
-                status=CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value,
+                type=AnalysisType.create_as_first_instance().dto,
+                status=CaseAssessmentAnalysisStatus.create('SEARCHING_PRECEDENTS').dto,
                 is_archived=False,
                 created_at='2026-03-31T10:30:00+00:00',
             )
+        )
+
+    @staticmethod
+    def _create_synthesis_item(
+        number: int, applicability_level: int
+    ) -> SimpleNamespace:
+        return SimpleNamespace(
+            court='STF',
+            kind='RG',
+            number=number,
+            synthesis=f'Sintese {number}',
+            applicability_level=applicability_level,
+            legal_features=SimpleNamespace(
+                central_issue_match=2,
+                structural_issue_match=1,
+                context_compatibility=2,
+                is_lateral_topic=0,
+                is_accessory_topic=0,
+            ),
         )

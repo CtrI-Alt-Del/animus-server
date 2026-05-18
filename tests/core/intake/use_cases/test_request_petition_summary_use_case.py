@@ -2,11 +2,14 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
-from animus.core.intake.domain.entities.dtos.petition_document_dto import (
-    PetitionDocumentDto,
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
+from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
+    AnalysisDocumentDto,
 )
 from animus.core.intake.domain.events import PetitionSummaryRequestedEvent
 from animus.core.intake.domain.errors import (
@@ -46,14 +49,16 @@ class TestRequestPetitionSummaryUseCase:
         petition = PetitionsFaker.fake(
             petition_id=petition_id,
             analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
-            document=PetitionDocumentDto(
+            document=AnalysisDocumentDto(
+                analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+                uploaded_at='2026-03-31T10:30:00+00:00',
                 file_path='intake/analyses/01TEST/petitions/petition.pdf',
                 name='petition.pdf',
             ),
         )
         analysis = AnalysesFaker.fake(
             analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
-            status=CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value,
+            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
         )
         self.petitions_repository_mock.find_by_id.return_value = petition
         self.analisyses_repository_mock.find_by_id.return_value = analysis
@@ -73,7 +78,8 @@ class TestRequestPetitionSummaryUseCase:
         published_event = self.broker_mock.publish.call_args.args[0]
 
         assert (
-            updated_analysis.status == CaseAssessmentAnalysisStatus.ANALYZING_CASE.value
+            updated_analysis.status
+            == FirstInstanceAnalysisStatus.create_as_analyzing_case()
         )
         assert isinstance(published_event, PetitionSummaryRequestedEvent)
         assert published_event.payload.petition_id == petition_id
@@ -107,7 +113,9 @@ class TestRequestPetitionSummaryUseCase:
         petition = PetitionsFaker.fake(
             petition_id=petition_id,
             analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
-            document=PetitionDocumentDto(
+            document=AnalysisDocumentDto(
+                analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+                uploaded_at='2026-03-31T10:30:00+00:00',
                 file_path='intake/analyses/01TEST/petitions/petition.pdf',
                 name='petition.pdf',
             ),

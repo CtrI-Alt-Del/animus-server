@@ -1,5 +1,5 @@
-from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
-    PetitionSummaryDto,
+from animus.core.intake.domain.structures.dtos.case_summary_dto import (
+    CaseSummaryDto,
 )
 from animus.core.shared.domain.decorators import structure
 from animus.core.shared.domain.abstracts import Structure
@@ -24,7 +24,7 @@ class PetitionSummary(Structure):
     excluded_or_accessory_topics: list[Text]
 
     @classmethod
-    def create(cls, dto: PetitionSummaryDto) -> 'PetitionSummary':
+    def create(cls, dto: CaseSummaryDto) -> 'PetitionSummary':
         return cls(
             case_summary=Text.create(dto.case_summary),
             legal_issue=Text.create(dto.legal_issue),
@@ -61,8 +61,8 @@ class PetitionSummary(Structure):
         )
 
     @property
-    def dto(self) -> PetitionSummaryDto:
-        return PetitionSummaryDto(
+    def dto(self) -> CaseSummaryDto:
+        return CaseSummaryDto(
             case_summary=self.case_summary.value,
             legal_issue=self.legal_issue.value,
             central_question=self.central_question.value,

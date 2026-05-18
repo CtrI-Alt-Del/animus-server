@@ -90,8 +90,5 @@ class TestUpdateAnalysisStatusController:
         assert response.status_code == 400
         assert response.json() == {
             'title': 'Erro de validação',
-            'message': (
-                'Status de analise invalido para analise de case assessment '
-                'ou primeira instancia: invalid_status'
-            ),
+            'message': 'Status de analise first instance invalido: invalid_status',
         }

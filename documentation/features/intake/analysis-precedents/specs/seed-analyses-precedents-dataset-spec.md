@@ -18,12 +18,12 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 - Criar o `SeedAnalysesPrecedentsDatasetJob` em `Inngest` para processamento em lote das peticoes de `intake/xertica/petitions/`.
 - Resolver a conta tecnica existente pelo e-mail `animus.ctrlaltdel@gmail.com` antes de criar as `Analysis` do lote.
-- Reutilizar os fluxos existentes de criacao de `Analysis`, criacao de `Petition`, leitura do documento, resumo da peticao e busca de precedentes.
+- Reutilizar os fluxos existentes de criacao de `Analysis`, criacao de `Petition`, leitura do documento, resumo da petição e busca de precedentes.
 - Permitir que a busca interna do job persista `20` `AnalysisPrecedent` por analise, sem ampliar o limite do endpoint publico.
 - Criar o workflow de classificacao de aplicabilidade dos precedentes da analise.
 - Persistir `AnalysisPrecedentApplicabilityFeedback` apenas quando a classificacao retornar `confidence = high`.
 - Persistir `AnalysisPrecedentDatasetRow` derivado de cada feedback salvo.
-- Exportar as linhas geradas no lote atual para `intake/datasets/analysis-precedents/{ulid}-{date}.parquet`.
+- Exportar as linhas geradas no lote atual para `intake/datasets/analyses-precedents/{ulid}-{date}.parquet`.
 - Tornar o job seguro para reexecucao, evitando recriar processamento para o mesmo `document_file_path` ja semeado.
 
 ## 2.2 Out-of-scope
@@ -47,12 +47,12 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - O job deve extrair o conteudo do PDF via `GetDocumentContentUseCase` e gerar `PetitionSummary` pelo workflow atual de resumo.
 - O job deve executar a busca de precedentes usando o pipeline atual de embeddings e `Qdrant`, retornando `20` candidatos persistidos por analise.
 - O job nao deve gerar `synthesis` dos precedentes nesse fluxo; a persistencia deve ocorrer com `synthesis=None`.
-- O workflow de classificacao deve receber o resumo da peticao e a lista de `AnalysisPrecedent` persistidos da analise.
+- O workflow de classificacao deve receber o resumo da petição e a lista de `AnalysisPrecedent` persistidos da analise.
 - O workflow deve executar os steps `BUILD_CLASSIFICATION_INPUT` -> `CLASSIFY_PRECEDENTS_APPLICABILITY` -> `CREATE_CLASSIFICATIONS`.
 - A saida do agente deve incluir, por precedente, o nivel de aplicabilidade e um `confidence` textual.
 - Apenas classificacoes com `confidence = high` devem gerar `AnalysisPrecedentApplicabilityFeedback` com `is_from_human=False`.
 - Para cada feedback salvo, deve ser criada uma `AnalysisPrecedentDatasetRow` com os atributos necessarios para treino.
-- Ao final do lote, o job deve exportar as linhas geradas no processamento atual para `intake/datasets/analysis-precedents/{ulid}-{date}.parquet`.
+- Ao final do lote, o job deve exportar as linhas geradas no processamento atual para `intake/datasets/analyses-precedents/{ulid}-{date}.parquet`.
 - Se um `document_file_path` ja tiver sido processado anteriormente, o job deve pular o arquivo e seguir para o proximo.
 
 ## 3.2 Nao funcionais
@@ -71,7 +71,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 ## Core (Intake)
 
 - **`CreateAnalysisUseCase`** (`src/animus/core/intake/use_cases/create_analysis_use_case.py`) - cria uma `Analysis` com nome gerado e `status=WAITING_PETITION`.
-- **`CreatePetitionUseCase`** (`src/animus/core/intake/use_cases/create_petition_use_case.py`) - cria a `Petition`, atualiza o status da analise e trata substituicao de peticao.
+- **`CreatePetitionUseCase`** (`src/animus/core/intake/use_cases/create_petition_use_case.py`) - cria a `Petition`, atualiza o status da analise e trata substituicao de petição.
 - **`CreatePetitionSummaryUseCase`** (`src/animus/core/intake/use_cases/create_petition_summary_use_case.py`) - persiste o resumo e move a analise para `PETITION_ANALYZED`.
 - **`SearchAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/search_analysis_precedents_use_case.py`) - executa embeddings, busca vetorial, deduplicacao, score e ordenacao dos precedentes.
 - **`CreateAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/create_analysis_precedents_use_case.py`) - persiste os `AnalysisPrecedent` e atualiza a analise para `WAITING_PRECEDENT_CHOISE`; ja suporta `synthesis_output=None`.
@@ -112,7 +112,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - **`GcsFileStorageProvider`** (`src/animus/providers/storage/file_storage/gcs/gcs_file_storage_provider.py`) - provider concreto de `GCS`, com `client`, `get_file(...)` e `upload_files(...)`.
 - **`GetDocumentContentUseCase`** (`src/animus/core/storage/use_cases/get_document_content_use_case.py`) - leitura reutilizavel de PDF/DOCX a partir de `FileStorageProvider`.
 - **`StorageSeeder`** (`src/animus/database/sqlalchemy/seeders/storage_seeder.py`) - referencia de acesso direto ao `client` do `GcsFileStorageProvider` para operacoes de bucket/prefixo.
-- **`OpenAIPetitionSummaryEmbeddingsProvider`** (`src/animus/providers/intake/petition_summary_embeddings/openai/openai_petition_summary_embeddings_provider.py`) - provider atual de embeddings do resumo.
+- **`OpenAICaseSummaryEmbeddingsProvider`** (`src/animus/providers/intake/petition_summary_embeddings/openai/openai_petition_summary_embeddings_provider.py`) - provider atual de embeddings do resumo.
 
 ## PubSub
 
@@ -257,8 +257,8 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - **Passos (`step.run`):**
 - `resolve_account` - resolve a conta pelo e-mail `animus.ctrlaltdel@gmail.com`.
 - `list_petition_files` - lista os blobs `*.pdf` do prefixo `intake/xertica/petitions/`.
-- `process_file_<n>` - para cada arquivo: verifica idempotencia por `document_file_path`, cria `Analysis`, cria `Petition`, resume a peticao, busca `20` precedentes, persiste precedentes sem sintese e classifica aplicabilidade.
-- `export_dataset` - gera um `ULID`, monta dois caminhos distintos, `local_file_path` temporario e `bucket_file_path=intake/datasets/analysis-precedents/{ulid}-{date}.parquet`, delega a escrita local ao `ParquetProvider` e depois faz upload do arquivo temporario para o `GCS` no caminho final do bucket.
+- `process_file_<n>` - para cada arquivo: verifica idempotencia por `document_file_path`, cria `Analysis`, cria `Petition`, resume a petição, busca `20` precedentes, persiste precedentes sem sintese e classifica aplicabilidade.
+- `export_dataset` - gera um `ULID`, monta dois caminhos distintos, `local_file_path` temporario e `bucket_file_path=intake/datasets/analyses-precedents/{ulid}-{date}.parquet`, delega a escrita local ao `ParquetProvider` e depois faz upload do arquivo temporario para o `GCS` no caminho final do bucket.
 - **Idempotencia:** arquivos com `document_file_path` ja encontrado em `PetitionsRepository.find_by_document_file_path(...)` devem ser ignorados; feedbacks e dataset rows usam `replace` pela chave natural `analysis_id + precedent_id`.
 
 ## Camada Providers
@@ -433,14 +433,14 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## 8.9 Exportar `parquet` com nome unico por execucao
 
-- **Decisao:** cada execucao deve gerar `intake/datasets/analysis-precedents/{ulid}-{date}.parquet`.
+- **Decisao:** cada execucao deve gerar `intake/datasets/analyses-precedents/{ulid}-{date}.parquet`.
 - **Alternativas consideradas:** usar apenas `{date}.parquet`; sobrescrever o arquivo do mesmo dia.
 - **Motivo da escolha:** evita colisao entre execucoes no mesmo dia e facilita rastrear o artefato produzido por cada run.
 - **Impactos / trade-offs:** multiplos arquivos podem ser gerados no mesmo dia, exigindo criterio de consumo posterior fora do escopo desta task.
 
 ## 8.10 Separar caminho local temporario do caminho final no bucket
 
-- **Decisao:** o fluxo deve trabalhar com dois caminhos distintos no `export_dataset`: um `local_file_path` temporario para a escrita do `.parquet` e um `bucket_file_path` final em `intake/datasets/analysis-precedents/{ulid}-{date}.parquet` para upload.
+- **Decisao:** o fluxo deve trabalhar com dois caminhos distintos no `export_dataset`: um `local_file_path` temporario para a escrita do `.parquet` e um `bucket_file_path` final em `intake/datasets/analyses-precedents/{ulid}-{date}.parquet` para upload.
 - **Alternativas consideradas:** fazer o `ParquetProvider` escrever diretamente no bucket; reutilizar o mesmo valor de `FilePath` para escrita local e remota.
 - **Motivo da escolha:** a escrita com `pyarrow` acontece no filesystem local do processo, enquanto o artefato definitivo precisa existir como objeto remoto no `GCS`; explicitar os dois caminhos elimina ambiguidade de implementacao.
 - **Impactos / trade-offs:** o job precisa coordenar a etapa adicional de upload e limpeza do arquivo temporario, mas o contrato do provider fica simples e focado em serializacao.
@@ -469,7 +469,7 @@ Inngest TriggerEvent
             -> CreateAnalysisPrecedentDatasetRowUseCase.execute(...)
   -> generate ULID + date
   -> build local_file_path=/tmp/.../{ulid}-{date}.parquet
-  -> build bucket_file_path=intake/datasets/analysis-precedents/{ulid}-{date}.parquet
+  -> build bucket_file_path=intake/datasets/analyses-precedents/{ulid}-{date}.parquet
   -> ParquetProvider.write_analysis_precedents_dataset(rows, local_file_path)
   -> upload local_file_path to bucket_file_path
   -> remove local temp file

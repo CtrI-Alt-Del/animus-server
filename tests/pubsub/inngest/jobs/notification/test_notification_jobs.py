@@ -1,14 +1,18 @@
 import time
 from typing import Any
+
 import pytest
 from pytest import MonkeyPatch
-from animus.providers.notification import OneSignalPushNotificationProvider
-from animus.core.shared.domain.structures import Id
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
-from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from sqlalchemy.orm import Session, sessionmaker
+
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
+from animus.core.shared.domain.structures import Id
+from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
+from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
+from animus.providers.notification import OneSignalPushNotificationProvider
 
 
 def _seed_analysis(
@@ -24,8 +28,8 @@ def _seed_analysis(
             name='Analise de teste',
             account_id=account_id,
             folder_id=None,
-            type=AnalysisType.FIRST_INSTANCE.value,
-            status=AnalysisStatusValue.PETITION_ANALYZED.value,
+            type=AnalysisType.create_as_first_instance().dto,
+            status=FirstInstanceAnalysisStatus.create_as_case_analyzed().dto,
             is_archived=False,
         )
     )

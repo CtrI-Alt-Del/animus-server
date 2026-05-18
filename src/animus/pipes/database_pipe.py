@@ -18,7 +18,7 @@ from animus.core.intake.interfaces.extracted_petitions_repository import (
     ExtractedPetitionsRepository,
 )
 from animus.core.intake.interfaces.judgment_drafts_repository import (
-    JudgmentDraftsRepository,
+    SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
@@ -35,7 +35,7 @@ from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalisysesRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemyExtractedPetitionsRepository,
-    SqlalchemyJudgmentDraftsRepository,
+    SqlalchemySecondInstanceJudgmentDraftsRepository,
     SqlalchemyPetitionDraftsRepository,
     SqlalchemyPetitionSummariesRepository,
     SqlalchemyPetitionsRepository,
@@ -93,8 +93,8 @@ class DatabasePipe:
     @staticmethod
     def get_judgment_drafts_repository_from_request(
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
-    ) -> JudgmentDraftsRepository:
-        return SqlalchemyJudgmentDraftsRepository(sqlalchemy)
+    ) -> SecondInstanceJudgmentDraftsRepository:
+        return SqlalchemySecondInstanceJudgmentDraftsRepository(sqlalchemy)
 
     @staticmethod
     def get_analisyses_repository_from_request(

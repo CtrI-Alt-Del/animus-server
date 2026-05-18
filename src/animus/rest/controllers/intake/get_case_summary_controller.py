@@ -14,7 +14,7 @@ class GetCaseSummaryController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/analysis/{analysis_id}/case-summaries',
+            '/analyses/{analysis_id}/case-summaries',
             status_code=200,
             response_model=CaseSummaryDto,
         )

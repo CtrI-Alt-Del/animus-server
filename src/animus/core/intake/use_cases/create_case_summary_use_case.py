@@ -1,12 +1,15 @@
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
-)
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
-    SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.errors import (
     AnalysisDocumentNotFoundError,
     AnalysisNotFoundError,
+)
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
@@ -57,10 +60,12 @@ class CreateCaseSummaryUseCase:
         if analysis is None:
             raise AnalysisNotFoundError
 
-        if analysis.type.uses_case_assessment_or_first_instance_flow():
-            analysis.set_status(CaseAssessmentAnalysisStatus.CASE_ANALYZED)
-        else:
-            analysis.set_status(SecondInstanceAnalysisStatus.CASE_ANALYZED)
+        if analysis.type.is_case_analysis.is_true:
+            analysis.set_status(CaseAssessmentAnalysisStatus.create_as_case_analyzed())
+        elif analysis.type.is_first_instance.is_true:
+            analysis.set_status(FirstInstanceAnalysisStatus.create_as_case_analyzed())
+        elif analysis.type.is_second_instance.is_true:
+            analysis.set_status(SecondInstanceAnalysisStatus.create_as_case_analyzed())
 
         self._analisyses_repository.replace(analysis)
         return case_summary.dto

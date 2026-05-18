@@ -47,9 +47,9 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 - O `classification_level` deve ser derivado de `applicability_percentage` por regra deterministica no `UseCase`.
 - O endpoint deve retornar `404` quando a analise nao existir (`AnalysisNotFoundError`).
 - O endpoint deve retornar `403` quando a analise existir, mas pertencer a outra conta (`ForbiddenError`).
-- O endpoint deve reutilizar os contratos atuais de leitura de peticao e resumo:
-  - `PetitionNotFoundError` quando nao houver peticao para a analise.
-  - `PetitionSummaryUnavailableError` quando nao houver resumo da peticao.
+- O endpoint deve reutilizar os contratos atuais de leitura de petição e resumo:
+  - `PetitionNotFoundError` quando nao houver petição para a analise.
+  - `PetitionSummaryUnavailableError` quando nao houver resumo da petição.
 
 ## 3.2 Nao funcionais
 
@@ -67,7 +67,7 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 - **`AnalysisReportDto`** (`src/animus/core/intake/domain/structures/dtos/analysis_report_dto.py`) — contrato de relatorio ja existente, ainda modelado com `precedents: list[PrecedentDto]` e `chosen_precedent`.
 - **`AnalysisPrecedentDto`** (`src/animus/core/intake/domain/structures/dtos/analysis_precedent_dto.py`) — DTO ja usado na listagem de precedentes; contem `is_chosen`, `applicability_percentage` e `synthesis`.
 - **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) — porta para busca da analise por ID (`find_by_id`).
-- **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) — porta para busca da peticao da analise (`find_by_analysis_id`).
+- **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) — porta para busca da petição da analise (`find_by_analysis_id`).
 - **`PetitionSummariesRepository`** (`src/animus/core/intake/interfaces/petition_summaries_repository.py`) — porta para busca do resumo por analise (`find_by_analysis_id`).
 - **`AnalysisPrecedentsRepository`** (`src/animus/core/intake/interfaces/analysis_precedents_repository.py`) — porta para listagem de precedentes da analise (`find_many_by_analysis_id`).
 - **`GetAnalysisUseCase`** (`src/animus/core/intake/use_cases/get_analysis_use_case.py`) — referencia de leitura por `analysis_id`, com validacao de ownership no `core`.
@@ -76,7 +76,7 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 ## Database
 
 - **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) — implementa lookup de analise por ID.
-- **`SqlalchemyPetitionsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petitions_repository.py`) — implementa lookup de peticao por `analysis_id`.
+- **`SqlalchemyPetitionsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petitions_repository.py`) — implementa lookup de petição por `analysis_id`.
 - **`SqlalchemyPetitionSummariesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petition_summaries_repository.py`) — implementa lookup de summary por `analysis_id`.
 - **`SqlalchemyAnalysisPrecedentsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedents_repository.py`) — retorna precedentes ordenados por `applicability_percentage desc`.
 - **`AnalysisPrecedentModel`** (`src/animus/database/sqlalchemy/models/intake/analysis_precedent_model.py`) — persistencia de `is_chosen`, `applicability_percentage` e `synthesis`.
@@ -85,7 +85,7 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 
 - **`GetAnalysisController`** (`src/animus/rest/controllers/intake/get_analysis_controller.py`) — referencia de endpoint `GET` por `analysis_id` com `AuthPipe` + `DatabasePipe`.
 - **`ListAnalysisPrecedentsController`** (`src/animus/rest/controllers/intake/list_analysis_precedents_controller.py`) — referencia de retorno `list[AnalysisPrecedentDto]` no contexto `intake`.
-- **`GetAnalysisPetitionController`** (`src/animus/rest/controllers/intake/get_analysis_petition_controller.py`) — referencia de leitura de peticao por analise.
+- **`GetAnalysisPetitionController`** (`src/animus/rest/controllers/intake/get_analysis_petition_controller.py`) — referencia de leitura de petição por analise.
 - **`GetAnalysisStatusController`** (`src/animus/rest/controllers/intake/get_analysis_status_controller.py`) — referencia de endpoint de leitura simples no mesmo modulo.
 - **`AppErrorHandler`** (`src/animus/rest/handlers/app_error_handler.py`) — tradutor global de erros de dominio para status HTTP (`404`, `403`, `409`, etc.).
 
@@ -117,7 +117,7 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
   - normaliza `analysis_id` e `account_id` para `Id`
   - busca analise por `find_by_id`
   - valida ownership (`analysis.account_id == account_id`), levantando `ForbiddenError` em divergencia
-  - busca peticao e resumo por `analysis_id`
+  - busca petição e resumo por `analysis_id`
   - busca precedentes vinculados por `analysis_id`
   - deriva `classification_level` para cada precedente
   - retorna `AnalysisReportDto`

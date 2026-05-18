@@ -1,5 +1,5 @@
 from .generate_petition_upload_url_controller import (
-    GeneratePetitionUploadUrlController,
+    GenerateAnalysisDocumentUploadUrlController,
 )
 
-__all__ = ['GeneratePetitionUploadUrlController']
+__all__ = ['GenerateAnalysisDocumentUploadUrlController']

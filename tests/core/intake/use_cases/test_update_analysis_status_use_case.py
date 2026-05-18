@@ -42,7 +42,7 @@ class TestUpdateAnalysisStatusUseCase:
             Id.create('01ARZ3NDEKTSV4RRFFQ69G5FAV')
         )
         self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
-        assert analysis.status == 'SEARCHING_PRECEDENTS'
+        assert analysis.status.dto == 'SEARCHING_PRECEDENTS'
 
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
         self,

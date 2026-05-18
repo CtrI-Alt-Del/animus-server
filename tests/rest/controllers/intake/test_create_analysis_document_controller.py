@@ -2,8 +2,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
-    CaseAssessmentAnalysisStatus,
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
 )
 from animus.database.sqlalchemy.models.intake import (
     AnalysisDocumentModel,
@@ -29,7 +29,7 @@ class TestCreateAnalysisDocumentController:
         analysis = create_analysis(account_id=account.id)
 
         response = client.post(
-            f'/intake/analysis/{analysis.id}/document',
+            f'/intake/analyses/{analysis.id}/document',
             json={
                 'uploaded_at': '2026-03-27T10:30:00+00:00',
                 'file_path': 'intake/analyses/document.pdf',
@@ -54,7 +54,7 @@ class TestCreateAnalysisDocumentController:
         assert persisted_analysis is not None
         assert (
             persisted_analysis.status
-            == CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value
+            == FirstInstanceAnalysisStatus.create_as_document_uploaded().dto
         )
         assert response.json() == {
             'analysis_id': analysis.id,
@@ -80,7 +80,7 @@ class TestCreateAnalysisDocumentController:
         analysis = create_analysis(account_id=owner_account.id)
 
         response = client.post(
-            f'/intake/analysis/{analysis.id}/document',
+            f'/intake/analyses/{analysis.id}/document',
             json={
                 'uploaded_at': '2026-03-27T10:30:00+00:00',
                 'file_path': 'intake/analyses/document.pdf',
@@ -107,7 +107,7 @@ class TestCreateAnalysisDocumentController:
         analysis = create_analysis(account_id=account.id)
 
         response = client.post(
-            f'/intake/analysis/{analysis.id}/document',
+            f'/intake/analyses/{analysis.id}/document',
             json={
                 'uploaded_at': '2026-03-27T10:30:00+00:00',
                 'file_path': 'intake/analyses/document.pdf',

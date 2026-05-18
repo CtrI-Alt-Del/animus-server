@@ -17,8 +17,8 @@ from animus.core.intake.domain.structures.dtos.analysis_precedent_dataset_row_dt
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
 )
-from animus.core.intake.domain.structures.dtos.petition_summary_dto import (
-    PetitionSummaryDto,
+from animus.core.intake.domain.structures.dtos.case_summary_dto import (
+    CaseSummaryDto,
 )
 from animus.core.intake.interfaces.classify_analysis_precedents_applicability_workflow import (
     ClassifyAnalysisPrecedentsApplicabilityWorkflow,
@@ -46,7 +46,7 @@ class _StepNames(NamedTuple):
 
 
 def build_classification_prompt(
-    petition_summary_dto: PetitionSummaryDto,
+    petition_summary_dto: CaseSummaryDto,
     precedents_input: list[str],
 ) -> str:
     return dedent(

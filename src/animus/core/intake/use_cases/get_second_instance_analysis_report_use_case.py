@@ -23,6 +23,9 @@ from animus.core.intake.interfaces.analysis_precedents_repository import (
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
+from animus.core.intake.interfaces.judgment_drafts_repository import (
+    SecondInstanceJudgmentDraftsRepository,
+)
 from animus.core.shared.domain.errors.forbidden_error import ForbiddenError
 from animus.core.shared.domain.structures import Id
 
@@ -34,11 +37,14 @@ class GetSecondInstanceAnalysisReportUseCase:
         analysis_documents_repository: AnalysisDocumentsRepository,
         case_summaries_repository: CaseSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
+        judgment_drafts_repository: SecondInstanceJudgmentDraftsRepository
+        | None = None,
     ) -> None:
         self._analisyses_repository = analisyses_repository
         self._analysis_documents_repository = analysis_documents_repository
         self._case_summaries_repository = case_summaries_repository
         self._analysis_precedents_repository = analysis_precedents_repository
+        self._judgment_drafts_repository = judgment_drafts_repository
 
     def execute(
         self, analysis_id: str, account_id: str
@@ -67,22 +73,18 @@ class GetSecondInstanceAnalysisReportUseCase:
         )
 
         classified_precedents = analysis_precedents_response.items
-
-        chosen_precedent = next(
-            (
-                precedent
-                for precedent in classified_precedents
-                if precedent.is_chosen.is_true
-            ),
-            None,
-        )
+        judgment_draft = None
+        if self._judgment_drafts_repository is not None:
+            judgment_draft = self._judgment_drafts_repository.find_by_analysis_id(
+                id_analysis,
+            )
 
         report = SecondInstanceAnalysisReport(
             analysis=analysis,
             document=document,
             case_summary=case_summary,
             precedents=classified_precedents,
-            chosen_precedent=chosen_precedent,
+            draft=judgment_draft,
         )
 
         return report.dto

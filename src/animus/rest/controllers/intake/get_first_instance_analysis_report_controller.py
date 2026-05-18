@@ -8,7 +8,7 @@ from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalisysesRepository,
     CaseSummariesRepository,
-    JudgmentDraftsRepository,
+    SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.intake.use_cases import GetFirstInstanceAnalysisReportUseCase
 from animus.core.shared.domain.structures import Id
@@ -44,7 +44,7 @@ class GetFirstInstanceAnalysisReportController:
                 Depends(DatabasePipe.get_analysis_precedents_repository_from_request),
             ],
             judgment_drafts_repository: Annotated[
-                JudgmentDraftsRepository,
+                SecondInstanceJudgmentDraftsRepository,
                 Depends(DatabasePipe.get_judgment_drafts_repository_from_request),
             ],
         ) -> FirstInstanceAnalysisReportDto:

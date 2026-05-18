@@ -4,8 +4,8 @@ from openai import OpenAI
 
 from animus.constants.env import Env
 from animus.core.intake.domain.structures.case_summary import CaseSummary
-from animus.core.intake.domain.structures.petition_summary_embedding import (
-    PetitionSummaryEmbedding,
+from animus.core.intake.domain.structures.case_summary_embedding import (
+    CaseSummaryEmbedding,
 )
 from animus.core.intake.interfaces.case_summary_embeddings_provider import (
     CaseSummaryEmbeddingsProvider,
@@ -21,12 +21,12 @@ class OpenAICaseSummaryEmbeddingsProvider(CaseSummaryEmbeddingsProvider):
         self._client = OpenAI(api_key=Env.OPENAI_API_KEY)
         self._model = 'text-embedding-3-large'
 
-    def generate(self, case_summary: CaseSummary) -> list[PetitionSummaryEmbedding]:
+    def generate(self, case_summary: CaseSummary) -> list[CaseSummaryEmbedding]:
         texts = _ChunkBuilder(case_summary).build()
         vectors = self._embed(texts)
 
         return [
-            PetitionSummaryEmbedding.create(
+            CaseSummaryEmbedding.create(
                 vector=[Decimal.create(float(v)) for v in vector],
                 chunk=Text.create(chunk),
             )

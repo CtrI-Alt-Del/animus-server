@@ -1,5 +1,4 @@
 from animus.core.intake.domain.entities.analysis import Analysis
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     PetitionNotFoundError,
@@ -43,5 +42,5 @@ class RequestPetitionSummaryUseCase:
 
     @staticmethod
     def _create_analysis_with_analyzing_petition_status(analysis: Analysis) -> Analysis:
-        analysis.set_status(AnalysisStatusValue.ANALYZING_PETITION.value)
+        analysis.set_status('ANALYZING_CASE')
         return analysis

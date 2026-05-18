@@ -3,12 +3,12 @@ from unittest.mock import create_autospec
 import pytest
 
 from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.events import PetitionReplacedEvent
@@ -55,9 +55,9 @@ class TestCreateAnalysisDocumentUseCase:
                 id=analysis_id,
                 name='Analise',
                 account_id=Id.create().value,
-                status=CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD.value,
+                status=CaseAssessmentAnalysisStatus.create_as_waiting_document_upload().dto,
                 created_at='2026-03-31T10:30:00+00:00',
-                type=AnalysisType.CASE_ASSESSMENT,
+                type=AnalysisType.create_as_case_assessment().dto,
             )
         )
 
@@ -91,7 +91,7 @@ class TestCreateAnalysisDocumentUseCase:
         )
         assert (
             updated_analysis.status
-            == CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value
+            == CaseAssessmentAnalysisStatus.create_as_document_uploaded()
         )
 
     def test_should_replace_analysis_document_publish_event_and_update_second_instance_status(
@@ -103,9 +103,9 @@ class TestCreateAnalysisDocumentUseCase:
                 id=analysis_id,
                 name='Analise',
                 account_id=Id.create().value,
-                status=SecondInstanceAnalysisStatus.WAITING_DOCUMENT_UPLOAD.value,
+                status=SecondInstanceAnalysisStatus.create_as_waiting_document_upload().dto,
                 created_at='2026-03-31T10:30:00+00:00',
-                type=AnalysisType.SECOND_INSTANCE,
+                type=AnalysisType.create_as_second_instance().dto,
             )
         )
         existing_document = AnalysisDocument.create(
@@ -145,7 +145,7 @@ class TestCreateAnalysisDocumentUseCase:
         assert result.file_path == 'intake/analyses/new-document.pdf'
         assert (
             updated_analysis.status
-            == SecondInstanceAnalysisStatus.DOCUMENT_UPLOADED.value
+            == SecondInstanceAnalysisStatus.create_as_document_uploaded()
         )
 
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(

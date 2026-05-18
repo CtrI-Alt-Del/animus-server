@@ -4,13 +4,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.database.sqlalchemy.models.intake import (
     AnalysisDocumentModel,
     AnalysisModel,
     AnalysisPrecedentModel,
     CaseSummaryModel,
-    JudgmentDraftModel,
+    SecondInstanceJudgmentDraftModel,
     PetitionDraftModel,
     PrecedentModel,
 )
@@ -22,7 +22,7 @@ def _create_report_analysis(
     sqlalchemy_session_factory: sessionmaker[Session],
     *,
     account_id: str,
-    analysis_type: AnalysisType,
+    analysis_type: str,
     with_case_summary: bool = True,
     with_petition_draft: bool = False,
     with_judgment_draft: bool = False,
@@ -36,7 +36,7 @@ def _create_report_analysis(
             name='Analise completa',
             folder_id=None,
             account_id=account_id,
-            type=analysis_type.value,
+            type=analysis_type,
             status='DONE',
             is_archived=False,
             created_at=datetime.now(UTC),
@@ -66,14 +66,17 @@ def _create_report_analysis(
         session.add(
             PetitionDraftModel(
                 analysis_id=analysis_id,
-                content='Minuta de peticao',
+                content='Minuta de petição',
             )
         )
     if with_judgment_draft:
         session.add(
-            JudgmentDraftModel(
+            SecondInstanceJudgmentDraftModel(
                 analysis_id=analysis_id,
-                content='Minuta de julgamento',
+                report='Relatorio',
+                merit_analysis='Fundamentacao',
+                precedent_adherence_analysis='Aderencia',
+                ruling=['Dispositivo'],
             )
         )
     session.add(
@@ -104,7 +107,7 @@ def _create_report_analysis(
 
 
 class TestGetSecondInstanceAnalysisReportController:
-    def test_should_return_200_when_second_instance_analysis_exists(
+    def test_should_return_200_with_draft_when_second_instance_analysis_has_draft(
         self,
         client: TestClient,
         create_account: CreateAccountFixture,
@@ -115,7 +118,8 @@ class TestGetSecondInstanceAnalysisReportController:
         analysis_id = _create_report_analysis(
             sqlalchemy_session_factory,
             account_id=account.id,
-            analysis_type=AnalysisType.SECOND_INSTANCE,
+            analysis_type=AnalysisType.create_as_second_instance().dto,
+            with_judgment_draft=True,
         )
 
         response = client.get(
@@ -125,10 +129,44 @@ class TestGetSecondInstanceAnalysisReportController:
 
         assert response.status_code == 200
         payload = response.json()
-        assert payload['analysis']['type'] == AnalysisType.SECOND_INSTANCE.value
+        assert (
+            payload['analysis']['type'] == AnalysisType.create_as_second_instance().dto
+        )
         assert payload['document']['analysis_id'] == analysis_id
         assert payload['case_summary']['case_summary'] == 'Resumo'
-        assert payload['chosen_precedent']['analysis_id'] == analysis_id
+        assert len(payload['precedents']) == 1
+        assert payload['precedents'][0]['analysis_id'] == analysis_id
+        assert payload['draft'] == {
+            'analysis_id': analysis_id,
+            'report': 'Relatorio',
+            'merit_analysis': 'Fundamentacao',
+            'precedent_adherence_analysis': 'Aderencia',
+            'ruling': ['Dispositivo'],
+            'preliminary_issues': None,
+            'no_applicable_precedent_notice': None,
+        }
+
+    def test_should_return_200_without_draft_when_second_instance_analysis_has_no_draft(
+        self,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+        sqlalchemy_session_factory: sessionmaker[Session],
+    ) -> None:
+        account = create_account(is_verified=True, is_active=True)
+        analysis_id = _create_report_analysis(
+            sqlalchemy_session_factory,
+            account_id=account.id,
+            analysis_type=AnalysisType.create_as_second_instance().dto,
+        )
+
+        response = client.get(
+            f'/intake/analyses/{analysis_id}/second-instance-report',
+            headers=build_auth_headers(account.id),
+        )
+
+        assert response.status_code == 200
+        assert response.json()['draft'] is None
 
 
 class TestGetCaseAssessmentAnalysisReportController:
@@ -143,7 +181,7 @@ class TestGetCaseAssessmentAnalysisReportController:
         analysis_id = _create_report_analysis(
             sqlalchemy_session_factory,
             account_id=account.id,
-            analysis_type=AnalysisType.CASE_ASSESSMENT,
+            analysis_type=AnalysisType.create_as_case_assessment().dto,
             with_petition_draft=True,
         )
 
@@ -154,10 +192,12 @@ class TestGetCaseAssessmentAnalysisReportController:
 
         assert response.status_code == 200
         payload = response.json()
-        assert payload['analysis']['type'] == AnalysisType.CASE_ASSESSMENT.value
+        assert (
+            payload['analysis']['type'] == AnalysisType.create_as_case_assessment().dto
+        )
         assert payload['petition_draft'] == {
             'analysis_id': analysis_id,
-            'content': 'Minuta de peticao',
+            'content': 'Minuta de petição',
         }
         assert payload['chosen_precedent'] is not None
         assert payload['chosen_precedent']['is_chosen'] is True
@@ -175,7 +215,7 @@ class TestGetFirstInstanceAnalysisReportController:
         analysis_id = _create_report_analysis(
             sqlalchemy_session_factory,
             account_id=account.id,
-            analysis_type=AnalysisType.FIRST_INSTANCE,
+            analysis_type=AnalysisType.create_as_first_instance().dto,
             with_judgment_draft=True,
         )
 
@@ -186,8 +226,15 @@ class TestGetFirstInstanceAnalysisReportController:
 
         assert response.status_code == 200
         payload = response.json()
-        assert payload['analysis']['type'] == AnalysisType.FIRST_INSTANCE.value
+        assert (
+            payload['analysis']['type'] == AnalysisType.create_as_first_instance().dto
+        )
         assert payload['judgment_draft'] == {
             'analysis_id': analysis_id,
-            'content': 'Minuta de julgamento',
+            'report': 'Relatorio',
+            'merit_analysis': 'Fundamentacao',
+            'precedent_adherence_analysis': 'Aderencia',
+            'ruling': ['Dispositivo'],
+            'preliminary_issues': None,
+            'no_applicable_precedent_notice': None,
         }

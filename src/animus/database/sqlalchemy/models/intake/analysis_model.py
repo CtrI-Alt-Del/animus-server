@@ -56,7 +56,7 @@ class AnalysisModel(Model):
         cascade='all, delete-orphan',
     )
     judgment_draft: Mapped[Any] = relationship(
-        'JudgmentDraftModel',
+        'SecondInstanceJudgmentDraftModel',
         back_populates='analysis',
         uselist=False,
         cascade='all, delete-orphan',

@@ -174,10 +174,10 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
 
         prompt = dedent(
             f"""
-            Relacione os precedentes candidatos com a peticao e retorne uma sintese e as features jurídicas
+            Relacione os precedentes candidatos com a petição e retorne uma sintese e as features jurídicas
             para cada precedente no formato estruturado esperado.
 
-            Resumo da peticao:
+            Resumo da petição:
             - case_summary: {petition_summary_dto.case_summary}
             - legal_issue: {petition_summary_dto.legal_issue}
             - central_question: {petition_summary_dto.central_question}
