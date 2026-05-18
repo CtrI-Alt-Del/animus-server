@@ -26,6 +26,7 @@ from .rename_analysis_controller import RenameAnalysisController
 from .request_case_summary_controller import RequestCaseSummaryController
 from .search_analysis_precedents_controller import SearchAnalysisPrecedentsController
 from .summarize_petition_controller import SummarizePetitionController
+from .unarchive_analysis_controller import UnarchiveAnalysisController
 from .update_analysis_status_controller import UpdateAnalysisStatusController
 from .get_petition_summary_controller import GetPetitionSummaryController
 
@@ -51,6 +52,7 @@ __all__ = [
     'RequestCaseSummaryController',
     'SearchAnalysisPrecedentsController',
     'SummarizePetitionController',
+    'UnarchiveAnalysisController',
     'UpdateAnalysisStatusController',
     'GetFirstInstanceAnalysisReportController',
     'GetSecondInstanceAnalysisReportController',
