@@ -54,7 +54,6 @@ class AnalysesRouter:
         GetSecondInstanceAnalysisReportController.handle(router)
         RenameAnalysisController.handle(router)
         ArchiveAnalysesController.handle(router)
-        UnarchiveAnalysisController.handle(router)
         ListAnalysisPetitionsController.handle(router)
         SearchAnalysisPrecedentsController.handle(router)
         ListAnalysisPrecedentsController.handle(router)
