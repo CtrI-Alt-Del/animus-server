@@ -171,7 +171,9 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
                         'precedent_ids': [
                             precedent.precedent.id.value for precedent in precedents
                         ],
-                        'chosen_flags': [precedent.is_chosen.is_true for precedent in precedents],
+                        'chosen_flags': [
+                            precedent.is_chosen.is_true for precedent in precedents
+                        ],
                     }
                 )
                 return SecondInstanceJudgmentDraftDto(
@@ -193,10 +195,8 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
             staticmethod(lambda: _FakeWorkflow()),
         )
 
-        generate_and_persist = getattr(
-            GenerateSecondInstanceJudgmentDraftJob,
-            '_generate_and_persist_judgment_draft_sync',
-        )
+        job_class = cast('Any', GenerateSecondInstanceJudgmentDraftJob)
+        generate_and_persist = job_class._generate_and_persist_judgment_draft_sync  # noqa: SLF001
         generate_and_persist(payload)
 
         persisted_analysis = _get_analysis(
@@ -223,9 +223,7 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
         assert persisted_judgment_draft is not None
         assert persisted_judgment_draft.report == 'Relatorio'
         assert persisted_judgment_draft.merit_analysis == 'Fundamentacao'
-        assert (
-            persisted_judgment_draft.precedent_adherence_analysis == 'Aderencia'
-        )
+        assert persisted_judgment_draft.precedent_adherence_analysis == 'Aderencia'
         assert persisted_judgment_draft.ruling == ['Dispositivo']
 
     def test_should_mark_analysis_as_failed_when_failure_handler_receives_event_payload(
@@ -252,11 +250,9 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
             staticmethod(lambda: sqlalchemy_session_factory()),
         )
 
-        handle_failure = getattr(
-            GenerateSecondInstanceJudgmentDraftJob,
-            '_handle_failure',
-        )
-        asyncio.run(handle_failure(cast(Any, context)))
+        job_class = cast('Any', GenerateSecondInstanceJudgmentDraftJob)
+        handle_failure = job_class._handle_failure  # noqa: SLF001
+        asyncio.run(handle_failure(cast('Any', context)))
 
         persisted_analysis = _get_analysis(
             sqlalchemy_session_factory,

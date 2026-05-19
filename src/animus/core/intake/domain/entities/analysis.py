@@ -82,7 +82,7 @@ class Analysis(Entity):
 
     def archive(self) -> None:
         self.is_archived = Logical.create_true()
-        
+
     def unarchive(self) -> None:
         self.is_archived = Logical.create_false()
 
