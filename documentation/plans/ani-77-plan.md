@@ -21,7 +21,7 @@ Este documento detalha o plano de execução para a implementação da persistê
   - **Ação:** Adicionar campo `precedents_search_filters: AnalysisPrecedentsSearchFiltersDto | None = None`.
   - **Resultado:** Contrato de domínio preparado para o snapshot.
 - **T1.2: Evoluir Entidade `Analysis`**
-  - **Arquivo:** `src/animus/core/intake/domain/entities/analyses.py`
+  - **Arquivo:** `src/animus/core/intake/domain/entities/analysis.py`
   - **Ação:** Incluir campo no `create(...)`, atualizar serialização no método `dto`, e adicionar métodos explícitos `set_status(...)` e `set_precedents_search_filters(...)`.
   - **Resultado:** Entidade protege o estado e evita sobrescritas acidentais.
 - **T1.3: Ajustar `RequestAnalysisPrecedentsSearchUseCase`**
