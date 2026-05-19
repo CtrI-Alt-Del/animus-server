@@ -36,6 +36,7 @@ from .trigger_second_instance_case_summarization_controller import (
     TriggerSecondInstanceCaseSummarizationController,
 )
 from .unchoose_analysis_precedent_controller import UnchooseAnalysisPrecedentController
+from .unarchive_analysis_controller import UnarchiveAnalysisController
 from .update_analysis_status_controller import UpdateAnalysisStatusController
 
 __all__ = [
@@ -61,6 +62,7 @@ __all__ = [
     'TriggerSecondInstanceJudgmentDraftGenerationController',
     'SearchAnalysisPrecedentsController',
     'UnchooseAnalysisPrecedentController',
+    'UnarchiveAnalysisController',
     'UpdateAnalysisStatusController',
     'GetFirstInstanceAnalysisReportController',
     'GetSecondInstanceAnalysisReportController',
