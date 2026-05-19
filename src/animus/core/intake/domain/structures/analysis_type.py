@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from pydantic import ValidationError
-
 from animus.core.shared.domain.abstracts import Structure
 from animus.core.shared.domain.decorators import structure
+from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Logical
 
 
@@ -24,7 +23,7 @@ class AnalysisType(Structure):
         try:
             return cls(AnalysisTypeValue(value.upper()))
         except ValueError as error:
-            raise ValidationError(f'Tipo de precedente invalido: {value}') from error
+            raise ValidationError(f'Tipo de analise invalido: {value}') from error
 
     @classmethod
     def normalize(cls, value: str) -> AnalysisType:

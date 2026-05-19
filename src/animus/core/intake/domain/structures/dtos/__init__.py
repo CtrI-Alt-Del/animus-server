@@ -42,10 +42,6 @@ def __getattr__(name: str) -> Any:
             '.second_instance_judgment_draft_dto',
             'SecondInstanceJudgmentDraftDto',
         ),
-        'SecondInstanceAnalysisReportDraftDto': (
-            '.second_instance_analysis_report_draft',
-            'SecondInstanceAnalysisReportDraftDto',
-        ),
         'PetitionDraftDto': ('.petition_draft_dto', 'PetitionDraftDto'),
         'PetitionExtractionDto': (
             '.petition_extraction_dto',

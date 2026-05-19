@@ -29,7 +29,7 @@ class TestCreateAnalysisDocumentController:
         analysis = create_analysis(account_id=account.id)
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/document',
+            f'/intake/analyses/{analysis.id}/documents',
             json={
                 'uploaded_at': '2026-03-27T10:30:00+00:00',
                 'file_path': 'intake/analyses/document.pdf',
@@ -80,7 +80,7 @@ class TestCreateAnalysisDocumentController:
         analysis = create_analysis(account_id=owner_account.id)
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/document',
+            f'/intake/analyses/{analysis.id}/documents',
             json={
                 'uploaded_at': '2026-03-27T10:30:00+00:00',
                 'file_path': 'intake/analyses/document.pdf',
@@ -107,7 +107,7 @@ class TestCreateAnalysisDocumentController:
         analysis = create_analysis(account_id=account.id)
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/document',
+            f'/intake/analyses/{analysis.id}/documents',
             json={
                 'uploaded_at': '2026-03-27T10:30:00+00:00',
                 'file_path': 'intake/analyses/document.pdf',

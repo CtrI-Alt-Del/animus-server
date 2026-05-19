@@ -104,12 +104,30 @@ Content-Type: application/json
 }
 
 ### Obter documento principal da analise (GetAnalysisDocumentController)
-GET {{url}}/analyses/{{analysis_id}}/document
+GET {{url}}/analyses/{{analysis_id}}/documents
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Listar precedentes da analise (ListAnalysisPrecedentsController)
 GET {{url}}/analyses/{{analysis_id}}/precedents
 Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Obter precedente por identificador (GetPrecedentController)
+GET {{url}}/precedents/identifier?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Adicionar analysis precedent (CreateAnalysisPrecedentController)
+POST {{url}}/analyses/precedents
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "analysis_id": "{{analysis_id}}",
+  "identifier": {
+    "court": "{{precedent_court}}",
+    "kind": "{{precedent_kind}}",
+    "number": {{precedent_number}}
+  }
+}
 
 ### Disparar resumo de caso jurídico de primeira instância (TriggerFirstInstanceCaseSummarizationController)
 POST {{url}}/analyses/{{analysis_id}}/case-summaries

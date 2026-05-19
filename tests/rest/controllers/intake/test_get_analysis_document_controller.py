@@ -60,7 +60,7 @@ class TestGetAnalysisDocumentController:
         )
 
         response = client.get(
-            f'/intake/analyses/{analysis_id}/document',
+            f'/intake/analyses/{analysis_id}/documents',
             headers=build_auth_headers(account.id),
         )
 
@@ -81,7 +81,7 @@ class TestGetAnalysisDocumentController:
         account = create_account(is_verified=True, is_active=True)
 
         response = client.get(
-            '/intake/analyses/invalid-analysis-id/document',
+            '/intake/analyses/invalid-analysis-id/documents',
             headers=build_auth_headers(account.id),
         )
 

@@ -415,7 +415,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == CaseAssessmentAnalysisStatus.create_as_done().dto
+            == CaseAssessmentAnalysisStatus.create_as_precedents_searched().dto
         )
         analysis = _get_analysis(
             sqlalchemy_session_factory,

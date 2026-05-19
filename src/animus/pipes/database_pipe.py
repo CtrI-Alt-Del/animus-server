@@ -27,6 +27,7 @@ from animus.core.intake.interfaces.petition_drafts_repository import (
     PetitionDraftsRepository,
 )
 from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
+from animus.core.intake.interfaces.precedents_repository import PrecedentsRepository
 from animus.core.library.interfaces import FoldersRepository
 from animus.database.sqlalchemy.repositories.auth import SqlalchemyAccountsRepository
 from animus.database.sqlalchemy.repositories.intake import (
@@ -39,6 +40,7 @@ from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyPetitionDraftsRepository,
     SqlalchemyPetitionSummariesRepository,
     SqlalchemyPetitionsRepository,
+    SqlalchemyPrecedentsRepository,
 )
 from animus.database.sqlalchemy.repositories.library import SqlalchemyFoldersRepository
 
@@ -107,6 +109,12 @@ class DatabasePipe:
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
     ) -> AnalysisPrecedentsRepository:
         return SqlalchemyAnalysisPrecedentsRepository(sqlalchemy)
+
+    @staticmethod
+    def get_precedents_repository_from_request(
+        sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
+    ) -> PrecedentsRepository:
+        return SqlalchemyPrecedentsRepository(sqlalchemy)
 
     @staticmethod
     def get_folders_repository_from_request(
