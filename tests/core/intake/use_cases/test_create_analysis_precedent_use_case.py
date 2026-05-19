@@ -144,9 +144,7 @@ class TestCreateAnalysisPrecedentUseCase:
         )
         self.analisyses_repository_mock.find_by_id.return_value = analysis
         self.precedents_repository_mock.find_by_identifier.return_value = precedent
-        self.analysis_precedents_repository_mock.find_by_analysis_id_and_precedent_id.return_value = (
-            existing_analysis_precedent
-        )
+        self.analysis_precedents_repository_mock.find_by_analysis_id_and_precedent_id.return_value = existing_analysis_precedent
 
         result = self.use_case.execute(
             analysis_id=analysis_id,

@@ -27,7 +27,6 @@ from animus.rest.controllers.intake import (
     TriggerSecondInstanceJudgmentDraftGenerationController,
     UnarchiveAnalysisController,
     UnchooseAnalysisPrecedentController,
-    UnarchiveAnalysisController,
     UpdateAnalysisStatusController,
 )
 from animus.rest.controllers.intake.list_processing_analyses_controller import (
