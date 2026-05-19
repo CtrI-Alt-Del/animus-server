@@ -52,7 +52,7 @@ class TestGenerateAnalysisDocumentUploadUrlController:
         )
 
         response = self.client.post(
-            f'/storage/analyses/{analysis_id}/petitions/upload?document_type={document_type}'
+            f'/storage/analyses/{analysis_id}/documents?document_type={document_type}'
         )
 
         assert response.status_code == 201
@@ -64,7 +64,7 @@ class TestGenerateAnalysisDocumentUploadUrlController:
 
     def test_should_return_422_when_document_type_is_invalid(self) -> None:
         response = self.client.post(
-            '/storage/analyses/fake-analysis-123/petitions/upload?document_type=txt'
+            '/storage/analyses/fake-analysis-123/documents?document_type=txt'
         )
 
         assert response.status_code == 422

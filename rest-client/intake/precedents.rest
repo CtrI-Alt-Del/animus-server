@@ -1,0 +1,22 @@
+@url = {{BASE_URL}}/intake
+@precedent_court = STJ
+@precedent_kind = RR
+@precedent_number = 974
+
+### Obter precedente por identificador (GetPrecedentController)
+GET {{url}}/precedents/identifier?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Adicionar precedent a analise (CreateAnalysisPrecedentController)
+POST {{url}}/analyses/precedents
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "analysis_id": "01KRKEW0MNECWS8AQAJGFGZPC0",
+  "identifier": {
+    "court": "{{precedent_court}}",
+    "kind": "{{precedent_kind}}",
+    "number": {{precedent_number}}
+  }
+}

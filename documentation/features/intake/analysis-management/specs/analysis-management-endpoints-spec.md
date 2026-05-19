@@ -81,7 +81,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 
 ## Core
 
-- **`Analysis`** (`src/animus/core/intake/domain/entities/analyses.py`) — entidade de dominio ja existente, com `name`, `folder_id`, `account_id`, `status`, `is_archived`, `created_at`, `create(...)` e `dto`.
+- **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) — entidade de dominio ja existente, com `name`, `folder_id`, `account_id`, `status`, `is_archived`, `created_at`, `create(...)` e `dto`.
 - **`AnalysisStatus` e `AnalysisStatusValue`** (`src/animus/core/intake/domain/entities/analysis_status.py`) — estrutura de status ja existente; a criacao deve reutilizar `WAITING_PETITION`.
 - **`AnalysisDto`** (`src/animus/core/intake/domain/entities/dtos/analysis_dto.py`) — contrato de saida ja existente para representar a analise nas bordas.
 - **`AnalysisNotFoundError`** (`src/animus/core/intake/domain/errors/analysis_not_found_error.py`) — erro de dominio ja mapeado para `404` por `AppErrorHandler`.
@@ -254,7 +254,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 
 ## Camada Core
 
-- **Arquivo:** `src/animus/core/intake/domain/entities/analyses.py`
+- **Arquivo:** `src/animus/core/intake/domain/entities/analysis.py`
 - **Mudanca:** adicionar os metodos `rename(name: str) -> None` e `archive() -> None` na entidade `Analysis`.
 - **Justificativa:** manter as mutacoes de nome e arquivamento dentro do dominio, alinhadas ao padrao ja usado em `Account`.
 

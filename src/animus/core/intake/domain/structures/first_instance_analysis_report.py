@@ -1,4 +1,5 @@
-from ctypes import Structure
+from animus.core.shared.domain.abstracts import Structure
+
 from animus.core.intake.domain.entities.analysis import Analysis
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.analysis_precedent import AnalysisPrecedent

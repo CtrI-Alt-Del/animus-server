@@ -5,6 +5,7 @@ from .create_analysis_document_use_case import CreateAnalysisDocumentUseCase
 from .create_analysis_precedent_applicability_feedback_use_case import (
     CreateAnalysisPrecedentApplicabilityFeedbackUseCase,
 )
+from .create_analysis_precedent_use_case import CreateAnalysisPrecedentUseCase
 from .create_analysis_precedent_dataset_row_use_case import (
     CreateAnalysisPrecedentDatasetRowUseCase,
 )
@@ -13,6 +14,9 @@ from .create_case_summary_use_case import CreateCaseSummaryUseCase
 from .create_extracted_petition_use_case import CreateExtractedPetitionUseCase
 from .create_judgment_draft_use_case import CreateSecondInstanceJudgmentDraftUseCase
 from .get_analysis_document_use_case import GetAnalysisDocumentUseCase
+from .get_analysis_precedent_by_identifier_use_case import (
+    GetPrecedentUseCase,
+)
 from .get_analysis_petition_use_case import GetAnalysisPetitionUseCase
 from .get_case_assessment_analysis_report_use_case import (
     GetCaseAssessmentAnalysisReportUseCase,
@@ -60,12 +64,14 @@ __all__ = [
     'CreateAnalysisUseCase',
     'CreateAnalysisDocumentUseCase',
     'CreateAnalysisPrecedentApplicabilityFeedbackUseCase',
+    'CreateAnalysisPrecedentUseCase',
     'CreateAnalysisPrecedentDatasetRowUseCase',
     'CreateAnalysisPrecedentsUseCase',
     'CreateCaseSummaryUseCase',
     'CreateExtractedPetitionUseCase',
     'CreateSecondInstanceJudgmentDraftUseCase',
     'GetAnalysisDocumentUseCase',
+    'GetPrecedentUseCase',
     'GetAnalysisPetitionUseCase',
     'GetCaseAssessmentAnalysisReportUseCase',
     'GetAnalysisUseCase',

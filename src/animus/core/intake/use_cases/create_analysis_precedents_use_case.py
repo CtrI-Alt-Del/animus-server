@@ -77,9 +77,12 @@ class CreateAnalysisPrecedentsUseCase:
                 CaseAssessmentAnalysisStatus.create_as_precedents_searched()
             )
         elif analysis.type.is_first_instance.is_true:
-            analysis.set_status(
-                FirstInstanceAnalysisStatus.create_as_precedents_searched()
-            )
+            if synthesis_output is None:
+                analysis.set_status(FirstInstanceAnalysisStatus.create_as_done())
+            else:
+                analysis.set_status(
+                    FirstInstanceAnalysisStatus.create_as_precedents_searched()
+                )
         elif analysis.type.is_second_instance.is_true:
             analysis.set_status(
                 SecondInstanceAnalysisStatus.create_as_precedents_searched()
