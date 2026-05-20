@@ -9,7 +9,7 @@ from animus.ai.agno.squads import IntakeSquad
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     CaseSummariesRepository,
     SummarizeFirstInstanceCaseWorkflow,
 )
@@ -31,12 +31,12 @@ class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeFirstInstanceCaseWorkflow
         self,
         case_summaries_repository: CaseSummariesRepository,
         analysis_documents_repository: AnalysisDocumentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._create_case_summary_use_case = CreateCaseSummaryUseCase(
             case_summaries_repository=case_summaries_repository,
             analysis_documents_repository=analysis_documents_repository,
-            analisyses_repository=analisyses_repository,
+            analyses_repository=analyses_repository,
         )
         self._team = IntakeSquad()
         self._step_names = _StepNames()

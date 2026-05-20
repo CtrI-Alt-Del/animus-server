@@ -21,7 +21,7 @@ from animus.core.intake.domain.structures.dtos import (
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.intake.use_cases import UnchooseAnalysisPrecedentUseCase
 from animus.core.shared.domain.structures import Id
@@ -35,13 +35,13 @@ class TestUnchooseAnalysisPrecedentUseCase:
             AnalysisPrecedentsRepository,
             instance=True,
         )
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.use_case = UnchooseAnalysisPrecedentUseCase(
             analysis_precedents_repository=self.analysis_precedents_repository_mock,
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
         )
 
     def test_should_unchoose_precedent_when_identifier_exists(self) -> None:
@@ -71,7 +71,7 @@ class TestUnchooseAnalysisPrecedentUseCase:
         analysis = Analysis.create(
             AnalysisDto(
                 id=analysis_id,
-                name='Analise de precedentes',
+                name='Análise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
                 type=AnalysisType.create_as_first_instance().dto,
@@ -84,7 +84,7 @@ class TestUnchooseAnalysisPrecedentUseCase:
         self.analysis_precedents_repository_mock.find_many_by_analysis_id.return_value = ListResponse(
             items=[analysis_precedent]
         )
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(
             analysis_id=analysis_id,
@@ -95,7 +95,7 @@ class TestUnchooseAnalysisPrecedentUseCase:
             analysis_id=Id.create(analysis_id),
             precedent_id=analysis_precedent.precedent.id,
         )
-        self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
+        self.analyses_repository_mock.replace.assert_called_once_with(analysis)
         assert result.value == analysis.status.dto
 
     def test_should_raise_precedent_not_found_error_when_identifier_does_not_exist(
@@ -145,7 +145,7 @@ class TestUnchooseAnalysisPrecedentUseCase:
         self.analysis_precedents_repository_mock.find_many_by_analysis_id.return_value = ListResponse(
             items=[analysis_precedent]
         )
-        self.analisyses_repository_mock.find_by_id.return_value = None
+        self.analyses_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(

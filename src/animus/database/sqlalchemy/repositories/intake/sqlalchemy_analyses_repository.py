@@ -12,14 +12,14 @@ from animus.core.intake.domain.structures.first_instance_analysis_status import 
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
 from animus.database.sqlalchemy.mappers.intake import AnalysisMapper
 from animus.database.sqlalchemy.models.intake import AnalysisModel
 
 
-class SqlalchemyAnalisysesRepository(AnalisysesRepository):
+class SqlalchemyAnalysesRepository(AnalysesRepository):
     def __init__(self, sqlalchemy: Session) -> None:
         self._sqlalchemy = sqlalchemy
 

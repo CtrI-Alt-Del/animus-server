@@ -27,28 +27,28 @@ class TestListAnalysesController:
         create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
-            name='Analise alfa',
+            name='Análise alfa',
         )
         second_analysis = create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAW',
-            name='Analise beta',
+            name='Análise beta',
         )
         create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAX',
-            name='Analise arquivada',
+            name='Análise arquivada',
             is_archived=True,
         )
         create_analysis(
             account_id=other_account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAY',
-            name='Analise de outra conta',
+            name='Análise de outra conta',
         )
 
         response = client.get(
             '/intake/analyses',
-            params={'limit': 1, 'search': 'Analise', 'is_archived': False},
+            params={'limit': 1, 'search': 'Análise', 'is_archived': False},
             headers=build_auth_headers(account.id),
         )
 

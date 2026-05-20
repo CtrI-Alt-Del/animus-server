@@ -19,7 +19,7 @@ from animus.core.intake.domain.structures.second_instance_judgment_draft import 
     SecondInstanceJudgmentDraft,
 )
 from animus.core.intake.interfaces import (
-    AnalisysesRepository,
+    AnalysesRepository,
     SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.intake.use_cases import CreateSecondInstanceJudgmentDraftUseCase
@@ -33,13 +33,13 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
             SecondInstanceJudgmentDraftsRepository,
             instance=True,
         )
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.use_case = CreateSecondInstanceJudgmentDraftUseCase(
             judgment_drafts_repository=self.judgment_drafts_repository_mock,
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
         )
 
     def test_should_add_judgment_draft_and_update_analysis_status_to_done(self) -> None:
@@ -51,13 +51,13 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
             status=SecondInstanceAnalysisStatus.create_as_generating_judgment_draft().dto,
         )
         self.judgment_drafts_repository_mock.find_by_analysis_id.return_value = None
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(analysis_id=analysis_id, dto=dto)
 
         self.judgment_drafts_repository_mock.add.assert_called_once()
         self.judgment_drafts_repository_mock.replace.assert_not_called()
-        self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
+        self.analyses_repository_mock.replace.assert_called_once_with(analysis)
 
         persisted_judgment_draft = (
             self.judgment_drafts_repository_mock.add.call_args.args[0]
@@ -97,7 +97,7 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
         self.judgment_drafts_repository_mock.find_by_analysis_id.return_value = (
             existing_judgment_draft
         )
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(analysis_id=analysis_id, dto=dto)
 
@@ -105,7 +105,7 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
         self.judgment_drafts_repository_mock.replace.assert_called_once_with(
             existing_judgment_draft
         )
-        self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
+        self.analyses_repository_mock.replace.assert_called_once_with(analysis)
 
         assert result == dto
         assert analysis.status == SecondInstanceAnalysisStatus.create_as_done()
@@ -116,12 +116,12 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
         analysis_id = Id.create().value
         dto = self._create_judgment_draft_dto(analysis_id=analysis_id)
         self.judgment_drafts_repository_mock.find_by_analysis_id.return_value = None
-        self.analisyses_repository_mock.find_by_id.return_value = None
+        self.analyses_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(analysis_id=analysis_id, dto=dto)
 
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
 
     def test_should_raise_second_instance_analysis_required_error_when_analysis_is_not_second_instance(
         self,
@@ -134,12 +134,12 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
             status='CASE_ANALYZED',
         )
         self.judgment_drafts_repository_mock.find_by_analysis_id.return_value = None
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         with pytest.raises(SecondInstanceAnalysisRequiredError):
             self.use_case.execute(analysis_id=analysis_id, dto=dto)
 
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
 
     @staticmethod
     def _create_analysis(
@@ -150,7 +150,7 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
         return Analysis.create(
             AnalysisDto(
                 id=analysis_id,
-                name='Analise',
+                name='Análise',
                 folder_id=None,
                 account_id=Id.create().value,
                 type=analysis_type,
@@ -164,9 +164,9 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
     def _create_judgment_draft_dto(analysis_id: str) -> SecondInstanceJudgmentDraftDto:
         return SecondInstanceJudgmentDraftDto(
             analysis_id=analysis_id,
-            report='Relatorio',
+            report='Relatório',
             merit_analysis='Fundamentacao',
-            precedent_adherence_analysis='Aderencia',
+            precedent_adherence_analysis='Aderência',
             ruling=['Dispositivo 1', 'Dispositivo 2'],
             preliminary_issues='Preliminar',
             no_applicable_precedent_notice='Aviso',

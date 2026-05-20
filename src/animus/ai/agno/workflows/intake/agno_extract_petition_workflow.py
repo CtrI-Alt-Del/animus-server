@@ -132,7 +132,7 @@ class AgnoExtractPetitionWorkflow(ExtractPetitionWorkflow):
 
         prompt = dedent(
             f"""
-            Analise a janela de paginas abaixo e atualize os limites da petição inicial.
+            Análise a janela de paginas abaixo e atualize os limites da petição inicial.
 
             Total de paginas do PDF: {total_pages}
             Janela atual: {start}-{end}

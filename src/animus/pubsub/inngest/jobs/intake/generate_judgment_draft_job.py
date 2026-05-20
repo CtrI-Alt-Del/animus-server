@@ -17,7 +17,7 @@ from animus.core.intake.use_cases import (
 )
 from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.repositories.intake import (
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
     SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemySecondInstanceJudgmentDraftsRepository,
@@ -104,13 +104,11 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
     def _mark_analysis_as_generating_judgment_draft_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
             analysis_id = Id.create(payload.analysis_id)
-            analysis = SqlalchemyAnalisysesRepository(session).find_by_id(analysis_id)
+            analysis = SqlalchemyAnalysesRepository(session).find_by_id(analysis_id)
             if analysis is None:
                 return
 
-            UpdateAnalysisStatusUseCase(
-                SqlalchemyAnalisysesRepository(session)
-            ).execute(
+            UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=analysis_id.value,
                 status=SecondInstanceAnalysisStatus.create_as_generating_judgment_draft().dto,
             )
@@ -131,7 +129,7 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
     @staticmethod
     def _generate_and_persist_judgment_draft_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
-            analisyses_repository = SqlalchemyAnalisysesRepository(session)
+            analyses_repository = SqlalchemyAnalysesRepository(session)
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
                 session
@@ -168,7 +166,7 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
 
             CreateSecondInstanceJudgmentDraftUseCase(
                 judgment_drafts_repository=judgment_drafts_repository,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
             ).execute(
                 analysis_id=analysis_id.value,
                 dto=judgment_draft_dto,
@@ -191,13 +189,11 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
     def _mark_analysis_as_failed_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
             analysis_id = Id.create(payload.analysis_id)
-            analysis = SqlalchemyAnalisysesRepository(session).find_by_id(analysis_id)
+            analysis = SqlalchemyAnalysesRepository(session).find_by_id(analysis_id)
             if analysis is None:
                 return
 
-            UpdateAnalysisStatusUseCase(
-                SqlalchemyAnalisysesRepository(session)
-            ).execute(
+            UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=analysis_id.value,
                 status=SecondInstanceAnalysisStatus.create_as_failed().dto,
             )

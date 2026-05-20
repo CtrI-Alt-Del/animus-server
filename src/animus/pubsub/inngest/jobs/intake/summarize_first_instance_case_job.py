@@ -22,7 +22,7 @@ from animus.core.shared.domain.structures import Id
 from animus.core.storage.use_cases import GetDocumentContentUseCase
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisDocumentsRepository,
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
     SqlalchemyCaseSummariesRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -116,7 +116,7 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
                 session
             )
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
-            analisyses_repository = SqlalchemyAnalisysesRepository(session)
+            analyses_repository = SqlalchemyAnalysesRepository(session)
 
             analysis_id = Id.create(payload.analysis_id)
             analysis_document = analysis_documents_repository.find_by_analysis_id(
@@ -125,7 +125,7 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
             if analysis_document is None:
                 raise AnalysisDocumentNotFoundError
 
-            analysis = analisyses_repository.find_by_id(analysis_id)
+            analysis = analyses_repository.find_by_id(analysis_id)
             if analysis is None:
                 raise AnalysisNotFoundError
 
@@ -138,7 +138,7 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
             workflow = AgnoSummarizeFirstInstanceCaseWorkflow(
                 case_summaries_repository=case_summaries_repository,
                 analysis_documents_repository=analysis_documents_repository,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
             )
             workflow.run(
                 analysis_id=analysis_id.value,
@@ -164,13 +164,11 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
     def _mark_analysis_as_failed_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
             analysis_id = Id.create(payload.analysis_id)
-            analysis = SqlalchemyAnalisysesRepository(session).find_by_id(analysis_id)
+            analysis = SqlalchemyAnalysesRepository(session).find_by_id(analysis_id)
             if analysis is None:
                 return
 
-            UpdateAnalysisStatusUseCase(
-                SqlalchemyAnalisysesRepository(session)
-            ).execute(
+            UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=analysis_id.value,
                 status='FAILED',
             )

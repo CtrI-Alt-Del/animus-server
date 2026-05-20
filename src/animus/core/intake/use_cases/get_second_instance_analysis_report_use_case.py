@@ -16,7 +16,7 @@ from animus.core.intake.domain.structures.second_instance_analysis_report import
 from animus.core.intake.interfaces.analysis_documents_repository import (
     AnalysisDocumentsRepository,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.analysis_precedents_repository import (
     AnalysisPrecedentsRepository,
 )
@@ -33,14 +33,14 @@ from animus.core.shared.domain.structures import Id
 class GetSecondInstanceAnalysisReportUseCase:
     def __init__(
         self,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
         analysis_documents_repository: AnalysisDocumentsRepository,
         case_summaries_repository: CaseSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
         judgment_drafts_repository: SecondInstanceJudgmentDraftsRepository
         | None = None,
     ) -> None:
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
         self._analysis_documents_repository = analysis_documents_repository
         self._case_summaries_repository = case_summaries_repository
         self._analysis_precedents_repository = analysis_precedents_repository
@@ -52,7 +52,7 @@ class GetSecondInstanceAnalysisReportUseCase:
         id_analysis = Id.create(analysis_id)
         id_account = Id.create(account_id)
 
-        analysis = self._analisyses_repository.find_by_id(id_analysis)
+        analysis = self._analyses_repository.find_by_id(id_analysis)
 
         if analysis is None:
             raise AnalysisNotFoundError

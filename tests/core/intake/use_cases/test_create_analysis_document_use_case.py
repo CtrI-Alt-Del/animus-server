@@ -19,7 +19,7 @@ from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
 )
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.intake.use_cases.create_analysis_document_use_case import (
     CreateAnalysisDocumentUseCase,
@@ -35,14 +35,14 @@ class TestCreateAnalysisDocumentUseCase:
             AnalysisDocumentsRepository,
             instance=True,
         )
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.broker_mock = create_autospec(Broker, instance=True)
         self.use_case = CreateAnalysisDocumentUseCase(
             analysis_documents_repository=self.analysis_documents_repository_mock,
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
             broker=self.broker_mock,
         )
 
@@ -53,7 +53,7 @@ class TestCreateAnalysisDocumentUseCase:
         analysis = Analysis.create(
             AnalysisDto(
                 id=analysis_id,
-                name='Analise',
+                name='Análise',
                 account_id=Id.create().value,
                 status=CaseAssessmentAnalysisStatus.create_as_waiting_document_upload().dto,
                 created_at='2026-03-31T10:30:00+00:00',
@@ -61,7 +61,7 @@ class TestCreateAnalysisDocumentUseCase:
             )
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = None
 
         result = self.use_case.execute(
@@ -74,9 +74,9 @@ class TestCreateAnalysisDocumentUseCase:
         self.analysis_documents_repository_mock.add.assert_called_once()
         self.analysis_documents_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
-        self.analisyses_repository_mock.replace.assert_called_once()
+        self.analyses_repository_mock.replace.assert_called_once()
 
-        updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
+        updated_analysis = self.analyses_repository_mock.replace.call_args.args[0]
 
         assert (
             result
@@ -101,7 +101,7 @@ class TestCreateAnalysisDocumentUseCase:
         analysis = Analysis.create(
             AnalysisDto(
                 id=analysis_id,
-                name='Analise',
+                name='Análise',
                 account_id=Id.create().value,
                 status=SecondInstanceAnalysisStatus.create_as_waiting_document_upload().dto,
                 created_at='2026-03-31T10:30:00+00:00',
@@ -117,7 +117,7 @@ class TestCreateAnalysisDocumentUseCase:
             )
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             existing_document
         )
@@ -132,10 +132,10 @@ class TestCreateAnalysisDocumentUseCase:
         self.analysis_documents_repository_mock.add.assert_not_called()
         self.analysis_documents_repository_mock.replace.assert_called_once()
         self.broker_mock.publish.assert_called_once()
-        self.analisyses_repository_mock.replace.assert_called_once()
+        self.analyses_repository_mock.replace.assert_called_once()
 
         published_event = self.broker_mock.publish.call_args.args[0]
-        updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
+        updated_analysis = self.analyses_repository_mock.replace.call_args.args[0]
 
         assert isinstance(published_event, PetitionReplacedEvent)
         assert (
@@ -151,7 +151,7 @@ class TestCreateAnalysisDocumentUseCase:
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
         self,
     ) -> None:
-        self.analisyses_repository_mock.find_by_id.return_value = None
+        self.analyses_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(
@@ -163,4 +163,4 @@ class TestCreateAnalysisDocumentUseCase:
 
         self.analysis_documents_repository_mock.add.assert_not_called()
         self.analysis_documents_repository_mock.replace.assert_not_called()
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()

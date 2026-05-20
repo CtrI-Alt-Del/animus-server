@@ -30,7 +30,7 @@ def _create_second_instance_analysis_with_summary_and_precedents(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de segunda instancia',
+            name='Análise de segunda instancia',
             folder_id=None,
             account_id=account_id,
             type=AnalysisType.create_as_second_instance().dto,
@@ -43,7 +43,7 @@ def _create_second_instance_analysis_with_summary_and_precedents(
         CaseSummaryModel(
             analysis_id=analysis_id,
             case_summary='Resumo',
-            legal_issue='Questao',
+            legal_issue='Questão',
             central_question='Pergunta',
             relevant_laws=['Lei 1'],
             key_facts=['Fato 1'],

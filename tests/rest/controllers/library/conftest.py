@@ -68,7 +68,7 @@ def create_analysis(
         account_id: str,
         folder_id: str | None = None,
         analysis_id: str | None = None,
-        name: str = 'Analise inicial',
+        name: str = 'Análise inicial',
         is_archived: bool = False,
     ) -> AnalysisModel:
         session = sqlalchemy_session_factory()

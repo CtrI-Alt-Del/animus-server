@@ -22,7 +22,7 @@ from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filter
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.shared.domain.errors import AppError
 from animus.core.shared.domain.structures import Id
@@ -32,10 +32,10 @@ class CreateAnalysisPrecedentsUseCase:
     def __init__(
         self,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._analysis_precedents_repository = analysis_precedents_repository
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
 
     def execute(
         self,
@@ -66,7 +66,7 @@ class CreateAnalysisPrecedentsUseCase:
             analysis_precedents=merged_analysis_precedents,
         )
 
-        analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:
             raise AnalysisNotFoundError
 
@@ -88,7 +88,7 @@ class CreateAnalysisPrecedentsUseCase:
                 SecondInstanceAnalysisStatus.create_as_precedents_searched()
             )
 
-        self._analisyses_repository.replace(analysis)
+        self._analyses_repository.replace(analysis)
 
         return [
             analysis_precedent.dto for analysis_precedent in merged_analysis_precedents

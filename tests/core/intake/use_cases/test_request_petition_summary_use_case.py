@@ -16,7 +16,7 @@ from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     PetitionNotFoundError,
 )
-from animus.core.intake.interfaces import AnalisysesRepository, PetitionsRepository
+from animus.core.intake.interfaces import AnalysesRepository, PetitionsRepository
 from animus.core.intake.use_cases import RequestPetitionSummaryUseCase
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id
@@ -32,14 +32,14 @@ class TestRequestPetitionSummaryUseCase:
             PetitionsRepository,
             instance=True,
         )
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.broker_mock = create_autospec(Broker, instance=True)
         self.use_case = RequestPetitionSummaryUseCase(
             petitions_repository=self.petitions_repository_mock,
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
             broker=self.broker_mock,
         )
 
@@ -61,20 +61,20 @@ class TestRequestPetitionSummaryUseCase:
             status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
         )
         self.petitions_repository_mock.find_by_id.return_value = petition
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         self.use_case.execute(petition_id=petition_id)
 
         self.petitions_repository_mock.find_by_id.assert_called_once_with(
             petition_id_entity,
         )
-        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+        self.analyses_repository_mock.find_by_id.assert_called_once_with(
             petition.analysis_id,
         )
-        self.analisyses_repository_mock.replace.assert_called_once()
+        self.analyses_repository_mock.replace.assert_called_once()
         self.broker_mock.publish.assert_called_once()
 
-        updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
+        updated_analysis = self.analyses_repository_mock.replace.call_args.args[0]
         published_event = self.broker_mock.publish.call_args.args[0]
 
         assert (
@@ -89,8 +89,8 @@ class TestRequestPetitionSummaryUseCase:
             self.use_case.execute(petition_id='invalid-petition-id')
 
         self.petitions_repository_mock.find_by_id.assert_not_called()
-        self.analisyses_repository_mock.find_by_id.assert_not_called()
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.find_by_id.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
 
     def test_should_raise_petition_not_found_error_when_petition_does_not_exist(
@@ -102,8 +102,8 @@ class TestRequestPetitionSummaryUseCase:
         with pytest.raises(PetitionNotFoundError):
             self.use_case.execute(petition_id=petition_id)
 
-        self.analisyses_repository_mock.find_by_id.assert_not_called()
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.find_by_id.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
 
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
@@ -121,10 +121,10 @@ class TestRequestPetitionSummaryUseCase:
             ),
         )
         self.petitions_repository_mock.find_by_id.return_value = petition
-        self.analisyses_repository_mock.find_by_id.return_value = None
+        self.analyses_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(petition_id=petition_id)
 
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()

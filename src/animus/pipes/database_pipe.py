@@ -10,7 +10,7 @@ from animus.core.intake.interfaces.analysis_precedents_repository import (
 from animus.core.intake.interfaces.analysis_documents_repository import (
     AnalysisDocumentsRepository,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
@@ -33,7 +33,7 @@ from animus.database.sqlalchemy.repositories.auth import SqlalchemyAccountsRepos
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisDocumentsRepository,
     SqlalchemyAnalysisPrecedentsRepository,
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemyExtractedPetitionsRepository,
     SqlalchemySecondInstanceJudgmentDraftsRepository,
@@ -99,10 +99,10 @@ class DatabasePipe:
         return SqlalchemySecondInstanceJudgmentDraftsRepository(sqlalchemy)
 
     @staticmethod
-    def get_analisyses_repository_from_request(
+    def get_analyses_repository_from_request(
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
-    ) -> AnalisysesRepository:
-        return SqlalchemyAnalisysesRepository(sqlalchemy)
+    ) -> AnalysesRepository:
+        return SqlalchemyAnalysesRepository(sqlalchemy)
 
     @staticmethod
     def get_analysis_precedents_repository_from_request(

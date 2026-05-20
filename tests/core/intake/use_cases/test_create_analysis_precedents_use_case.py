@@ -21,7 +21,7 @@ from animus.core.intake.domain.structures.dtos import (
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.intake.use_cases.create_analysis_precedents_use_case import (
     CreateAnalysisPrecedentsUseCase,
@@ -37,13 +37,13 @@ class TestCreateAnalysisPrecedentsUseCase:
             AnalysisPrecedentsRepository,
             instance=True,
         )
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.use_case = CreateAnalysisPrecedentsUseCase(
             analysis_precedents_repository=self.analysis_precedents_repository_mock,
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
         )
 
     def test_should_create_and_save_precedents_without_synthesis_output(self) -> None:
@@ -63,7 +63,7 @@ class TestCreateAnalysisPrecedentsUseCase:
             )
         ]
         analysis = self._create_analysis_entity(analysis_id)
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         self.use_case.execute(
             analysis_id=analysis_id,
@@ -85,12 +85,13 @@ class TestCreateAnalysisPrecedentsUseCase:
         assert saved_precedents[0].similarity_score.value == 84.5
         assert saved_precedents[0].synthesis is None
         assert saved_precedents[0].legal_features is None
+        assert saved_precedents[0].is_manually_added.is_false
 
-        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+        self.analyses_repository_mock.find_by_id.assert_called_once_with(
             analysis_id_entity
         )
-        self.analisyses_repository_mock.replace.assert_called_once()
-        updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
+        self.analyses_repository_mock.replace.assert_called_once()
+        updated_analysis = self.analyses_repository_mock.replace.call_args.args[0]
         assert updated_analysis.status == FirstInstanceAnalysisStatus.create_as_done()
         assert updated_analysis.precedents_search_filters is not None
         assert updated_analysis.precedents_search_filters.dto == filters_dto
@@ -129,7 +130,7 @@ class TestCreateAnalysisPrecedentsUseCase:
                 )
             ]
         )
-        self.analisyses_repository_mock.find_by_id.return_value = (
+        self.analyses_repository_mock.find_by_id.return_value = (
             self._create_analysis_entity(analysis_id)
         )
 
@@ -149,6 +150,7 @@ class TestCreateAnalysisPrecedentsUseCase:
         assert saved_precedents[0].legal_features is not None
         assert saved_precedents[0].legal_features.central_issue_match.value == 2
         assert saved_precedents[0].is_chosen.is_true
+        assert saved_precedents[0].is_manually_added.is_false
 
     def test_should_choose_by_default_only_precedents_with_applicability_level_two(
         self,
@@ -189,7 +191,7 @@ class TestCreateAnalysisPrecedentsUseCase:
                 self._create_synthesis_item(number=103, applicability_level=0),
             ]
         )
-        self.analisyses_repository_mock.find_by_id.return_value = (
+        self.analyses_repository_mock.find_by_id.return_value = (
             self._create_analysis_entity(analysis_id)
         )
 
@@ -226,7 +228,7 @@ class TestCreateAnalysisPrecedentsUseCase:
                 synthesis=None,
             )
         ]
-        self.analisyses_repository_mock.find_by_id.return_value = None
+        self.analyses_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(
@@ -239,7 +241,7 @@ class TestCreateAnalysisPrecedentsUseCase:
             Id.create(analysis_id)
         )
         self.analysis_precedents_repository_mock.add_many_by_analysis_id.assert_called_once()
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
 
     def test_should_raise_app_error_when_synthesis_for_precedent_is_missing(
         self,
@@ -287,8 +289,8 @@ class TestCreateAnalysisPrecedentsUseCase:
         )
         self.analysis_precedents_repository_mock.remove_many_by_analysis_id.assert_not_called()
         self.analysis_precedents_repository_mock.add_many_by_analysis_id.assert_not_called()
-        self.analisyses_repository_mock.find_by_id.assert_not_called()
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.find_by_id.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
 
     @staticmethod
     def _create_analysis_precedent_dto(
@@ -324,7 +326,7 @@ class TestCreateAnalysisPrecedentsUseCase:
         return Analysis.create(
             AnalysisDto(
                 id=analysis_id,
-                name='Analise de precedentes',
+                name='Análise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
                 type=AnalysisType.create_as_first_instance().dto,

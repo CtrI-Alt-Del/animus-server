@@ -19,7 +19,7 @@ from animus.core.intake.domain.structures.dtos import (
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     PrecedentsRepository,
 )
 from animus.core.intake.use_cases import CreateAnalysisPrecedentUseCase
@@ -33,8 +33,8 @@ class TestCreateAnalysisPrecedentUseCase:
             AnalysisPrecedentsRepository,
             instance=True,
         )
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.precedents_repository_mock = create_autospec(
@@ -43,7 +43,7 @@ class TestCreateAnalysisPrecedentUseCase:
         )
         self.use_case = CreateAnalysisPrecedentUseCase(
             analysis_precedents_repository=self.analysis_precedents_repository_mock,
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
             precedents_repository=self.precedents_repository_mock,
         )
 
@@ -59,7 +59,7 @@ class TestCreateAnalysisPrecedentUseCase:
         analysis = Analysis.create(
             AnalysisDto(
                 id=analysis_id,
-                name='Analise de precedentes',
+                name='Análise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
                 type=AnalysisType.create_as_first_instance().dto,
@@ -78,22 +78,24 @@ class TestCreateAnalysisPrecedentUseCase:
                 last_updated_in_pangea_at='2026-03-31T10:30:00+00:00',
             )
         )
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.precedents_repository_mock.find_by_identifier.return_value = precedent
         self.analysis_precedents_repository_mock.find_by_analysis_id_and_precedent_id.return_value = None
 
         result = self.use_case.execute(
             analysis_id=analysis_id,
             precedent_identifier_dto=precedent_identifier_dto,
+            is_manually_added=True,
         )
 
-        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+        self.analyses_repository_mock.find_by_id.assert_called_once_with(
             Id.create(analysis_id)
         )
         self.precedents_repository_mock.find_by_identifier.assert_called_once()
         self.analysis_precedents_repository_mock.add_many_by_analysis_id.assert_called_once()
         assert result.analysis_id == analysis_id
         assert result.precedent.identifier == precedent_identifier_dto
+        assert result.is_manually_added is True
 
     def test_should_return_existing_analysis_precedent_when_it_already_exists(
         self,
@@ -107,7 +109,7 @@ class TestCreateAnalysisPrecedentUseCase:
         analysis = Analysis.create(
             AnalysisDto(
                 id=analysis_id,
-                name='Analise de precedentes',
+                name='Análise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
                 type=AnalysisType.create_as_first_instance().dto,
@@ -140,17 +142,17 @@ class TestCreateAnalysisPrecedentUseCase:
                 final_rank=0,
                 applicability_level=0,
                 legal_features=None,
+                is_manually_added=False,
             )
         )
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.precedents_repository_mock.find_by_identifier.return_value = precedent
-        self.analysis_precedents_repository_mock.find_by_analysis_id_and_precedent_id.return_value = (
-            existing_analysis_precedent
-        )
+        self.analysis_precedents_repository_mock.find_by_analysis_id_and_precedent_id.return_value = existing_analysis_precedent
 
         result = self.use_case.execute(
             analysis_id=analysis_id,
             precedent_identifier_dto=precedent_identifier_dto,
+            is_manually_added=True,
         )
 
         self.analysis_precedents_repository_mock.add_many_by_analysis_id.assert_not_called()
@@ -159,7 +161,7 @@ class TestCreateAnalysisPrecedentUseCase:
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
         self,
     ) -> None:
-        self.analisyses_repository_mock.find_by_id.return_value = None
+        self.analyses_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(
@@ -169,6 +171,7 @@ class TestCreateAnalysisPrecedentUseCase:
                     kind='RG',
                     number=101,
                 ),
+                is_manually_added=True,
             )
 
     def test_should_raise_precedent_not_found_error_when_precedent_does_not_exist(
@@ -177,7 +180,7 @@ class TestCreateAnalysisPrecedentUseCase:
         analysis = Analysis.create(
             AnalysisDto(
                 id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
-                name='Analise de precedentes',
+                name='Análise de precedentes',
                 folder_id=None,
                 account_id='01ARZ3NDEKTSV4RRFFQ69G5FAA',
                 type=AnalysisType.create_as_first_instance().dto,
@@ -186,7 +189,7 @@ class TestCreateAnalysisPrecedentUseCase:
                 created_at='2026-03-31T10:30:00+00:00',
             )
         )
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.precedents_repository_mock.find_by_identifier.return_value = None
 
         with pytest.raises(PrecedentNotFoundError):
@@ -197,4 +200,5 @@ class TestCreateAnalysisPrecedentUseCase:
                     kind='RG',
                     number=101,
                 ),
+                is_manually_added=True,
             )

@@ -65,7 +65,7 @@ class _ChunkBuilder:
         s = self._summary
 
         self._add(s.case_summary.value)
-        self._add(f'Questao juridica principal: {s.legal_issue.value}')
+        self._add(f'Questão juridica principal: {s.legal_issue.value}')
         self._add(f'Pergunta juridica central: {s.central_question.value}')
 
         self._add_optional_single_chunks()
@@ -79,15 +79,15 @@ class _ChunkBuilder:
             self._add(f'Tipo de acao: {s.type_of_action.value}')
 
         if s.jurisdiction_issue is not None:
-            self._add(f'Questao de competencia: {s.jurisdiction_issue.value}')
+            self._add(f'Questão de competencia: {s.jurisdiction_issue.value}')
 
         if s.standing_issue is not None:
-            self._add(f'Questao de legitimidade: {s.standing_issue.value}')
+            self._add(f'Questão de legitimidade: {s.standing_issue.value}')
 
     def _add_prefixed_list_chunks(self) -> None:
         s = self._summary
         list_fields = [
-            ('Questao juridica secundaria: ', s.secondary_legal_issues),
+            ('Questão juridica secundaria: ', s.secondary_legal_issues),
             ('Pergunta juridica adicional: ', s.alternative_questions),
             ('Fato relevante: ', s.key_facts),
             ('Pedido principal: ', s.requested_relief),
@@ -129,18 +129,18 @@ class _ChunkBuilder:
         if s.type_of_action is not None:
             parts.append(f'Tipo de acao: {s.type_of_action.value}')
 
-        parts.append(f'Questao juridica principal: {s.legal_issue.value}')
+        parts.append(f'Questão juridica principal: {s.legal_issue.value}')
         parts.append(f'Pergunta juridica central: {s.central_question.value}')
 
         if s.jurisdiction_issue is not None:
-            parts.append(f'Questao de competencia: {s.jurisdiction_issue.value}')
+            parts.append(f'Questão de competencia: {s.jurisdiction_issue.value}')
 
         if s.standing_issue is not None:
-            parts.append(f'Questao de legitimidade: {s.standing_issue.value}')
+            parts.append(f'Questão de legitimidade: {s.standing_issue.value}')
 
         secondary = [item.value for item in s.secondary_legal_issues]
         if secondary:
-            parts.append('Questoes juridicas secundarias: ' + ' | '.join(secondary))
+            parts.append('Questões juridicas secundarias: ' + ' | '.join(secondary))
 
         return ' || '.join(parts)
 

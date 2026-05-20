@@ -33,7 +33,7 @@ def _create_report_analysis(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise completa',
+            name='Análise completa',
             folder_id=None,
             account_id=account_id,
             type=analysis_type,
@@ -55,7 +55,7 @@ def _create_report_analysis(
             CaseSummaryModel(
                 analysis_id=analysis_id,
                 case_summary='Resumo',
-                legal_issue='Questao',
+                legal_issue='Questão',
                 central_question='Pergunta',
                 relevant_laws=['Lei'],
                 key_facts=['Fato'],
@@ -73,9 +73,9 @@ def _create_report_analysis(
         session.add(
             SecondInstanceJudgmentDraftModel(
                 analysis_id=analysis_id,
-                report='Relatorio',
+                report='Relatório',
                 merit_analysis='Fundamentacao',
-                precedent_adherence_analysis='Aderencia',
+                precedent_adherence_analysis='Aderência',
                 ruling=['Dispositivo'],
             )
         )
@@ -138,9 +138,9 @@ class TestGetSecondInstanceAnalysisReportController:
         assert payload['precedents'][0]['analysis_id'] == analysis_id
         assert payload['draft'] == {
             'analysis_id': analysis_id,
-            'report': 'Relatorio',
+            'report': 'Relatório',
             'merit_analysis': 'Fundamentacao',
-            'precedent_adherence_analysis': 'Aderencia',
+            'precedent_adherence_analysis': 'Aderência',
             'ruling': ['Dispositivo'],
             'preliminary_issues': None,
             'no_applicable_precedent_notice': None,
@@ -229,9 +229,9 @@ class TestGetFirstInstanceAnalysisReportController:
         )
         assert payload['judgment_draft'] == {
             'analysis_id': analysis_id,
-            'report': 'Relatorio',
+            'report': 'Relatório',
             'merit_analysis': 'Fundamentacao',
-            'precedent_adherence_analysis': 'Aderencia',
+            'precedent_adherence_analysis': 'Aderência',
             'ruling': ['Dispositivo'],
             'preliminary_issues': None,
             'no_applicable_precedent_notice': None,

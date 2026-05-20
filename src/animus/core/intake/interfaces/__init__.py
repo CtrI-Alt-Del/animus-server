@@ -6,7 +6,7 @@ from .analysis_precedent_applicability_feedbacks_repository import (
 from .analysis_precedent_dataset_rows_repository import (
     AnalysisPrecedentDatasetRowsRepository,
 )
-from .analisyses_repository import AnalisysesRepository
+from .analyses_repository import AnalysesRepository
 from .classify_analysis_precedents_applicability_workflow import (
     ClassifyAnalysisPrecedentsApplicabilityWorkflow,
 )
@@ -46,7 +46,7 @@ __all__ = [
     'PetitionDraftsRepository',
     'PrecedentsRepository',
     'PrecedentsEmbeddingsRepository',
-    'AnalisysesRepository',
+    'AnalysesRepository',
     'CaseSummaryEmbeddingsProvider',
     'PrecedentEmbeddingsProvider',
     'PetitionSummariesRepository',

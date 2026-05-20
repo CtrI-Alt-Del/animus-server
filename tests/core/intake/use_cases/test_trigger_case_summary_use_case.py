@@ -21,7 +21,7 @@ from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
 )
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.intake.use_cases import TriggerSecondInstanceCaseSummarizationUseCase
 from animus.core.shared.domain.structures import Id
@@ -35,14 +35,14 @@ class TestTriggerSecondInstanceCaseSummarizationUseCase:
             AnalysisDocumentsRepository,
             instance=True,
         )
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.broker_mock = create_autospec(Broker, instance=True)
         self.use_case = TriggerSecondInstanceCaseSummarizationUseCase(
             analysis_documents_repository=self.analysis_documents_repository_mock,
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
             broker=self.broker_mock,
         )
 
@@ -61,7 +61,7 @@ class TestTriggerSecondInstanceCaseSummarizationUseCase:
         analysis = Analysis.create(
             AnalysisDto(
                 id=analysis_id,
-                name='Analise',
+                name='Análise',
                 account_id=Id.create().value,
                 status=SecondInstanceAnalysisStatus.create_as_document_uploaded().dto,
                 created_at='2026-03-31T10:30:00+00:00',
@@ -72,14 +72,14 @@ class TestTriggerSecondInstanceCaseSummarizationUseCase:
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             analysis_document
         )
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         self.use_case.execute(analysis_id=analysis_id)
 
-        self.analisyses_repository_mock.replace.assert_called_once()
+        self.analyses_repository_mock.replace.assert_called_once()
         self.broker_mock.publish.assert_called_once()
 
-        updated_analysis = self.analisyses_repository_mock.replace.call_args.args[0]
+        updated_analysis = self.analyses_repository_mock.replace.call_args.args[0]
         published_event = self.broker_mock.publish.call_args.args[0]
 
         assert (
@@ -100,8 +100,8 @@ class TestTriggerSecondInstanceCaseSummarizationUseCase:
         with pytest.raises(AnalysisDocumentNotFoundError):
             self.use_case.execute(analysis_id=analysis_id)
 
-        self.analisyses_repository_mock.find_by_id.assert_not_called()
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.find_by_id.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
 
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
@@ -119,10 +119,10 @@ class TestTriggerSecondInstanceCaseSummarizationUseCase:
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             analysis_document
         )
-        self.analisyses_repository_mock.find_by_id.return_value = None
+        self.analyses_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(analysis_id=analysis_id)
 
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()

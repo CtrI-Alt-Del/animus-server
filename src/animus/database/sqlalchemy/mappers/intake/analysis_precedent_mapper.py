@@ -23,6 +23,7 @@ class AnalysisPrecedentMapper:
                 total_search_hits=model.total_search_hits,
                 similarity_rank=model.similarity_rank,
                 final_rank=model.final_rank,
+                is_manually_added=model.is_manually_added,
                 applicability_level=model.applicability_level,
                 legal_features=(
                     AnalysiesPrecedentLegalFeaturesMapper.to_entity(
@@ -51,6 +52,7 @@ class AnalysisPrecedentMapper:
             total_search_hits=entity.total_search_hits.value,
             similarity_rank=entity.similarity_rank.value,
             final_rank=entity.final_rank.value,
+            is_manually_added=entity.is_manually_added.value,
             applicability_level=entity.applicability_level.dto,
             synthesis=entity.synthesis.value if entity.synthesis is not None else None,
             legal_features=(

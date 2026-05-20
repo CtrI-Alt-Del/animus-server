@@ -12,7 +12,7 @@ from animus.core.intake.domain.structures.precedent_identifier import (
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     PrecedentsRepository,
 )
 from animus.core.shared.domain.structures import Id
@@ -22,20 +22,21 @@ class CreateAnalysisPrecedentUseCase:
     def __init__(
         self,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
         precedents_repository: PrecedentsRepository,
     ) -> None:
         self._analysis_precedents_repository = analysis_precedents_repository
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
         self._precedents_repository = precedents_repository
 
     def execute(
         self,
         analysis_id: str,
         precedent_identifier_dto: PrecedentIdentifierDto,
+        is_manually_added: bool,
     ) -> AnalysisPrecedentDto:
         analysis_id_entity = Id.create(analysis_id)
-        analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:
             raise AnalysisNotFoundError
 
@@ -57,6 +58,8 @@ class CreateAnalysisPrecedentUseCase:
             AnalysisPrecedentDto(
                 analysis_id=analysis_id,
                 precedent=precedent.dto,
+                is_manually_added=is_manually_added,
+                is_chosen=True,
             )
         )
         self._analysis_precedents_repository.add_many_by_analysis_id(

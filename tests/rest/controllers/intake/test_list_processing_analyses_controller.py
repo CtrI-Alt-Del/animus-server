@@ -34,14 +34,14 @@ class TestListProcessingAnalysesController:
         analysis_1 = create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA1',
-            name='Analise buscando precedentes',
+            name='Análise buscando precedentes',
             status=CaseAssessmentAnalysisStatus.create('SEARCHING_PRECEDENTS').dto,
         )
 
         analysis_2 = create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA2',
-            name='Analise similaridade',
+            name='Análise similaridade',
             status=CaseAssessmentAnalysisStatus.create(
                 'ANALYZING_PRECEDENTS_SIMILARITY'
             ).dto,
@@ -50,14 +50,14 @@ class TestListProcessingAnalysesController:
         create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA3',
-            name='Analise aguardando',
+            name='Análise aguardando',
             status=CaseAssessmentAnalysisStatus.create_as_waiting_document_upload().dto,
         )
 
         create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA4',
-            name='Analise arquivada',
+            name='Análise arquivada',
             status=CaseAssessmentAnalysisStatus.create_as_generating_petition_draft().dto,
             is_archived=True,
         )
@@ -65,7 +65,7 @@ class TestListProcessingAnalysesController:
         create_analysis(
             account_id=other_account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA5',
-            name='Analise de outra conta',
+            name='Análise de outra conta',
             status=SecondInstanceAnalysisStatus.create_as_analyzing_case().dto,
         )
 
@@ -78,7 +78,7 @@ class TestListProcessingAnalysesController:
         assert response.json() == [
             {
                 'id': analysis_2.id,
-                'name': 'Analise similaridade',
+                'name': 'Análise similaridade',
                 'folder_id': None,
                 'account_id': account.id,
                 'type': 'FIRST_INSTANCE',
@@ -91,7 +91,7 @@ class TestListProcessingAnalysesController:
             },
             {
                 'id': analysis_1.id,
-                'name': 'Analise buscando precedentes',
+                'name': 'Análise buscando precedentes',
                 'folder_id': None,
                 'account_id': account.id,
                 'type': 'FIRST_INSTANCE',
@@ -116,7 +116,7 @@ class TestListProcessingAnalysesController:
         create_analysis(
             account_id=account.id,
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FA1',
-            name='Analise finalizada',
+            name='Análise finalizada',
             status=CaseAssessmentAnalysisStatus.create_as_done().dto,
         )
 

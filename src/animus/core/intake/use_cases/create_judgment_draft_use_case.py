@@ -12,7 +12,7 @@ from animus.core.intake.domain.structures.second_instance_judgment_draft import 
     SecondInstanceJudgmentDraft,
 )
 from animus.core.intake.interfaces import (
-    AnalisysesRepository,
+    AnalysesRepository,
     SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.shared.domain.structures import Id
@@ -22,10 +22,10 @@ class CreateSecondInstanceJudgmentDraftUseCase:
     def __init__(
         self,
         judgment_drafts_repository: SecondInstanceJudgmentDraftsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._judgment_drafts_repository = judgment_drafts_repository
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
 
     def execute(
         self,
@@ -54,7 +54,7 @@ class CreateSecondInstanceJudgmentDraftUseCase:
         else:
             self._judgment_drafts_repository.replace(judgment_draft)
 
-        analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:
             raise AnalysisNotFoundError
 
@@ -62,6 +62,6 @@ class CreateSecondInstanceJudgmentDraftUseCase:
             raise SecondInstanceAnalysisRequiredError
 
         analysis.set_status(SecondInstanceAnalysisStatus.create_as_done())
-        self._analisyses_repository.replace(analysis)
+        self._analyses_repository.replace(analysis)
 
         return judgment_draft.dto

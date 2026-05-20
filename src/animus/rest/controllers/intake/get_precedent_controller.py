@@ -17,7 +17,7 @@ class GetPrecedentController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/precedents/identifier',
+            '/precedents',
             status_code=200,
             response_model=PrecedentDto,
         )

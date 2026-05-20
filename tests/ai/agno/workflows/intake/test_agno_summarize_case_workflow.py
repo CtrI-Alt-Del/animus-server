@@ -8,7 +8,7 @@ from animus.ai.agno.outputs import PetitionSummaryOutput
 from animus.ai.agno.workflows.intake import AgnoSummarizeFirstInstanceCaseWorkflow
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     CaseSummariesRepository,
 )
 from animus.core.shared.domain.errors import AppError
@@ -27,8 +27,8 @@ class TestAgnoSummarizeFirstInstanceCaseWorkflow:
                 AnalysisDocumentsRepository,
                 instance=True,
             ),
-            analisyses_repository=create_autospec(
-                AnalisysesRepository,
+            analyses_repository=create_autospec(
+                AnalysesRepository,
                 instance=True,
             ),
         )
@@ -40,7 +40,7 @@ class TestAgnoSummarizeFirstInstanceCaseWorkflow:
             return SimpleNamespace(
                 content=PetitionSummaryOutput(
                     case_summary='Resumo',
-                    legal_issue='Questao',
+                    legal_issue='Questão',
                     central_question='Pergunta',
                     relevant_laws=['Lei 1'],
                     key_facts=['Fato 1'],

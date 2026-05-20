@@ -1,6 +1,6 @@
 from .auth import SqlalchemyAccountsRepository
 from .intake import (
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
     SqlalchemyPetitionSummariesRepository,
     SqlalchemyPetitionsRepository,
     SqlalchemyPrecedentsRepository,
@@ -9,7 +9,7 @@ from .library import SqlalchemyFoldersRepository
 
 __all__ = [
     'SqlalchemyAccountsRepository',
-    'SqlalchemyAnalisysesRepository',
+    'SqlalchemyAnalysesRepository',
     'SqlalchemyPetitionsRepository',
     'SqlalchemyPetitionSummariesRepository',
     'SqlalchemyPrecedentsRepository',

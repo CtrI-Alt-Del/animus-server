@@ -19,7 +19,7 @@ def _create_analysis_with_case_summary(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise',
+            name='Análise',
             folder_id=None,
             account_id=account_id,
             type='FIRST_INSTANCE',
@@ -32,7 +32,7 @@ def _create_analysis_with_case_summary(
         CaseSummaryModel(
             analysis_id=analysis_id,
             case_summary='Resumo do caso',
-            legal_issue='Questao juridica',
+            legal_issue='Questão juridica',
             central_question='Pergunta central',
             relevant_laws=['Lei 1'],
             key_facts=['Fato 1'],
@@ -67,7 +67,7 @@ class TestGetCaseSummaryController:
         assert response.status_code == 200
         assert response.json() == {
             'case_summary': 'Resumo do caso',
-            'legal_issue': 'Questao juridica',
+            'legal_issue': 'Questão juridica',
             'central_question': 'Pergunta central',
             'relevant_laws': ['Lei 1'],
             'key_facts': ['Fato 1'],

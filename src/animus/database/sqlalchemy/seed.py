@@ -2,8 +2,8 @@ from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from animus.database.sqlalchemy import models
-from animus.database.sqlalchemy.repositories.intake.sqlalchemy_analisyses_repository import (
-    SqlalchemyAnalisysesRepository,
+from animus.database.sqlalchemy.repositories.intake.sqlalchemy_analyses_repository import (
+    SqlalchemyAnalysesRepository,
 )
 from animus.database.sqlalchemy.repositories.intake.sqlalchemy_petition_summaries_repository import (
     SqlalchemyPetitionSummariesRepository,
@@ -37,7 +37,7 @@ def seed() -> None:
         account_ids = auth_seeder.seed()
 
         intake_seeder = IntakeSeeder(
-            analisyses_repository=SqlalchemyAnalisysesRepository(session),
+            analyses_repository=SqlalchemyAnalysesRepository(session),
             petitions_repository=SqlalchemyPetitionsRepository(session),
             petition_summaries_repository=SqlalchemyPetitionSummariesRepository(
                 session

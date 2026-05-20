@@ -68,7 +68,7 @@ class TestUpdateAnalysisStatusController:
         assert response.status_code == 403
         assert response.json() == {
             'title': 'Erro de acesso negado',
-            'message': 'Analise nao pertence a conta autenticada',
+            'message': 'Análise nao pertence a conta autenticada',
         }
 
     def test_should_return_400_when_status_is_invalid(

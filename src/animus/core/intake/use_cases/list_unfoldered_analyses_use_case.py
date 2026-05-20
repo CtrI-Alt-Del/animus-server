@@ -5,7 +5,7 @@ from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
@@ -27,8 +27,8 @@ class ListUnfolderedAnalysesUseCase:
         SecondInstanceAnalysisStatus.create_as_failed().dto,
     )
 
-    def __init__(self, analisyses_repository: AnalisysesRepository) -> None:
-        self._analisyses_repository = analisyses_repository
+    def __init__(self, analyses_repository: AnalysesRepository) -> None:
+        self._analyses_repository = analyses_repository
 
     def execute(
         self,
@@ -49,7 +49,7 @@ class ListUnfolderedAnalysesUseCase:
         normalized_limit = Integer.create(limit)
         normalized_is_archived = Logical.create(is_archived)
 
-        analyses = self._analisyses_repository.find_many(
+        analyses = self._analyses_repository.find_many(
             account_id=normalized_account_id,
             search=normalized_search,
             cursor=normalized_cursor,

@@ -100,4 +100,4 @@ class TestMoveAnalysesToFolderController:
         )
 
         assert response.status_code == 404
-        assert response.json()['message'] == 'Analise nao encontrada'
+        assert response.json()['message'] == 'Análise nao encontrada'

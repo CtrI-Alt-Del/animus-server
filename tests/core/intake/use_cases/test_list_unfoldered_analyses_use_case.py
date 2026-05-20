@@ -8,7 +8,7 @@ from animus.core.intake.domain.structures.case_assessment_analysis_status import
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.use_cases.list_unfoldered_analyses_use_case import (
     ListUnfolderedAnalysesUseCase,
 )
@@ -21,12 +21,12 @@ from animus.fakers.intake.entities.analyses_faker import AnalysesFaker
 class TestListUnfolderedAnalysesUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.use_case = ListUnfolderedAnalysesUseCase(
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
         )
 
     def test_should_list_unfoldered_analyses_from_repository_and_return_dtos(
@@ -35,11 +35,11 @@ class TestListUnfolderedAnalysesUseCase:
         analysis = AnalysesFaker.fake(
             analysis_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
             account_id='01BX5ZZKBKACTAV9WEVGEMMVRZ',
-            name='Analise sem pasta',
+            name='Análise sem pasta',
         )
         next_cursor = Id.create('01BX5ZZKBKACTAV9WEVGEMMVS0')
-        self.analisyses_repository_mock.find_many.return_value = (
-            CursorPaginationResponse(items=[analysis], next_cursor=next_cursor)
+        self.analyses_repository_mock.find_many.return_value = CursorPaginationResponse(
+            items=[analysis], next_cursor=next_cursor
         )
 
         result = self.use_case.execute(
@@ -50,9 +50,9 @@ class TestListUnfolderedAnalysesUseCase:
             is_archived=False,
         )
 
-        self.analisyses_repository_mock.find_many.assert_called_once()
+        self.analyses_repository_mock.find_many.assert_called_once()
 
-        kwargs = self.analisyses_repository_mock.find_many.call_args.kwargs
+        kwargs = self.analyses_repository_mock.find_many.call_args.kwargs
 
         assert kwargs['account_id'] == Id.create('01BX5ZZKBKACTAV9WEVGEMMVRZ')
         assert kwargs['search'] == Text.create('sem pasta')
@@ -88,7 +88,7 @@ class TestListUnfolderedAnalysesUseCase:
                 is_archived=False,
             )
 
-        self.analisyses_repository_mock.find_many.assert_not_called()
+        self.analyses_repository_mock.find_many.assert_not_called()
 
     def test_should_raise_validation_error_when_limit_is_not_positive(self) -> None:
         with pytest.raises(
@@ -103,4 +103,4 @@ class TestListUnfolderedAnalysesUseCase:
                 is_archived=False,
             )
 
-        self.analisyses_repository_mock.find_many.assert_not_called()
+        self.analyses_repository_mock.find_many.assert_not_called()

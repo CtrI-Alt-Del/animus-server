@@ -32,7 +32,7 @@ from animus.core.intake.domain.structures.dtos import (
 from animus.core.intake.interfaces.analysis_documents_repository import (
     AnalysisDocumentsRepository,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.analysis_precedents_repository import (
     AnalysisPrecedentsRepository,
 )
@@ -66,7 +66,7 @@ def _make_analysis(
     return Analysis.create(
         AnalysisDto(
             id=analysis_id,
-            name='Analise',
+            name='Análise',
             account_id=account_id,
             status='DONE',
             created_at='2026-04-04T10:00:00Z',
@@ -78,8 +78,8 @@ def _make_analysis(
 class TestGetCaseAssessmentAnalysisReportUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository, instance=True
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository, instance=True
         )
         self.analysis_documents_repository_mock = create_autospec(
             AnalysisDocumentsRepository, instance=True
@@ -94,7 +94,7 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
             PetitionDraftsRepository, instance=True
         )
         self.use_case = GetCaseAssessmentAnalysisReportUseCase(
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
             analysis_documents_repository=self.analysis_documents_repository_mock,
             case_summaries_repository=self.case_summaries_repository_mock,
             analysis_precedents_repository=self.analysis_precedents_repository_mock,
@@ -122,7 +122,7 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo do caso',
-                legal_issue='Questao legal',
+                legal_issue='Questão legal',
                 central_question='Pergunta central',
                 relevant_laws=['Lei 1'],
                 key_facts=['Fato 1'],
@@ -133,7 +133,7 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
             PetitionDraftDto(analysis_id=analysis_id, content='Minuta de petição')
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             document
         )
@@ -175,7 +175,7 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo do caso',
-                legal_issue='Questao legal',
+                legal_issue='Questão legal',
                 central_question='Pergunta central',
                 relevant_laws=['Lei 1'],
                 key_facts=['Fato 1'],
@@ -183,7 +183,7 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
             )
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             document
         )
@@ -199,8 +199,8 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
 class TestGetFirstInstanceAnalysisReportUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository, instance=True
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository, instance=True
         )
         self.analysis_documents_repository_mock = create_autospec(
             AnalysisDocumentsRepository, instance=True
@@ -215,7 +215,7 @@ class TestGetFirstInstanceAnalysisReportUseCase:
             SecondInstanceJudgmentDraftsRepository, instance=True
         )
         self.use_case = GetFirstInstanceAnalysisReportUseCase(
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
             analysis_documents_repository=self.analysis_documents_repository_mock,
             case_summaries_repository=self.case_summaries_repository_mock,
             analysis_precedents_repository=self.analysis_precedents_repository_mock,
@@ -243,7 +243,7 @@ class TestGetFirstInstanceAnalysisReportUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo do caso',
-                legal_issue='Questao legal',
+                legal_issue='Questão legal',
                 central_question='Pergunta central',
                 relevant_laws=['Lei 1'],
                 key_facts=['Fato 1'],
@@ -253,14 +253,14 @@ class TestGetFirstInstanceAnalysisReportUseCase:
         judgment_draft = SecondInstanceJudgmentDraft.create(
             SecondInstanceJudgmentDraftDto(
                 analysis_id=analysis_id,
-                report='Relatorio',
+                report='Relatório',
                 merit_analysis='Fundamentacao',
-                precedent_adherence_analysis='Aderencia',
+                precedent_adherence_analysis='Aderência',
                 ruling=['Dispositivo'],
             )
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             document
         )
@@ -302,7 +302,7 @@ class TestGetFirstInstanceAnalysisReportUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo do caso',
-                legal_issue='Questao legal',
+                legal_issue='Questão legal',
                 central_question='Pergunta central',
                 relevant_laws=['Lei 1'],
                 key_facts=['Fato 1'],
@@ -310,7 +310,7 @@ class TestGetFirstInstanceAnalysisReportUseCase:
             )
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             document
         )
@@ -326,8 +326,8 @@ class TestGetFirstInstanceAnalysisReportUseCase:
 class TestGetSecondInstanceAnalysisReportUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository, instance=True
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository, instance=True
         )
         self.analysis_documents_repository_mock = create_autospec(
             AnalysisDocumentsRepository, instance=True
@@ -343,7 +343,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         )
         self.judgment_drafts_repository_mock.find_by_analysis_id.return_value = None
         self.use_case = GetSecondInstanceAnalysisReportUseCase(
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
             analysis_documents_repository=self.analysis_documents_repository_mock,
             case_summaries_repository=self.case_summaries_repository_mock,
             analysis_precedents_repository=self.analysis_precedents_repository_mock,
@@ -368,7 +368,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo do caso',
-                legal_issue='Questao legal',
+                legal_issue='Questão legal',
                 central_question='Pergunta central',
                 relevant_laws=['Lei 1'],
                 key_facts=['Fato 1'],
@@ -409,7 +409,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
             )
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             document
         )
@@ -432,7 +432,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         assert result.precedents[0].precedent.id == precedent_1.precedent.id.value
         assert result.draft is None
 
-        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+        self.analyses_repository_mock.find_by_id.assert_called_once_with(
             Id.create(analysis_id)
         )
         self.analysis_documents_repository_mock.find_by_analysis_id.assert_called_once_with(
@@ -466,7 +466,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo do caso',
-                legal_issue='Questao legal',
+                legal_issue='Questão legal',
                 central_question='Pergunta central',
                 relevant_laws=['Lei 1'],
                 key_facts=['Fato 1'],
@@ -476,14 +476,14 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         judgment_draft = SecondInstanceJudgmentDraft.create(
             SecondInstanceJudgmentDraftDto(
                 analysis_id=analysis_id,
-                report='Relatorio',
+                report='Relatório',
                 merit_analysis='Fundamentacao',
-                precedent_adherence_analysis='Aderencia',
+                precedent_adherence_analysis='Aderência',
                 ruling=['Dispositivo'],
             )
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             document
         )
@@ -513,7 +513,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         wrong_account_id = Id.create().value
         analysis = AnalysesFaker.fake(analysis_id=analysis_id, account_id=account_id)
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         # Act & Assert
         with pytest.raises(ForbiddenError):
@@ -526,7 +526,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         analysis_id = Id.create().value
         account_id = Id.create().value
 
-        self.analisyses_repository_mock.find_by_id.return_value = None
+        self.analyses_repository_mock.find_by_id.return_value = None
 
         # Act & Assert
         with pytest.raises(AnalysisNotFoundError):
@@ -548,7 +548,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo do caso',
-                legal_issue='Questao legal',
+                legal_issue='Questão legal',
                 central_question='Pergunta central',
                 relevant_laws=['Lei 1'],
                 key_facts=['Fato 1'],
@@ -584,7 +584,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
             create_precedent(None),
         ]
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
             document
         )

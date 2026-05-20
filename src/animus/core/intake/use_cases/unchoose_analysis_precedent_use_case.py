@@ -11,7 +11,7 @@ from animus.core.intake.domain.structures.precedent_identifier import (
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.shared.domain.structures import Id
 
@@ -20,10 +20,10 @@ class UnchooseAnalysisPrecedentUseCase:
     def __init__(
         self,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._analysis_precedents_repository = analysis_precedents_repository
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
 
     def execute(
         self,
@@ -55,10 +55,10 @@ class UnchooseAnalysisPrecedentUseCase:
             precedent_id=analysis_precedent.precedent.id,
         )
 
-        analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:
             raise AnalysisNotFoundError
 
-        self._analisyses_repository.replace(analysis)
+        self._analyses_repository.replace(analysis)
 
         return AnalysisStatusDto(value=analysis.status.dto)

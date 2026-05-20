@@ -8,7 +8,7 @@ from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
 )
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.intake.use_cases import CreateAnalysisDocumentUseCase
 from animus.core.shared.domain.structures import Id
@@ -37,9 +37,9 @@ class CreateAnalysisDocumentController:
             analysis_id: str,
             body: _Body,
             account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
-            analisyses_repository: Annotated[
-                AnalisysesRepository,
-                Depends(DatabasePipe.get_analisyses_repository_from_request),
+            analyses_repository: Annotated[
+                AnalysesRepository,
+                Depends(DatabasePipe.get_analyses_repository_from_request),
             ],
             analysis_documents_repository: Annotated[
                 AnalysisDocumentsRepository,
@@ -50,12 +50,12 @@ class CreateAnalysisDocumentController:
             IntakePipe.verify_analysis_by_account_from_request(
                 analysis_id=analysis_id,
                 account_id=account_id,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
             )
 
             use_case = CreateAnalysisDocumentUseCase(
                 analysis_documents_repository=analysis_documents_repository,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
                 broker=broker,
             )
 

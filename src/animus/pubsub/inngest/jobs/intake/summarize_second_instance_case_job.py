@@ -27,7 +27,7 @@ from animus.core.intake.use_cases import (
 from animus.core.shared.domain.structures import Id, Integer
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisDocumentsRepository,
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemyExtractedPetitionsRepository,
 )
@@ -136,7 +136,7 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
                 session
             )
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
-            analisyses_repository = SqlalchemyAnalisysesRepository(session)
+            analyses_repository = SqlalchemyAnalysesRepository(session)
             pdf_provider = PypdfPdfProvider()
 
             analysis_id = Id.create(payload.analysis_id)
@@ -172,7 +172,7 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
                 end=Integer.create(last_page),
             )
 
-            UpdateAnalysisStatusUseCase(analisyses_repository).execute(
+            UpdateAnalysisStatusUseCase(analyses_repository).execute(
                 analysis_id=analysis_id.value,
                 status=SecondInstanceAnalysisStatus.create_as_analyzing_case().dto,
             )
@@ -181,14 +181,14 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
             AgnoSummarizeSecondInstanceCaseWorkflow(
                 case_summaries_repository=case_summaries_repository,
                 analysis_documents_repository=analysis_documents_repository,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
             ).run(
                 analysis_id=analysis_id.value,
                 document_content=petition_content,
             )
             session.commit()
 
-            analysis = analisyses_repository.find_by_id(analysis_id)
+            analysis = analyses_repository.find_by_id(analysis_id)
             if analysis is None:
                 raise AnalysisNotFoundError
 
@@ -211,13 +211,11 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
     def _mark_petition_as_not_found_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
             analysis_id = Id.create(payload.analysis_id)
-            analysis = SqlalchemyAnalisysesRepository(session).find_by_id(analysis_id)
+            analysis = SqlalchemyAnalysesRepository(session).find_by_id(analysis_id)
             if analysis is None:
                 return
 
-            UpdateAnalysisStatusUseCase(
-                SqlalchemyAnalisysesRepository(session)
-            ).execute(
+            UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=analysis_id.value,
                 status=SecondInstanceAnalysisStatus.create_as_petition_not_found().dto,
             )
@@ -237,13 +235,11 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
     def _mark_analysis_as_failed_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
             analysis_id = Id.create(payload.analysis_id)
-            analysis = SqlalchemyAnalisysesRepository(session).find_by_id(analysis_id)
+            analysis = SqlalchemyAnalysesRepository(session).find_by_id(analysis_id)
             if analysis is None:
                 return
 
-            UpdateAnalysisStatusUseCase(
-                SqlalchemyAnalisysesRepository(session)
-            ).execute(
+            UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=analysis_id.value,
                 status=SecondInstanceAnalysisStatus.create_as_failed().dto,
             )

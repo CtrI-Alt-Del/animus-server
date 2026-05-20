@@ -51,6 +51,11 @@ class AnalysisPrecedentModel(Model):
         nullable=False,
         default=0,
     )
+    is_manually_added: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
     applicability_level: Mapped[int] = mapped_column(
         Integer,
         nullable=False,

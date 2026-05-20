@@ -32,7 +32,7 @@ def _create_analysis_and_precedent(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de precedentes',
+            name='Análise de precedentes',
             folder_id=None,
             account_id=account_id,
             type=AnalysisType.create_as_first_instance().dto,
@@ -73,14 +73,11 @@ class TestCreateAnalysisPrecedentController:
         )
 
         response = client.post(
-            '/intake/analyses/precedents',
+            f'/intake/analyses/{analysis_id}/precedents',
             json={
-                'analysis_id': analysis_id,
-                'identifier': {
-                    'court': 'STF',
-                    'kind': 'RG',
-                    'number': 101,
-                },
+                'court': 'STF',
+                'kind': 'RG',
+                'number': 101,
             },
             headers=_build_auth_headers(account.id),
         )
@@ -116,14 +113,11 @@ class TestCreateAnalysisPrecedentController:
         )
 
         response = client.post(
-            '/intake/analyses/precedents',
+            f'/intake/analyses/{analysis_id}/precedents',
             json={
-                'analysis_id': analysis_id,
-                'identifier': {
-                    'court': 'STF',
-                    'kind': 'RG',
-                    'number': 999,
-                },
+                'court': 'STF',
+                'kind': 'RG',
+                'number': 999,
             },
             headers=_build_auth_headers(account.id),
         )

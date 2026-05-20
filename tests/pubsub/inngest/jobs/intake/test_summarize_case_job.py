@@ -25,7 +25,7 @@ def _seed_analysis(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de teste',
+            name='Análise de teste',
             account_id=account_id,
             folder_id=None,
             type='FIRST_INSTANCE',

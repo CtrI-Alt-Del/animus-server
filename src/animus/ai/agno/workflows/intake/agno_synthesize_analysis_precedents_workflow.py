@@ -19,7 +19,7 @@ from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filter
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     PetitionSummariesRepository,
 )
 from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
@@ -49,12 +49,12 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
         self,
         petition_summaries_repository: PetitionSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._petition_summaries_repository = petition_summaries_repository
         self._create_analysis_precedents_use_case = CreateAnalysisPrecedentsUseCase(
             analysis_precedents_repository=analysis_precedents_repository,
-            analisyses_repository=analisyses_repository,
+            analyses_repository=analyses_repository,
         )
         self._squad = IntakeSquad()
         self._step_names = _StepNames()

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Response
 from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.intake.use_cases import TriggerFirstInstanceCaseSummarizationUseCase
 from animus.core.shared.interfaces import Broker
@@ -27,15 +27,15 @@ class TriggerFirstInstanceCaseSummarizationController:
                 AnalysisDocumentsRepository,
                 Depends(DatabasePipe.get_analysis_documents_repository_from_request),
             ],
-            analisyses_repository: Annotated[
-                AnalisysesRepository,
-                Depends(DatabasePipe.get_analisyses_repository_from_request),
+            analyses_repository: Annotated[
+                AnalysesRepository,
+                Depends(DatabasePipe.get_analyses_repository_from_request),
             ],
             broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
         ) -> Response:
             use_case = TriggerFirstInstanceCaseSummarizationUseCase(
                 analysis_documents_repository=analysis_documents_repository,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
                 broker=broker,
             )
 

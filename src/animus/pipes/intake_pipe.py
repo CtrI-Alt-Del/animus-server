@@ -7,7 +7,7 @@ from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     PetitionNotFoundError,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
 from animus.core.shared.domain.errors import ForbiddenError
 from animus.core.shared.domain.structures import FilePath, Id
@@ -21,17 +21,17 @@ class IntakePipe:
     def verify_analysis_by_account_from_request(
         analysis_id: IdSchema,
         account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
-        analisyses_repository: Annotated[
-            AnalisysesRepository,
-            Depends(DatabasePipe.get_analisyses_repository_from_request),
+        analyses_repository: Annotated[
+            AnalysesRepository,
+            Depends(DatabasePipe.get_analyses_repository_from_request),
         ],
     ) -> Analysis:
-        analysis = analisyses_repository.find_by_id(Id.create(analysis_id))
+        analysis = analyses_repository.find_by_id(Id.create(analysis_id))
         if analysis is None:
             raise AnalysisNotFoundError
 
         if analysis.account_id.value != account_id.value:
-            raise ForbiddenError('Analise nao pertence a conta autenticada')
+            raise ForbiddenError('Análise nao pertence a conta autenticada')
 
         return analysis
 
@@ -43,16 +43,16 @@ class IntakePipe:
             PetitionsRepository,
             Depends(DatabasePipe.get_petitions_repository_from_request),
         ],
-        analisyses_repository: Annotated[
-            AnalisysesRepository,
-            Depends(DatabasePipe.get_analisyses_repository_from_request),
+        analyses_repository: Annotated[
+            AnalysesRepository,
+            Depends(DatabasePipe.get_analyses_repository_from_request),
         ],
     ) -> FilePath:
         petition = IntakePipe.verify_petition_by_account(
             petition_id=petition_id,
             account_id=account_id,
             petitions_repository=petitions_repository,
-            analisyses_repository=analisyses_repository,
+            analyses_repository=analyses_repository,
         )
 
         return petition.file_path
@@ -65,16 +65,16 @@ class IntakePipe:
             PetitionsRepository,
             Depends(DatabasePipe.get_petitions_repository_from_request),
         ],
-        analisyses_repository: Annotated[
-            AnalisysesRepository,
-            Depends(DatabasePipe.get_analisyses_repository_from_request),
+        analyses_repository: Annotated[
+            AnalysesRepository,
+            Depends(DatabasePipe.get_analyses_repository_from_request),
         ],
     ) -> Petition:
         petition = petitions_repository.find_by_id(Id.create(petition_id))
         if petition is None:
             raise PetitionNotFoundError
 
-        analysis = analisyses_repository.find_by_id(petition.analysis_id)
+        analysis = analyses_repository.find_by_id(petition.analysis_id)
         if analysis is None:
             raise AnalysisNotFoundError
 

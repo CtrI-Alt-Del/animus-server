@@ -49,7 +49,7 @@ class TestListAnalysisPetitionsUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo da primeira petição.',
-                legal_issue='Questao juridica da primeira petição.',
+                legal_issue='Questão juridica da primeira petição.',
                 central_question='A primeira pretensao tem amparo legal?',
                 relevant_laws=['Codigo Civil, Art. 186'],
                 key_facts=['Fato relevante da primeira petição.'],

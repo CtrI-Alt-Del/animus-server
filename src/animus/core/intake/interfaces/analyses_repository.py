@@ -5,7 +5,7 @@ from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
 
 
-class AnalisysesRepository(Protocol):
+class AnalysesRepository(Protocol):
     def find_by_id(self, analysis_id: Id) -> Analysis | None: ...
 
     def find_many(

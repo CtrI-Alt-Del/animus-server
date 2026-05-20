@@ -7,13 +7,13 @@ from animus.core.intake.domain.structures.second_instance_analysis_status import
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.shared.domain.structures import Datetime, Id, Logical
 
 
 class CreateAnalysisUseCase:
-    def __init__(self, analisyses_repository: AnalisysesRepository) -> None:
-        self._analisyses_repository = analisyses_repository
+    def __init__(self, analyses_repository: AnalysesRepository) -> None:
+        self._analyses_repository = analyses_repository
 
     def execute(
         self,
@@ -24,7 +24,7 @@ class CreateAnalysisUseCase:
         normalized_account_id = Id.create(account_id)
         normalized_type = AnalysisType.normalize(type)
         normalized_folder_id = Id.create(folder_id) if folder_id is not None else None
-        next_number = self._analisyses_repository.find_next_generated_name_number(
+        next_number = self._analyses_repository.find_next_generated_name_number(
             normalized_account_id
         )
 
@@ -50,6 +50,6 @@ class CreateAnalysisUseCase:
             )
         )
 
-        self._analisyses_repository.add(analysis)
+        self._analyses_repository.add(analysis)
 
         return analysis.dto

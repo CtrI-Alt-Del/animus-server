@@ -23,7 +23,7 @@ def _create_second_instance_analysis_with_draft(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de segunda instancia',
+            name='Análise de segunda instancia',
             folder_id=None,
             account_id=account_id,
             type=AnalysisType.create_as_second_instance().dto,
@@ -35,9 +35,9 @@ def _create_second_instance_analysis_with_draft(
     session.add(
         SecondInstanceJudgmentDraftModel(
             analysis_id=analysis_id,
-            report='Relatorio',
+            report='Relatório',
             merit_analysis='Fundamentacao',
-            precedent_adherence_analysis='Aderencia',
+            precedent_adherence_analysis='Aderência',
             ruling=['Item 1', 'Item 2'],
             preliminary_issues='Preliminar',
             no_applicable_precedent_notice='Aviso',
@@ -59,7 +59,7 @@ def _create_second_instance_analysis_without_draft(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de segunda instancia',
+            name='Análise de segunda instancia',
             folder_id=None,
             account_id=account_id,
             type=AnalysisType.create_as_second_instance().dto,
@@ -96,9 +96,9 @@ class TestGetSecondInstanceJudgmentDraftController:
         assert response.status_code == 200
         assert response.json() == {
             'analysis_id': analysis_id,
-            'report': 'Relatorio',
+            'report': 'Relatório',
             'merit_analysis': 'Fundamentacao',
-            'precedent_adherence_analysis': 'Aderencia',
+            'precedent_adherence_analysis': 'Aderência',
             'ruling': ['Item 1', 'Item 2'],
             'preliminary_issues': 'Preliminar',
             'no_applicable_precedent_notice': 'Aviso',

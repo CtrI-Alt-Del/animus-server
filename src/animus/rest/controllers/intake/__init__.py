@@ -5,7 +5,7 @@ from .create_analysis_precedent_controller import CreateAnalysisPrecedentControl
 from .create_analysis_document_controller import CreateAnalysisDocumentController
 from .get_analysis_controller import GetAnalysisController
 from .get_analysis_document_controller import GetAnalysisDocumentController
-from .get_precedent_by_identifier_controller import (
+from .get_precedent_controller import (
     GetPrecedentController,
 )
 from .get_case_assessment_analysis_report_controller import (

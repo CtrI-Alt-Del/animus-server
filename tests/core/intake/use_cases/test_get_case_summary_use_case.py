@@ -28,7 +28,7 @@ class TestGetCaseSummaryUseCase:
         case_summary = CaseSummary.create(
             CaseSummaryDto(
                 case_summary='Resumo do caso',
-                legal_issue='Questao juridica',
+                legal_issue='Questão juridica',
                 central_question='Pergunta central',
                 relevant_laws=['Lei 1'],
                 key_facts=['Fato 1'],

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Response
 from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     CaseSummariesRepository,
 )
 from animus.core.intake.use_cases import (
@@ -28,9 +28,9 @@ class TriggerSecondInstanceJudgmentDraftGenerationController:
                 Analysis,
                 Depends(IntakePipe.verify_analysis_by_account_from_request),
             ],
-            analisyses_repository: Annotated[
-                AnalisysesRepository,
-                Depends(DatabasePipe.get_analisyses_repository_from_request),
+            analyses_repository: Annotated[
+                AnalysesRepository,
+                Depends(DatabasePipe.get_analyses_repository_from_request),
             ],
             case_summaries_repository: Annotated[
                 CaseSummariesRepository,
@@ -43,7 +43,7 @@ class TriggerSecondInstanceJudgmentDraftGenerationController:
             broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
         ) -> Response:
             use_case = TriggerSecondInstanceJudgmentDraftGenerationUseCase(
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
                 case_summaries_repository=case_summaries_repository,
                 analysis_precedents_repository=analysis_precedents_repository,
                 broker=broker,

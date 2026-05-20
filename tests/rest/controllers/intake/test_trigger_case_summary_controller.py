@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.models.intake import AnalysisDocumentModel
-from animus.database.sqlalchemy.repositories.intake.sqlalchemy_analisyses_repository import (
-    SqlalchemyAnalisysesRepository,
+from animus.database.sqlalchemy.repositories.intake.sqlalchemy_analyses_repository import (
+    SqlalchemyAnalysesRepository,
 )
 from tests.fixtures.auth_fixtures import CreateAccountFixture
 from tests.fixtures.inngest_fixtures import FakeInngestClient
@@ -64,7 +64,7 @@ class TestTriggerFirstInstanceCaseSummarizationController:
         assert fake_inngest_client.sent_events[0].data['analysis_id'] == analysis.id
 
         session = sqlalchemy_session_factory()
-        persisted_analysis = SqlalchemyAnalisysesRepository(session).find_by_id(
+        persisted_analysis = SqlalchemyAnalysesRepository(session).find_by_id(
             Id.create(analysis.id)
         )
         session.close()

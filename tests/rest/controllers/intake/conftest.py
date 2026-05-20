@@ -38,7 +38,7 @@ def create_analysis(
         *,
         account_id: str,
         analysis_id: str | None = None,
-        name: str = 'Analise inicial',
+        name: str = 'Análise inicial',
         analysis_type: str = AnalysisType.create_as_first_instance().dto,
         status: str = FirstInstanceAnalysisStatus.create_as_waiting_document_upload().dto,
         folder_id: str | None = None,

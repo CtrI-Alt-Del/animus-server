@@ -11,7 +11,7 @@ from animus.core.intake.domain.events import (
 )
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.shared.domain.structures import Id
 from animus.core.shared.interfaces import Broker
@@ -21,11 +21,11 @@ class TriggerSecondInstanceCaseSummarizationUseCase:
     def __init__(
         self,
         analysis_documents_repository: AnalysisDocumentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
         broker: Broker,
     ) -> None:
         self._analysis_documents_repository = analysis_documents_repository
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
         self._broker = broker
 
     def execute(self, analysis_id: str) -> None:
@@ -38,7 +38,7 @@ class TriggerSecondInstanceCaseSummarizationUseCase:
         if analysis_document is None:
             raise AnalysisDocumentNotFoundError
 
-        analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:
             raise AnalysisNotFoundError
 
@@ -48,7 +48,7 @@ class TriggerSecondInstanceCaseSummarizationUseCase:
         analysis.set_status(
             SecondInstanceAnalysisStatus.create_as_extracting_petition()
         )
-        self._analisyses_repository.replace(analysis)
+        self._analyses_repository.replace(analysis)
         self._broker.publish(
             SecondInstanceCaseSummarizationTriggeredEvent(
                 analysis_id=analysis_id_entity.value

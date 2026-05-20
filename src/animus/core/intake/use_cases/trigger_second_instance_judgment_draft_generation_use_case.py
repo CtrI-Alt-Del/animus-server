@@ -11,7 +11,7 @@ from animus.core.intake.domain.events import (
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     CaseSummariesRepository,
 )
 from animus.core.shared.domain.structures import Id
@@ -21,12 +21,12 @@ from animus.core.shared.interfaces import Broker
 class TriggerSecondInstanceJudgmentDraftGenerationUseCase:
     def __init__(
         self,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
         case_summaries_repository: CaseSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
         broker: Broker,
     ) -> None:
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
         self._case_summaries_repository = case_summaries_repository
         self._analysis_precedents_repository = analysis_precedents_repository
         self._broker = broker
@@ -34,7 +34,7 @@ class TriggerSecondInstanceJudgmentDraftGenerationUseCase:
     def execute(self, analysis_id: str) -> None:
         analysis_id_entity = Id.create(analysis_id)
 
-        analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:
             raise AnalysisNotFoundError
 

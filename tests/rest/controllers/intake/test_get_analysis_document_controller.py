@@ -22,7 +22,7 @@ def _create_analysis_with_document(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise',
+            name='Análise',
             folder_id=None,
             account_id=account_id,
             type='FIRST_INSTANCE',

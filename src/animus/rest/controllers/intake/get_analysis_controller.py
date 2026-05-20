@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.use_cases.get_analysis_use_case import GetAnalysisUseCase
 from animus.core.shared.domain.structures import Id
 from animus.pipes.auth_pipe import AuthPipe
@@ -19,13 +19,13 @@ class GetAnalysisController:
         def _(
             analysis_id: str,
             account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
-            analisyses_repository: Annotated[
-                AnalisysesRepository,
-                Depends(DatabasePipe.get_analisyses_repository_from_request),
+            analyses_repository: Annotated[
+                AnalysesRepository,
+                Depends(DatabasePipe.get_analyses_repository_from_request),
             ],
         ) -> AnalysisDto:
             use_case = GetAnalysisUseCase(
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
             )
 
             return use_case.execute(

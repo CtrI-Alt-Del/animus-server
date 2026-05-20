@@ -6,7 +6,7 @@ from animus.core.intake.domain.entities.dtos import AnalysisStatusDto
 from animus.core.intake.domain.structures.dtos import PrecedentIdentifierDto
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.intake.use_cases import ChooseAnalysisPrecedentUseCase
 from animus.core.shared.domain.structures import Id
@@ -29,9 +29,9 @@ class ChooseAnalysisPrecedentController:
             kind: str,
             number: int,
             account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)],
-            analisyses_repository: Annotated[
-                AnalisysesRepository,
-                Depends(DatabasePipe.get_analisyses_repository_from_request),
+            analyses_repository: Annotated[
+                AnalysesRepository,
+                Depends(DatabasePipe.get_analyses_repository_from_request),
             ],
             analysis_precedents_repository: Annotated[
                 AnalysisPrecedentsRepository,
@@ -41,12 +41,12 @@ class ChooseAnalysisPrecedentController:
             IntakePipe.verify_analysis_by_account_from_request(
                 analysis_id=analysis_id,
                 account_id=account_id,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
             )
 
             use_case = ChooseAnalysisPrecedentUseCase(
                 analysis_precedents_repository=analysis_precedents_repository,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
             )
 
             return use_case.execute(

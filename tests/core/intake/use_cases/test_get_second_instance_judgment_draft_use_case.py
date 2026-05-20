@@ -30,9 +30,9 @@ class TestGetSecondInstanceJudgmentDraftUseCase:
         judgment_draft = SecondInstanceJudgmentDraft.create(
             SecondInstanceJudgmentDraftDto(
                 analysis_id=analysis_id,
-                report='Relatorio',
+                report='Relatório',
                 merit_analysis='Fundamentacao',
-                precedent_adherence_analysis='Aderencia',
+                precedent_adherence_analysis='Aderência',
                 ruling=['Item 1', 'Item 2'],
             )
         )

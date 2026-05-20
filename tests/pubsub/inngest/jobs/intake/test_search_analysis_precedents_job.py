@@ -30,7 +30,7 @@ from animus.core.intake.use_cases import (
 from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisPrecedentsRepository,
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
 )
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.database.sqlalchemy.models.intake.analysis_precedent_model import (
@@ -58,7 +58,7 @@ def _seed_analysis_with_petition_summary(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de teste',
+            name='Análise de teste',
             account_id=Id.create().value,
             folder_id=None,
             type=AnalysisType.create_as_first_instance().dto,
@@ -79,7 +79,7 @@ def _seed_analysis_with_petition_summary(
         PetitionSummaryModel(
             petition_id=petition_id,
             case_summary='Resumo do caso',
-            legal_issue='Questao juridica',
+            legal_issue='Questão juridica',
             central_question='Pergunta central',
             relevant_laws=['Lei 1'],
             key_facts=['Fato 1'],
@@ -347,7 +347,7 @@ class TestSearchAnalysisPrecedentsJob:
                     analysis_precedents_repository=SqlalchemyAnalysisPrecedentsRepository(
                         session
                     ),
-                    analisyses_repository=SqlalchemyAnalisysesRepository(session),
+                    analyses_repository=SqlalchemyAnalysesRepository(session),
                 ).execute(
                     analysis_id=analysis_id,
                     filters_dto=filters_dto,

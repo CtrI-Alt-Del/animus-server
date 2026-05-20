@@ -6,7 +6,7 @@ from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.first_instance_analysis_status import (
     FirstInstanceAnalysisStatus,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.use_cases.create_analysis_use_case import CreateAnalysisUseCase
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id, Integer
@@ -15,18 +15,18 @@ from animus.core.shared.domain.structures import Id, Integer
 class TestCreateAnalysisUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.use_case = CreateAnalysisUseCase(
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
         )
 
     def test_should_create_analysis_with_generated_name_and_add_it_to_repository(
         self,
     ) -> None:
-        self.analisyses_repository_mock.find_next_generated_name_number.return_value = (
+        self.analyses_repository_mock.find_next_generated_name_number.return_value = (
             Integer.create(3)
         )
 
@@ -35,11 +35,11 @@ class TestCreateAnalysisUseCase:
             folder_id='01BX5ZZKBKACTAV9WEVGEMMVRZ',
         )
 
-        self.analisyses_repository_mock.find_next_generated_name_number.assert_called_once_with(
+        self.analyses_repository_mock.find_next_generated_name_number.assert_called_once_with(
             Id.create('01ARZ3NDEKTSV4RRFFQ69G5FAV')
         )
-        self.analisyses_repository_mock.add.assert_called_once()
-        added_analysis = self.analisyses_repository_mock.add.call_args.args[0]
+        self.analyses_repository_mock.add.assert_called_once()
+        added_analysis = self.analyses_repository_mock.add.call_args.args[0]
 
         assert added_analysis.dto == result
         assert result.name == 'Nova analise #3'
@@ -60,5 +60,5 @@ class TestCreateAnalysisUseCase:
                 folder_id='invalid-folder-id',
             )
 
-        self.analisyses_repository_mock.find_next_generated_name_number.assert_not_called()
-        self.analisyses_repository_mock.add.assert_not_called()
+        self.analyses_repository_mock.find_next_generated_name_number.assert_not_called()
+        self.analyses_repository_mock.add.assert_not_called()

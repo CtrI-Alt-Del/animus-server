@@ -33,7 +33,7 @@ def _create_analysis_with_chosen_precedents(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de precedentes',
+            name='Análise de precedentes',
             folder_id=None,
             account_id=account_id,
             type=AnalysisType.create_as_first_instance().dto,

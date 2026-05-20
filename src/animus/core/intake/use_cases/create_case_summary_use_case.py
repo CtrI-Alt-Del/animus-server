@@ -15,7 +15,7 @@ from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     CaseSummariesRepository,
 )
 from animus.core.shared.domain.structures import Id
@@ -26,11 +26,11 @@ class CreateCaseSummaryUseCase:
         self,
         case_summaries_repository: CaseSummariesRepository,
         analysis_documents_repository: AnalysisDocumentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._case_summaries_repository = case_summaries_repository
         self._analysis_documents_repository = analysis_documents_repository
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
 
     def execute(self, analysis_id: str, dto: CaseSummaryDto) -> CaseSummaryDto:
         analysis_id_entity = Id.create(analysis_id)
@@ -56,7 +56,7 @@ class CreateCaseSummaryUseCase:
                 case_summary=case_summary,
             )
 
-        analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:
             raise AnalysisNotFoundError
 
@@ -67,5 +67,5 @@ class CreateCaseSummaryUseCase:
         elif analysis.type.is_second_instance.is_true:
             analysis.set_status(SecondInstanceAnalysisStatus.create_as_case_analyzed())
 
-        self._analisyses_repository.replace(analysis)
+        self._analyses_repository.replace(analysis)
         return case_summary.dto

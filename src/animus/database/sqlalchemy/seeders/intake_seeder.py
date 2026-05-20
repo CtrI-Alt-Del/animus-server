@@ -11,7 +11,7 @@ from animus.core.intake.domain.structures.dtos.case_summary_dto import (
     CaseSummaryDto,
 )
 from animus.core.intake.domain.structures.petition_summary import PetitionSummary
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
 )
@@ -22,11 +22,11 @@ from animus.core.shared.domain.structures.id import Id
 class IntakeSeeder:
     def __init__(
         self,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
         petitions_repository: PetitionsRepository,
         petition_summaries_repository: PetitionSummariesRepository,
     ) -> None:
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
         self._petitions_repository = petitions_repository
         self._petition_summaries_repository = petition_summaries_repository
 
@@ -37,14 +37,14 @@ class IntakeSeeder:
         analysis = Analysis.create(
             AnalysisDto(
                 id='01KMQTN9YCHWG20ZZEPNBRYW87',
-                name='Analise de exemplo',
+                name='Análise de exemplo',
                 account_id=account_ids[0].value,
                 type=AnalysisType.create_as_first_instance().dto,
                 status=FirstInstanceAnalysisStatus.create_as_document_uploaded().dto,
                 created_at=datetime.now(UTC).isoformat(),
             )
         )
-        self._analisyses_repository.add(analysis)
+        self._analyses_repository.add(analysis)
 
         petition = Petition.create(
             petition_id='01KMQV3F09J22AWX0P7X21D9PK',
