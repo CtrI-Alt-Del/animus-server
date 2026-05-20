@@ -74,7 +74,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **`SummarizeFirstInstanceCaseWorkflow`** (`src/animus/core/intake/interfaces/summarize_case_workflow.py`) - contrato atual de sumarização geral: `run(analysis_id: str, document_content: Text) -> CaseSummaryDto`.
 - **`RequestCaseSummaryUseCase`** (`src/animus/core/intake/use_cases/request_case_summary_use_case.py`) - use case que hoje atualiza status e publica `CaseSummaryRequestedEvent`.
 - **`CreateCaseSummaryUseCase`** (`src/animus/core/intake/use_cases/create_case_summary_use_case.py`) - cria ou substitui `CaseSummary` e atualiza status para `CASE_ANALYZED`.
-- **`UpdateAnalysisStatusUseCase`** (`src/animus/core/intake/use_cases/update_analysis_status_use_case.py`) - altera status da analysis via `AnalisysesRepository`.
+- **`UpdateAnalysisStatusUseCase`** (`src/animus/core/intake/use_cases/update_analysis_status_use_case.py`) - altera status da analysis via `AnalysesRepository`.
 - **`CaseSummaryFinishedEvent`** (`src/animus/core/intake/domain/events/case_summary_finished_event.py`) - evento existente de conclusão do resumo.
 - **`CaseSummaryRequestedEvent`** (`src/animus/core/intake/domain/events/case_summary_requested_event.py`) - evento atual do fluxo de sumarização geral.
 
@@ -197,7 +197,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 
 - **Localização:** `src/animus/ai/agno/workflows/intake/agno_summarize_second_instance_case_workflow.py` (**novo arquivo**)
 - **Interface implementada:** `SummarizeFirstInstanceCaseWorkflow`
-- **Dependências:** `CaseSummariesRepository`, `AnalysisDocumentsRepository`, `AnalisysesRepository`
+- **Dependências:** `CaseSummariesRepository`, `AnalysisDocumentsRepository`, `AnalysesRepository`
 - **Método principal:** `run(analysis_id: str, document_content: Text) -> CaseSummaryDto` - sumariza a petição extraída com contexto de recurso e persiste via `CreateCaseSummaryUseCase`.
 - **Fluxo resumido:** montar prompt especializado, chamar `IntakeSquad.second_instance_case_summarizer_agent`, normalizar `CaseSummaryOutput`, executar `CreateCaseSummaryUseCase.execute(...)`.
 
@@ -218,7 +218,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 
 - **Localização:** `src/animus/pubsub/inngest/jobs/intake/extract_petition_job.py` (**novo arquivo**)
 - **Evento consumido:** `SecondInstanceCaseSummarizationTriggeredEvent.name` com payload `analysis_id`.
-- **Dependências:** `SqlalchemyAnalysisDocumentsRepository`, `SqlalchemyCaseSummariesRepository`, `SqlalchemyAnalisysesRepository`, `SqlalchemyExtractedPetitionsRepository`, `GcsFileStorageProvider`, `PypdfPdfProvider`, `AgnoExtractPetitionWorkflow`, `AgnoSummarizeSecondInstanceCaseWorkflow`, `CreateExtractedPetitionUseCase`, `UpdateAnalysisStatusUseCase`, `InngestBroker`.
+- **Dependências:** `SqlalchemyAnalysisDocumentsRepository`, `SqlalchemyCaseSummariesRepository`, `SqlalchemyAnalysesRepository`, `SqlalchemyExtractedPetitionsRepository`, `GcsFileStorageProvider`, `PypdfPdfProvider`, `AgnoExtractPetitionWorkflow`, `AgnoSummarizeSecondInstanceCaseWorkflow`, `CreateExtractedPetitionUseCase`, `UpdateAnalysisStatusUseCase`, `InngestBroker`.
 - **Passos (`step.run`):** `normalize_payload`; `extract_and_summarize`; `publish_finished_event`; em exceção, `mark_analysis_as_failed`.
 - **Métodos:** `handle(inngest: Inngest) -> Any` - registra function Inngest; `_normalize_payload(data: dict[str, Any]) -> dict[str, str]` - normaliza payload; `_extract_and_summarize(payload: _Payload) -> dict[str, str]` - delega execução bloqueante para executor; `_extract_and_summarize_sync(payload: _Payload) -> dict[str, str]` - executa transação de extração e sumarização; `_mark_petition_as_not_found(payload: _Payload) -> None` - delega marcação de ausência de petição; `_mark_petition_as_not_found_sync(payload: _Payload) -> None` - atualiza status para `PETITION_NOT_FOUND` e comita; `_mark_analysis_as_failed(payload: _Payload) -> None` - delega marcação de falha; `_mark_analysis_as_failed_sync(payload: _Payload) -> None` - atualiza status para `FAILED` e comita; `_handle_failure(context: Context) -> None` - trata falhas capturadas pelo Inngest.
 - **Idempotência:** `ExtractedPetitionsRepository.find_by_analysis_id(...)` evita nova chamada ao workflow de extração; `CreateCaseSummaryUseCase` já substitui resumo existente; publicação de `CaseSummaryFinishedEvent` só ocorre após sucesso da execução principal.

@@ -96,7 +96,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - **`SqlalchemyAnalysisPrecedentsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedents_repository.py`) - referencia de persistencia dos precedentes da analise.
 - **`SqlalchemyPetitionsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petitions_repository.py`) - repository atual de `Petition`; faltando busca por `document_file_path`.
 - **`SqlalchemyAccountsRepository`** (`src/animus/database/sqlalchemy/repositories/auth/sqlalchemy_accounts_repository.py`) - implementacao concreta de busca de conta por e-mail.
-- **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) - persistencia da analise, inclusive `add_many(...)` e `replace(...)`.
+- **`SqlalchemyAnalysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`) - persistencia da analise, inclusive `add_many(...)` e `replace(...)`.
 - **`SqlalchemyPetitionSummariesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petition_summaries_repository.py`) - suporte de persistencia/leitura do resumo.
 - **Migracoes existentes** (`migrations/versions/20260328_150000_create_analysis_precedents_table.py`, `migrations/versions/20260418_130000_add_analysis_precedent_scores_columns.py`, `migrations/versions/20260426_160000_add_final_rank_to_analysis_precedents.py`) - base atual da tabela `analysis_precedents` e das colunas de score/rank.
 
@@ -253,7 +253,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 - **Localizacao:** `src/animus/pubsub/inngest/jobs/intake/seed_analyses_precedents_dataset_job.py` (**novo arquivo**)
 - **Evento consumido:** `TriggerEvent(event='intake/seed-analyses-precedents-dataset.requested')` diretamente no job; nao cria `Event` de dominio no `core`, porque o disparo e operacional.
-- **Dependencias:** `SqlalchemyAccountsRepository`, `SqlalchemyAnalisysesRepository`, `SqlalchemyPetitionsRepository`, `SqlalchemyPetitionSummariesRepository`, `SqlalchemyAnalysisPrecedentsRepository`, novos repositories de feedback/dataset row, `GcsFileStorageProvider`, `ParquetProvider`, `GetDocumentContentUseCase`, `AgnoSummarizePetitionWorkflow`, `SearchAnalysisPrecedentsUseCase`, `CreateAnalysisPrecedentsUseCase`, `AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow`.
+- **Dependencias:** `SqlalchemyAccountsRepository`, `SqlalchemyAnalysesRepository`, `SqlalchemyPetitionsRepository`, `SqlalchemyPetitionSummariesRepository`, `SqlalchemyAnalysisPrecedentsRepository`, novos repositories de feedback/dataset row, `GcsFileStorageProvider`, `ParquetProvider`, `GetDocumentContentUseCase`, `AgnoSummarizePetitionWorkflow`, `SearchAnalysisPrecedentsUseCase`, `CreateAnalysisPrecedentsUseCase`, `AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow`.
 - **Passos (`step.run`):**
 - `resolve_account` - resolve a conta pelo e-mail `animus.ctrlaltdel@gmail.com`.
 - `list_petition_files` - lista os blobs `*.pdf` do prefixo `intake/xertica/petitions/`.

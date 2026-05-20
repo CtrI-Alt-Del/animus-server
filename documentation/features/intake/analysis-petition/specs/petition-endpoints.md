@@ -67,7 +67,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **`PetitionSummary`** (`src/animus/core/intake/domain/structures/petition_summary.py`) - `Structure` do resumo da petição ja existente, com `case_summary`, `legal_issue`, `central_question`, `relevant_laws`, `key_facts` e `search_terms`.
 - **`PetitionSummaryDto`** (`src/animus/core/intake/domain/structures/dtos/petition_summary_dto.py`) - DTO do resumo ja existente.
 - **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) - port ja existente para persistencia de peticoes; hoje so expoe listagem por `analysis_id` e escrita.
-- **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) - port ja existente para consultas de `Analysis`; ainda sem adaptador concreto na branch atual.
+- **`AnalysesRepository`** (`src/animus/core/intake/interfaces/analyses_repository.py`) - port ja existente para consultas de `Analysis`; ainda sem adaptador concreto na branch atual.
 - **`SummarizePetitionWorkflow`** (`src/animus/core/intake/interfaces/summarize_petition_workflow.py`) - port ja existente, mas hoje esta inconsistente com o dominio de peticoes: importa `typing.Text`, retorna `ListResponse[PrecedentEmbedding]` e nao e referenciado por nenhum consumidor.
 - **`FileStorageProvider`** (`src/animus/core/storage/interfaces/file_storage_provider.py`) - port atual de storage; hoje so cobre `generate_upload_url(...)`.
 - **`PdfProvider`** (`src/animus/core/storage/interfaces/pdf_provider.py`) - port ja existente para extracao de texto de `PDF` a partir de `File`.
@@ -105,7 +105,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - Nao existe provider concreto de `storage`, parser concreto de `PDF`, parser de `DOCX` nem qualquer `StoragePipe`.
 - Nao existe implementacao concreta de `SummarizePetitionWorkflow`, nem estrutura inicial de `src/animus/ai/agno/`.
 - Nao existe `PetitionSummariesRepository` no `core`, nem persistencia SQLAlchemy de `petitions` e `petition_summaries`.
-- O port `AnalisysesRepository` ainda nao possui evidencia de adapter SQLAlchemy na branch atual, embora seja pre-requisito para ownership check.
+- O port `AnalysesRepository` ainda nao possui evidencia de adapter SQLAlchemy na branch atual, embora seja pre-requisito para ownership check.
 - `PetitionSummary` e `PetitionSummaryDto` existem, mas nao sao exportados em `src/animus/core/intake/domain/structures/__init__.py` nem em `src/animus/core/intake/domain/structures/dtos/__init__.py`.
 
 ---
@@ -158,9 +158,9 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Fluxo resumido:** validar/converter `analysis_id`, `uploaded_at` e `document` -> `Petition.create(PetitionDto(...))` -> `PetitionsRepository.add(...)` -> retornar `petition.dto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/create_petition_summary_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `PetitionSummariesRepository`, `PetitionsRepository`, `AnalisysesRepository`
+- **Dependencias (ports injetados):** `PetitionSummariesRepository`, `PetitionsRepository`, `AnalysesRepository`
 - **Metodo principal:** `execute(petition_id: str, dto: PetitionSummaryDto) -> PetitionSummaryDto` - converte o DTO em `PetitionSummary`, decide entre criar/substituir, atualiza o status da analise para `PETITION_ANALYZED` e devolve o DTO normalizado.
-- **Fluxo resumido:** `PetitionSummary.create(dto)` -> `find_by_petition_id(...)` -> `add(...)` quando ausente / `replace(...)` quando existente -> `PetitionsRepository.find_by_id(...)` -> `AnalisysesRepository.find_by_id(...)` -> `AnalisysesRepository.replace(analysis.status=PETITION_ANALYZED)` -> retornar `petition_summary.dto`.
+- **Fluxo resumido:** `PetitionSummary.create(dto)` -> `find_by_petition_id(...)` -> `add(...)` quando ausente / `replace(...)` quando existente -> `PetitionsRepository.find_by_id(...)` -> `AnalysesRepository.find_by_id(...)` -> `AnalysesRepository.replace(analysis.status=PETITION_ANALYZED)` -> retornar `petition_summary.dto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/__init__.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** nao aplicavel
@@ -224,7 +224,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 ## Camada Database (Seeders)
 
 - **Localizacao:** `src/animus/database/sqlalchemy/seeders/intake_seeder.py` (**novo arquivo**)
-- **Dependencias:** `AnalisysesRepository`, `PetitionsRepository`, `PetitionSummariesRepository`
+- **Dependencias:** `AnalysesRepository`, `PetitionsRepository`, `PetitionSummariesRepository`
 - **Metodos:**
   - `seed(account_ids: list[Id]) -> dict[str, Id] | None` - cria dados iniciais de `Analysis`, `Petition` e `PetitionSummary` para o contexto `intake` quando existir ao menos uma conta seeded.
 
@@ -235,8 +235,8 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Metodo HTTP e path:** `POST /intake/petitions`
 - **`status_code`:** `201`
 - **`response_model`:** `PetitionDto`
-- **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe.get_account_id`, `analisyses_repository: AnalisysesRepository` via `DatabasePipe.get_analisyses_repository_from_request`, `petitions_repository: PetitionsRepository` via `DatabasePipe.get_petitions_repository_from_request`
-- **Fluxo:** `_Body` -> `IntakePipe.verify_analysis_by_account(body.analysis_id, account_id, analisyses_repository)` -> `CreatePetitionUseCase.execute(...)` -> resposta `PetitionDto`.
+- **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe.get_account_id`, `analyses_repository: AnalysesRepository` via `DatabasePipe.get_analyses_repository_from_request`, `petitions_repository: PetitionsRepository` via `DatabasePipe.get_petitions_repository_from_request`
+- **Fluxo:** `_Body` -> `IntakePipe.verify_analysis_by_account(body.analysis_id, account_id, analyses_repository)` -> `CreatePetitionUseCase.execute(...)` -> resposta `PetitionDto`.
 
 - **Localizacao:** `src/animus/rest/controllers/intake/summarize_petition_controller.py` (**novo arquivo**)
 - **`*Body`:** nao aplicavel
@@ -264,8 +264,8 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 
 - **Localizacao:** `src/animus/pipes/intake_pipe.py` (**novo arquivo**)
 - **Metodo `Depends`:**
-  - `verify_analysis_by_account(analysis_id: str, account_id: Id, analisyses_repository: AnalisysesRepository) -> Analysis` - valida que a analise existe e pertence ao usuario autenticado.
-  - `verify_petition_document_path_by_account(petition_id: str, account_id: Annotated[Id, Depends(AuthPipe.get_account_id)], petitions_repository: Annotated[PetitionsRepository, Depends(DatabasePipe.get_petitions_repository_from_request)], analisyses_repository: Annotated[AnalisysesRepository, Depends(DatabasePipe.get_analisyses_repository_from_request)]) -> Text` - valida ownership da petição via analise relacionada e devolve `petition.document.file_path`.
+  - `verify_analysis_by_account(analysis_id: str, account_id: Id, analyses_repository: AnalysesRepository) -> Analysis` - valida que a analise existe e pertence ao usuario autenticado.
+  - `verify_petition_document_path_by_account(petition_id: str, account_id: Annotated[Id, Depends(AuthPipe.get_account_id)], petitions_repository: Annotated[PetitionsRepository, Depends(DatabasePipe.get_petitions_repository_from_request)], analyses_repository: Annotated[AnalysesRepository, Depends(DatabasePipe.get_analyses_repository_from_request)]) -> Text` - valida ownership da petição via analise relacionada e devolve `petition.document.file_path`.
 - **Sessao SQLAlchemy:** obtida indiretamente pelos repositories fornecidos por `DatabasePipe`.
 
 - **Localizacao:** `src/animus/pipes/storage_pipe.py` (**novo arquivo**)
@@ -334,7 +334,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 - **Mudanca:** adicionar `find_by_id(petition_id: Id) -> Petition | None` ao port existente, preservando os metodos de listagem e escrita ja publicados.
 - **Justificativa:** o fluxo de resumo precisa localizar uma petição pelo `petition_id` de path antes de acessar o storage.
 
-- **Arquivo:** `src/animus/core/intake/interfaces/analisyses_repository.py`
+- **Arquivo:** `src/animus/core/intake/interfaces/analyses_repository.py`
 - **Mudanca:** corrigir a semantica do parametro de `find_by_id(...)` para `analysis_id: Id` e padronizar retorno `Analysis | None` quando nao encontrada.
 - **Justificativa:** o nome atual `account_id` conflita com o uso real de ownership check e induz implementacao incorreta.
 
@@ -411,7 +411,7 @@ Entregar os endpoints `POST /intake/petitions` e `POST /intake/petitions/{petiti
 ## Camada Pipes
 
 - **Arquivo:** `src/animus/pipes/database_pipe.py`
-- **Mudanca:** adicionar `get_petitions_repository_from_request(...) -> PetitionsRepository`, `get_petition_summaries_repository_from_request(...) -> PetitionSummariesRepository` e `get_analisyses_repository_from_request(...) -> AnalisysesRepository`.
+- **Mudanca:** adicionar `get_petitions_repository_from_request(...) -> PetitionsRepository`, `get_petition_summaries_repository_from_request(...) -> PetitionSummariesRepository` e `get_analyses_repository_from_request(...) -> AnalysesRepository`.
 - **Justificativa:** o contexto `intake` precisa resolver repositories concretos por `Depends(...)` a partir da `Session` aberta no middleware.
 
 - **Arquivo:** `src/animus/pipes/providers_pipe.py`

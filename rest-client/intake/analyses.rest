@@ -33,7 +33,7 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 Content-Type: application/json
 
 {
-  "name": "Analise renomeada via REST Client"
+  "name": "Análise renomeada via REST Client"
 }
 
 ### Arquivar analises (ArchiveAnalysesController)

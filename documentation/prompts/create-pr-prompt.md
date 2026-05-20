@@ -23,7 +23,7 @@ de trabalho.
 
 ## Diretrizes de Execução
 
-### 1 Analise do Contexto
+### 1 Análise do Contexto
 
 - Revise a Spec implementada e o changelog das alterações realizadas.
 - Identifique:

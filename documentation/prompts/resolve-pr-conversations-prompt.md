@@ -50,8 +50,8 @@ gh api graphql -f query='
 3. **Análise e Implementação:**
    * Para cada comentário **não resolvido**:
      * Localize o arquivo e as linhas de código mencionadas.
-     * Analise a sugestão ou problema apontado pelo revisor.
-     * Analise também os comentários da conversa.
+     * Análise a sugestão ou problema apontado pelo revisor.
+     * Análise também os comentários da conversa.
      * Aplique as alterações necessárias no código local utilizando as ferramentas de edição de arquivo (`replace_file_content`, `multi_replace_file_content`).
      * Antes de implementar, consulte as regras da camada afetada seguindo o índice em `documentation/rules/rules.md`:
        * Regra de negócio (`core`) → `documentation/rules/core-layer-rules.md`
@@ -164,4 +164,4 @@ Relate o progresso listando **somente as conversas não resolvidas que foram tra
 
 ### Passo 6: Atualização da documentação relacionada
 
-Analise o documento de Spec, Report ou PRD da funcionalidade relacionada e atualize-o caso seja necessário com as novas alterações.
+Análise o documento de Spec, Report ou PRD da funcionalidade relacionada e atualize-o caso seja necessário com as novas alterações.

@@ -8,7 +8,7 @@ O Animus Server sustenta os principais fluxos do produto:
 
 - **Auth e identidade:** cadastro, login, gestao de perfil e recuperacao de senha.
 - **Intake juridico:** upload de peticoes em PDF ou DOCX para extracao, resumacao e analise de precedentes com IA.
-- **Analise de precedentes:** classificacao de aplicabilidade, sintese explicativa e apoio a decisao processual.
+- **Análise de precedentes:** classificacao de aplicabilidade, sintese explicativa e apoio a decisao processual.
 - **Storage e historico:** persistencia, organizacao, consulta e exportacao de analises anteriores.
 - **Notificacoes assicronas:** eventos de conclusao de analise e outros fluxos desacoplados.
 

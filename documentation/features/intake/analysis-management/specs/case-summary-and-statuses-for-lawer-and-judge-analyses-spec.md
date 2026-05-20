@@ -67,7 +67,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Compatibilidade de dados:** migrations devem preservar os dados hoje em `petitions` e `petition_summaries`, migrando-os para os novos contratos centrados em `analysis` sem perda de informacao.
 - **Compatibilidade HTTP:** os endpoints novos de `analysis` e os endpoints legados de `petitions` coexistem temporariamente; a remocao final das rotas antigas continua sendo breaking e exige coordenacao com o cliente mobile.
-- **Performance:** `SqlalchemyAnalisysesRepository.find_many(...)` e `find_many_in_processing(...)` devem continuar sem joins adicionais; a troca de status nao deve degradar o polling ou a paginacao principal.
+- **Performance:** `SqlalchemyAnalysesRepository.find_many(...)` e `find_many_in_processing(...)` devem continuar sem joins adicionais; a troca de status nao deve degradar o polling ou a paginacao principal.
 - **Observabilidade:** nomes de eventos, jobs, payloads e logs devem deixar de usar `petition_summary` e refletir `case_summary`.
 - **Seguranca:** ownership continua validado por `analysis_id` da conta autenticada; a mudanca nao deve mover regra de acesso para `database`, `router` ou `provider`.
 
@@ -99,7 +99,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 ## Database
 
 - **`AnalysisModel`** (`src/animus/database/sqlalchemy/models/intake/analysis_model.py`) - model atual de `analyses`; ja possui `type`, `document`, `case_summary`, `petition_draft` e `judgment_draft`.
-- **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) - usa `AnalysisStatusValue` nos filtros de listagem e processamento.
+- **`SqlalchemyAnalysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`) - usa `AnalysisStatusValue` nos filtros de listagem e processamento.
 - **`PetitionModel`** (`src/animus/database/sqlalchemy/models/intake/petition_model.py`) - tabela atual do documento da analise, com `id`, `analysis_id`, `uploaded_at`, `document_file_path` e `document_name`.
 - **`SqlalchemyPetitionsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petitions_repository.py`) - implementacao concreta atual do documento.
 - **`PetitionSummaryModel`** (`src/animus/database/sqlalchemy/models/intake/petition_summary_model.py`) - model atual do resumo estruturado.
@@ -262,7 +262,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 ## Camada Core (Use Cases)
 
 - **Localizacao:** `src/animus/core/intake/use_cases/create_analysis_document_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalysisDocumentsRepository`, `AnalisysesRepository`, `Broker`
+- **Dependencias (ports injetados):** `AnalysisDocumentsRepository`, `AnalysesRepository`, `Broker`
 - **Metodo principal:** `execute(analysis_id: str, uploaded_at: str, file_path: str, name: str) -> AnalysisDocumentDto` - cria ou substitui o documento da analise e atualiza o status para `DOCUMENT_UPLOADED`.
 - **Fluxo resumido:** busca `Analysis`; remove/substitui documento anterior quando existir; constroi `AnalysisDocument`; persiste; ajusta `analysis.status`; persiste a analise; publica evento de substituicao de arquivo se necessario.
 
@@ -271,12 +271,12 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodo principal:** `execute(analysis_id: str) -> AnalysisDocumentDto` - retorna o documento associado a analise.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/request_case_summary_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalysisDocumentsRepository`, `AnalisysesRepository`, `Broker`
+- **Dependencias (ports injetados):** `AnalysisDocumentsRepository`, `AnalysesRepository`, `Broker`
 - **Metodo principal:** `execute(analysis_id: str) -> None` - valida a existencia do documento, move a analise para o estado de processamento do caso e publica o evento assíncrono do resumo.
 - **Fluxo resumido:** busca `AnalysisDocument` por `analysis_id`; busca `Analysis`; ajusta `analysis.status`; persiste a analise; publica `CaseSummaryRequestedEvent(analysis_id)`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/create_case_summary_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `CaseSummariesRepository`, `AnalysisDocumentsRepository`, `AnalisysesRepository`
+- **Dependencias (ports injetados):** `CaseSummariesRepository`, `AnalysisDocumentsRepository`, `AnalysesRepository`
 - **Metodo principal:** `execute(analysis_id: str, dto: CaseSummaryDto) -> CaseSummaryDto` - persiste ou substitui o resumo do caso e move a analise para `CASE_ANALYZED`.
 - **Fluxo resumido:** valida `AnalysisDocument`; cria `CaseSummary`; faz upsert no repositorio; busca `Analysis`; ajusta `analysis.status`; persiste a analise; retorna `case_summary.dto`.
 
@@ -285,15 +285,15 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodo principal:** `execute(analysis_id: str) -> CaseSummaryDto` - retorna o resumo do caso da analise.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_case_assessment_analysis_report_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`, `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `PetitionDraftsRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`, `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `PetitionDraftsRepository`
 - **Metodo principal:** `execute(analysis_id: str, account_id: str) -> CaseAssessmentAnalysisReportDto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_first_instance_analysis_report_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`, `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `SecondInstanceJudgmentDraftsRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`, `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `SecondInstanceJudgmentDraftsRepository`
 - **Metodo principal:** `execute(analysis_id: str, account_id: str) -> FirstInstanceAnalysisReportDto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_second_instance_analysis_report_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`, `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`, `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`
 - **Metodo principal:** `execute(analysis_id: str, account_id: str) -> SecondInstanceAnalysisReportDto`.
 
 ## Camada Database (Models SQLAlchemy)
@@ -361,7 +361,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodo HTTP e path:** `POST /analyses/{analysis_id}/document`
 - **`status_code`:** `201`
 - **`response_model`:** `AnalysisDocumentDto`
-- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalisysesRepository`; `AnalysisDocumentsRepository`; `Broker`
+- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalysesRepository`; `AnalysisDocumentsRepository`; `Broker`
 - **Fluxo:** valida ownership da analise -> `CreateAnalysisDocumentUseCase.execute(...)` -> resposta.
 
 - **Localizacao:** `src/animus/rest/controllers/intake/get_analysis_document_controller.py` (**novo arquivo**)
@@ -377,7 +377,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Metodo HTTP e path:** `POST /analyses/{analysis_id}/case-summaries`
 - **`status_code`:** `202`
 - **`response_model`:** nao aplicavel
-- **Dependencias injetadas via `Depends`:** `Analysis` por `IntakePipe.verify_analysis_by_account_from_request`; `AnalysisDocumentsRepository`; `AnalisysesRepository`; `Broker`
+- **Dependencias injetadas via `Depends`:** `Analysis` por `IntakePipe.verify_analysis_by_account_from_request`; `AnalysisDocumentsRepository`; `AnalysesRepository`; `Broker`
 - **Fluxo:** `RequestCaseSummaryUseCase.execute(analysis_id=analysis.id.value)` -> `202`.
 
 - **Localizacao:** `src/animus/rest/controllers/intake/get_case_summary_controller.py` (**novo arquivo**)
@@ -429,7 +429,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 
 - **Localizacao:** `src/animus/pubsub/inngest/jobs/intake/summarize_case_job.py` (**novo arquivo**)
 - **Evento consumido:** `CaseSummaryRequestedEvent.NAME`
-- **Dependencias:** `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalisysesRepository`, `SummarizeFirstInstanceCaseWorkflow`
+- **Dependencias:** `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysesRepository`, `SummarizeFirstInstanceCaseWorkflow`
 - **Passos (`step.run`):** normalizar payload -> carregar `AnalysisDocument` -> ler conteudo do arquivo -> executar workflow -> persistir `CaseSummary` -> publicar `CaseSummaryFinishedEvent`
 - **Idempotencia:** resumo e atualizado por `replace(...)` quando a analise ja possuir `CaseSummary`; reexecucoes nao criam duplicata.
 
@@ -507,7 +507,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Mudanca:** serializar `type` e o novo status direto no `AnalysisDto`.
 - **Justificativa:** o mapper precisa reconstruir o agregado com o discriminador correto.
 
-- **Arquivo:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`
+- **Arquivo:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`
 - **Mudanca:** trocar todos os filtros/assinaturas baseados em `AnalysisStatusValue` por strings/tuplas derivadas dos enums tipados; persistir `type` em `replace(...)`.
 - **Justificativa:** a persistencia de analises e o ponto central dos filtros de listagem e polling.
 
@@ -756,18 +756,18 @@ POST /intake/analyses/{analysis_id}/document
   -> CreateAnalysisDocumentController
   -> CreateAnalysisDocumentUseCase.execute(...)
      -> AnalysisDocumentsRepository.find_by_analysis_id
-     -> AnalisysesRepository.find_by_id
+     -> AnalysesRepository.find_by_id
      -> AnalysisDocumentsRepository.add|replace
      -> Analysis.set_status(DOCUMENT_UPLOADED)
-     -> AnalisysesRepository.replace
+     -> AnalysesRepository.replace
 
 POST /intake/analyses/{analysis_id}/case-summaries
   -> RequestCaseSummaryController
   -> RequestCaseSummaryUseCase.execute(analysis_id)
      -> AnalysisDocumentsRepository.find_by_analysis_id
-     -> AnalisysesRepository.find_by_id
+     -> AnalysesRepository.find_by_id
      -> Analysis.set_status(ANALYZING_CASE | EXTRACTING_PETITION)
-     -> AnalisysesRepository.replace
+     -> AnalysesRepository.replace
      -> Broker.publish(CaseSummaryRequestedEvent)
 
 Inngest -> SummarizeFirstInstanceCaseJob
@@ -775,9 +775,9 @@ Inngest -> SummarizeFirstInstanceCaseJob
   -> SummarizeFirstInstanceCaseWorkflow.run(...)
   -> CreateCaseSummaryUseCase.execute(analysis_id, dto)
      -> CaseSummariesRepository.add|replace
-     -> AnalisysesRepository.find_by_id
+     -> AnalysesRepository.find_by_id
      -> Analysis.set_status(CASE_ANALYZED)
-     -> AnalisysesRepository.replace
+     -> AnalysesRepository.replace
   -> Broker.publish(CaseSummaryFinishedEvent)
 
 GET /intake/analyses/{analysis_id}/case-summaries

@@ -18,7 +18,7 @@ Entrada:
 
 ## Diretrizes de execucao
 
-### 1 Aderencia as regras do projeto (leitura progressiva)
+### 1 Aderência as regras do projeto (leitura progressiva)
 
 - Sempre comece por `documentation/rules/testing-rules.md`.
 - Se for use case (`core`): leia `documentation/rules/use-cases-testing-rules.md`.

@@ -142,11 +142,11 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
 ## Camada Core (Use Cases)
 
 - **Localização:** `src/animus/core/intake/use_cases/trigger_second_instance_judgment_draft_generation_use_case.py` (**novo arquivo**)
-- **Dependências (ports injetados):** `AnalisysesRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `Broker`
+- **Dependências (ports injetados):** `AnalysesRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `Broker`
 - **Método principal:** `execute(analysis_id: str) -> None` — valida pré-condições de geração e publica `SecondInstanceJudgmentDraftGenerationTriggeredEvent`.
 - **Fluxo resumido:**
   - Normaliza `analysis_id` como `Id`.
-  - Busca `Analysis` em `AnalisysesRepository.find_by_id(...)`; se ausente, lança `AnalysisNotFoundError`.
+  - Busca `Analysis` em `AnalysesRepository.find_by_id(...)`; se ausente, lança `AnalysisNotFoundError`.
   - Verifica `analysis.type == AnalysisType.SECOND_INSTANCE`; se não, lança `SecondInstanceAnalysisRequiredError`.
   - Busca `CaseSummary` em `CaseSummariesRepository.find_by_analysis_id(...)`; se ausente, lança `CaseSummaryUnavailableError`.
   - Busca precedentes em `AnalysisPrecedentsRepository.find_many_by_analysis_id(...)`; se `items` estiver vazio, lança `AnalysisPrecedentsUnavailableError`.
@@ -154,7 +154,7 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
   - Publica `SecondInstanceJudgmentDraftGenerationTriggeredEvent(analysis_id=analysis_id_entity.value)` via `Broker.publish(...)`.
 
 - **Localização:** `src/animus/core/intake/use_cases/create_judgment_draft_use_case.py` (**novo arquivo**)
-- **Dependências (ports injetados):** `SecondInstanceJudgmentDraftsRepository`, `AnalisysesRepository`
+- **Dependências (ports injetados):** `SecondInstanceJudgmentDraftsRepository`, `AnalysesRepository`
 - **Método principal:** `execute(analysis_id: str, dto: SecondInstanceJudgmentDraftDto) -> SecondInstanceJudgmentDraftDto` — cria ou substitui a minuta da análise e conclui o status de segunda instância.
 - **Fluxo resumido:**
   - Normaliza `analysis_id` como `Id`.
@@ -164,7 +164,7 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
   - Se existente, chama `SecondInstanceJudgmentDraftsRepository.replace(judgment_draft)`.
   - Busca `Analysis`; se ausente, lança `AnalysisNotFoundError`.
   - Verifica `analysis.type == AnalysisType.SECOND_INSTANCE`; se não, lança `SecondInstanceAnalysisRequiredError`.
-  - Atualiza status com `analysis.set_status(SecondInstanceAnalysisStatus.DONE)` e persiste via `AnalisysesRepository.replace(analysis)`.
+  - Atualiza status com `analysis.set_status(SecondInstanceAnalysisStatus.DONE)` e persiste via `AnalysesRepository.replace(analysis)`.
   - Retorna `judgment_draft.dto`.
 
 ## Camada REST (Controllers)
@@ -176,7 +176,7 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
 - **`response_model`:** Não aplicável.
 - **Dependências injetadas via `Depends`:**
   - `IntakePipe.verify_analysis_by_account_from_request` para autenticação e ownership.
-  - `DatabasePipe.get_analisyses_repository_from_request`.
+  - `DatabasePipe.get_analyses_repository_from_request`.
   - `DatabasePipe.get_case_summaries_repository_from_request`.
   - `DatabasePipe.get_analysis_precedents_repository_from_request`.
   - `PubSubPipe.get_broker_from_request`.
@@ -193,7 +193,7 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
 
 - **Localização:** `src/animus/pubsub/inngest/jobs/intake/generate_judgment_draft_job.py` (**novo arquivo**)
 - **Evento consumido:** `SecondInstanceJudgmentDraftGenerationTriggeredEvent.name`
-- **Dependências:** `SqlalchemyAnalisysesRepository`, `SqlalchemyCaseSummariesRepository`, `SqlalchemyAnalysisPrecedentsRepository`, `SqlalchemySecondInstanceJudgmentDraftsRepository`, `AiPipe.get_generate_judgment_draft_workflow(...)`, `CreateSecondInstanceJudgmentDraftUseCase`, `UpdateAnalysisStatusUseCase`.
+- **Dependências:** `SqlalchemyAnalysesRepository`, `SqlalchemyCaseSummariesRepository`, `SqlalchemyAnalysisPrecedentsRepository`, `SqlalchemySecondInstanceJudgmentDraftsRepository`, `AiPipe.get_generate_judgment_draft_workflow(...)`, `CreateSecondInstanceJudgmentDraftUseCase`, `UpdateAnalysisStatusUseCase`.
 - **Passos (`step.run`):**
   - `normalize_payload` — `data: dict[str, Any] -> dict[str, str]`; normaliza `analysis_id`.
   - `mark_analysis_as_generating_judgment_draft` — atualiza status para `SecondInstanceAnalysisStatus.GENERATING_JUDGMENT_DRAFT` e executa `session.commit()`.
@@ -381,7 +381,7 @@ HTTP Request
     -> IntakePipe.verify_analysis_by_account_from_request
     -> DatabasePipe / PubSubPipe
     -> TriggerSecondInstanceJudgmentDraftGenerationUseCase
-    -> AnalisysesRepository / CaseSummariesRepository / AnalysisPrecedentsRepository
+    -> AnalysesRepository / CaseSummariesRepository / AnalysisPrecedentsRepository
     -> Broker.publish(SecondInstanceJudgmentDraftGenerationTriggeredEvent)
     -> 202 Accepted
 ```
@@ -397,7 +397,7 @@ SecondInstanceJudgmentDraftGenerationTriggeredEvent
           -> UpdateAnalysisStatusUseCase(..., GENERATING_JUDGMENT_DRAFT)
           -> session.commit()
       -> generate_and_persist_judgment_draft
-          -> SqlalchemyAnalisysesRepository.find_by_id(...)
+          -> SqlalchemyAnalysesRepository.find_by_id(...)
           -> SqlalchemyCaseSummariesRepository.find_by_analysis_id(...)
           -> SqlalchemyAnalysisPrecedentsRepository.find_many_by_analysis_id(...)
           -> AiPipe.get_generate_judgment_draft_workflow(...)
@@ -417,7 +417,7 @@ SecondInstanceJudgmentDraftGenerationTriggeredEvent
 GET /intake/analyses/{analysis_id}/second-instance-report
   -> GetSecondInstanceAnalysisReportController
   -> GetSecondInstanceAnalysisReportUseCase
-  -> AnalisysesRepository / AnalysisDocumentsRepository
+  -> AnalysesRepository / AnalysisDocumentsRepository
   -> CaseSummariesRepository / AnalysisPrecedentsRepository
   -> SecondInstanceJudgmentDraftsRepository.find_by_analysis_id(...)
   -> SecondInstanceAnalysisReportDto(draft=SecondInstanceAnalysisReportDraftDto | None)

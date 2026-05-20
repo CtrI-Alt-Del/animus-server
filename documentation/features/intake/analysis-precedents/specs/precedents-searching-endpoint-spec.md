@@ -97,7 +97,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **`PrecedentModel`** (`src/animus/database/sqlalchemy/models/intake/precedent_model.py`) - tabela `precedents` com `court`, `kind`, `number`, `status`, `enunciation` e `thesis`.
 - **`PrecedentMapper`** (`src/animus/database/sqlalchemy/mappers/intake/precedents_mapper.py`) - reconstrui `Precedent` a partir do ORM atual.
 - **`SqlalchemyPrecedentsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_precendents_repository.py`) - referencia de repository concreto do contexto `intake`; hoje usa lookup incompleto para um identificador que, pelo Glossario, deveria ser `court + kind + number`.
-- **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) - repository ja pronto para `find_by_id(...)` e `replace(...)` da `Analysis`.
+- **`SqlalchemyAnalysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`) - repository ja pronto para `find_by_id(...)` e `replace(...)` da `Analysis`.
 - **`SqlalchemyPetitionSummariesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petition_summaries_repository.py`) - repository existente para leitura do resumo da petição.
 - **`QdrantPrecedentsEmbeddingsRepository`** (`src/animus/database/qdrant/qdrant_precedents_embeddings_repository.py`) - adaptador vetorial atual com named vectors `thesis` e `enunciation`; ja persiste `court` e `kind` no payload, o que permite evoluir para filtros no Qdrant.
 
@@ -190,14 +190,14 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **Fluxo resumido:** carregar `PetitionSummary` -> gerar embeddings -> consultar Qdrant com filtros -> hidratar `Precedent` em lote -> agregar por identificador usando melhor `score` por campo -> calcular `applicability_percentage` -> ordenar desc -> truncar em `limit` -> montar `AnalysisPrecedentDto` com `synthesis=None`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/update_analysis_status_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`
 - **Metodo principal:** `execute(analysis_id: str, status: str) -> None` - atualiza o status persistido da analise mantendo os demais campos do agregado.
-- **Fluxo resumido:** `find_by_id(...)` -> recriar `Analysis` com o mesmo DTO e novo `status` -> `AnalisysesRepository.replace(...)`.
+- **Fluxo resumido:** `find_by_id(...)` -> recriar `Analysis` com o mesmo DTO e novo `status` -> `AnalysesRepository.replace(...)`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/choose_analysis_precedent_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalysisPrecedentsRepository`, `AnalisysesRepository`
+- **Dependencias (ports injetados):** `AnalysisPrecedentsRepository`, `AnalysesRepository`
 - **Metodo principal:** `execute(analysis_id: str, precedent_identifier_dto: PrecedentIdentifierDto) -> AnalysisStatusDto` - valida a existencia do `AnalysisPrecedent` pelo identificador composto (`court`, `kind`, `number`), marca apenas ele como escolhido e atualiza a analise para `PRECEDENT_CHOSED`.
-- **Fluxo resumido:** `Id.create(analysis_id)` -> `PrecedentIdentifier.create(...)` -> `AnalysisPrecedentsRepository.find_many_by_analysis_id(...)` -> localizar item por `precedent.identifier` -> `AnalysisPrecedentsRepository.choose_by_analysis_id_and_precedent_id(...)` -> `AnalisysesRepository.find_by_id(...)` -> recriar `Analysis` com status `PRECEDENT_CHOSED` -> `AnalisysesRepository.replace(...)` -> retornar `analysis.status.dto`.
+- **Fluxo resumido:** `Id.create(analysis_id)` -> `PrecedentIdentifier.create(...)` -> `AnalysisPrecedentsRepository.find_many_by_analysis_id(...)` -> localizar item por `precedent.identifier` -> `AnalysisPrecedentsRepository.choose_by_analysis_id_and_precedent_id(...)` -> `AnalysesRepository.find_by_id(...)` -> recriar `Analysis` com status `PRECEDENT_CHOSED` -> `AnalysesRepository.replace(...)` -> retornar `analysis.status.dto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/list_analysis_precedents_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `AnalysisPrecedentsRepository`
@@ -243,7 +243,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **`status_code`:** `202`
 - **`response_model`:** **Nao aplicavel** (`202` sem body)
 - **Path params:** `analysis_id: IdSchema`
-- **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe`, `analisyses_repository: AnalisysesRepository` via `DatabasePipe`, `petition_summaries_repository: PetitionSummariesRepository` via `DatabasePipe`, `broker: Broker` via `PubSubPipe`
+- **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe`, `analyses_repository: AnalysesRepository` via `DatabasePipe`, `petition_summaries_repository: PetitionSummariesRepository` via `DatabasePipe`, `broker: Broker` via `PubSubPipe`
 - **Fluxo:** `analysis_id: IdSchema` + `_Body.to_dto()` -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> controller instancia `RequestAnalysisPrecedentsSearchUseCase(...)` com ports/provedores ja resolvidos -> `execute(...)` -> `Response(status_code=202)`.
 
 - **Localizacao:** `src/animus/rest/controllers/intake/get_analysis_status_controller.py` (**novo arquivo**)
@@ -275,7 +275,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 - **Metodo HTTP e path:** `PATCH /intake/analyses/{analysis_id}/precedents/choose`
 - **`status_code`:** `200`
 - **`response_model`:** `AnalysisStatusDto`
-- **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe`, `analisyses_repository: AnalisysesRepository` via `DatabasePipe`, `analysis_precedents_repository: AnalysisPrecedentsRepository` via `DatabasePipe`
+- **Dependencias injetadas via `Depends`:** `account_id: Id` via `AuthPipe`, `analyses_repository: AnalysesRepository` via `DatabasePipe`, `analysis_precedents_repository: AnalysisPrecedentsRepository` via `DatabasePipe`
 - **Query params:** `court: str`, `kind: str`, `number: int`
 - **Fluxo:** `analysis_id` + (`court`, `kind`, `number`) -> `IntakePipe.verify_analysis_by_account_from_request(...)` -> controller instancia `ChooseAnalysisPrecedentUseCase(...)` -> `execute(...)` -> `AnalysisStatusDto`
 
@@ -515,8 +515,8 @@ PATCH /intake/analyses/{analysis_id}/precedents/choose?court={court}&kind={kind}
   -> ChooseAnalysisPrecedentUseCase
        -> AnalysisPrecedentsRepository.find_many_by_analysis_id(...)
        -> AnalysisPrecedentsRepository.choose_by_analysis_id_and_precedent_id(...)
-       -> AnalisysesRepository.find_by_id(...)
-       -> AnalisysesRepository.replace(..., status=PRECEDENT_CHOSED)
+       -> AnalysesRepository.find_by_id(...)
+       -> AnalysesRepository.replace(..., status=PRECEDENT_CHOSED)
   -> 200 AnalysisStatusDto
 
 POST /intake/analyses/{analysis_id}/precedents/search
@@ -589,7 +589,7 @@ PATCH choose endpoint
   - `src/animus/core/intake/domain/structures/analysis_precedent.py`
   - `src/animus/core/intake/interfaces/petition_summaries_repository.py`
   - `src/animus/database/qdrant/qdrant_precedents_embeddings_repository.py`
-  - `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`
+  - `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`
   - `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petition_summaries_repository.py`
   - `src/animus/pubsub/inngest/jobs/intake/vectorize_precedents_job.py`
   - `src/animus/ai/agno/workflows/intake/agno_summarize_petition_workflow.py`

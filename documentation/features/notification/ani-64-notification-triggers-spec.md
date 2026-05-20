@@ -93,11 +93,11 @@ Implementar os gatilhos de conclusão e os fluxos assíncronos necessários no `
 
 - **Localização:** `src/animus/pubsub/inngest/jobs/notification/send_petition_summary_finished_notification_job.py` (**novo arquivo**)
 - **Evento consumido:** `PetitionSummaryFinishedEvent.NAME`
-- **Fluxo:** Recebe `analysis_id` -> Resolve `account_id` via `AnalisysesRepository` -> Chama `SendPetitionSummaryFinishedNotificationUseCase`.
+- **Fluxo:** Recebe `analysis_id` -> Resolve `account_id` via `AnalysesRepository` -> Chama `SendPetitionSummaryFinishedNotificationUseCase`.
 
 - **Localização:** `src/animus/pubsub/inngest/jobs/notification/send_precedents_search_finished_notification_job.py` (**novo arquivo**)
 - **Evento consumido:** `PrecedentsSearchFinishedEvent.NAME`
-- **Fluxo:** Recebe `analysis_id` -> Resolve `account_id` via `AnalisysesRepository` -> Chama `SendPrecedentsSearchFinishedNotificationUseCase`.
+- **Fluxo:** Recebe `analysis_id` -> Resolve `account_id` via `AnalysesRepository` -> Chama `SendPrecedentsSearchFinishedNotificationUseCase`.
 
 ---
 
@@ -157,7 +157,7 @@ Implementar os gatilhos de conclusão e os fluxos assíncronos necessários no `
       v
 [SendPetitionSummaryFinishedNotificationJob] (Inngest)
       |
-      +--> [AnalisysesRepository.find_by_id] (Resolve AccountId)
+      +--> [AnalysesRepository.find_by_id] (Resolve AccountId)
       |
       v
 [SendPetitionSummaryFinishedNotificationUseCase]

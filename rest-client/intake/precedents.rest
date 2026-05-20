@@ -3,8 +3,8 @@
 @precedent_kind = RR
 @precedent_number = 974
 
-### Obter precedente por identificador (GetPrecedentController)
-GET {{url}}/precedents/identifier?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
+### Obter precedente (GetPrecedentController)
+GET {{url}}/precedents?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Adicionar precedent a analise (CreateAnalysisPrecedentController)

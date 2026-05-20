@@ -66,7 +66,7 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 
 - **`AnalysisReportDto`** (`src/animus/core/intake/domain/structures/dtos/analysis_report_dto.py`) — contrato de relatorio ja existente, ainda modelado com `precedents: list[PrecedentDto]` e `chosen_precedent`.
 - **`AnalysisPrecedentDto`** (`src/animus/core/intake/domain/structures/dtos/analysis_precedent_dto.py`) — DTO ja usado na listagem de precedentes; contem `is_chosen`, `applicability_percentage` e `synthesis`.
-- **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) — porta para busca da analise por ID (`find_by_id`).
+- **`AnalysesRepository`** (`src/animus/core/intake/interfaces/analyses_repository.py`) — porta para busca da analise por ID (`find_by_id`).
 - **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) — porta para busca da petição da analise (`find_by_analysis_id`).
 - **`PetitionSummariesRepository`** (`src/animus/core/intake/interfaces/petition_summaries_repository.py`) — porta para busca do resumo por analise (`find_by_analysis_id`).
 - **`AnalysisPrecedentsRepository`** (`src/animus/core/intake/interfaces/analysis_precedents_repository.py`) — porta para listagem de precedentes da analise (`find_many_by_analysis_id`).
@@ -75,7 +75,7 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 
 ## Database
 
-- **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) — implementa lookup de analise por ID.
+- **`SqlalchemyAnalysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`) — implementa lookup de analise por ID.
 - **`SqlalchemyPetitionsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petitions_repository.py`) — implementa lookup de petição por `analysis_id`.
 - **`SqlalchemyPetitionSummariesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petition_summaries_repository.py`) — implementa lookup de summary por `analysis_id`.
 - **`SqlalchemyAnalysisPrecedentsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedents_repository.py`) — retorna precedentes ordenados por `applicability_percentage desc`.
@@ -111,7 +111,7 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 ## Camada Core (Use Cases)
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_analysis_report_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`, `PetitionsRepository`, `PetitionSummariesRepository`, `AnalysisPrecedentsRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`, `PetitionsRepository`, `PetitionSummariesRepository`, `AnalysisPrecedentsRepository`
 - **Metodo principal:** `execute(analysis_id: str, account_id: str) -> AnalysisReportDto` — agrega e retorna o relatorio completo da analise.
 - **Fluxo resumido:**
   - normaliza `analysis_id` e `account_id` para `Id`
@@ -132,7 +132,7 @@ Implementar o endpoint `GET /intake/analyses/{analysis_id}/report` para entregar
 - **`response_model`:** `AnalysisReportDto`
 - **Dependencias injetadas via `Depends`:**
   - `account_id: Id` via `AuthPipe.get_account_id_from_request`
-  - `analisyses_repository: AnalisysesRepository` via `DatabasePipe.get_analisyses_repository_from_request`
+  - `analyses_repository: AnalysesRepository` via `DatabasePipe.get_analyses_repository_from_request`
   - `petitions_repository: PetitionsRepository` via `DatabasePipe.get_petitions_repository_from_request`
   - `petition_summaries_repository: PetitionSummariesRepository` via `DatabasePipe.get_petition_summaries_repository_from_request`
   - `analysis_precedents_repository: AnalysisPrecedentsRepository` via `DatabasePipe.get_analysis_precedents_repository_from_request`
@@ -223,7 +223,7 @@ HTTP GET /intake/analyses/{analysis_id}/report
   -> GetAnalysisReportController
   -> AuthPipe.get_account_id_from_request
   -> GetAnalysisReportUseCase.execute(analysis_id, account_id)
-       -> AnalisysesRepository.find_by_id(analysis_id)
+       -> AnalysesRepository.find_by_id(analysis_id)
        -> [None] AnalysisNotFoundError (404)
        -> [analysis.account_id != account_id] ForbiddenError (403)
        -> PetitionsRepository.find_by_analysis_id(analysis_id)

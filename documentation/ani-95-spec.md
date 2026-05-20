@@ -8,7 +8,7 @@ last_updated_at: 2026-05-13
 
 # 1. Objetivo
 
-Implementar o endpoint autenticado `PATCH /intake/analyses/{analysis_id}/unarchive` para desarquivar uma analise da conta do usuario, definindo `is_archived = false` de forma idempotente e retornando o `AnalysisDto` atualizado com `200 OK`. A implementacao deve criar o fluxo de dominio em `core`, expor a borda HTTP em `rest` e registrar o controller no router de `intake`, reutilizando o contrato atual de `AnalisysesRepository` e a entidade `Analysis`.
+Implementar o endpoint autenticado `PATCH /intake/analyses/{analysis_id}/unarchive` para desarquivar uma analise da conta do usuario, definindo `is_archived = false` de forma idempotente e retornando o `AnalysisDto` atualizado com `200 OK`. A implementacao deve criar o fluxo de dominio em `core`, expor a borda HTTP em `rest` e registrar o controller no router de `intake`, reutilizando o contrato atual de `AnalysesRepository` e a entidade `Analysis`.
 
 ---
 
@@ -21,7 +21,7 @@ Implementar o endpoint autenticado `PATCH /intake/analyses/{analysis_id}/unarchi
 - Criar `UnarchiveAnalysisController` com rota `PATCH /intake/analyses/{analysis_id}/unarchive`.
 - Registrar o controller em `AnalysesRouter`.
 - Atualizar exports publicos de `core/intake/use_cases` e `rest/controllers/intake`.
-- Reutilizar `AnalysisDto`, `AnalysisNotFoundError`, `AuthPipe.get_account_id_from_request()` e `DatabasePipe.get_analisyses_repository_from_request()`.
+- Reutilizar `AnalysisDto`, `AnalysisNotFoundError`, `AuthPipe.get_account_id_from_request()` e `DatabasePipe.get_analyses_repository_from_request()`.
 - Retornar `404` quando a analise nao existir ou pertencer a outra conta, conforme ANI-95.
 
 ## 2.2 Out-of-scope
@@ -62,19 +62,19 @@ Implementar o endpoint autenticado `PATCH /intake/analyses/{analysis_id}/unarchi
 - **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) - entidade de dominio da analise; ja possui `archive()` que define `is_archived = Logical.create_true()` e deve receber o comportamento inverso `unarchive()`.
 - **`AnalysisDto`** (`src/animus/core/intake/domain/entities/dtos/analysis_dto.py`) - contrato de saida ja usado como `response_model`, incluindo `is_archived: bool`.
 - **`AnalysisNotFoundError`** (`src/animus/core/intake/domain/errors/analysis_not_found_error.py`) - erro de dominio traduzido para `404` pelo handler global.
-- **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) - port existente com `find_by_id(analysis_id: Id) -> Analysis | None` e `replace(analysis: Analysis) -> None`.
+- **`AnalysesRepository`** (`src/animus/core/intake/interfaces/analyses_repository.py`) - port existente com `find_by_id(analysis_id: Id) -> Analysis | None` e `replace(analysis: Analysis) -> None`.
 - **`ArchiveAnalysesUseCase`** (`src/animus/core/intake/use_cases/archive_analyses_use_case.py`) - referencia para validar ownership e persistir `analysis.archive()` em lote.
 - **`GetAnalysisUseCase`** (`src/animus/core/intake/use_cases/get_analysis_use_case.py`) - referencia para fluxo singular com `account_id`, `analysis_id` e `AnalysisNotFoundError`.
-- **`RenameAnalysisUseCase`** (`src/animus/core/intake/use_cases/rename_analysis_use_case.py`) - referencia para fluxo singular que altera a entidade e chama `AnalisysesRepository.replace(...)`.
+- **`RenameAnalysisUseCase`** (`src/animus/core/intake/use_cases/rename_analysis_use_case.py`) - referencia para fluxo singular que altera a entidade e chama `AnalysesRepository.replace(...)`.
 
 ## Database
 
-- **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) - implementa `replace(analysis)` e ja persiste `model.is_archived = analysis.is_archived.value`, portanto nao exige novo metodo ou alteracao de schema.
+- **`SqlalchemyAnalysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`) - implementa `replace(analysis)` e ja persiste `model.is_archived = analysis.is_archived.value`, portanto nao exige novo metodo ou alteracao de schema.
 
 ## Pipes
 
 - **`AuthPipe.get_account_id_from_request()`** (`src/animus/pipes/auth_pipe.py`) - extrai e valida o `account_id` autenticado a partir do token de acesso.
-- **`DatabasePipe.get_analisyses_repository_from_request()`** (`src/animus/pipes/database_pipe.py`) - fornece `AnalisysesRepository` usando a `Session` SQLAlchemy do request.
+- **`DatabasePipe.get_analyses_repository_from_request()`** (`src/animus/pipes/database_pipe.py`) - fornece `AnalysesRepository` usando a `Session` SQLAlchemy do request.
 
 ## REST
 
@@ -97,15 +97,15 @@ Implementar o endpoint autenticado `PATCH /intake/analyses/{analysis_id}/unarchi
 
 - **Localizacao:** `src/animus/core/intake/use_cases/unarchive_analysis_use_case.py` (**novo arquivo**)
 - **Classe:** `UnarchiveAnalysisUseCase`
-- **Dependencias (ports injetados):** `analisyses_repository: AnalisysesRepository`
+- **Dependencias (ports injetados):** `analyses_repository: AnalysesRepository`
 - **Metodo principal:** `execute(account_id: str, analysis_id: str) -> AnalysisDto` - desarquiva uma analise da conta autenticada e retorna o DTO atualizado.
 - **Fluxo resumido:**
   - Normalizar `account_id` com `Id.create(account_id)`.
   - Normalizar `analysis_id` com `Id.create(analysis_id)`.
-  - Buscar a analise com `AnalisysesRepository.find_by_id(normalized_analysis_id)`.
+  - Buscar a analise com `AnalysesRepository.find_by_id(normalized_analysis_id)`.
   - Levantar `AnalysisNotFoundError` se a analise nao existir ou se `analysis.account_id != normalized_account_id`.
   - Chamar `analysis.unarchive()`.
-  - Persistir com `AnalisysesRepository.replace(analysis)`.
+  - Persistir com `AnalysesRepository.replace(analysis)`.
   - Retornar `analysis.dto`.
 
 ## Camada REST (Controllers)
@@ -119,7 +119,7 @@ Implementar o endpoint autenticado `PATCH /intake/analyses/{analysis_id}/unarchi
 - **`response_model`:** `AnalysisDto`
 - **Dependencias injetadas via `Depends`:**
   - `account_id: Annotated[Id, Depends(AuthPipe.get_account_id_from_request)]`
-  - `analisyses_repository: Annotated[AnalisysesRepository, Depends(DatabasePipe.get_analisyses_repository_from_request)]`
+  - `analyses_repository: Annotated[AnalysesRepository, Depends(DatabasePipe.get_analyses_repository_from_request)]`
 - **Fluxo:** `analysis_id` path param -> `AuthPipe` -> `DatabasePipe` -> `UnarchiveAnalysisUseCase.execute(account_id=account_id.value, analysis_id=analysis_id)` -> `AnalysisDto`.
 
 ---
@@ -164,7 +164,7 @@ Implementar o endpoint autenticado `PATCH /intake/analyses/{analysis_id}/unarchi
 - **Motivo da escolha:** ANI-95 define endpoint singular e retorno `AnalysisDto`; um use case dedicado mantem o fluxo claro e evita acoplar operacoes com semanticas diferentes.
 - **Impactos / trade-offs:** adiciona um arquivo novo pequeno, mas preserva legibilidade e evita alterar contrato existente.
 
-- **Decisao:** reutilizar `AnalisysesRepository.replace(analysis)` em vez de criar metodo de repository como `unarchive(...)` ou `update(...)`.
+- **Decisao:** reutilizar `AnalysesRepository.replace(analysis)` em vez de criar metodo de repository como `unarchive(...)` ou `update(...)`.
 - **Alternativas consideradas:** criar metodo especifico no port; alterar o repository concreto para update parcial.
 - **Motivo da escolha:** `replace(...)` ja persiste `is_archived` e e usado pelos fluxos de alteracao de analise (`rename`, `archive`, `move_to_folder`).
 - **Impactos / trade-offs:** evita mudar contratos de persistencia; mantem update de entidade completa como padrao atual.
@@ -196,13 +196,13 @@ PATCH /intake/analyses/{analysis_id}/unarchive
   -> AnalysesRouter
   -> UnarchiveAnalysisController
   -> AuthPipe.get_account_id_from_request()
-  -> DatabasePipe.get_analisyses_repository_from_request()
+  -> DatabasePipe.get_analyses_repository_from_request()
   -> UnarchiveAnalysisUseCase.execute(account_id, analysis_id)
-  -> AnalisysesRepository.find_by_id(Id)
+  -> AnalysesRepository.find_by_id(Id)
       -> None ou outra conta: AnalysisNotFoundError -> AppErrorHandler -> 404
   -> Analysis.unarchive()
-  -> AnalisysesRepository.replace(Analysis)
-  -> SqlalchemyAnalisysesRepository.replace(Analysis)
+  -> AnalysesRepository.replace(Analysis)
+  -> SqlalchemyAnalysesRepository.replace(Analysis)
   -> PostgreSQL analyses.is_archived = false
   -> Analysis.dto
   -> 200 AnalysisDto
@@ -217,8 +217,8 @@ PATCH /intake/analyses/{analysis_id}/unarchive
   - `src/animus/rest/controllers/intake/rename_analysis_controller.py`
   - `src/animus/core/intake/use_cases/rename_analysis_use_case.py`
   - `src/animus/core/intake/domain/entities/analysis.py`
-  - `src/animus/core/intake/interfaces/analisyses_repository.py`
-  - `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`
+  - `src/animus/core/intake/interfaces/analyses_repository.py`
+  - `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`
   - `src/animus/routers/intake/analyses_router.py`
 
 ---
@@ -241,6 +241,6 @@ PATCH /intake/analyses/{analysis_id}/unarchive
 - `UnarchiveAnalysisController` deve apenas adaptar HTTP, resolver dependencias e delegar ao use case.
 - `AnalysesRouter` deve apenas compor controllers; nao deve conter validacao de transporte ou regra de negocio.
 - Nao criar novo schema em `validation/`, pois o endpoint nao recebe body e retorna `AnalysisDto` ja existente.
-- Nao alterar `AnalisysesRepository`, `SqlalchemyAnalisysesRepository` ou models SQLAlchemy, pois `replace(...)` ja cobre persistencia de `is_archived`.
+- Nao alterar `AnalysesRepository`, `SqlalchemyAnalysesRepository` ou models SQLAlchemy, pois `replace(...)` ja cobre persistencia de `is_archived`.
 - Nao adicionar migracao Alembic para ANI-95; a coluna `analyses.is_archived` ja existe e e mapeada.
 - Manter resposta em `snake_case`, conforme contrato REST atual do projeto.

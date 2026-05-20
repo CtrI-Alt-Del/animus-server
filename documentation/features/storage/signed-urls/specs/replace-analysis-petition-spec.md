@@ -1,5 +1,5 @@
 ---
-title: Substituicao de Peticao Vinculada a Analise
+title: Substituicao de Peticao Vinculada a Análise
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/CID5
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-61
 status: closed
@@ -154,7 +154,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## Core
 
 - **Arquivo:** `src/animus/core/intake/use_cases/create_petition_use_case.py`
-- **Mudanca:** estender o construtor para receber `analisyses_repository: AnalisysesRepository` e `broker: Broker` alem de `petitions_repository: PetitionsRepository`; no `execute(analysis_id: str, uploaded_at: str, document: PetitionDocumentDto) -> PetitionDto`, buscar petição existente da mesma analise, publicar `PetitionReplacedEvent`, remover a petição anterior, atualizar a `Analysis` para `PETITION_UPLOADED` e entao adicionar a nova.
+- **Mudanca:** estender o construtor para receber `analyses_repository: AnalysesRepository` e `broker: Broker` alem de `petitions_repository: PetitionsRepository`; no `execute(analysis_id: str, uploaded_at: str, document: PetitionDocumentDto) -> PetitionDto`, buscar petição existente da mesma analise, publicar `PetitionReplacedEvent`, remover a petição anterior, atualizar a `Analysis` para `PETITION_UPLOADED` e entao adicionar a nova.
 - **Justificativa:** o use case e o ponto correto para orquestrar a regra de substituicao mantendo o `core` independente de HTTP e infraestrutura.
 
 - **Arquivo:** `src/animus/core/intake/interfaces/petitions_repository.py`
@@ -178,7 +178,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## REST
 
 - **Arquivo:** `src/animus/rest/controllers/intake/create_petition_controller.py`
-- **Mudanca:** injetar `broker: Broker` via `Depends(PubSubPipe.get_broker_from_request)` e instanciar `CreatePetitionUseCase` com `petitions_repository`, `analisyses_repository` e `broker`, sem alterar o `*Body` nem o `response_model`.
+- **Mudanca:** injetar `broker: Broker` via `Depends(PubSubPipe.get_broker_from_request)` e instanciar `CreatePetitionUseCase` com `petitions_repository`, `analyses_repository` e `broker`, sem alterar o `*Body` nem o `response_model`.
 - **Justificativa:** o controller continua fino e passa a fornecer ao use case a dependencia necessaria para publicacao do evento e atualizacao de status da analise.
 
 - **Arquivo:** `src/animus/rest/controllers/intake/__init__.py`
@@ -265,8 +265,8 @@ HTTP POST /intake/petitions
          -> PetitionsRepository.remove(old_petition_id)
             -> SQLAlchemy session.delete(PetitionModel)
             -> ORM cascade remove PetitionSummaryModel
-      -> AnalisysesRepository.find_by_id(analysis_id)
-      -> AnalisysesRepository.replace(analysis.status = PETITION_UPLOADED)
+      -> AnalysesRepository.find_by_id(analysis_id)
+      -> AnalysesRepository.replace(analysis.status = PETITION_UPLOADED)
       -> PetitionsRepository.add(new_petition)
   -> Response 201 PetitionDto
 ```
