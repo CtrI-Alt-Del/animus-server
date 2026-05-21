@@ -49,7 +49,7 @@ class TestGetPrecedentController:
         _create_precedent(sqlalchemy_session_factory)
 
         response = client.get(
-            '/intake/precedents/identifier',
+            '/intake/precedents',
             params={
                 'court': 'STF',
                 'kind': 'RG',
@@ -75,7 +75,7 @@ class TestGetPrecedentController:
         _create_precedent(sqlalchemy_session_factory)
 
         response = client.get(
-            '/intake/precedents/identifier',
+            '/intake/precedents',
             params={
                 'court': 'STF',
                 'kind': 'RG',
