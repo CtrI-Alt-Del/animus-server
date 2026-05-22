@@ -1,3 +1,14 @@
+# [1.29.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.28.0...v1.29.0) (2026-05-22)
+
+
+### Features
+
+* ANI-94 add judgment draft retrieval and structured draft schema ([5e22225](https://github.com/CtrI-Alt-Del/animus-server/commit/5e222257037441e5cbed29010ffcce8c69fb08b9))
+* ANI-94 add precedent endpoints and align intake routes ([bc16b80](https://github.com/CtrI-Alt-Del/animus-server/commit/bc16b807165c4e27dd9675741c416e427f51542c))
+* ANI-94 add unarchive method to Analysis class ([b1ac568](https://github.com/CtrI-Alt-Del/animus-server/commit/b1ac56845c2ddf3dde4c55b3d73270394bf01598))
+* ANI-94 align intake analyses and precedent flows ([0e8b477](https://github.com/CtrI-Alt-Del/animus-server/commit/0e8b4774107cff0ceb8e42a118e21334e1dff549))
+* ANI-94 implement second instance judgment draft flow ([4c565a8](https://github.com/CtrI-Alt-Del/animus-server/commit/4c565a85de7065d723c671bd039dd5d58d455c6a))
+
 # [1.28.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.27.0...v1.28.0) (2026-05-18)
 
 
