@@ -32,6 +32,9 @@ from .rename_analysis_controller import RenameAnalysisController
 from .trigger_first_instance_case_summarization_controller import (
     TriggerFirstInstanceCaseSummarizationController,
 )
+from .trigger_case_assessment_case_summarization_controller import (
+    TriggerCaseAssessmentCaseSummarizationController,
+)
 from .trigger_second_instance_judgment_draft_generation_controller import (
     TriggerSecondInstanceJudgmentDraftGenerationController,
 )
@@ -62,6 +65,7 @@ __all__ = [
     'ListAnalysisPetitionsController',
     'ListAnalysisPrecedentsController',
     'MoveAnalysesToFolderController',
+    'TriggerCaseAssessmentCaseSummarizationController',
     'RenameAnalysisController',
     'TriggerFirstInstanceCaseSummarizationController',
     'TriggerSecondInstanceCaseSummarizationController',

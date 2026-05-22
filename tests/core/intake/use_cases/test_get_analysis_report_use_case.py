@@ -130,7 +130,14 @@ class TestGetCaseAssessmentAnalysisReportUseCase:
             )
         )
         petition_draft = PetitionDraft.create(
-            PetitionDraftDto(analysis_id=analysis_id, content='Minuta de petição')
+            PetitionDraftDto(
+                analysis_id=analysis_id,
+                structured_facts='Fatos estruturados',
+                legal_grounds='Fundamentos jurídicos',
+                central_thesis='Tese central',
+                requests=['Pedido 1'],
+                precedent_citations=['STJ REsp 123 - tese aplicável'],
+            )
         )
 
         self.analyses_repository_mock.find_by_id.return_value = analysis

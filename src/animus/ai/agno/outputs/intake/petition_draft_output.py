@@ -1,9 +1,7 @@
-from animus.core.shared.domain.decorators import dto
+from pydantic import BaseModel
 
 
-@dto
-class PetitionDraftDto:
-    analysis_id: str
+class PetitionDraftOutput(BaseModel):
     structured_facts: str
     legal_grounds: str
     central_thesis: str

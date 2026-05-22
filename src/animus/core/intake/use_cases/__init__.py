@@ -13,6 +13,7 @@ from .create_analysis_precedents_use_case import CreateAnalysisPrecedentsUseCase
 from .create_case_summary_use_case import CreateCaseSummaryUseCase
 from .create_extracted_petition_use_case import CreateExtractedPetitionUseCase
 from .create_judgment_draft_use_case import CreateSecondInstanceJudgmentDraftUseCase
+from .create_petition_draft_use_case import CreatePetitionDraftUseCase
 from .get_analysis_document_use_case import GetAnalysisDocumentUseCase
 from .get_analysis_precedent_by_identifier_use_case import (
     GetPrecedentUseCase,
@@ -53,6 +54,9 @@ from .search_analysis_precedents_use_case import SearchAnalysisPrecedentsUseCase
 from .trigger_first_instance_case_summarization_use_case import (
     TriggerFirstInstanceCaseSummarizationUseCase,
 )
+from .trigger_case_assessment_case_summarization_use_case import (
+    TriggerCaseAssessmentCaseSummarizationUseCase,
+)
 from .unchoose_analysis_precedent_use_case import UnchooseAnalysisPrecedentUseCase
 from .update_analysis_status_use_case import UpdateAnalysisStatusUseCase
 from .vectorize_all_precedents_use_case import VectorizeAllPrecedentsUseCase
@@ -69,6 +73,7 @@ __all__ = [
     'CreateCaseSummaryUseCase',
     'CreateExtractedPetitionUseCase',
     'CreateSecondInstanceJudgmentDraftUseCase',
+    'CreatePetitionDraftUseCase',
     'GetAnalysisDocumentUseCase',
     'GetPrecedentUseCase',
     'GetAnalysisPetitionUseCase',
@@ -87,6 +92,7 @@ __all__ = [
     'RenameAnalysisUseCase',
     'RequestAnalysisPrecedentsSearchUseCase',
     'TriggerSecondInstanceJudgmentDraftGenerationUseCase',
+    'TriggerCaseAssessmentCaseSummarizationUseCase',
     'TriggerFirstInstanceCaseSummarizationUseCase',
     'RequestPetitionSummaryUseCase',
     'SearchAnalysisPrecedentsUseCase',

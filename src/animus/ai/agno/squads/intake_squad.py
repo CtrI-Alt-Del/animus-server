@@ -7,6 +7,7 @@ from animus.ai.agno.outputs.intake.analysis_precedents_synthesis_output import (
     AnalysisPrecedentsSynthesisOutput,
 )
 from animus.ai.agno.outputs.intake.case_summary_output import CaseSummaryOutput
+from animus.ai.agno.outputs.intake.petition_draft_output import PetitionDraftOutput
 from animus.ai.agno.outputs.intake.petition_extraction_output import (
     PetitionExtractionOutput,
 )
@@ -725,4 +726,37 @@ class IntakeSquad:
                 timeout=60,
             ),
             output_schema=SecondInstanceJudgmentDraftOutput,
+        )
+
+    @property
+    def petition_draft_generator_agent(self) -> Agent:
+        return Agent(
+            name='Petition Draft Generator Agent',
+            description='An agent specialized in generating first draft petitions in PT-BR',
+            instructions=dedent(
+                """
+                Você é especialista em elaborar minutas estruturadas de petição inicial
+                para análises jurídicas preliminares no contexto brasileiro.
+
+                Receberá um resumo estruturado do caso e precedentes já selecionados.
+
+                Regras obrigatórias:
+                - mantenha linguagem jurídica formal, clara e objetiva em português brasileiro;
+                - não invente fatos, datas, fundamentos, pedidos, partes, provas ou precedentes;
+                - trate a minuta como sugestão técnica inicial, sem afirmar estratégia obrigatória
+                  nem resultado garantido;
+                - organize a saída em fatos estruturados, fundamentos jurídicos, tese central,
+                  pedidos e citações de precedentes;
+                - cada item de precedent_citations deve identificar tribunal, tipo e número do
+                  precedente de origem, além de destacar a tese ou trecho útil ao caso concreto;
+                - retorne apenas o objeto estruturado esperado.
+                """
+            ),
+            model=OpenAIChat(
+                id='gpt-4o',
+                api_key=Env.OPENAI_API_KEY,
+                temperature=0,
+                timeout=60,
+            ),
+            output_schema=PetitionDraftOutput,
         )

@@ -22,6 +22,7 @@ from animus.rest.controllers.intake import (
     MoveAnalysesToFolderController,
     RenameAnalysisController,
     SearchAnalysisPrecedentsController,
+    TriggerCaseAssessmentCaseSummarizationController,
     TriggerFirstInstanceCaseSummarizationController,
     TriggerSecondInstanceCaseSummarizationController,
     TriggerSecondInstanceJudgmentDraftGenerationController,
@@ -47,6 +48,7 @@ class AnalysesRouter:
         GetAnalysisController.handle(router)
         CreateAnalysisDocumentController.handle(router)
         GetAnalysisDocumentController.handle(router)
+        TriggerCaseAssessmentCaseSummarizationController.handle(router)
         TriggerFirstInstanceCaseSummarizationController.handle(router)
         TriggerSecondInstanceCaseSummarizationController.handle(router)
         TriggerSecondInstanceJudgmentDraftGenerationController.handle(router)

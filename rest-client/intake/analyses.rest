@@ -133,6 +133,10 @@ Content-Type: application/json
 POST {{url}}/analyses/{{analysis_id}}/case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Disparar sumarização de case assessment (TriggerCaseAssessmentCaseSummarizationController)
+POST {{url}}/analyses/{{analysis_id}}/case-assessment-case-summaries
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Disparar resumo de caso jurídico de segunda instância (SecondInstanceCaseSummarizationController)
 POST {{url}}/analyses/{{analysis_id}}/petition-extraction
 Authorization: Bearer {{ACCESS_TOKEN}}
