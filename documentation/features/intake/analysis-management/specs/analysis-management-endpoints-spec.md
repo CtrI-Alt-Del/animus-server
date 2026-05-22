@@ -23,8 +23,8 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - Adicionar `PATCH /intake/analyses/{analysis_id}/archive`.
 - Criar `use cases` dedicados para cada endpoint novo.
 - Reutilizar `AuthPipe` e `DatabasePipe` para autenticacao e injecao de repositorio.
-- Ajustar o contrato de `AnalisysesRepository` para suportar listagem filtrada por conta e geracao de nome padrao sequencial.
-- Ajustar a implementacao `SqlalchemyAnalisysesRepository` para refletir o novo contrato.
+- Ajustar o contrato de `AnalysesRepository` para suportar listagem filtrada por conta e geracao de nome padrao sequencial.
+- Ajustar a implementacao `SqlalchemyAnalysesRepository` para refletir o novo contrato.
 - Adicionar um schema HTTP reutilizavel para `cursor pagination` com `next_cursor: str | null`.
 - Registrar os novos controllers no `IntakeRouter`.
 
@@ -35,7 +35,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - Alterar o comportamento dos endpoints ja existentes de `petitions`.
 - Criar jobs `Inngest`, eventos de dominio, canais `WebSocket` ou `providers` novos.
 - Alterar o schema da tabela `analyses` via migration.
-- Corrigir o typo historico `AnalisysesRepository` para `AnalysesRepository` nesta tarefa.
+- Corrigir o typo historico `AnalysesRepository` para `AnalysesRepository` nesta tarefa.
 
 ---
 
@@ -85,7 +85,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - **`AnalysisStatus` e `AnalysisStatusValue`** (`src/animus/core/intake/domain/entities/analysis_status.py`) — estrutura de status ja existente; a criacao deve reutilizar `WAITING_PETITION`.
 - **`AnalysisDto`** (`src/animus/core/intake/domain/entities/dtos/analysis_dto.py`) — contrato de saida ja existente para representar a analise nas bordas.
 - **`AnalysisNotFoundError`** (`src/animus/core/intake/domain/errors/analysis_not_found_error.py`) — erro de dominio ja mapeado para `404` por `AppErrorHandler`.
-- **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) — port ja existente com `find_by_id`, `find_many`, `add`, `add_many` e `replace`.
+- **`AnalysesRepository`** (`src/animus/core/intake/interfaces/analyses_repository.py`) — port ja existente com `find_by_id`, `find_many`, `add`, `add_many` e `replace`.
 - **`CursorPaginationResponse`** (`src/animus/core/shared/responses/cursor_pagination_response.py`) — resposta compartilhada ja existente para pagina por cursor; serve de contrato interno entre repositorio e `use case`.
 - **`CreatePetitionUseCase`** (`src/animus/core/intake/use_cases/create_petition_use_case.py`) — referencia de `use case` simples que constroi entidade, persiste e retorna `Dto`.
 - **`Account`** (`src/animus/core/auth/domain/entities/account.py`) — referencia de entidade com metodos mutadores de dominio (`verify`, `activate`, `deactivate`).
@@ -95,7 +95,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 
 - **`AnalysisModel`** (`src/animus/database/sqlalchemy/models/intake/analysis_model.py`) — model ORM ja existente para a tabela `analyses`; possui `id`, `name`, `folder_id`, `account_id`, `status`, `is_archived` e herda `created_at` e `updated_at` de `Model`.
 - **`AnalysisMapper`** (`src/animus/database/sqlalchemy/mappers/intake/analysis_mapper.py`) — traduz `AnalysisModel` para `Analysis` e vice-versa.
-- **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) — implementacao concreta atual do port de analises; ja possui `find_by_id`, `find_many`, `add`, `add_many` e `replace`.
+- **`SqlalchemyAnalysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`) — implementacao concreta atual do port de analises; ja possui `find_by_id`, `find_many`, `add`, `add_many` e `replace`.
 - **Migration da tabela `analyses`** (`migrations/versions/20260328_110000_create_analyses_table.py`) — evidencia que a persistencia principal ja existe e nao requer schema novo para esta feature.
 
 ## REST
@@ -111,7 +111,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 ## Pipes
 
 - **`AuthPipe`** (`src/animus/pipes/auth_pipe.py`) — resolve `account_id` a partir do header `Authorization` usando `JwtProvider` e `AccountsRepository`.
-- **`DatabasePipe`** (`src/animus/pipes/database_pipe.py`) — entrega `AnalisysesRepository` e outros repositorios concretos por `Depends(...)`.
+- **`DatabasePipe`** (`src/animus/pipes/database_pipe.py`) — entrega `AnalysesRepository` e outros repositorios concretos por `Depends(...)`.
 - **`IntakePipe`** (`src/animus/pipes/intake_pipe.py`) — contem validacao de ownership de analise para o fluxo atual de `petitions`, mas hoje devolve `403` em caso de outra conta; isso nao atende ao requisito novo de ocultacao com `404`.
 
 ## Validation
@@ -127,35 +127,35 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 ### `CreateAnalysisUseCase`
 
 - **Localizacao:** `src/animus/core/intake/use_cases/create_analysis_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`
 - **Metodo principal:** `execute(account_id: str, folder_id: str | None = None) -> AnalysisDto` — cria uma nova analise para a conta autenticada com nome automatico, status inicial e retorno em `Dto`.
 - **Fluxo resumido:** converte `account_id` e `folder_id`; consulta o proximo numero disponivel para nome gerado; constroi `AnalysisDto` com `WAITING_PETITION`, `is_archived = false` e `created_at = now`; cria a entidade; persiste com `add(...)`; retorna `analysis.dto`.
 
 ### `ListAnalysesUseCase`
 
 - **Localizacao:** `src/animus/core/intake/use_cases/list_analyses_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`
 - **Metodo principal:** `execute(account_id: str, search: str, cursor: str | None, limit: int, is_archived: bool) -> CursorPaginationResponse[AnalysisDto]` — lista analises da conta autenticada com filtro textual e paginacao por cursor.
 - **Fluxo resumido:** converte `account_id`, `search`, `cursor`, `limit` e `is_archived`; delega ao repositorio; transforma cada `Analysis` retornada em `AnalysisDto`; devolve `CursorPaginationResponse` interno com `items` em `Dto`.
 
 ### `GetAnalysisUseCase`
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_analysis_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`
 - **Metodo principal:** `execute(account_id: str, analysis_id: str) -> AnalysisDto` — busca uma analise por ID e devolve `404` sem vazar existencia para outra conta.
 - **Fluxo resumido:** converte IDs; busca a analise; se nao existir ou se `analysis.account_id` divergir do `account_id` autenticado, levanta `AnalysisNotFoundError`; retorna `analysis.dto`.
 
 ### `RenameAnalysisUseCase`
 
 - **Localizacao:** `src/animus/core/intake/use_cases/rename_analysis_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`
 - **Metodo principal:** `execute(account_id: str, analysis_id: str, name: str) -> AnalysisDto` — renomeia uma analise da conta autenticada e devolve o `Dto` atualizado.
 - **Fluxo resumido:** busca a analise por ID com a mesma regra de ownership do `GetAnalysisUseCase`; executa a mutacao de dominio de rename; persiste com `replace(...)`; retorna `analysis.dto`.
 
 ### `ArchiveAnalysisUseCase`
 
 - **Localizacao:** `src/animus/core/intake/use_cases/archive_analysis_use_case.py` (**novo arquivo**)
-- **Dependencias (ports injetados):** `AnalisysesRepository`
+- **Dependencias (ports injetados):** `AnalysesRepository`
 - **Metodo principal:** `execute(account_id: str, analysis_id: str) -> AnalysisDto` — arquiva a analise da conta autenticada de forma idempotente.
 - **Fluxo resumido:** busca a analise por ID com a mesma regra de ownership do `GetAnalysisUseCase`; executa a mutacao de dominio de archive; persiste o estado final com `replace(...)`; retorna `analysis.dto`.
 
@@ -177,7 +177,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - **Metodo HTTP e path:** `POST /analyses`.
 - **`status_code`:** `201`
 - **`response_model`:** `AnalysisDto`
-- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalisysesRepository` por `DatabasePipe.get_analisyses_repository_from_request`.
+- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalysesRepository` por `DatabasePipe.get_analyses_repository_from_request`.
 - **Fluxo:** `_Body` e `account_id` -> `CreateAnalysisUseCase.execute(account_id=account_id.value, folder_id=body.folder_id)` -> resposta.
 
 ### `ListAnalysesController`
@@ -187,7 +187,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - **Metodo HTTP e path:** `GET /analyses`.
 - **`status_code`:** `200`
 - **`response_model`:** `CursorPaginationResponseSchema[AnalysisDto]`
-- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalisysesRepository` por `DatabasePipe.get_analisyses_repository_from_request`.
+- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalysesRepository` por `DatabasePipe.get_analyses_repository_from_request`.
 - **Fluxo:** query params -> `ListAnalysesUseCase.execute(...)` -> adaptacao de `next_cursor` para `str | None` no contrato HTTP -> resposta.
 
 ### `GetAnalysisController`
@@ -197,7 +197,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - **Metodo HTTP e path:** `GET /analyses/{analysis_id}`.
 - **`status_code`:** `200`
 - **`response_model`:** `AnalysisDto`
-- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalisysesRepository` por `DatabasePipe.get_analisyses_repository_from_request`.
+- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalysesRepository` por `DatabasePipe.get_analyses_repository_from_request`.
 - **Fluxo:** `analysis_id` e `account_id` -> `GetAnalysisUseCase.execute(account_id=account_id.value, analysis_id=analysis_id)` -> resposta.
 
 ### `RenameAnalysisController`
@@ -207,7 +207,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - **Metodo HTTP e path:** `PATCH /analyses/{analysis_id}/name`.
 - **`status_code`:** `200`
 - **`response_model`:** `AnalysisDto`
-- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalisysesRepository` por `DatabasePipe.get_analisyses_repository_from_request`.
+- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalysesRepository` por `DatabasePipe.get_analyses_repository_from_request`.
 - **Fluxo:** `_Body` + `analysis_id` + `account_id` -> `RenameAnalysisUseCase.execute(account_id=account_id.value, analysis_id=analysis_id, name=body.name)` -> resposta.
 
 ### `ArchiveAnalysisController`
@@ -217,7 +217,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - **Metodo HTTP e path:** `PATCH /analyses/{analysis_id}/archive`.
 - **`status_code`:** `200`
 - **`response_model`:** `AnalysisDto`
-- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalisysesRepository` por `DatabasePipe.get_analisyses_repository_from_request`.
+- **Dependencias injetadas via `Depends`:** `Id` por `AuthPipe.get_account_id_from_request`; `AnalysesRepository` por `DatabasePipe.get_analyses_repository_from_request`.
 - **Fluxo:** `analysis_id` e `account_id` -> `ArchiveAnalysisUseCase.execute(account_id=account_id.value, analysis_id=analysis_id)` -> resposta.
 
 ## Camada Routers
@@ -258,7 +258,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - **Mudanca:** adicionar os metodos `rename(name: str) -> None` e `archive() -> None` na entidade `Analysis`.
 - **Justificativa:** manter as mutacoes de nome e arquivamento dentro do dominio, alinhadas ao padrao ja usado em `Account`.
 
-- **Arquivo:** `src/animus/core/intake/interfaces/analisyses_repository.py`
+- **Arquivo:** `src/animus/core/intake/interfaces/analyses_repository.py`
 - **Mudanca:** alterar a assinatura de `find_many(...)` para receber `account_id: Id` e `is_archived: Logical`; adicionar `find_next_generated_name_number(account_id: Id) -> Integer`.
 - **Justificativa:** a listagem precisa ser escopada pela conta autenticada e pelo estado de arquivamento; a criacao precisa de um contrato explicito para calcular o proximo sufixo do nome automatico sem acoplar o `use case` a SQLAlchemy.
 
@@ -268,7 +268,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 
 ## Camada Database
 
-- **Arquivo:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`
+- **Arquivo:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`
 - **Mudanca:** atualizar `find_many(...)` para filtrar por `account_id`, `is_archived` e `name`, preservando o cursor por `id`; implementar `find_next_generated_name_number(...)` com base nas analises atuais da conta; manter `replace(...)` para persistir rename e archive.
 - **Justificativa:** a implementacao concreta precisa refletir o novo port do `core` e garantir que a listagem nao atravesse fronteiras de conta.
 
@@ -315,7 +315,7 @@ Implementar a superficie HTTP de CRUD de analises no contexto `intake`, reutiliz
 - **Motivo da escolha:** o ticket exige `next_cursor: string | null`, enquanto o wrapper interno atual usa `Id | None`; alem disso, `pydantic.dataclasses` genericas nao sao a melhor base para um contrato HTTP generico e reutilizavel.
 - **Impactos / trade-offs:** adiciona um arquivo novo na camada `validation`, mas mantem o `core` desacoplado do contrato HTTP final e prepara reuso futuro.
 
-- **Decisao:** preservar o typo historico `AnalisysesRepository` e `SqlalchemyAnalisysesRepository` nesta tarefa.
+- **Decisao:** preservar o typo historico `AnalysesRepository` e `SqlalchemyAnalysesRepository` nesta tarefa.
 - **Alternativas consideradas:** renomear todos os arquivos, classes, imports e pipes para `Analyses...`.
 - **Motivo da escolha:** o typo ja esta espalhado em `core`, `database`, `pipes` e controllers existentes; a tarefa do ticket e funcional, nao de nomenclatura.
 - **Impactos / trade-offs:** a inconsistencia nominal permanece por ora, mas evita uma refatoracao transversal fora do escopo.
@@ -341,11 +341,11 @@ POST /intake/analyses
   -> IntakeRouter
   -> CreateAnalysisController
   -> AuthPipe.get_account_id_from_request
-  -> DatabasePipe.get_analisyses_repository_from_request
+  -> DatabasePipe.get_analyses_repository_from_request
   -> CreateAnalysisUseCase
-  -> AnalisysesRepository.find_next_generated_name_number
-  -> AnalisysesRepository.add
-  -> SqlalchemyAnalisysesRepository
+  -> AnalysesRepository.find_next_generated_name_number
+  -> AnalysesRepository.add
+  -> SqlalchemyAnalysesRepository
   -> AnalysisModel / PostgreSQL (table: analyses)
   -> AnalysisDto
   -> JSON 201
@@ -358,10 +358,10 @@ GET /intake/analyses
   -> IntakeRouter
   -> ListAnalysesController
   -> AuthPipe.get_account_id_from_request
-  -> DatabasePipe.get_analisyses_repository_from_request
+  -> DatabasePipe.get_analyses_repository_from_request
   -> ListAnalysesUseCase
-  -> AnalisysesRepository.find_many
-  -> SqlalchemyAnalisysesRepository
+  -> AnalysesRepository.find_many
+  -> SqlalchemyAnalysesRepository
   -> AnalysisModel / PostgreSQL (table: analyses)
   -> CursorPaginationResponse[AnalysisDto]
   -> CursorPaginationResponseSchema[AnalysisDto]
@@ -375,7 +375,7 @@ GET /intake/analyses
 - **Referencias:** `src/animus/core/intake/use_cases/create_petition_use_case.py`
 - **Referencias:** `src/animus/core/auth/use_cases/verify_email_use_case.py`
 - **Referencias:** `src/animus/core/auth/domain/entities/account.py`
-- **Referencias:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`
+- **Referencias:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`
 - **Referencias:** `src/animus/routers/intake/intake_router.py`
 - **Referencias:** `src/animus/pipes/auth_pipe.py`
 - **Referencias:** `src/animus/rest/handlers/app_error_handler.py`
@@ -392,6 +392,6 @@ GET /intake/analyses
 - **Impacto na implementacao:** a API pode aceitar um `folder_id` valido sintaticamente, mas sem garantia de referencia consistente.
 - **Acao sugerida:** validar com produto/arquitetura se essa validacao deve entrar em uma tarefa futura de `folders`.
 
-- **Descricao da pendencia:** o ticket nao define explicitamente a ordenacao da listagem; a spec assume a estrategia ja existente em `SqlalchemyAnalisysesRepository`, com cursor baseado em `id` crescente.
+- **Descricao da pendencia:** o ticket nao define explicitamente a ordenacao da listagem; a spec assume a estrategia ja existente em `SqlalchemyAnalysesRepository`, com cursor baseado em `id` crescente.
 - **Impacto na implementacao:** a ordem visivel no cliente pode divergir da expectativa de UX caso se espere itens mais recentes primeiro.
 - **Acao sugerida:** validar com produto se a ordenacao atual atende ao caso de uso; se nao atender, abrir ajuste especifico de ordenacao e cursor.

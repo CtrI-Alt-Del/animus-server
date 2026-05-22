@@ -73,9 +73,9 @@ Execute primeiro:
 
 ---
 
-### 2 Analise do Contexto
+### 2 Análise do Contexto
 
-- Analise nome/caminho e tambem o diff das alteracoes
+- Análise nome/caminho e tambem o diff das alteracoes
 - Agrupe por responsabilidade
 - Se houver mudancas em camadas diferentes (ex: UI e REST), crie commits separados
 

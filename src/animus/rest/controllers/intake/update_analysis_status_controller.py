@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.domain.entities.dtos import AnalysisStatusDto
-from animus.core.intake.interfaces import AnalisysesRepository
+from animus.core.intake.interfaces import AnalysesRepository
 from animus.pipes.database_pipe import DatabasePipe
 from animus.pipes.intake_pipe import IntakePipe
 
@@ -28,12 +28,12 @@ class UpdateAnalysisStatusController:
                 Analysis,
                 Depends(IntakePipe.verify_analysis_by_account_from_request),
             ],
-            analisyses_repository: Annotated[
-                AnalisysesRepository,
-                Depends(DatabasePipe.get_analisyses_repository_from_request),
+            analyses_repository: Annotated[
+                AnalysesRepository,
+                Depends(DatabasePipe.get_analyses_repository_from_request),
             ],
         ) -> AnalysisStatusDto:
             analysis.set_status(body.status)
-            analisyses_repository.replace(analysis)
+            analyses_repository.replace(analysis)
 
-            return AnalysisStatusDto(value=analysis.status.value)
+            return AnalysisStatusDto(value=analysis.status.dto)

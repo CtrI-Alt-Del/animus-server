@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session, sessionmaker
 from animus.ai.agno.workflows.intake import (
     AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
 )
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
@@ -30,7 +30,7 @@ from animus.core.intake.use_cases import (
 from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisPrecedentsRepository,
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
 )
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.database.sqlalchemy.models.intake.analysis_precedent_model import (
@@ -58,11 +58,11 @@ def _seed_analysis_with_petition_summary(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de teste',
+            name='Análise de teste',
             account_id=Id.create().value,
             folder_id=None,
-            type=AnalysisType.FIRST_INSTANCE.value,
-            status=CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value,
+            type=AnalysisType.create_as_first_instance().dto,
+            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
             is_archived=False,
         )
     )
@@ -79,7 +79,7 @@ def _seed_analysis_with_petition_summary(
         PetitionSummaryModel(
             petition_id=petition_id,
             case_summary='Resumo do caso',
-            legal_issue='Questao juridica',
+            legal_issue='Questão juridica',
             central_question='Pergunta central',
             relevant_laws=['Lei 1'],
             key_facts=['Fato 1'],
@@ -232,7 +232,7 @@ class TestSearchAnalysisPrecedentsJob:
         )
 
         response = inngest_runtime.post_event(
-            name='intake/analysis.precedents.search.requested',
+            name='intake/analyses.precedents.search.requested',
             data={
                 'analysis_id': seeded_data['analysis_id'],
                 'courts': ['STF'],
@@ -347,7 +347,7 @@ class TestSearchAnalysisPrecedentsJob:
                     analysis_precedents_repository=SqlalchemyAnalysisPrecedentsRepository(
                         session
                     ),
-                    analisyses_repository=SqlalchemyAnalisysesRepository(session),
+                    analyses_repository=SqlalchemyAnalysesRepository(session),
                 ).execute(
                     analysis_id=analysis_id,
                     filters_dto=filters_dto,
@@ -400,7 +400,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == CaseAssessmentAnalysisStatus.SEARCHING_PRECEDENTS.value
+            == CaseAssessmentAnalysisStatus.create('SEARCHING_PRECEDENTS').dto
         )
 
         synthesize_analysis_precedents_sync(payload, analysis_precedents_data)
@@ -415,7 +415,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == CaseAssessmentAnalysisStatus.DONE.value
+            == CaseAssessmentAnalysisStatus.create_as_precedents_searched().dto
         )
         analysis = _get_analysis(
             sqlalchemy_session_factory,
@@ -461,7 +461,7 @@ class TestSearchAnalysisPrecedentsJob:
                 sqlalchemy_session_factory,
                 seeded_data['analysis_id'],
             )
-            == CaseAssessmentAnalysisStatus.FAILED.value
+            == CaseAssessmentAnalysisStatus.create_as_failed().dto
         )
         assert (
             _get_analysis_precedents(

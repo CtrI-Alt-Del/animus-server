@@ -8,15 +8,18 @@ from animus.core.intake.interfaces.analysis_precedents_repository import (
 from animus.core.intake.interfaces.analysis_documents_repository import (
     AnalysisDocumentsRepository,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
+)
+from animus.core.intake.interfaces.generate_judgment_draft_workflow import (
+    GenerateSecondInstanceJudgmentDraftWorkflow,
 )
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
 )
 from animus.core.intake.interfaces.summarize_case_workflow import (
-    SummarizeCaseWorkflow,
+    SummarizeFirstInstanceCaseWorkflow,
 )
 from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
     SynthesizeAnalysisPrecedentsWorkflow,
@@ -35,26 +38,26 @@ class AiPipe:
             AnalysisDocumentsRepository,
             Depends(DatabasePipe.get_analysis_documents_repository_from_request),
         ],
-        analisyses_repository: Annotated[
-            AnalisysesRepository,
-            Depends(DatabasePipe.get_analisyses_repository_from_request),
+        analyses_repository: Annotated[
+            AnalysesRepository,
+            Depends(DatabasePipe.get_analyses_repository_from_request),
         ],
-    ) -> SummarizeCaseWorkflow:
-        from animus.ai.agno.workflows.intake.agno_summarize_case_workflow import (
-            AgnoSummarizeCaseWorkflow,
+    ) -> SummarizeFirstInstanceCaseWorkflow:
+        from animus.ai.agno.workflows.intake.agno_summarize_first_instance_case_workflow import (
+            AgnoSummarizeFirstInstanceCaseWorkflow,
         )
 
-        return AgnoSummarizeCaseWorkflow(
+        return AgnoSummarizeFirstInstanceCaseWorkflow(
             case_summaries_repository=case_summaries_repository,
             analysis_documents_repository=analysis_documents_repository,
-            analisyses_repository=analisyses_repository,
+            analyses_repository=analyses_repository,
         )
 
     @staticmethod
     def get_synthesize_analysis_precedents_workflow(
         petition_summaries_repository: PetitionSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> SynthesizeAnalysisPrecedentsWorkflow:
         from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
             AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
@@ -63,5 +66,15 @@ class AiPipe:
         return AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
             petition_summaries_repository=petition_summaries_repository,
             analysis_precedents_repository=analysis_precedents_repository,
-            analisyses_repository=analisyses_repository,
+            analyses_repository=analyses_repository,
         )
+
+    @staticmethod
+    def get_generate_judgment_draft_workflow() -> (
+        GenerateSecondInstanceJudgmentDraftWorkflow
+    ):
+        from animus.ai.agno.workflows.intake.agno_generate_second_instance_judgment_draft_workflow import (
+            AgnoGenerateSecondInstanceJudgmentDraftWorkflow,
+        )
+
+        return AgnoGenerateSecondInstanceJudgmentDraftWorkflow()

@@ -19,3 +19,4 @@ class AnalysisPrecedentDto:
     final_rank: int = 0
     applicability_level: int | None = None
     legal_features: AnalysiesPrecedentLegalFeaturesDto | None = None
+    is_manually_added: bool = False

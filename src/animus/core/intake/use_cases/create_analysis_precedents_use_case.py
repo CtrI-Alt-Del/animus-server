@@ -1,9 +1,12 @@
 from typing import cast
 
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.errors import AnalysisNotFoundError
@@ -19,7 +22,7 @@ from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filter
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
 )
 from animus.core.shared.domain.errors import AppError
 from animus.core.shared.domain.structures import Id
@@ -29,10 +32,10 @@ class CreateAnalysisPrecedentsUseCase:
     def __init__(
         self,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._analysis_precedents_repository = analysis_precedents_repository
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
 
     def execute(
         self,
@@ -63,16 +66,29 @@ class CreateAnalysisPrecedentsUseCase:
             analysis_precedents=merged_analysis_precedents,
         )
 
-        analysis = self._analisyses_repository.find_by_id(analysis_id_entity)
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:
             raise AnalysisNotFoundError
 
         analysis.set_precedents_search_filters(filters_dto)
-        if analysis.type.uses_case_assessment_or_first_instance_flow():
-            analysis.set_status(CaseAssessmentAnalysisStatus.DONE)
-        else:
-            analysis.set_status(SecondInstanceAnalysisStatus.DONE)
-        self._analisyses_repository.replace(analysis)
+
+        if analysis.type.is_case_analysis.is_true:
+            analysis.set_status(
+                CaseAssessmentAnalysisStatus.create_as_precedents_searched()
+            )
+        elif analysis.type.is_first_instance.is_true:
+            if synthesis_output is None:
+                analysis.set_status(FirstInstanceAnalysisStatus.create_as_done())
+            else:
+                analysis.set_status(
+                    FirstInstanceAnalysisStatus.create_as_precedents_searched()
+                )
+        elif analysis.type.is_second_instance.is_true:
+            analysis.set_status(
+                SecondInstanceAnalysisStatus.create_as_precedents_searched()
+            )
+
+        self._analyses_repository.replace(analysis)
 
         return [
             analysis_precedent.dto for analysis_precedent in merged_analysis_precedents
@@ -276,10 +292,11 @@ class CreateAnalysisPrecedentsUseCase:
         analysis_precedent_entities: list[AnalysisPrecedent] = []
 
         for rank, dto in enumerate(reranked_dtos, start=1):
+            should_choose_by_default = dto.applicability_level == 2
             final_dto = AnalysisPrecedentDto(
                 analysis_id=dto.analysis_id,
                 precedent=dto.precedent,
-                is_chosen=dto.is_chosen,
+                is_chosen=should_choose_by_default,
                 similarity_score=dto.similarity_score,
                 thesis_similarity_score=dto.thesis_similarity_score,
                 enunciation_similarity_score=dto.enunciation_similarity_score,

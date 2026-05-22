@@ -59,7 +59,7 @@ Implementar suporte a operações em lote no `animus-server` para permitir que o
 
 - **`Analysis`** (`src/animus/core/intake/domain/entities/analysis.py`) — entidade que possui `folder_id` e `is_archived`.
 - **`Folder`** (`src/animus/core/library/domain/entities/folder.py`) — entidade de pasta.
-- **`AnalisysesRepository`** (`src/animus/core/intake/interfaces/analisyses_repository.py`) — possui `find_by_id` e `replace`.
+- **`AnalysesRepository`** (`src/animus/core/intake/interfaces/analyses_repository.py`) — possui `find_by_id` e `replace`.
 - **`FoldersRepository`** (`src/animus/core/library/interfaces/folders_repository.py`) — possui `find_by_id`.
 - **`ArchiveAnalysisUseCase`** (`src/animus/core/intake/use_cases/archive_analysis_use_case.py`) — será evoluído para lote.
 - **`AnalysisNotFoundError`** (`src/animus/core/intake/domain/errors/analysis_not_found_error.py`) — erro lançado em falha de ownership ou existência.
@@ -68,7 +68,7 @@ Implementar suporte a operações em lote no `animus-server` para permitir que o
 ## Database
 
 - **`AnalysisModel`** (`src/animus/database/sqlalchemy/models/intake/analysis_model.py`) — mapeia `folder_id` e `is_archived`.
-- **`SqlalchemyAnalisysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`) — implementação de persistência.
+- **`SqlalchemyAnalysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`) — implementação de persistência.
 
 ## REST
 
@@ -81,7 +81,7 @@ Implementar suporte a operações em lote no `animus-server` para permitir que o
 ## Camada Core (Use Cases)
 
 - **Localização:** `src/animus/core/intake/use_cases/move_analyses_to_folder_use_case.py` (**novo arquivo**)
-- **Dependências:** `AnalisysesRepository`, `FoldersRepository`
+- **Dependências:** `AnalysesRepository`, `FoldersRepository`
 - **Método principal:** `execute(account_id: str, analysis_ids: list[str], folder_id: str | None) -> list[AnalysisDto]`
 - **Fluxo resumido:**
   1. Normalizar `account_id` e `folder_id`.
@@ -96,7 +96,7 @@ Implementar suporte a operações em lote no `animus-server` para permitir que o
   5. Retornar lista de DTOs das análises atualizadas.
 
 - **Localização:** `src/animus/core/intake/use_cases/archive_analyses_use_case.py` (**novo arquivo** ou renomear anterior)
-- **Dependências:** `AnalisysesRepository`
+- **Dependências:** `AnalysesRepository`
 - **Método principal:** `execute(account_id: str, analysis_ids: list[str]) -> list[AnalysisDto]`
 - **Fluxo resumido:**
   1. Para cada `analysis_id`: buscar e validar ownership. Lançar `AnalysisNotFoundError` em falha.
@@ -112,7 +112,7 @@ Implementar suporte a operações em lote no `animus-server` para permitir que o
 - **Método HTTP e path:** `PATCH /intake/analyses/folder`
 - **`status_code`**: `200`
 - **`response_model`**: `list[AnalysisDto]`
-- **Dependências:** `AuthPipe`, `DatabasePipe` (Analisyses e Folders)
+- **Dependências:** `AuthPipe`, `DatabasePipe` (Analyses e Folders)
 - **Fluxo:** `Body` -> `UseCase.execute(...)` -> Resposta.
 
 - **Localização:** `src/animus/rest/controllers/intake/archive_analyses_controller.py` (**novo arquivo**, substituindo `archive_analysis_controller.py`)
@@ -193,11 +193,11 @@ PATCH /intake/analyses/folder { analysis_ids, folder_id }
   -> MoveAnalysesToFolderUseCase.execute
      -> FoldersRepository.find_by_id (se folder_id != None)
      -> loop analysis_ids:
-        -> AnalisysesRepository.find_by_id
+        -> AnalysesRepository.find_by_id
         -> validation (ownership)
      -> loop validated_analyses:
         -> analysis.move_to_folder
-        -> AnalisysesRepository.replace
+        -> AnalysesRepository.replace
   -> 200 list[AnalysisDto]
 ```
 

@@ -19,7 +19,7 @@ from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filter
 )
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     PetitionSummariesRepository,
 )
 from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
@@ -49,12 +49,12 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
         self,
         petition_summaries_repository: PetitionSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._petition_summaries_repository = petition_summaries_repository
         self._create_analysis_precedents_use_case = CreateAnalysisPrecedentsUseCase(
             analysis_precedents_repository=analysis_precedents_repository,
-            analisyses_repository=analisyses_repository,
+            analyses_repository=analyses_repository,
         )
         self._squad = IntakeSquad()
         self._step_names = _StepNames()
@@ -174,10 +174,10 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
 
         prompt = dedent(
             f"""
-            Relacione os precedentes candidatos com a peticao e retorne uma sintese e as features jurídicas
+            Relacione os precedentes candidatos com a petição e retorne uma sintese e as features jurídicas
             para cada precedente no formato estruturado esperado.
 
-            Resumo da peticao:
+            Resumo da petição:
             - case_summary: {petition_summary_dto.case_summary}
             - legal_issue: {petition_summary_dto.legal_issue}
             - central_question: {petition_summary_dto.central_question}

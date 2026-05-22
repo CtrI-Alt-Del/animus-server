@@ -5,7 +5,7 @@ import pytest
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.use_cases.move_analyses_to_folder_use_case import (
     MoveAnalysesToFolderUseCase,
 )
@@ -21,8 +21,8 @@ from animus.fakers.library.entities.folders_faker import FoldersFaker
 class TestMoveAnalysesToFolderUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.folders_repository_mock = create_autospec(
@@ -30,7 +30,7 @@ class TestMoveAnalysesToFolderUseCase:
             instance=True,
         )
         self.use_case = MoveAnalysesToFolderUseCase(
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
             folders_repository=self.folders_repository_mock,
         )
 
@@ -48,7 +48,7 @@ class TestMoveAnalysesToFolderUseCase:
             account_id=account_id,
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
         self.folders_repository_mock.find_by_id.return_value = folder
 
         result = self.use_case.execute(
@@ -57,13 +57,13 @@ class TestMoveAnalysesToFolderUseCase:
             folder_id=folder_id,
         )
 
-        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+        self.analyses_repository_mock.find_by_id.assert_called_once_with(
             Id.create(analysis_id)
         )
         self.folders_repository_mock.find_by_id.assert_called_once_with(
             Id.create(folder_id)
         )
-        self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
+        self.analyses_repository_mock.replace.assert_called_once_with(analysis)
         assert result[0].folder_id == folder_id
 
     def test_should_move_analyses_to_none_folder(self) -> None:
@@ -76,7 +76,7 @@ class TestMoveAnalysesToFolderUseCase:
             folder_id='01BX5ZZKBKACTAV9WEVGEMMVS1',
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(
             account_id=account_id,
@@ -118,7 +118,7 @@ class TestMoveAnalysesToFolderUseCase:
             account_id='01BX5ZZKBKACTAV9WEVGEMMVS0',
         )
 
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(

@@ -14,9 +14,9 @@ def __getattr__(name: str) -> Any:
         ),
         'AnalysisDocumentDto': ('.analysis_document_dto', 'AnalysisDocumentDto'),
         'ExtractedPetitionDto': ('.extracted_petition_dto', 'ExtractedPetitionDto'),
-        'PetitionSummaryEmbeddingDto': (
+        'CaseSummaryEmbeddingDto': (
             '.petition_summary_embedding_dto',
-            'PetitionSummaryEmbeddingDto',
+            'CaseSummaryEmbeddingDto',
         ),
         'PrecedentEmbeddingDto': ('.precedent_embedding_dto', 'PrecedentEmbeddingDto'),
         'AnalysisPrecedentDto': ('.analysis_precedent_dto', 'AnalysisPrecedentDto'),
@@ -38,13 +38,16 @@ def __getattr__(name: str) -> Any:
             'AnalysisPrecedentsSearchFiltersDto',
         ),
         'CaseSummaryDto': ('.case_summary_dto', 'CaseSummaryDto'),
-        'JudgmentDraftDto': ('.judgment_draft_dto', 'JudgmentDraftDto'),
+        'SecondInstanceJudgmentDraftDto': (
+            '.second_instance_judgment_draft_dto',
+            'SecondInstanceJudgmentDraftDto',
+        ),
         'PetitionDraftDto': ('.petition_draft_dto', 'PetitionDraftDto'),
         'PetitionExtractionDto': (
             '.petition_extraction_dto',
             'PetitionExtractionDto',
         ),
-        'PetitionSummaryDto': ('.petition_summary_dto', 'PetitionSummaryDto'),
+        'PetitionSummaryDto': ('.case_summary_dto', 'CaseSummaryDto'),
         'PrecedentIdentifierDto': (
             '.precedent_identifier_dto',
             'PrecedentIdentifierDto',

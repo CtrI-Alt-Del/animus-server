@@ -22,7 +22,7 @@ def _create_analysis_with_document(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise',
+            name='Análise',
             folder_id=None,
             account_id=account_id,
             type='FIRST_INSTANCE',
@@ -60,7 +60,7 @@ class TestGetAnalysisDocumentController:
         )
 
         response = client.get(
-            f'/intake/analysis/{analysis_id}/document',
+            f'/intake/analyses/{analysis_id}/documents',
             headers=build_auth_headers(account.id),
         )
 
@@ -81,7 +81,7 @@ class TestGetAnalysisDocumentController:
         account = create_account(is_verified=True, is_active=True)
 
         response = client.get(
-            '/intake/analysis/invalid-analysis-id/document',
+            '/intake/analyses/invalid-analysis-id/documents',
             headers=build_auth_headers(account.id),
         )
 

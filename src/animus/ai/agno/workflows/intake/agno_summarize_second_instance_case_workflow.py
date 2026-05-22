@@ -9,9 +9,9 @@ from animus.ai.agno.squads import IntakeSquad
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
 from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-    AnalisysesRepository,
+    AnalysesRepository,
     CaseSummariesRepository,
-    SummarizeCaseWorkflow,
+    SummarizeFirstInstanceCaseWorkflow,
 )
 from animus.core.intake.use_cases import CreateCaseSummaryUseCase
 from animus.core.shared.domain.errors import AppError
@@ -26,17 +26,17 @@ class _StepNames(NamedTuple):
     SUMMARIZE_CASE: str = 'summarize-case'
 
 
-class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeCaseWorkflow):
+class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeFirstInstanceCaseWorkflow):
     def __init__(
         self,
         case_summaries_repository: CaseSummariesRepository,
         analysis_documents_repository: AnalysisDocumentsRepository,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
     ) -> None:
         self._create_case_summary_use_case = CreateCaseSummaryUseCase(
             case_summaries_repository=case_summaries_repository,
             analysis_documents_repository=analysis_documents_repository,
-            analisyses_repository=analisyses_repository,
+            analyses_repository=analyses_repository,
         )
         self._team = IntakeSquad()
         self._step_names = _StepNames()
@@ -78,7 +78,7 @@ class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeCaseWorkflow):
         document_content = str(run_context.session_state.get('document_content', ''))
         prompt = dedent(
             f"""
-            Resuma o conteudo da peticao inicial em contexto de segunda instancia.
+            Resuma o conteudo da petição inicial em contexto de segunda instancia.
             Entregue a saida estruturada contendo `case_summary`, `legal_issue`,
             `central_question`, `relevant_laws`, `key_facts` e `search_terms`.
 
@@ -89,7 +89,7 @@ class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeCaseWorkflow):
             - identifique controversias estruturais que impactam admissibilidade,
               legitimidade e alcance do provimento pretendido.
 
-            Conteudo da peticao:
+            Conteudo da petição:
             {document_content}
             """
         ).strip()

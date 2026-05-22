@@ -82,7 +82,7 @@
 
 ### Exemplo pratico
 
-- Se `ChooseAnalysisPrecedentUseCase` precisa atualizar `Analysis.status`, ele deve usar os ports de dominio necessarios (`AnalisysesRepository`) no proprio fluxo, sem instanciar `UpdateAnalysisStatusUseCase` internamente.
+- Se `ChooseAnalysisPrecedentUseCase` precisa atualizar `Analysis.status`, ele deve usar os ports de dominio necessarios (`AnalysesRepository`) no proprio fluxo, sem instanciar `UpdateAnalysisStatusUseCase` internamente.
 
 ## Regras de Integracao com Outras Camadas
 
@@ -123,7 +123,7 @@
 - `Interfaces` estaveis para repositorios, providers, `brokers` e `workflows`.
 - `Events`, `responses` e `errors` alinhados ao comportamento real do dominio.
 - Nomes consistentes como `*UseCase`, `*Dto`, `*Error`, `*Repository`, `*Provider` e `*Event`.
-- `UseCase` deve orquestrar diretamente seus ports de dominio quando precisar compor passos (ex.: em `src/animus/core/intake/use_cases/choose_analysis_precedent_use_case.py`, atualizar status via `AnalisysesRepository` sem encadear outro caso de uso).
+- `UseCase` deve orquestrar diretamente seus ports de dominio quando precisar compor passos (ex.: em `src/animus/core/intake/use_cases/choose_analysis_precedent_use_case.py`, atualizar status via `AnalysesRepository` sem encadear outro caso de uso).
 
 ## ❌ O que NUNCA deve conter
 

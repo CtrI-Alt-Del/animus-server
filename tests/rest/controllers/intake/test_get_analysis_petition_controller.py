@@ -4,8 +4,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
 from animus.database.sqlalchemy.models.intake import AnalysisModel, PetitionModel
 from tests.fixtures.auth_fixtures import CreateAccountFixture
 from tests.rest.controllers.intake.conftest import BuildAuthHeadersFixture
@@ -22,11 +24,11 @@ def _create_analysis_with_petition(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de peticao',
+            name='Análise de petição',
             folder_id=None,
             account_id=account_id,
-            type=AnalysisType.FIRST_INSTANCE.value,
-            status=AnalysisStatusValue.PETITION_UPLOADED.value,
+            type=AnalysisType.create_as_first_instance().dto,
+            status=FirstInstanceAnalysisStatus.create_as_document_uploaded().dto,
             is_archived=False,
             created_at=datetime.now(UTC),
         )
@@ -55,7 +57,7 @@ class TestGetAnalysisPetitionController:
         sqlalchemy_session_factory: sessionmaker[Session],
     ) -> None:
         account = create_account(is_verified=True, is_active=True)
-        analysis_id, petition_id = _create_analysis_with_petition(
+        analysis_id, _petition_id = _create_analysis_with_petition(
             sqlalchemy_session_factory,
             account_id=account.id,
         )
@@ -67,13 +69,10 @@ class TestGetAnalysisPetitionController:
 
         assert response.status_code == 200
         assert response.json() == {
-            'id': petition_id,
             'analysis_id': analysis_id,
             'uploaded_at': '2026-03-27T10:30:00+00:00',
-            'document': {
-                'file_path': 'petitions/current-petition.pdf',
-                'name': 'Peticao atual.pdf',
-            },
+            'file_path': 'petitions/current-petition.pdf',
+            'name': 'Peticao atual.pdf',
         }
 
     def test_should_return_422_when_analysis_id_is_invalid(

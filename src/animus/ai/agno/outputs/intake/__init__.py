@@ -5,6 +5,9 @@ from .analysis_precedents_synthesis_output import AnalysisPrecedentsSynthesisOut
 from .case_summary_output import CaseSummaryOutput
 from .petition_extraction_output import PetitionExtractionOutput
 from .petition_summary_output import PetitionSummaryOutput
+from .second_instance_judgment_draft_output import (
+    SecondInstanceJudgmentDraftOutput,
+)
 
 __all__ = [
     'AnalysisPrecedentsApplicabilityClassificationOutput',
@@ -12,4 +15,5 @@ __all__ = [
     'CaseSummaryOutput',
     'PetitionExtractionOutput',
     'PetitionSummaryOutput',
+    'SecondInstanceJudgmentDraftOutput',
 ]

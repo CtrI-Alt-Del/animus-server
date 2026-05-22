@@ -1,35 +1,34 @@
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
-from animus.core.intake.domain.entities.second_instance_analysis_status import (
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id, Integer, Logical, Text
 from animus.core.shared.responses import CursorPaginationResponse
 
 
 class ListUnfolderedAnalysesUseCase:
-    _ALLOWED_ANALYSIS_STATUSES: tuple[
-        CaseAssessmentAnalysisStatus | SecondInstanceAnalysisStatus, ...
-    ] = (
-        CaseAssessmentAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
-        CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED,
-        CaseAssessmentAnalysisStatus.CASE_ANALYZED,
-        CaseAssessmentAnalysisStatus.DONE,
-        CaseAssessmentAnalysisStatus.FAILED,
-        SecondInstanceAnalysisStatus.WAITING_DOCUMENT_UPLOAD,
-        SecondInstanceAnalysisStatus.DOCUMENT_UPLOADED,
-        SecondInstanceAnalysisStatus.CASE_ANALYZED,
-        SecondInstanceAnalysisStatus.DONE,
-        SecondInstanceAnalysisStatus.PETITION_NOT_FOUND,
-        SecondInstanceAnalysisStatus.FAILED,
+    _ALLOWED_ANALYSIS_STATUSES: tuple[str, ...] = (
+        CaseAssessmentAnalysisStatus.create_as_waiting_document_upload().dto,
+        CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+        CaseAssessmentAnalysisStatus.create_as_case_analyzed().dto,
+        CaseAssessmentAnalysisStatus.create_as_done().dto,
+        CaseAssessmentAnalysisStatus.create_as_failed().dto,
+        SecondInstanceAnalysisStatus.create_as_waiting_document_upload().dto,
+        SecondInstanceAnalysisStatus.create_as_document_uploaded().dto,
+        SecondInstanceAnalysisStatus.create_as_case_analyzed().dto,
+        SecondInstanceAnalysisStatus.create_as_done().dto,
+        SecondInstanceAnalysisStatus.create_as_petition_not_found().dto,
+        SecondInstanceAnalysisStatus.create_as_precedents_searched().dto,
+        SecondInstanceAnalysisStatus.create_as_failed().dto,
     )
 
-    def __init__(self, analisyses_repository: AnalisysesRepository) -> None:
-        self._analisyses_repository = analisyses_repository
+    def __init__(self, analyses_repository: AnalysesRepository) -> None:
+        self._analyses_repository = analyses_repository
 
     def execute(
         self,
@@ -50,7 +49,7 @@ class ListUnfolderedAnalysesUseCase:
         normalized_limit = Integer.create(limit)
         normalized_is_archived = Logical.create(is_archived)
 
-        analyses = self._analisyses_repository.find_many(
+        analyses = self._analyses_repository.find_many(
             account_id=normalized_account_id,
             search=normalized_search,
             cursor=normalized_cursor,

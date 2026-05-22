@@ -68,7 +68,7 @@ class TestUpdateAnalysisStatusController:
         assert response.status_code == 403
         assert response.json() == {
             'title': 'Erro de acesso negado',
-            'message': 'Analise nao pertence a conta autenticada',
+            'message': 'Análise nao pertence a conta autenticada',
         }
 
     def test_should_return_400_when_status_is_invalid(
@@ -90,8 +90,5 @@ class TestUpdateAnalysisStatusController:
         assert response.status_code == 400
         assert response.json() == {
             'title': 'Erro de validação',
-            'message': (
-                'Status de analise invalido para analise de case assessment '
-                'ou primeira instancia: invalid_status'
-            ),
+            'message': 'Status de analise first instance invalido: invalid_status',
         }

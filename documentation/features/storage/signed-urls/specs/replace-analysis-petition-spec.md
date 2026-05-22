@@ -1,5 +1,5 @@
 ---
-title: Substituicao de Peticao Vinculada a Analise
+title: Substituicao de Peticao Vinculada a Análise
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/CID5
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-61
 status: closed
@@ -8,7 +8,7 @@ last_updated_at: 2026-04-02
 
 # 1. Objetivo
 
-Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a uma `Analysis` substitua corretamente a anterior no banco e no storage. Tecnicamente, a entrega deve manter os contratos HTTP atuais, remover a `Petition` anterior e seu `PetitionSummary` associado, publicar `PetitionReplacedEvent` para limpeza assincrona do arquivo antigo no GCS, expor endpoints de consulta da peticao e do resumo e atualizar o `Analysis.status` para `PETITION_UPLOADED` apos a persistencia.
+Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a uma `Analysis` substitua corretamente a anterior no banco e no storage. Tecnicamente, a entrega deve manter os contratos HTTP atuais, remover a `Petition` anterior e seu `PetitionSummary` associado, publicar `PetitionReplacedEvent` para limpeza assincrona do arquivo antigo no GCS, expor endpoints de consulta da petição e do resumo e atualizar o `Analysis.status` para `PETITION_UPLOADED` apos a persistencia.
 
 ---
 
@@ -16,15 +16,15 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 
 ## 2.1 In-scope
 
-- Ajustar `CreatePetitionUseCase` para tratar substituicao de peticao na mesma analise.
-- Publicar `PetitionReplacedEvent` quando ja existir uma peticao para a `Analysis`.
+- Ajustar `CreatePetitionUseCase` para tratar substituicao de petição na mesma analise.
+- Publicar `PetitionReplacedEvent` quando ja existir uma petição para a `Analysis`.
 - Remover a `Petition` anterior do banco de modo que o `PetitionSummary` relacionado seja removido junto.
 - Criar job Inngest no contexto `intake` para excluir o arquivo antigo via `FileStorageProvider`.
 - Completar o adaptador `GcsFileStorageProvider` com remocao fisica de arquivos.
-- Atualizar `Analysis.status` para `PETITION_UPLOADED` no fluxo de criacao/substituicao de peticao.
+- Atualizar `Analysis.status` para `PETITION_UPLOADED` no fluxo de criacao/substituicao de petição.
 - Adicionar endpoint para buscar `Petition` por `analysis_id`.
 - Adicionar endpoint para buscar `PetitionSummary` por `petition_id`.
-- Manter o endpoint atual de criacao de peticao (`POST /intake/petitions`) como ponto de persistencia da nova peticao apos o upload via Signed URL.
+- Manter o endpoint atual de criacao de petição (`POST /intake/petitions`) como ponto de persistencia da nova petição apos o upload via Signed URL.
 
 ## 2.2 Out-of-scope
 
@@ -40,22 +40,22 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 
 ## 3.1 Funcionais
 
-- Ao persistir uma nova `Petition` para uma `Analysis` que ja possui uma peticao, o sistema deve substituir a anterior.
+- Ao persistir uma nova `Petition` para uma `Analysis` que ja possui uma petição, o sistema deve substituir a anterior.
 - A substituicao deve publicar `PetitionReplacedEvent` com o `petition_document_path` do arquivo anterior.
 - A `Petition` anterior deve ser removida do repositorio antes da persistencia da nova.
-- O `PetitionSummary` associado a peticao removida deve deixar de existir apos a substituicao.
-- O endpoint de criacao de peticao deve continuar validando ownership da `Analysis` pela conta autenticada.
-- Apos criar/substituir a peticao, o sistema deve atualizar `Analysis.status` para `PETITION_UPLOADED`.
-- A resposta de `CreatePetitionUseCase.execute(analysis_id: str, uploaded_at: str, document: PetitionDocumentDto) -> PetitionDto` deve continuar retornando a nova peticao persistida.
+- O `PetitionSummary` associado a petição removida deve deixar de existir apos a substituicao.
+- O endpoint de criacao de petição deve continuar validando ownership da `Analysis` pela conta autenticada.
+- Apos criar/substituir a petição, o sistema deve atualizar `Analysis.status` para `PETITION_UPLOADED`.
+- A resposta de `CreatePetitionUseCase.execute(analysis_id: str, uploaded_at: str, document: PetitionDocumentDto) -> PetitionDto` deve continuar retornando a nova petição persistida.
 - O sistema deve expor `GET /intake/analyses/{analysis_id}/petition` para retornar a `PetitionDto` atual da analise autenticada.
-- O sistema deve expor `GET /intake/petitions/{petition_id}/summary` para retornar a `PetitionSummaryDto` da peticao autenticada.
+- O sistema deve expor `GET /intake/petitions/{petition_id}/summary` para retornar a `PetitionSummaryDto` da petição autenticada.
 
 ## 3.2 Nao funcionais
 
 - **Seguranca:** a substituicao continua condicionada a ownership validado por `IntakePipe.verify_analysis_by_account_from_request(...)`.
 - **Idempotencia:** o job `RemovePetitionDocumentFileJob` deve ser seguro em reexecucoes; a remocao do blob no GCS deve tratar arquivo inexistente como no-op.
-- **Resiliencia:** a exclusao do arquivo antigo deve ocorrer assincronamente para nao bloquear a resposta do endpoint de persistencia da nova peticao.
-- **Compatibilidade retroativa:** nao deve haver mudanca de payload ou `response_model` nos endpoints existentes de upload e criacao de peticao.
+- **Resiliencia:** a exclusao do arquivo antigo deve ocorrer assincronamente para nao bloquear a resposta do endpoint de persistencia da nova petição.
+- **Compatibilidade retroativa:** nao deve haver mudanca de payload ou `response_model` nos endpoints existentes de upload e criacao de petição.
 
 ---
 
@@ -65,7 +65,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 
 - **`CreatePetitionUseCase`** (`src/animus/core/intake/use_cases/create_petition_use_case.py`) — use case atual que cria e adiciona uma `Petition`; sera estendido para tratar substituicao e atualizacao de status da analise.
 - **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) — port atual de persistencia de peticoes; ainda nao possui lookup direto por `analysis_id` nem remocao.
-- **`PetitionReplacedEvent`** (`src/animus/core/intake/domain/events/petition_replaced_event.py`) — evento de dominio ja existente para sinalizar substituicao do arquivo da peticao.
+- **`PetitionReplacedEvent`** (`src/animus/core/intake/domain/events/petition_replaced_event.py`) — evento de dominio ja existente para sinalizar substituicao do arquivo da petição.
 - **`RequestAnalysisPrecedentsSearchUseCase`** (`src/animus/core/intake/use_cases/request_analysis_precedents_search_use_case.py`) — referencia de publicacao de eventos via `Broker` a partir de use case.
 - **`ListAnalysisPetitionsUseCase`** (`src/animus/core/intake/use_cases/list_analysis_petitions_use_case.py`) — referencia de leitura orientada a `UseCase` no contexto `intake` para endpoints `GET`.
 
@@ -80,7 +80,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 
 - **`CreatePetitionController`** (`src/animus/rest/controllers/intake/create_petition_controller.py`) — endpoint `POST /intake/petitions`; hoje valida ownership e chama `CreatePetitionUseCase` sem `Broker`.
 - **`ListAnalysisPetitionsController`** (`src/animus/rest/controllers/intake/list_analysis_petitions_controller.py`) — referencia de controller `GET` com guard de ownership da analise.
-- **`GeneratePetitionUploadUrlController`** (`src/animus/rest/controllers/storage/generate_petition_upload_url_controller.py`) — endpoint que gera o path unico de upload no storage; serve como entrada anterior ao `POST /intake/petitions`.
+- **`GenerateAnalysisDocumentUploadUrlController`** (`src/animus/rest/controllers/storage/generate_petition_upload_url_controller.py`) — endpoint que gera o path unico de upload no storage; serve como entrada anterior ao `POST /intake/petitions`.
 
 ## Routers
 
@@ -89,10 +89,10 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 
 ## Pipes
 
-- **`IntakePipe.verify_analysis_by_account_from_request`** (`src/animus/pipes/intake_pipe.py`) — guard de ownership reutilizado pelo fluxo de criacao de peticao.
+- **`IntakePipe.verify_analysis_by_account_from_request`** (`src/animus/pipes/intake_pipe.py`) — guard de ownership reutilizado pelo fluxo de criacao de petição.
 - **`IntakePipe.verify_petition_document_path_by_account`** (`src/animus/pipes/intake_pipe.py`) — referencia de validacao por `petition_id` no contexto `intake`.
 - **`DatabasePipe.get_petitions_repository_from_request`** (`src/animus/pipes/database_pipe.py`) — provider atual do repositorio de peticoes.
-- **`PubSubPipe.get_broker_from_request`** (`src/animus/pipes/pubsub_pipe.py`) — provider atual de `Broker`; ainda nao e consumido no controller de criacao de peticao.
+- **`PubSubPipe.get_broker_from_request`** (`src/animus/pipes/pubsub_pipe.py`) — provider atual de `Broker`; ainda nao e consumido no controller de criacao de petição.
 
 ## Providers
 
@@ -123,12 +123,12 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_analysis_petition_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `PetitionsRepository`
-- **Metodo principal:** `execute(analysis_id: str) -> PetitionDto` — busca a peticao atual da analise e retorna seu DTO; lanca `PetitionNotFoundError` se a analise nao tiver peticao persistida.
+- **Metodo principal:** `execute(analysis_id: str) -> PetitionDto` — busca a petição atual da analise e retorna seu DTO; lanca `PetitionNotFoundError` se a analise nao tiver petição persistida.
 - **Fluxo resumido:** converter `analysis_id` para `Id` -> buscar `PetitionsRepository.find_by_analysis_id(...)` -> retornar `petition.dto`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/get_petition_summary_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `PetitionSummariesRepository`
-- **Metodo principal:** `execute(petition_id: str) -> PetitionSummaryDto` — busca o summary da peticao e retorna seu DTO; lanca `PetitionSummaryUnavailableError` se nao existir resumo para a peticao.
+- **Metodo principal:** `execute(petition_id: str) -> PetitionSummaryDto` — busca o summary da petição e retorna seu DTO; lanca `PetitionSummaryUnavailableError` se nao existir resumo para a petição.
 - **Fluxo resumido:** converter `petition_id` para `Id` -> buscar `PetitionSummariesRepository.find_by_petition_id(...)` -> retornar `petition_summary.dto`.
 
 ## Camada REST (Controllers)
@@ -144,7 +144,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 - **Metodo HTTP e path:** `GET /intake/petitions/{petition_id}/summary`
 - **`status_code`:** `200`
 - **`response_model`:** `PetitionSummaryDto`
-- **Dependencias injetadas via `Depends`:** guard por ownership da peticao e `PetitionSummariesRepository`
+- **Dependencias injetadas via `Depends`:** guard por ownership da petição e `PetitionSummariesRepository`
 - **Fluxo:** `petition_id` -> `GetPetitionSummaryUseCase.execute()` -> resposta.
 
 ---
@@ -154,12 +154,12 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## Core
 
 - **Arquivo:** `src/animus/core/intake/use_cases/create_petition_use_case.py`
-- **Mudanca:** estender o construtor para receber `analisyses_repository: AnalisysesRepository` e `broker: Broker` alem de `petitions_repository: PetitionsRepository`; no `execute(analysis_id: str, uploaded_at: str, document: PetitionDocumentDto) -> PetitionDto`, buscar peticao existente da mesma analise, publicar `PetitionReplacedEvent`, remover a peticao anterior, atualizar a `Analysis` para `PETITION_UPLOADED` e entao adicionar a nova.
+- **Mudanca:** estender o construtor para receber `analyses_repository: AnalysesRepository` e `broker: Broker` alem de `petitions_repository: PetitionsRepository`; no `execute(analysis_id: str, uploaded_at: str, document: PetitionDocumentDto) -> PetitionDto`, buscar petição existente da mesma analise, publicar `PetitionReplacedEvent`, remover a petição anterior, atualizar a `Analysis` para `PETITION_UPLOADED` e entao adicionar a nova.
 - **Justificativa:** o use case e o ponto correto para orquestrar a regra de substituicao mantendo o `core` independente de HTTP e infraestrutura.
 
 - **Arquivo:** `src/animus/core/intake/interfaces/petitions_repository.py`
 - **Mudanca:** adicionar os contratos `find_by_analysis_id(analysis_id: Id) -> Petition | None` e `remove(petition_id: Id) -> None`.
-- **Justificativa:** o use case precisa consultar e remover a peticao atual sem depender de detalhes de SQLAlchemy.
+- **Justificativa:** o use case precisa consultar e remover a petição atual sem depender de detalhes de SQLAlchemy.
 
 - **Arquivo:** `src/animus/core/intake/domain/events/__init__.py`
 - **Mudanca:** exportar `PetitionReplacedEvent` em `__all__`.
@@ -178,7 +178,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## REST
 
 - **Arquivo:** `src/animus/rest/controllers/intake/create_petition_controller.py`
-- **Mudanca:** injetar `broker: Broker` via `Depends(PubSubPipe.get_broker_from_request)` e instanciar `CreatePetitionUseCase` com `petitions_repository`, `analisyses_repository` e `broker`, sem alterar o `*Body` nem o `response_model`.
+- **Mudanca:** injetar `broker: Broker` via `Depends(PubSubPipe.get_broker_from_request)` e instanciar `CreatePetitionUseCase` com `petitions_repository`, `analyses_repository` e `broker`, sem alterar o `*Body` nem o `response_model`.
 - **Justificativa:** o controller continua fino e passa a fornecer ao use case a dependencia necessaria para publicacao do evento e atualizacao de status da analise.
 
 - **Arquivo:** `src/animus/rest/controllers/intake/__init__.py`
@@ -219,22 +219,22 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 
 - **Decisao:** tratar a substituicao dentro de `CreatePetitionUseCase`.
 - **Alternativas consideradas:** criar um novo `ReplacePetitionUseCase`; mover a logica para `CreatePetitionController`.
-- **Motivo da escolha:** a substituicao e uma extensao direta da regra de criacao de peticao e depende de orquestracao de dominio, nao de transporte.
+- **Motivo da escolha:** a substituicao e uma extensao direta da regra de criacao de petição e depende de orquestracao de dominio, nao de transporte.
 - **Impactos / trade-offs:** aumenta a responsabilidade do caso de uso atual, mas evita duplicacao de contrato HTTP e mantem o fluxo centrado no `core`.
 
 - **Decisao:** criar `GetAnalysisPetitionUseCase` e `GetPetitionSummaryUseCase` para os novos endpoints de leitura.
-- **Alternativas consideradas:** consultar repositorios diretamente nos controllers; reaproveitar `ListAnalysisPetitionsUseCase` para derivar a peticao atual.
+- **Alternativas consideradas:** consultar repositorios diretamente nos controllers; reaproveitar `ListAnalysisPetitionsUseCase` para derivar a petição atual.
 - **Motivo da escolha:** os controllers do projeto seguem o padrao de delegar ao `core`, e o endpoint singular deve expressar um contrato de leitura direto, sem acoplar a borda a detalhes de colecao.
 - **Impactos / trade-offs:** adiciona dois casos de uso pequenos, mas preserva consistencia arquitetural.
 
 - **Decisao:** expor o summary por `petition_id`, nao por `analysis_id`.
 - **Alternativas consideradas:** `GET /intake/analyses/{analysis_id}/petition-summary` com guard por analise.
-- **Motivo da escolha:** o recurso persistido e indexado naturalmente pela peticao, e o projeto ja possui base para validar ownership por `petition_id`.
-- **Impactos / trade-offs:** exige guard dedicado por peticao, mas evita ambiguidades quando houver historico de substituicoes.
+- **Motivo da escolha:** o recurso persistido e indexado naturalmente pela petição, e o projeto ja possui base para validar ownership por `petition_id`.
+- **Impactos / trade-offs:** exige guard dedicado por petição, mas evita ambiguidades quando houver historico de substituicoes.
 
 - **Decisao:** adicionar `find_by_analysis_id(...)` e `remove(...)` em `PetitionsRepository`, sem criar `remove(...)` em `PetitionSummariesRepository`.
-- **Alternativas consideradas:** remover `PetitionSummary` explicitamente por um novo metodo no repositorio de summaries; usar listagem ordenada existente para localizar a peticao atual.
-- **Motivo da escolha:** `PetitionModel` ja possui relacao com `cascade='all, delete-orphan'`; usar delecao ORM da peticao e o menor ajuste consistente com a modelagem atual.
+- **Alternativas consideradas:** remover `PetitionSummary` explicitamente por um novo metodo no repositorio de summaries; usar listagem ordenada existente para localizar a petição atual.
+- **Motivo da escolha:** `PetitionModel` ja possui relacao com `cascade='all, delete-orphan'`; usar delecao ORM da petição e o menor ajuste consistente com a modelagem atual.
 - **Impactos / trade-offs:** a implementacao concreta precisa evitar bulk delete para preservar o cascade ORM.
 
 - **Decisao:** fazer a remocao do arquivo antigo de forma assincrona por `PetitionReplacedEvent` + job Inngest no modulo `intake`.
@@ -242,10 +242,10 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 - **Motivo da escolha:** o fluxo de replace esta sendo entregue no contexto `intake` e o job ja foi registrado nesse modulo na implementacao atual.
 - **Impactos / trade-offs:** o evento e a reacao ficam agrupados no mesmo contexto de entrega, mesmo tratando um efeito colateral de storage.
 
-- **Decisao:** atualizar apenas `Analysis.status` para `PETITION_UPLOADED` e preservar `analysis_precedents` ao substituir a peticao.
+- **Decisao:** atualizar apenas `Analysis.status` para `PETITION_UPLOADED` e preservar `analysis_precedents` ao substituir a petição.
 - **Alternativas consideradas:** manter status inalterado; resetar status para um estado inicial; limpar precedentes e sinteses geradas.
-- **Motivo da escolha:** o status deve refletir que existe peticao atual persistida sem ampliar escopo para reprocessamento dos dados derivados.
-- **Impactos / trade-offs:** melhora a semantica de estado da analise, mantendo o risco conhecido de dados derivados representarem peticao anterior fora do escopo desta entrega.
+- **Motivo da escolha:** o status deve refletir que existe petição atual persistida sem ampliar escopo para reprocessamento dos dados derivados.
+- **Impactos / trade-offs:** melhora a semantica de estado da analise, mantendo o risco conhecido de dados derivados representarem petição anterior fora do escopo desta entrega.
 
 ---
 
@@ -265,8 +265,8 @@ HTTP POST /intake/petitions
          -> PetitionsRepository.remove(old_petition_id)
             -> SQLAlchemy session.delete(PetitionModel)
             -> ORM cascade remove PetitionSummaryModel
-      -> AnalisysesRepository.find_by_id(analysis_id)
-      -> AnalisysesRepository.replace(analysis.status = PETITION_UPLOADED)
+      -> AnalysesRepository.find_by_id(analysis_id)
+      -> AnalysesRepository.replace(analysis.status = PETITION_UPLOADED)
       -> PetitionsRepository.add(new_petition)
   -> Response 201 PetitionDto
 ```
@@ -313,7 +313,7 @@ CreatePetitionUseCase
 - `src/animus/database/sqlalchemy/models/intake/petition_model.py` — evidencia do cascade ORM entre `Petition` e `PetitionSummary`.
 - `src/animus/rest/controllers/intake/create_petition_controller.py` — endpoint que aciona o caso de uso de criacao/substituicao.
 - `src/animus/rest/controllers/intake/list_analysis_petitions_controller.py` — referencia de controller `GET` com guard de ownership da analise.
-- `src/animus/rest/controllers/storage/generate_petition_upload_url_controller.py` — etapa anterior do fluxo de upload com path unico para a nova peticao.
+- `src/animus/rest/controllers/storage/generate_petition_upload_url_controller.py` — etapa anterior do fluxo de upload com path unico para a nova petição.
 
 ---
 

@@ -22,7 +22,7 @@ from animus.core.intake.interfaces.analysis_documents_repository import (
 from animus.core.intake.interfaces.analysis_precedents_repository import (
     AnalysisPrecedentsRepository,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
@@ -36,13 +36,13 @@ from animus.core.shared.domain.structures import Id
 class GetCaseAssessmentAnalysisReportUseCase:
     def __init__(
         self,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
         analysis_documents_repository: AnalysisDocumentsRepository,
         case_summaries_repository: CaseSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
         petition_drafts_repository: PetitionDraftsRepository,
     ) -> None:
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
         self._analysis_documents_repository = analysis_documents_repository
         self._case_summaries_repository = case_summaries_repository
         self._analysis_precedents_repository = analysis_precedents_repository
@@ -54,7 +54,7 @@ class GetCaseAssessmentAnalysisReportUseCase:
         id_analysis = Id.create(analysis_id)
         id_account = Id.create(account_id)
 
-        analysis = self._analisyses_repository.find_by_id(id_analysis)
+        analysis = self._analyses_repository.find_by_id(id_analysis)
 
         if analysis is None:
             raise AnalysisNotFoundError

@@ -5,7 +5,7 @@ import pytest
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.use_cases.unarchive_analysis_use_case import (
     UnarchiveAnalysisUseCase,
 )
@@ -16,12 +16,12 @@ from animus.fakers.intake.entities.analyses_faker import AnalysesFaker
 class TestUnarchiveAnalysisUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.analisyses_repository_mock = create_autospec(
-            AnalisysesRepository,
+        self.analyses_repository_mock = create_autospec(
+            AnalysesRepository,
             instance=True,
         )
         self.use_case = UnarchiveAnalysisUseCase(
-            analisyses_repository=self.analisyses_repository_mock,
+            analyses_repository=self.analyses_repository_mock,
         )
 
     def test_should_unarchive_analysis_and_persist_it(self) -> None:
@@ -32,17 +32,17 @@ class TestUnarchiveAnalysisUseCase:
             account_id=account_id,
             is_archived=True,
         )
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(
             account_id=account_id,
             analysis_id=analysis_id,
         )
 
-        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+        self.analyses_repository_mock.find_by_id.assert_called_once_with(
             Id.create(analysis_id)
         )
-        self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
+        self.analyses_repository_mock.replace.assert_called_once_with(analysis)
         assert result.is_archived is False
 
     def test_should_keep_unarchive_idempotent_when_analysis_is_already_unarchived(
@@ -55,24 +55,24 @@ class TestUnarchiveAnalysisUseCase:
             account_id=account_id,
             is_archived=False,
         )
-        self.analisyses_repository_mock.find_by_id.return_value = analysis
+        self.analyses_repository_mock.find_by_id.return_value = analysis
 
         result = self.use_case.execute(
             account_id=account_id,
             analysis_id=analysis_id,
         )
 
-        self.analisyses_repository_mock.find_by_id.assert_called_once_with(
+        self.analyses_repository_mock.find_by_id.assert_called_once_with(
             Id.create(analysis_id)
         )
-        self.analisyses_repository_mock.replace.assert_called_once_with(analysis)
+        self.analyses_repository_mock.replace.assert_called_once_with(analysis)
         assert result.is_archived is False
 
     def test_should_raise_analysis_not_found_error_when_analysis_belongs_to_another_account(
         self,
     ) -> None:
         analysis_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
-        self.analisyses_repository_mock.find_by_id.return_value = AnalysesFaker.fake(
+        self.analyses_repository_mock.find_by_id.return_value = AnalysesFaker.fake(
             analysis_id=analysis_id,
             account_id='01BX5ZZKBKACTAV9WEVGEMMVS0',
         )
@@ -83,4 +83,4 @@ class TestUnarchiveAnalysisUseCase:
                 analysis_id=analysis_id,
             )
 
-        self.analisyses_repository_mock.replace.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()

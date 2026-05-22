@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 from inngest import Context, Inngest, TriggerEvent
 
-from animus.core.intake.domain.entities.analysis_status import AnalysisStatusValue
 from animus.core.intake.domain.events import (
     PrecedentsSearchFinishedEvent,
     AnalysisPrecedentsSearchRequestedEvent,
@@ -19,7 +18,7 @@ from animus.core.intake.use_cases import (
     UpdateAnalysisStatusUseCase,
 )
 from animus.database.sqlalchemy.repositories.intake import (
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
     SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemyPrecedentsRepository,
@@ -186,12 +185,12 @@ class SearchAnalysisPrecedentsJob(InngestJob):
         payload: _Payload,
     ) -> list[dict[str, Any]]:
         with Sqlalchemy.session() as session:
-            analisyses_repository = SqlalchemyAnalisysesRepository(session)
+            analyses_repository = SqlalchemyAnalysesRepository(session)
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             precedents_repository = SqlalchemyPrecedentsRepository(session)
-            UpdateAnalysisStatusUseCase(analisyses_repository).execute(
+            UpdateAnalysisStatusUseCase(analyses_repository).execute(
                 analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.SEARCHING_PRECEDENTS.value,
+                status='SEARCHING_PRECEDENTS',
             )
             session.commit()
 
@@ -224,7 +223,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def _get_analysis_account_id_sync(payload: _Payload) -> str:
         with Sqlalchemy.session() as session:
-            analysis = SqlalchemyAnalisysesRepository(session).find_by_id(
+            analysis = SqlalchemyAnalysesRepository(session).find_by_id(
                 Id.create(payload.analysis_id)
             )
             if analysis is None:
@@ -247,11 +246,9 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def _mark_analysis_as_analyzing_similarity_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
-            UpdateAnalysisStatusUseCase(
-                SqlalchemyAnalisysesRepository(session)
-            ).execute(
+            UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.ANALYZING_PRECEDENTS_SIMILARITY.value,
+                status='ANALYZING_PRECEDENTS_SIMILARITY',
             )
             session.commit()
 
@@ -277,15 +274,15 @@ class SearchAnalysisPrecedentsJob(InngestJob):
         from animus.pipes.ai_pipe import AiPipe
 
         with Sqlalchemy.session() as session:
-            analisyses_repository = SqlalchemyAnalisysesRepository(session)
+            analyses_repository = SqlalchemyAnalysesRepository(session)
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
                 session
             )
 
-            UpdateAnalysisStatusUseCase(analisyses_repository).execute(
+            UpdateAnalysisStatusUseCase(analyses_repository).execute(
                 analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.GENERATING_SYNTHESIS.value,
+                status='GENERATING_SYNTHESIS',
             )
             session.commit()
 
@@ -295,7 +292,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                     case_summaries_repository,
                 ),
                 analysis_precedents_repository=analysis_precedents_repository,
-                analisyses_repository=analisyses_repository,
+                analyses_repository=analyses_repository,
             )
 
             workflow.run(
@@ -319,11 +316,9 @@ class SearchAnalysisPrecedentsJob(InngestJob):
     @staticmethod
     def _mark_analysis_as_failed_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
-            UpdateAnalysisStatusUseCase(
-                SqlalchemyAnalisysesRepository(session)
-            ).execute(
+            UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=payload.analysis_id,
-                status=AnalysisStatusValue.FAILED.value,
+                status='FAILED',
             )
             session.commit()
 

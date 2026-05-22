@@ -33,6 +33,7 @@ class AnalysisPrecedent(Structure):
     similarity_score: Decimal | None
     applicability_level: AnalysisPrecedentApplicabilityLevel
     legal_features: AnalysiesPrecedentLegalFeatures | None
+    is_manually_added: Logical
 
     @classmethod
     def create(cls, dto: AnalysisPrecedentDto) -> 'AnalysisPrecedent':
@@ -63,6 +64,7 @@ class AnalysisPrecedent(Structure):
                 if dto.legal_features is not None
                 else None
             ),
+            is_manually_added=Logical.create(dto.is_manually_added),
         )
 
     @property
@@ -86,4 +88,5 @@ class AnalysisPrecedent(Structure):
             legal_features=(
                 self.legal_features.dto if self.legal_features is not None else None
             ),
+            is_manually_added=self.is_manually_added.value,
         )

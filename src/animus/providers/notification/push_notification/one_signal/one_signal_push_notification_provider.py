@@ -11,7 +11,7 @@ class OneSignalPushNotificationProvider(PushNotificationProvider):
         recipient_id: Id,
         analysis_id: Id,
     ) -> None:
-        title = 'Analise de petição concluida'
+        title = 'Análise de petição concluida'
         body = 'O resumo da sua petição ja esta disponivel.'
         data = {
             'type': 'case_summary_finished',

@@ -1,0 +1,64 @@
+from animus.core.intake.domain.entities.dtos import AnalysisStatusDto
+from animus.core.intake.domain.errors.analysis_not_found_error import (
+    AnalysisNotFoundError,
+)
+from animus.core.intake.domain.errors.precedent_not_found_error import (
+    PrecedentNotFoundError,
+)
+from animus.core.intake.domain.structures.dtos import PrecedentIdentifierDto
+from animus.core.intake.domain.structures.precedent_identifier import (
+    PrecedentIdentifier,
+)
+from animus.core.intake.interfaces import (
+    AnalysisPrecedentsRepository,
+    AnalysesRepository,
+)
+from animus.core.shared.domain.structures import Id
+
+
+class UnchooseAnalysisPrecedentUseCase:
+    def __init__(
+        self,
+        analysis_precedents_repository: AnalysisPrecedentsRepository,
+        analyses_repository: AnalysesRepository,
+    ) -> None:
+        self._analysis_precedents_repository = analysis_precedents_repository
+        self._analyses_repository = analyses_repository
+
+    def execute(
+        self,
+        analysis_id: str,
+        precedent_identifier_dto: PrecedentIdentifierDto,
+    ) -> AnalysisStatusDto:
+        analysis_id_entity = Id.create(analysis_id)
+        precedent_identifier = PrecedentIdentifier.create(precedent_identifier_dto)
+        analysis_precedents = (
+            self._analysis_precedents_repository.find_many_by_analysis_id(
+                analysis_id=analysis_id_entity,
+            )
+        )
+
+        analysis_precedent = next(
+            (
+                item
+                for item in analysis_precedents.items
+                if item.precedent.identifier == precedent_identifier
+            ),
+            None,
+        )
+
+        if analysis_precedent is None:
+            raise PrecedentNotFoundError
+
+        self._analysis_precedents_repository.unchoose_by_analysis_id_and_precedent_id(
+            analysis_id=analysis_id_entity,
+            precedent_id=analysis_precedent.precedent.id,
+        )
+
+        analysis = self._analyses_repository.find_by_id(analysis_id_entity)
+        if analysis is None:
+            raise AnalysisNotFoundError
+
+        self._analyses_repository.replace(analysis)
+
+        return AnalysisStatusDto(value=analysis.status.dto)

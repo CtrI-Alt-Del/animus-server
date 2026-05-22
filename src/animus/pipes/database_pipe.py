@@ -10,7 +10,7 @@ from animus.core.intake.interfaces.analysis_precedents_repository import (
 from animus.core.intake.interfaces.analysis_documents_repository import (
     AnalysisDocumentsRepository,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
@@ -18,7 +18,7 @@ from animus.core.intake.interfaces.extracted_petitions_repository import (
     ExtractedPetitionsRepository,
 )
 from animus.core.intake.interfaces.judgment_drafts_repository import (
-    JudgmentDraftsRepository,
+    SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
@@ -27,18 +27,20 @@ from animus.core.intake.interfaces.petition_drafts_repository import (
     PetitionDraftsRepository,
 )
 from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
+from animus.core.intake.interfaces.precedents_repository import PrecedentsRepository
 from animus.core.library.interfaces import FoldersRepository
 from animus.database.sqlalchemy.repositories.auth import SqlalchemyAccountsRepository
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisDocumentsRepository,
     SqlalchemyAnalysisPrecedentsRepository,
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemyExtractedPetitionsRepository,
-    SqlalchemyJudgmentDraftsRepository,
+    SqlalchemySecondInstanceJudgmentDraftsRepository,
     SqlalchemyPetitionDraftsRepository,
     SqlalchemyPetitionSummariesRepository,
     SqlalchemyPetitionsRepository,
+    SqlalchemyPrecedentsRepository,
 )
 from animus.database.sqlalchemy.repositories.library import SqlalchemyFoldersRepository
 
@@ -93,20 +95,26 @@ class DatabasePipe:
     @staticmethod
     def get_judgment_drafts_repository_from_request(
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
-    ) -> JudgmentDraftsRepository:
-        return SqlalchemyJudgmentDraftsRepository(sqlalchemy)
+    ) -> SecondInstanceJudgmentDraftsRepository:
+        return SqlalchemySecondInstanceJudgmentDraftsRepository(sqlalchemy)
 
     @staticmethod
-    def get_analisyses_repository_from_request(
+    def get_analyses_repository_from_request(
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
-    ) -> AnalisysesRepository:
-        return SqlalchemyAnalisysesRepository(sqlalchemy)
+    ) -> AnalysesRepository:
+        return SqlalchemyAnalysesRepository(sqlalchemy)
 
     @staticmethod
     def get_analysis_precedents_repository_from_request(
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
     ) -> AnalysisPrecedentsRepository:
         return SqlalchemyAnalysisPrecedentsRepository(sqlalchemy)
+
+    @staticmethod
+    def get_precedents_repository_from_request(
+        sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
+    ) -> PrecedentsRepository:
+        return SqlalchemyPrecedentsRepository(sqlalchemy)
 
     @staticmethod
     def get_folders_repository_from_request(

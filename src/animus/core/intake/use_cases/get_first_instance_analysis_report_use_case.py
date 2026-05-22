@@ -8,7 +8,7 @@ from animus.core.intake.domain.errors.case_summary_unavailable_error import (
     CaseSummaryUnavailableError,
 )
 from animus.core.intake.domain.errors.judgment_draft_unavailable_error import (
-    JudgmentDraftUnavailableError,
+    SecondInstanceJudgmentDraftUnavailableError,
 )
 from animus.core.intake.domain.structures.dtos.first_instance_analysis_report_dto import (
     FirstInstanceAnalysisReportDto,
@@ -22,12 +22,12 @@ from animus.core.intake.interfaces.analysis_documents_repository import (
 from animus.core.intake.interfaces.analysis_precedents_repository import (
     AnalysisPrecedentsRepository,
 )
-from animus.core.intake.interfaces.analisyses_repository import AnalisysesRepository
+from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
 from animus.core.intake.interfaces.judgment_drafts_repository import (
-    JudgmentDraftsRepository,
+    SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.shared.domain.errors.forbidden_error import ForbiddenError
 from animus.core.shared.domain.structures import Id
@@ -36,13 +36,13 @@ from animus.core.shared.domain.structures import Id
 class GetFirstInstanceAnalysisReportUseCase:
     def __init__(
         self,
-        analisyses_repository: AnalisysesRepository,
+        analyses_repository: AnalysesRepository,
         analysis_documents_repository: AnalysisDocumentsRepository,
         case_summaries_repository: CaseSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
-        judgment_drafts_repository: JudgmentDraftsRepository,
+        judgment_drafts_repository: SecondInstanceJudgmentDraftsRepository,
     ) -> None:
-        self._analisyses_repository = analisyses_repository
+        self._analyses_repository = analyses_repository
         self._analysis_documents_repository = analysis_documents_repository
         self._case_summaries_repository = case_summaries_repository
         self._analysis_precedents_repository = analysis_precedents_repository
@@ -54,7 +54,7 @@ class GetFirstInstanceAnalysisReportUseCase:
         id_analysis = Id.create(analysis_id)
         id_account = Id.create(account_id)
 
-        analysis = self._analisyses_repository.find_by_id(id_analysis)
+        analysis = self._analyses_repository.find_by_id(id_analysis)
 
         if analysis is None:
             raise AnalysisNotFoundError
@@ -74,7 +74,7 @@ class GetFirstInstanceAnalysisReportUseCase:
             id_analysis
         )
         if judgment_draft is None:
-            raise JudgmentDraftUnavailableError
+            raise SecondInstanceJudgmentDraftUnavailableError
 
         precedents = self._analysis_precedents_repository.find_many_by_analysis_id(
             id_analysis

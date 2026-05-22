@@ -8,7 +8,7 @@ O Animus Server sustenta os principais fluxos do produto:
 
 - **Auth e identidade:** cadastro, login, gestao de perfil e recuperacao de senha.
 - **Intake juridico:** upload de peticoes em PDF ou DOCX para extracao, resumacao e analise de precedentes com IA.
-- **Analise de precedentes:** classificacao de aplicabilidade, sintese explicativa e apoio a decisao processual.
+- **Análise de precedentes:** classificacao de aplicabilidade, sintese explicativa e apoio a decisao processual.
 - **Storage e historico:** persistencia, organizacao, consulta e exportacao de analises anteriores.
 - **Notificacoes assicronas:** eventos de conclusao de analise e outros fluxos desacoplados.
 
@@ -323,7 +323,7 @@ southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
 Com base na documentacao funcional, os modulos centrais do produto sao:
 
 - **Auth:** identidade do usuario, login com email/senha ou Google, perfil e recuperacao de senha.
-- **Intake:** recebimento da peticao inicial, extracao de informacoes e busca de precedentes juridicos relevantes.
+- **Intake:** recebimento da petição inicial, extracao de informacoes e busca de precedentes juridicos relevantes.
 - **Storage:** historico, organizacao em pastas, nomeacao e exportacao das analises.
 - **Notification:** comunicacao assincrona quando uma analise e concluida ou um relatorio e gerado.
 

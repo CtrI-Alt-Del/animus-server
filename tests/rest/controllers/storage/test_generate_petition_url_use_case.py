@@ -9,16 +9,16 @@ from animus.core.storage.interfaces.file_storage_provider import FileStorageProv
 from animus.pipes.intake_pipe import IntakePipe
 from animus.pipes.providers_pipe import ProvidersPipe
 from animus.rest.controllers.storage.generate_petition_upload_url_controller import (
-    GeneratePetitionUploadUrlController,
+    GenerateAnalysisDocumentUploadUrlController,
 )
 
 
-class TestGeneratePetitionUploadUrlController:
+class TestGenerateAnalysisDocumentUploadUrlController:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
         self.app = FastAPI()
         self.router = APIRouter()
-        GeneratePetitionUploadUrlController.handle(self.router)
+        GenerateAnalysisDocumentUploadUrlController.handle(self.router)
         self.app.include_router(self.router, prefix='/storage')
 
         self.client = TestClient(self.app)
@@ -52,7 +52,7 @@ class TestGeneratePetitionUploadUrlController:
         )
 
         response = self.client.post(
-            f'/storage/analyses/{analysis_id}/petitions/upload?document_type={document_type}'
+            f'/storage/analyses/{analysis_id}/documents?document_type={document_type}'
         )
 
         assert response.status_code == 201
@@ -64,7 +64,7 @@ class TestGeneratePetitionUploadUrlController:
 
     def test_should_return_422_when_document_type_is_invalid(self) -> None:
         response = self.client.post(
-            '/storage/analyses/fake-analysis-123/petitions/upload?document_type=txt'
+            '/storage/analyses/fake-analysis-123/documents?document_type=txt'
         )
 
         assert response.status_code == 422

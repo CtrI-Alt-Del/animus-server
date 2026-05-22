@@ -56,7 +56,7 @@ class TestGetDocumentContentUseCase:
 
     def test_should_return_pdf_content_when_file_is_pdf(self) -> None:
         file_path = FilePath.create('petitions/sample.pdf')
-        expected_content = Text.create('Conteudo da peticao em PDF')
+        expected_content = Text.create('Conteudo da petição em PDF')
         self.file_storage_provider_mock.get_file.return_value = self.pdf_file
         self.pdf_provider_mock.extract_content.return_value = expected_content
 
@@ -69,7 +69,7 @@ class TestGetDocumentContentUseCase:
 
     def test_should_return_docx_content_when_file_is_docx(self) -> None:
         file_path = FilePath.create('petitions/sample.docx')
-        expected_content = Text.create('Conteudo da peticao em DOCX')
+        expected_content = Text.create('Conteudo da petição em DOCX')
         self.file_storage_provider_mock.get_file.return_value = self.docx_file
         self.docx_provider_mock.extract_content.return_value = expected_content
 

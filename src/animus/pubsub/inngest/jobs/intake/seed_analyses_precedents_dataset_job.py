@@ -10,13 +10,13 @@ from inngest import Context, Inngest, TriggerEvent
 from animus.ai.agno.workflows.intake.agno_synthesize_analysis_precedents_workflow import (
     AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
 )
-from animus.ai.agno.workflows.intake.agno_summarize_case_workflow import (
-    AgnoSummarizeCaseWorkflow,
+from animus.ai.agno.workflows.intake.agno_summarize_first_instance_case_workflow import (
+    AgnoSummarizeFirstInstanceCaseWorkflow,
 )
 from animus.constants import Env
 from animus.core.auth.domain.errors import AccountNotFoundError
 from animus.core.auth.domain.structures import Email
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentDatasetRowDto,
     AnalysisPrecedentsSearchFiltersDto,
@@ -36,7 +36,7 @@ from animus.database.sqlalchemy.repositories.auth import SqlalchemyAccountsRepos
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisDocumentsRepository,
     SqlalchemyAnalysisPrecedentsRepository,
-    SqlalchemyAnalisysesRepository,
+    SqlalchemyAnalysesRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemyPrecedentsRepository,
 )
@@ -65,8 +65,8 @@ class _NoopBroker:
 class SeedAnalysesPrecedentsDatasetJob:
     _ACCOUNT_EMAIL = 'animus.ctrlaltdel@gmail.com'
     _DOCUMENTS_PREFIX = 'intake/xertica/documents/'
-    _DATASET_PATH_PREFIX = 'intake/datasets/analysis-precedents/'
-    _LOCAL_DATASET_PREFIX = 'tmp/intake/datasets/analysis-precedents/'
+    _DATASET_PATH_PREFIX = 'intake/datasets/analyses-precedents/'
+    _LOCAL_DATASET_PREFIX = 'tmp/intake/datasets/analyses-precedents/'
 
     @staticmethod
     def handle(inngest: Inngest) -> Any:
@@ -176,7 +176,7 @@ class SeedAnalysesPrecedentsDatasetJob:
         document_file_path: str,
     ) -> list[dict[str, Any]]:
         with Sqlalchemy.session() as session:
-            analisyses_repository = SqlalchemyAnalisysesRepository(session)
+            analyses_repository = SqlalchemyAnalysesRepository(session)
             analysis_documents_repository = SqlalchemyAnalysisDocumentsRepository(
                 session
             )
@@ -190,16 +190,16 @@ class SeedAnalysesPrecedentsDatasetJob:
                 FilePath.create(document_file_path)
             )
             if existing_document is None:
-                analysis = CreateAnalysisUseCase(analisyses_repository).execute(
+                analysis = CreateAnalysisUseCase(analyses_repository).execute(
                     account_id=account_id,
-                    type=AnalysisType.FIRST_INSTANCE.value,
+                    type=AnalysisType.create_as_first_instance().dto,
                 )
                 session.flush()
                 analysis_id = Id.create(analysis.id).value
 
                 CreateAnalysisDocumentUseCase(
                     analysis_documents_repository=analysis_documents_repository,
-                    analisyses_repository=analisyses_repository,
+                    analyses_repository=analyses_repository,
                     broker=_NoopBroker(),
                 ).execute(
                     analysis_id=analysis_id,
@@ -215,10 +215,10 @@ class SeedAnalysesPrecedentsDatasetJob:
                     docx_provider=PythonDocxProvider(),
                 ).execute(file_path=FilePath.create(document_file_path))
 
-                AgnoSummarizeCaseWorkflow(
+                AgnoSummarizeFirstInstanceCaseWorkflow(
                     case_summaries_repository=case_summaries_repository,
                     analysis_documents_repository=analysis_documents_repository,
-                    analisyses_repository=analisyses_repository,
+                    analyses_repository=analyses_repository,
                 ).run(
                     analysis_id=analysis_id,
                     document_content=document_content,
@@ -265,7 +265,7 @@ class SeedAnalysesPrecedentsDatasetJob:
                         case_summaries_repository,
                     ),
                     analysis_precedents_repository=analysis_precedents_repository,
-                    analisyses_repository=analisyses_repository,
+                    analyses_repository=analyses_repository,
                 ).run(
                     analysis_id=analysis_id,
                     filters_dto=filters_dto,

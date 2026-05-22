@@ -10,7 +10,9 @@ from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.pubsub.inngest.inngest_broker import InngestBroker
-from animus.pubsub.inngest.jobs.intake.summarize_case_job import SummarizeCaseJob
+from animus.pubsub.inngest.jobs.intake.summarize_first_instance_case_job import (
+    SummarizeFirstInstanceCaseJob,
+)
 
 
 def _seed_analysis(
@@ -23,7 +25,7 @@ def _seed_analysis(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de teste',
+            name='Análise de teste',
             account_id=account_id,
             folder_id=None,
             type='FIRST_INSTANCE',
@@ -48,7 +50,7 @@ def _wait_until(predicate: Any, *, timeout_seconds: float = 30) -> None:
     raise AssertionError('condition not satisfied before timeout')
 
 
-class TestSummarizeCaseJob:
+class TestSummarizeFirstInstanceCaseJob:
     @pytest.mark.filterwarnings(
         r'ignore:websockets\.legacy is deprecated:DeprecationWarning'
     )
@@ -78,7 +80,9 @@ class TestSummarizeCaseJob:
                 }
             )
 
-        monkeypatch.setattr(SummarizeCaseJob, '_summarize_case', _summarize_case)
+        monkeypatch.setattr(
+            SummarizeFirstInstanceCaseJob, '_summarize_case', _summarize_case
+        )
         monkeypatch.setattr(InngestBroker, 'publish', _publish)
 
         response = inngest_runtime.post_event(
@@ -106,12 +110,12 @@ class TestSummarizeCaseJob:
     ) -> None:
         seeded_data = _seed_analysis(sqlalchemy_session_factory)
         job_module = __import__(
-            'animus.pubsub.inngest.jobs.intake.summarize_case_job',
+            'animus.pubsub.inngest.jobs.intake.summarize_first_instance_case_job',
             fromlist=['_Payload'],
         )
         payload_factory = getattr(job_module, '_Payload')  # noqa: B009
         mark_analysis_as_failed_sync = getattr(  # noqa: B009
-            SummarizeCaseJob,
+            SummarizeFirstInstanceCaseJob,
             '_mark_analysis_as_failed_sync',
         )
         monkeypatch.setattr(

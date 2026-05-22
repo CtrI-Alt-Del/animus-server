@@ -51,8 +51,8 @@ Este documento detalha o plano de execução para a implementação da persistê
 - **T2.4: Atualizar `AnalysisMapper`**
   - **Arquivo:** `src/animus/database/sqlalchemy/mappers/intake/analysis_mapper.py`
   - **Ação:** Implementar a tradução domínio <-> ORM para os novos campos de filtros.
-- **T2.5: Ajustar `SqlalchemyAnalisysesRepository`**
-  - **Arquivo:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analisyses_repository.py`
+- **T2.5: Ajustar `SqlalchemyAnalysesRepository`**
+  - **Arquivo:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`
   - **Ação:** Garantir que o método `replace(...)` inclua as novas colunas na persistência.
 
 ### F3: Drivers/Infra - PubSub (Jobs)

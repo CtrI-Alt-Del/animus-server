@@ -25,7 +25,7 @@ class TestRenameAnalysisController:
 
         response = client.patch(
             f'/intake/analyses/{analysis.id}/name',
-            json={'name': '  Analise renomeada  '},
+            json={'name': '  Análise renomeada  '},
             headers=build_auth_headers(account.id),
         )
 
@@ -37,8 +37,8 @@ class TestRenameAnalysisController:
 
         assert response.status_code == 200
         assert persisted_analysis is not None
-        assert persisted_analysis.name == 'Analise renomeada'
-        assert response.json()['name'] == 'Analise renomeada'
+        assert persisted_analysis.name == 'Análise renomeada'
+        assert response.json()['name'] == 'Análise renomeada'
 
     def test_should_return_404_when_analysis_belongs_to_another_account(
         self,
@@ -61,14 +61,14 @@ class TestRenameAnalysisController:
 
         response = client.patch(
             f'/intake/analyses/{analysis.id}/name',
-            json={'name': 'Analise renomeada'},
+            json={'name': 'Análise renomeada'},
             headers=build_auth_headers(authenticated_account.id),
         )
 
         assert response.status_code == 404
         assert response.json() == {
             'title': 'Not Found Error',
-            'message': 'Analise nao encontrada',
+            'message': 'Análise nao encontrada',
         }
 
     def test_should_return_422_when_name_is_missing(

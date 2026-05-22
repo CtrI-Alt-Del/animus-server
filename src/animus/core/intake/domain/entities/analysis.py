@@ -83,6 +83,9 @@ class Analysis(Entity):
     def archive(self) -> None:
         self.is_archived = Logical.create_true()
 
+    def unarchive(self) -> None:
+        self.is_archived = Logical.create_false()
+
     def set_status(self, status: AnalysisStatus | str) -> None:
         if isinstance(status, str):
             self.status = self._normalize_status(self.type, status)

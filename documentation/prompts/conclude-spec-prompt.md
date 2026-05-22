@@ -250,7 +250,7 @@ declare explicitamente "Nenhum ponto de atencao identificado.">
 
 Ao final da execucao, devem ter sido produzidos:
 
-1. **Relatorio de cobertura de testes** (Fase 1.1.1) — restrito a use cases, controllers e jobs
+1. **Relatório de cobertura de testes** (Fase 1.1.1) — restrito a use cases, controllers e jobs
 2. **Testes criados pelos subagents em paralelo** para componentes sem cobertura (Fase 1.1.2, quando aplicavel)
 3. **Checklist de validacao** de requisitos (Fase 1.4)
 4. **Spec atualizada** com status `closed` e data (Fase 2.1)

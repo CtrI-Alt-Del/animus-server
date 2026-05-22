@@ -93,7 +93,7 @@ class TestUnarchiveAnalysisController:
         assert response.status_code == 404
         assert response.json() == {
             'title': 'Not Found Error',
-            'message': 'Analise nao encontrada',
+            'message': 'Análise nao encontrada',
         }
 
     def test_should_return_400_when_analysis_id_is_invalid(

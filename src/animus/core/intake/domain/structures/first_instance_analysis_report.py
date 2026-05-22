@@ -1,3 +1,5 @@
+from animus.core.shared.domain.abstracts import Structure
+
 from animus.core.intake.domain.entities.analysis import Analysis
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.analysis_precedent import AnalysisPrecedent
@@ -5,8 +7,9 @@ from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.dtos.first_instance_analysis_report_dto import (
     FirstInstanceAnalysisReportDto,
 )
-from animus.core.intake.domain.structures.judgment_draft import JudgmentDraft
-from animus.core.shared.domain.abstracts import Structure
+from animus.core.intake.domain.structures.second_instance_judgment_draft import (
+    SecondInstanceJudgmentDraft,
+)
 from animus.core.shared.domain.decorators import structure
 
 
@@ -16,7 +19,7 @@ class FirstInstanceAnalysisReport(Structure):
     document: AnalysisDocument
     case_summary: CaseSummary
     precedents: list[AnalysisPrecedent]
-    judgment_draft: JudgmentDraft
+    judgment_draft: SecondInstanceJudgmentDraft
 
     @classmethod
     def create(
@@ -27,7 +30,7 @@ class FirstInstanceAnalysisReport(Structure):
             document=AnalysisDocument.create(dto.document),
             case_summary=CaseSummary.create(dto.case_summary),
             precedents=[AnalysisPrecedent.create(item) for item in dto.precedents],
-            judgment_draft=JudgmentDraft.create(dto.judgment_draft),
+            judgment_draft=SecondInstanceJudgmentDraft.create(dto.judgment_draft),
         )
 
     @property

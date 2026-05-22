@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from animus.rest.controllers.storage import GeneratePetitionUploadUrlController
+from animus.rest.controllers.storage import GenerateAnalysisDocumentUploadUrlController
 
 
 class StorageRouter:
@@ -8,6 +8,6 @@ class StorageRouter:
     def register() -> APIRouter:
         router = APIRouter(prefix='/storage', tags=['storage'])
 
-        GeneratePetitionUploadUrlController.handle(router)
+        GenerateAnalysisDocumentUploadUrlController.handle(router)
 
         return router

@@ -4,10 +4,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 from ulid import ULID
 
-from animus.core.intake.domain.entities.case_assessment_analysis_status import (
-    CaseAssessmentAnalysisStatus,
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
 )
-from animus.core.intake.domain.entities.analysis_type import AnalysisType
 from animus.core.shared.domain.structures import Text
 from animus.database.sqlalchemy.models.intake import (
     AnalysisDocumentModel,
@@ -33,11 +33,11 @@ def _create_analysis_with_document_summary(
     session.add(
         AnalysisModel(
             id=analysis_id,
-            name='Analise de precedentes',
+            name='Análise de precedentes',
             folder_id=None,
             account_id=account_id,
-            type=AnalysisType.FIRST_INSTANCE.value,
-            status=CaseAssessmentAnalysisStatus.DOCUMENT_UPLOADED.value,
+            type=AnalysisType.create_as_first_instance().dto,
+            status=FirstInstanceAnalysisStatus.create_as_document_uploaded().dto,
             is_archived=False,
             created_at=datetime.now(UTC),
         )
@@ -53,7 +53,7 @@ def _create_analysis_with_document_summary(
     session.add(
         CaseSummaryModel(
             analysis_id=analysis_id,
-            case_summary='Resumo objetivo da peticao inicial',
+            case_summary='Resumo objetivo da petição inicial',
             legal_issue='Controversia sobre inadimplemento contratual',
             central_question='Ha inadimplemento apto a justificar condenacao?',
             relevant_laws=['Codigo Civil, Art. 389'],
@@ -96,7 +96,7 @@ class TestListAnalysisPetitionsController:
             'name': 'Documento inicial.pdf',
         }
         assert response_payload['items'][0]['case_summary'] == {
-            'case_summary': 'Resumo objetivo da peticao inicial',
+            'case_summary': 'Resumo objetivo da petição inicial',
             'legal_issue': 'Controversia sobre inadimplemento contratual',
             'central_question': 'Ha inadimplemento apto a justificar condenacao?',
             'relevant_laws': ['Codigo Civil, Art. 389'],

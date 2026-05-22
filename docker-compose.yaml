@@ -24,7 +24,7 @@ services:
     volumes: [animus_qdrant_data:/qdrant/storage]
 
   inngest:
-    image: inngest/inngest:v0.27.0
+    image: inngest/inngest:v1.19.4
     container_name: animus_inngest
     command: inngest dev -u http://host.docker.internal:8080/api/inngest
     ports: [8288:8288]
