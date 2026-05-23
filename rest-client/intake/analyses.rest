@@ -141,6 +141,10 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 POST {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Obter minuta de julgamento de 2a instancia (GetSecondInstanceJudgmentDraftController)
+GET {{url}}/analyses/{{analysis_id}}/petition-drafts
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Obter resumo de caso da analise (GetCaseSummaryController)
 GET {{url}}/analyses/{{analysis_id}}/case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
