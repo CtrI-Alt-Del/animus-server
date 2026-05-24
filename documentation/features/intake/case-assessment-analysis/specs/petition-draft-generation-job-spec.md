@@ -2,8 +2,8 @@
 title: Pipeline assíncrono de sumarização e geração de minuta de petição inicial
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/x/AYDsAg
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-93
-status: open
-last_updated_at: 2026-05-22
+status: closed
+last_updated_at: 2026-05-24
 ---
 
 # 1. Objetivo
@@ -19,7 +19,9 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - Criar `TriggerCaseAssessmentCaseSummarizationUseCase` para validar pré-condições, atualizar status para `ANALYZING_CASE` e publicar o evento de sumarização.
 - Criar `SummarizeCaseAssessmentCaseJob` baseado estruturalmente em `SummarizeSecondInstanceCaseJob`, reutilizando o padrão de steps, `publish_finished_event`, `except` + `on_failure` e `run_in_executor`.
 - Criar `AgnoSummarizeCaseAssessmentCaseWorkflow` para produzir e persistir `CaseSummary` de análises `CASE_ASSESSMENT` com prompt próprio.
+- Criar endpoint HTTP para solicitar a geração ou regeração da minuta de petição inicial.
 - Criar os eventos de domínio `PetitionDraftGenerationTriggeredEvent` e `PetitionDraftGenerationFinishedEvent`.
+- Criar `TriggerPetitionDraftGenerationUseCase` para validar pré-condições e publicar o evento de geração da minuta.
 - Criar o use case `CreatePetitionDraftUseCase` para criar ou substituir `PetitionDraft` e concluir a análise com status `DONE`.
 - Criar a interface `GeneratePetitionDraftWorkflow` no `core`.
 - Criar a implementação `AgnoGeneratePetitionDraftWorkflow` na camada `ai`.
@@ -35,7 +37,6 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 
 ## 2.2 Out-of-scope
 
-- Criar endpoint HTTP para solicitar a geração da minuta.
 - Alterar o fluxo de seleção ou confirmação de precedentes.
 - Reexecutar upload, extração em janelas paginadas, busca de precedentes ou qualquer etapa de `SECOND_INSTANCE`.
 - Alterar fluxos de `FIRST_INSTANCE` ou `SECOND_INSTANCE` além de reaproveitar componentes já existentes.
@@ -71,6 +72,18 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - O job de sumarização deve executar `AgnoSummarizeCaseAssessmentCaseWorkflow` para produzir e persistir `CaseSummary`.
 - Após persistir `CaseSummary` com sucesso, o job de sumarização deve publicar `CaseSummaryFinishedEvent { analysis_id, account_id }`.
 - Qualquer exceção não recuperável no job de sumarização deve atualizar a análise para `CaseAssessmentAnalysisStatus.FAILED` no `except` interno e também no `on_failure` do Inngest.
+- O endpoint HTTP de trigger da geração da minuta deve ser `POST /intake/analyses/{analysis_id}/petition-drafts`.
+- O endpoint de trigger da geração deve responder `202 Accepted` sem body quando a solicitação for aceita.
+- O endpoint de trigger da geração deve depender de `IntakePipe.verify_analysis_by_account_from_request` para garantir que a análise pertença à conta autenticada.
+- O endpoint de trigger da geração deve instanciar `TriggerPetitionDraftGenerationUseCase` e delegar a ele a validação de pré-condições e a publicação do evento.
+- O endpoint de trigger da geração deve seguir o padrão já adotado pelos demais triggers assíncronos de `intake`: controller fino, sem body, retorno explícito de `Response(status_code=202)` e sem lógica de negócio embutida.
+- Se a análise não pertencer à conta autenticada, a requisição de geração deve falhar no `IntakePipe.verify_analysis_by_account_from_request`, preservando o contrato de autorização já usado pelos demais endpoints de `analyses`.
+- Se a análise não existir, a resposta HTTP da geração deve seguir o mapeamento global já existente para `AnalysisNotFoundError`.
+- Se a análise existir mas não for do tipo `CASE_ASSESSMENT`, a resposta HTTP da geração deve seguir o mapeamento global já existente para `InconsistentAnalysisTypeError`.
+- Se `CaseSummary` não existir, a resposta HTTP da geração deve seguir o mapeamento global já existente para `CaseSummaryUnavailableError`.
+- Se não houver precedentes persistidos para a análise, a resposta HTTP da geração deve seguir o mapeamento global já existente para `AnalysisPrecedentsUnavailableError`.
+- Se houver precedentes persistidos, mas nenhum com `is_chosen = True`, a resposta HTTP da geração deve seguir o mapeamento global já existente para `ChosenAnalysisPrecedentsRequiredError`.
+- Em sucesso, o endpoint de geração deve publicar exatamente um `PetitionDraftGenerationTriggeredEvent` com o `analysis_id` da análise validada.
 - O job de geração deve iniciar a partir de `PetitionDraftGenerationTriggeredEvent` contendo `analysis_id`.
 - Ao iniciar, o job de geração deve atualizar a análise para `CaseAssessmentAnalysisStatus.GENERATING_PETITION_DRAFT` quando a análise existir.
 - O job de geração deve buscar `CaseSummary` por `analysis_id`.
@@ -93,7 +106,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **Idempotência:** reexecuções do job de sumarização devem ser seguras porque `CreateCaseSummaryUseCase` já decide entre `add(...)` e `replace(...)`; reexecuções do job de geração não devem criar múltiplas minutas para a mesma análise, e `CreatePetitionDraftUseCase` deve usar `replace(...)` quando houver registro existente.
 - **Resiliência:** o job de sumarização deve usar `retries=0` e `on_failure=SummarizeCaseAssessmentCaseJob._handle_failure`, alinhado ao padrão de sumarização; o job de geração deve usar `retries=2` e `on_failure=GeneratePetitionDraftJob._handle_failure`.
 - **Observabilidade por estado persistido:** o app deve acompanhar evolução por status da análise e pelo relatório de `CASE_ASSESSMENT` já existente.
-- **Segurança:** o novo endpoint de trigger deve reutilizar a autorização já padronizada no módulo `intake` via `IntakePipe.verify_analysis_by_account_from_request`; a publicação de `PetitionDraftGenerationTriggeredEvent` continua fora do escopo HTTP desta task.
+- **Segurança:** os endpoints de trigger de sumarização e de geração devem reutilizar a autorização já padronizada no módulo `intake` via `IntakePipe.verify_analysis_by_account_from_request`.
 - **Evolução de contrato e persistência:** deve haver alteração coordenada de schema HTTP, DTO de domínio, model SQLAlchemy, mapper, repository e schema de banco para refletir os novos campos estruturados de `PetitionDraft`.
 - **Compatibilidade de eventos:** o fluxo de sumarização de `CASE_ASSESSMENT` não deve reutilizar `CaseSummaryRequestedEvent`, porque esse evento já é consumido por `SummarizeFirstInstanceCaseJob` e criaria disparos concorrentes indevidos.
 - **Timeout de IA:** o agente de geração da minuta deve usar `timeout=60`, alinhado ao PRD e ao padrão dos agentes de intake.
@@ -125,10 +138,12 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **`CreateCaseSummaryUseCase`** (`src/animus/core/intake/use_cases/create_case_summary_use_case.py`) — use case existente que persiste `CaseSummary` e ajusta status conforme o tipo da análise.
 - **`TriggerFirstInstanceCaseSummarizationUseCase`** (`src/animus/core/intake/use_cases/trigger_first_instance_case_summarization_use_case.py`) — referência para o padrão de trigger por evento, atualização prévia de status e publicação via `Broker`.
 - **`CreateSecondInstanceJudgmentDraftUseCase`** (`src/animus/core/intake/use_cases/create_judgment_draft_use_case.py`) — referência análoga para persistência idempotente de minuta e transição para `DONE`.
+- **`TriggerPetitionDraftGenerationUseCase`** (`src/animus/core/intake/use_cases/trigger_petition_draft_generation_use_case.py`) — valida pré-condições de `CASE_ASSESSMENT` antes da publicação do evento de geração da minuta.
 - **`TriggerSecondInstanceJudgmentDraftGenerationUseCase`** (`src/animus/core/intake/use_cases/trigger_second_instance_judgment_draft_generation_use_case.py`) — referência para validação de pré-condições antes da publicação de evento assíncrono.
 - **`UpdateAnalysisStatusUseCase`** (`src/animus/core/intake/use_cases/update_analysis_status_use_case.py`) — use case usado por jobs para atualizar status sem colocar regra em repositórios.
 - **`GetCaseAssessmentAnalysisReportUseCase`** (`src/animus/core/intake/use_cases/get_case_assessment_analysis_report_use_case.py`) — já consome `PetitionDraftsRepository` e exige minuta para montar o relatório de `CASE_ASSESSMENT`.
 - **`TriggerFirstInstanceCaseSummarizationController`** (`src/animus/rest/controllers/intake/trigger_first_instance_case_summarization_controller.py`) — referência principal para o padrão do controller HTTP de trigger assíncrono com `POST`, `202`, verificação de ownership e delegação direta ao use case.
+- **`TriggerPetitionDraftGenerationController`** (`src/animus/rest/controllers/intake/trigger_petition_draft_generation_controller.py`) — endpoint HTTP de trigger para iniciar a geração ou regeração da minuta de petição inicial.
 - **`TriggerSecondInstanceJudgmentDraftGenerationController`** (`src/animus/rest/controllers/intake/trigger_second_instance_judgment_draft_generation_controller.py`) — referência complementar para endpoint de trigger assíncrono específico por tipo de análise.
 
 ## Database
@@ -215,6 +230,19 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
   - Persiste a análise via `AnalysesRepository.replace(analysis)`.
   - Publica `CaseAssessmentCaseSummaryRequestedEvent(analysis_id=analysis_id_entity.value)` via `Broker.publish(...)`.
 
+- **Localização:** `src/animus/core/intake/use_cases/trigger_petition_draft_generation_use_case.py` (**novo arquivo**)
+- **Dependências (ports injetados):** `AnalysesRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `Broker`
+- **Método principal:** `execute(analysis_id: str) -> None` — valida pré-condições da geração de minuta de `CASE_ASSESSMENT` e publica o evento de geração.
+- **Responsabilidade de borda:** não recebe `Request`, `Response`, `Depends(...)` e não conhece detalhes de serialização HTTP.
+- **Fluxo resumido:**
+  - Normaliza `analysis_id` como `Id`.
+  - Busca `Analysis`; se ausente, lança `AnalysisNotFoundError`.
+  - Se `analysis.type.is_case_analysis.is_false`, lança `InconsistentAnalysisTypeError`.
+  - Busca `CaseSummary` por `analysis_id`; se ausente, lança `CaseSummaryUnavailableError`.
+  - Busca precedentes por `analysis_id`; se não houver itens, lança `AnalysisPrecedentsUnavailableError`.
+  - Se não houver precedente com `is_chosen = True`, lança `ChosenAnalysisPrecedentsRequiredError`.
+  - Publica `PetitionDraftGenerationTriggeredEvent(analysis_id=analysis_id_entity.value)` via `Broker.publish(...)`.
+
 ## Camada Rest (Controller HTTP)
 
 - **Localização:** `src/animus/rest/controllers/intake/trigger_case_assessment_case_summarization_controller.py` (**novo arquivo**)
@@ -226,6 +254,19 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **Fluxo resumido:**
   - Obtém `analysis` validada por ownership via `IntakePipe`.
   - Instancia `TriggerCaseAssessmentCaseSummarizationUseCase`.
+  - Chama `use_case.execute(analysis_id=analysis.id.value)`.
+  - Retorna `Response(status_code=202)`.
+- **Erros esperados:** o controller não deve capturar nem traduzir erros manualmente; deve deixar o tratamento global do app converter exceções de domínio e autorização em respostas HTTP.
+
+- **Localização:** `src/animus/rest/controllers/intake/trigger_petition_draft_generation_controller.py` (**novo arquivo**)
+- **Método HTTP e path:** `POST /analyses/{analysis_id}/petition-drafts`
+- **Status de resposta:** `202 Accepted`
+- **Body:** não recebe payload.
+- **Assinatura esperada:** seguir o padrão de `TriggerSecondInstanceJudgmentDraftGenerationController`.
+- **Dependências:** `IntakePipe.verify_analysis_by_account_from_request`, `DatabasePipe.get_analyses_repository_from_request`, `DatabasePipe.get_case_summaries_repository_from_request`, `DatabasePipe.get_analysis_precedents_repository_from_request`, `PubSubPipe.get_broker_from_request`.
+- **Fluxo resumido:**
+  - Obtém `analysis` validada por ownership via `IntakePipe`.
+  - Instancia `TriggerPetitionDraftGenerationUseCase`.
   - Chama `use_case.execute(analysis_id=analysis.id.value)`.
   - Retorna `Response(status_code=202)`.
 - **Erros esperados:** o controller não deve capturar nem traduzir erros manualmente; deve deixar o tratamento global do app converter exceções de domínio e autorização em respostas HTTP.
@@ -343,13 +384,13 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **Justificativa:** seguir o padrão de contratos públicos do contexto `intake`.
 
 - **Arquivo:** `src/animus/core/intake/use_cases/__init__.py`
-- **Mudança:** exportar `TriggerCaseAssessmentCaseSummarizationUseCase` e `CreatePetitionDraftUseCase`.
+- **Mudança:** exportar `TriggerCaseAssessmentCaseSummarizationUseCase`, `TriggerPetitionDraftGenerationUseCase` e `CreatePetitionDraftUseCase`.
 - **Justificativa:** manter consistência com os demais use cases públicos.
 
 ## Rest
 
 - **Arquivo:** `src/animus/rest/controllers/intake/__init__.py`
-- **Mudança:** exportar `TriggerCaseAssessmentCaseSummarizationController`.
+- **Mudança:** exportar `TriggerCaseAssessmentCaseSummarizationController` e `TriggerPetitionDraftGenerationController`.
 - **Justificativa:** manter o controller público no pacote de intake, alinhado aos demais endpoints.
 
 - **Arquivo:** `src/animus/rest/controllers/intake/trigger_case_assessment_case_summarization_controller.py`
@@ -357,7 +398,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **Justificativa:** expor o gatilho HTTP de ponta a ponta sem mover regra de negócio para a borda.
 
 - **Arquivo:** `src/animus/routers/intake/analyses_router.py`
-- **Mudança:** registrar `TriggerCaseAssessmentCaseSummarizationController.handle(router)`.
+- **Mudança:** registrar `TriggerCaseAssessmentCaseSummarizationController.handle(router)` e `TriggerPetitionDraftGenerationController.handle(router)`.
 - **Justificativa:** tornar o endpoint acessível na composição HTTP do módulo de análises.
 
 ## AI
@@ -387,11 +428,11 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 ## PubSub
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/__init__.py`
-- **Mudança:** exportar `SummarizeCaseAssessmentCaseJob` e `GeneratePetitionDraftJob`.
+- **Mudança:** exportar `SummarizeCaseAssessmentCaseJob` e `GeneratePetitionDraftJob`, sem expor job intermediário de trigger da geração.
 - **Justificativa:** disponibilizar os jobs para o composition root do Inngest.
 
 - **Arquivo:** `src/animus/pubsub/inngest/inngest_pubsub.py`
-- **Mudança:** importar `SummarizeCaseAssessmentCaseJob` e `GeneratePetitionDraftJob`, registrando ambos em `register_intake_jobs(...)`.
+- **Mudança:** importar `SummarizeCaseAssessmentCaseJob` e `GeneratePetitionDraftJob`, registrando ambos em `register_intake_jobs(...)`, sem registrar job intermediário de trigger da geração.
 - **Justificativa:** tornar os jobs executáveis pelo Inngest.
 
 ## Database
@@ -423,9 +464,22 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
   - não publica evento quando qualquer pré-condição falhar.
 - **Justificativa:** garantir o contrato de ponta a ponta do endpoint desde a borda HTTP até a publicação do evento.
 
+- **Arquivo:** `tests/rest/controllers/intake/test_trigger_petition_draft_generation_controller.py` (**novo arquivo**)
+- **Mudança:** criar testes de integração do endpoint HTTP de trigger da geração da minuta.
+- **Cenários mínimos obrigatórios:**
+  - retorna `202` e publica `PetitionDraftGenerationTriggeredEvent` quando a análise `CASE_ASSESSMENT` possui `CaseSummary` e precedente escolhido;
+  - retorna o status HTTP mapeado para `CaseSummaryUnavailableError` quando o resumo não existir;
+  - retorna o status HTTP mapeado para `AnalysisPrecedentsUnavailableError` quando não houver precedentes persistidos;
+  - retorna o status HTTP mapeado para `ChosenAnalysisPrecedentsRequiredError` quando não houver precedente escolhido;
+  - retorna o status HTTP mapeado para `InconsistentAnalysisTypeError` quando a análise não for `CASE_ASSESSMENT`;
+  - não publica evento quando qualquer pré-condição falhar.
+- **Justificativa:** garantir o contrato de ponta a ponta do endpoint de geração desde a borda HTTP até a publicação do evento.
+
 # 7. O que deve ser removido?
 
-**Não aplicável.**
+- **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/trigger_petition_draft_generation_job.py`
+- **Mudança:** remover o job intermediário que observava `CaseSummaryFinishedEvent` apenas para republicar `PetitionDraftGenerationTriggeredEvent`.
+- **Justificativa:** o trigger da geração passa a ser explícito por endpoint HTTP dedicado, mantendo o mesmo padrão dos demais gatilhos assíncronos de `intake`.
 
 # 8. Decisões Técnicas e Trade-offs
 
@@ -439,10 +493,10 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **Motivo da escolha:** `CASE_ASSESSMENT` e `FIRST_INSTANCE` representam contextos de análise distintos no domínio, e a sumarização deve poder evoluir com prompt e foco semântico próprios.
 - **Impactos / trade-offs:** adiciona um workflow novo e mais wiring no `AiPipe`, mas elimina ambiguidade semântica e reduz acoplamento indevido entre fluxos.
 
-- **Decisão:** criar `PetitionDraftGenerationTriggeredEvent` mesmo sem endpoint nesta task.
-- **Alternativas consideradas:** aguardar um fluxo HTTP futuro criar o evento; acoplar o job a string literal do Inngest sem classe de domínio.
-- **Motivo da escolha:** o job precisa importar o evento para registrar o trigger e o ticket cita explicitamente `PetitionDraftGenerationTriggeredEvent`.
-- **Impactos / trade-offs:** a task entrega o contrato de evento, mas não entrega o publicador; o acionamento manual permanece fora do escopo.
+- **Decisão:** expor o trigger de geração da minuta por endpoint HTTP dedicado, em vez de depender de um job intermediário acionado por `CaseSummaryFinishedEvent`.
+- **Alternativas consideradas:** manter o encadeamento automático por job após `CaseSummaryFinishedEvent`; acoplar o disparo da geração ao job de sumarização.
+- **Motivo da escolha:** o endpoint explicita a intenção do usuário, permite reexecução controlada da geração e alinha `CASE_ASSESSMENT` ao padrão já adotado pelos demais triggers assíncronos de `intake`.
+- **Impactos / trade-offs:** aumenta a superfície HTTP do módulo `intake`, mas elimina uma etapa intermediária no Inngest e melhora previsibilidade operacional.
 
 - **Decisão:** `CreatePetitionDraftUseCase.execute(...)` retorna `PetitionDraftDto`.
 - **Alternativas consideradas:** retornar `None`, como descrito no esboço do Jira.
@@ -464,7 +518,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **Motivo da escolha:** o Jira exige encerramento sem falha quando `CaseSummary` não existir; a validação de pré-condição deve acontecer antes da publicação do evento pelo fluxo chamador.
 - **Impactos / trade-offs:** em evento inconsistente publicado fora do fluxo esperado, a análise pode não receber evento de conclusão; isso evita falso negativo operacional por dado ausente.
 
-- **Decisão:** usar `InconsistentAnalysisTypeError` se `CreatePetitionDraftUseCase` ou o trigger da sumarização receberem análise que não seja `CASE_ASSESSMENT`.
+- **Decisão:** usar `InconsistentAnalysisTypeError` se `CreatePetitionDraftUseCase`, o trigger da sumarização ou o trigger da geração receberem análise que não seja `CASE_ASSESSMENT`.
 - **Alternativas consideradas:** criar `CaseAssessmentAnalysisRequiredError`.
 - **Motivo da escolha:** já existe erro de domínio para tipo incoerente e o ticket não exige um erro novo.
 - **Impactos / trade-offs:** a mensagem é menos específica do que um erro dedicado, mas evita ampliar o contrato de erros sem necessidade.
@@ -482,6 +536,20 @@ POST /intake/analyses/{analysis_id}/case-assessment-case-summaries
   -> AnalysesRepository.find_by_id(...)
   -> AnalysesRepository.replace(... ANALYZING_CASE ...)
   -> Broker.publish(CaseAssessmentCaseSummaryRequestedEvent)
+  -> HTTP 202
+```
+
+- **Fluxo HTTP completo do trigger da geração:**
+
+```text
+POST /intake/analyses/{analysis_id}/petition-drafts
+  -> IntakePipe.verify_analysis_by_account_from_request
+  -> TriggerPetitionDraftGenerationController.handle(...)
+  -> TriggerPetitionDraftGenerationUseCase.execute(analysis_id)
+  -> AnalysesRepository.find_by_id(...)
+  -> CaseSummariesRepository.find_by_analysis_id(...)
+  -> AnalysisPrecedentsRepository.find_many_by_analysis_id(...)
+  -> Broker.publish(PetitionDraftGenerationTriggeredEvent)
   -> HTTP 202
 ```
 
@@ -507,7 +575,10 @@ TriggerCaseAssessmentCaseSummarizationUseCase.execute(analysis_id)
 - **Fluxo de geração da minuta:**
 
 ```text
-PetitionDraftGenerationTriggeredEvent { analysis_id }
+POST /intake/analyses/{analysis_id}/petition-drafts
+  -> TriggerPetitionDraftGenerationUseCase.execute(analysis_id)
+  -> Broker.publish(PetitionDraftGenerationTriggeredEvent)
+  -> PetitionDraftGenerationTriggeredEvent { analysis_id }
   -> Inngest
   -> GeneratePetitionDraftJob.handle(...)
   -> normalize_payload
@@ -560,12 +631,14 @@ GeneratePetitionDraftJob
 - `src/animus/ai/agno/squads/intake_squad.py` — referência para criação de agentes com `output_schema`.
 - `src/animus/core/intake/use_cases/trigger_first_instance_case_summarization_use_case.py` — referência para trigger por evento com atualização prévia de status.
 - `src/animus/rest/controllers/intake/trigger_first_instance_case_summarization_controller.py` — referência principal para o formato do endpoint HTTP de trigger com `202`.
+- `src/animus/core/intake/use_cases/trigger_petition_draft_generation_use_case.py` — referência para validação de pré-condições antes da publicação do evento de geração da minuta.
+- `src/animus/rest/controllers/intake/trigger_petition_draft_generation_controller.py` — referência principal para o formato do endpoint HTTP de geração da minuta com `202`.
 - `tests/rest/controllers/intake/test_trigger_case_summary_controller.py` — referência principal para o padrão de teste end-to-end do endpoint de trigger.
 - `tests/rest/controllers/intake/test_trigger_case_summary_controller.py` — referência principal para o padrão de teste do endpoint HTTP de trigger.
 - `src/animus/core/intake/use_cases/create_case_summary_use_case.py` — referência para persistência idempotente do resumo do caso.
 - `src/animus/core/intake/use_cases/create_judgment_draft_use_case.py` — referência para persistência idempotente de minuta e status `DONE`.
 - `src/animus/core/intake/domain/events/case_summary_finished_event.py` — referência de evento de conclusão com `analysis_id` e `account_id`.
-- `src/animus/core/intake/domain/events/judgment_draft_generation_triggered_event.py` — referência de evento de trigger com `analysis_id`.
+- `src/animus/core/intake/domain/events/petition_draft_generation_triggered_event.py` — referência de evento de trigger com `analysis_id`.
 
 # 10. Pendências / Dúvidas
 
