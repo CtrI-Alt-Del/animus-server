@@ -1,8 +1,11 @@
+import json
+from collections.abc import Mapping
 from textwrap import dedent
-from typing import TYPE_CHECKING, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, NamedTuple, cast
 
 from agno.run.base import RunContext
 from agno.workflow import Step, StepInput, StepOutput, Workflow
+from pydantic import BaseModel
 
 from animus.ai.agno.outputs.intake.petition_draft_output import PetitionDraftOutput
 from animus.ai.agno.squads import IntakeSquad
@@ -159,18 +162,66 @@ class AgnoGeneratePetitionDraftWorkflow(GeneratePetitionDraftWorkflow):
         output: object,
         analysis_id: str,
     ) -> PetitionDraftDto:
-        if isinstance(output, dict):
-            output = PetitionDraftOutput.model_validate(output)
-
-        if not isinstance(output, PetitionDraftOutput):
-            msg = 'Invalid output type from petition draft generator agent'
-            raise AppError('Erro de execucao do workflow', msg)
+        normalized_output = self._coerce_petition_draft_output(output)
 
         return PetitionDraftDto(
             analysis_id=analysis_id,
-            structured_facts=output.structured_facts,
-            legal_grounds=output.legal_grounds,
-            central_thesis=output.central_thesis,
-            requests=output.requests,
-            precedent_citations=output.precedent_citations,
+            structured_facts=normalized_output.structured_facts,
+            legal_grounds=normalized_output.legal_grounds,
+            central_thesis=normalized_output.central_thesis,
+            requests=normalized_output.requests,
+            precedent_citations=normalized_output.precedent_citations,
         )
+
+    def _coerce_petition_draft_output(self, output: object) -> PetitionDraftOutput:
+        unwrapped_output = self._unwrap_output_content(output)
+
+        if isinstance(unwrapped_output, PetitionDraftOutput):
+            return unwrapped_output
+
+        if isinstance(unwrapped_output, BaseModel):
+            return PetitionDraftOutput.model_validate(unwrapped_output.model_dump())
+
+        if isinstance(unwrapped_output, str):
+            stripped_output = unwrapped_output.strip()
+            if stripped_output.startswith(('{', '[')):
+                return PetitionDraftOutput.model_validate_json(stripped_output)
+
+            msg = self._build_invalid_output_message(stripped_output)
+            raise AppError('Erro de execucao do workflow', msg)
+
+        if isinstance(unwrapped_output, Mapping):
+            data = cast(
+                'dict[str, Any]',
+                dict(cast('Mapping[str, object]', unwrapped_output)),
+            )
+            return PetitionDraftOutput.model_validate(data)
+
+        msg = 'Invalid output type from petition draft generator agent'
+        raise AppError('Erro de execucao do workflow', msg)
+
+    def _build_invalid_output_message(self, output: str) -> str:
+        compact_output = ' '.join(output.split())
+        snippet = compact_output[:240]
+        return f'Petition draft generator agent returned non-JSON content: {snippet}'
+
+    def _unwrap_output_content(self, output_content: object) -> object:
+        unwrapped_content: object = output_content
+        for _ in range(6):
+            if isinstance(unwrapped_content, (PetitionDraftOutput, BaseModel, Mapping)):
+                return cast('object', unwrapped_content)
+
+            if isinstance(unwrapped_content, str):
+                try:
+                    unwrapped_content = json.loads(unwrapped_content)
+                    continue
+                except json.JSONDecodeError:
+                    return unwrapped_content
+
+            nested_content = getattr(unwrapped_content, 'content', None)
+            if nested_content is None or nested_content is unwrapped_content:
+                return unwrapped_content
+
+            unwrapped_content = nested_content
+
+        return unwrapped_content

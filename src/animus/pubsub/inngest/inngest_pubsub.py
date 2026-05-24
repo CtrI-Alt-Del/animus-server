@@ -18,7 +18,6 @@ from animus.pubsub.inngest.jobs.intake import (
     SummarizeCaseAssessmentCaseJob,
     SummarizeFirstInstanceCaseJob,
     SummarizeSecondInstanceCaseJob,
-    TriggerPetitionDraftGenerationJob,
     VectorizeAllPrecedentsJob,
     VectorizePrecedentsJob,
 )
@@ -65,7 +64,6 @@ class InngestPubSub:
         return [
             SummarizeCaseAssessmentCaseJob.handle(inngest),
             SummarizeSecondInstanceCaseJob.handle(inngest),
-            TriggerPetitionDraftGenerationJob.handle(inngest),
             GeneratePetitionDraftJob.handle(inngest),
             GenerateSecondInstanceJudgmentDraftJob.handle(inngest),
             RemovePetitionDocumentFileJob.handle(inngest),

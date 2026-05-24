@@ -57,6 +57,9 @@ from .trigger_first_instance_case_summarization_use_case import (
 from .trigger_case_assessment_case_summarization_use_case import (
     TriggerCaseAssessmentCaseSummarizationUseCase,
 )
+from .trigger_petition_draft_generation_use_case import (
+    TriggerPetitionDraftGenerationUseCase,
+)
 from .unchoose_analysis_precedent_use_case import UnchooseAnalysisPrecedentUseCase
 from .update_analysis_status_use_case import UpdateAnalysisStatusUseCase
 from .vectorize_all_precedents_use_case import VectorizeAllPrecedentsUseCase
@@ -93,6 +96,7 @@ __all__ = [
     'RequestAnalysisPrecedentsSearchUseCase',
     'TriggerSecondInstanceJudgmentDraftGenerationUseCase',
     'TriggerCaseAssessmentCaseSummarizationUseCase',
+    'TriggerPetitionDraftGenerationUseCase',
     'TriggerFirstInstanceCaseSummarizationUseCase',
     'RequestPetitionSummaryUseCase',
     'SearchAnalysisPrecedentsUseCase',

@@ -1,8 +1,11 @@
+import json
+from collections.abc import Mapping
 from textwrap import dedent
-from typing import TYPE_CHECKING, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, NamedTuple, cast
 
 from agno.run.base import RunContext
 from agno.workflow import Step, StepInput, StepOutput, Workflow
+from pydantic import BaseModel
 
 from animus.ai.agno.outputs import CaseSummaryOutput, PetitionSummaryOutput
 from animus.ai.agno.squads import IntakeSquad
@@ -54,7 +57,7 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
                 ),
                 Step(
                     name=self._step_names.SUMMARIZE_CASE,
-                    agent=self._team.first_instance_case_summarizer_agent,
+                    agent=self._team.case_assessment_case_summarizer_agent,
                 ),
             ],
             session_state={
@@ -94,6 +97,9 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
             - identifique controvérsias estruturais que impactem competência,
               legitimidade, cabimento ou necessidade de prova;
             - produza termos de busca úteis para localizar precedentes aplicáveis ao caso.
+            - seja conciso para evitar truncamento: `case_summary` com no máximo 120 palavras;
+            - `legal_issue` e `central_question` devem ter uma frase cada;
+            - cada item de listas deve ser curto, específico e sem justificativas extensas.
 
             Conteúdo do documento:
             {document_content}
@@ -126,14 +132,60 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
         )
 
     def _coerce_summary_output(self, output: object) -> CaseSummaryOutput:
-        if isinstance(output, CaseSummaryOutput):
-            return output
+        unwrapped_output = self._unwrap_output_content(output)
 
-        if isinstance(output, PetitionSummaryOutput):
-            return CaseSummaryOutput.model_validate(output.model_dump())
+        if isinstance(unwrapped_output, CaseSummaryOutput):
+            return unwrapped_output
 
-        if isinstance(output, dict):
-            return CaseSummaryOutput.model_validate(output)
+        if isinstance(unwrapped_output, PetitionSummaryOutput):
+            return CaseSummaryOutput.model_validate(unwrapped_output.model_dump())
+
+        if isinstance(unwrapped_output, BaseModel):
+            return CaseSummaryOutput.model_validate(unwrapped_output.model_dump())
+
+        if isinstance(unwrapped_output, str):
+            stripped_output = unwrapped_output.strip()
+            if stripped_output.startswith(('{', '[')):
+                return CaseSummaryOutput.model_validate_json(stripped_output)
+
+            msg = self._build_invalid_output_message(stripped_output)
+            raise AppError('Erro de execucao do workflow', msg)
+
+        if isinstance(unwrapped_output, Mapping):
+            data = cast(
+                'dict[str, Any]',
+                dict(cast('Mapping[str, object]', unwrapped_output)),
+            )
+            return CaseSummaryOutput.model_validate(data)
 
         msg = 'Invalid summary output type from case assessment summarizer workflow'
         raise AppError('Erro de execucao do workflow', msg)
+
+    def _build_invalid_output_message(self, output: str) -> str:
+        compact_output = ' '.join(output.split())
+        snippet = compact_output[:240]
+        return f'Case assessment summarizer agent returned non-JSON content: {snippet}'
+
+    def _unwrap_output_content(self, output_content: object) -> object:
+        unwrapped_content: object = output_content
+        for _ in range(6):
+            if isinstance(
+                unwrapped_content,
+                (CaseSummaryOutput, PetitionSummaryOutput, BaseModel, Mapping),
+            ):
+                return cast('object', unwrapped_content)
+
+            if isinstance(unwrapped_content, str):
+                try:
+                    unwrapped_content = json.loads(unwrapped_content)
+                    continue
+                except json.JSONDecodeError:
+                    return unwrapped_content
+
+            nested_content = getattr(unwrapped_content, 'content', None)
+            if nested_content is None or nested_content is unwrapped_content:
+                return unwrapped_content
+
+            unwrapped_content = nested_content
+
+        return unwrapped_content

@@ -201,7 +201,11 @@ class TestGetCaseAssessmentAnalysisReportController:
         )
         assert payload['petition_draft'] == {
             'analysis_id': analysis_id,
-            'content': 'Minuta de petição',
+            'structured_facts': 'Fatos estruturados',
+            'legal_grounds': 'Fundamentos jurídicos',
+            'central_thesis': 'Tese central',
+            'requests': ['Pedido 1'],
+            'precedent_citations': ['STJ REsp 123 - tese aplicável'],
         }
 
 
