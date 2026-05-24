@@ -68,7 +68,7 @@ class TestSecondInstanceCaseSummarizationController:
         assert len(fake_inngest_client.sent_events) == 1
         assert (
             fake_inngest_client.sent_events[0].name
-            == 'intake/petition.extraction.requested'
+            == 'intake/petition.extraction.triggered'
         )
         assert fake_inngest_client.sent_events[0].data['analysis_id'] == analysis.id
 

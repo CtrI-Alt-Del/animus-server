@@ -72,7 +72,7 @@ class TestAgnoSummarizeFirstInstanceCaseWorkflow:
         )
 
         assert result.case_summary == 'Resumo'
-        assert result.requested_relief == ['Pedido 1']
+        assert result.triggered_relief == ['Pedido 1']
         assert result.excluded_or_accessory_topics == ['Topico acessorio']
 
     def test_should_raise_when_output_type_is_invalid(

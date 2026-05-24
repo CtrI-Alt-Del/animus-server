@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from animus.core.intake.domain.events import (
     PetitionDraftGenerationTriggeredEvent,
 )
+from animus.core.intake.domain.errors import ChosenAnalysisPrecedentsRequiredError
 from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
@@ -39,6 +40,7 @@ def _seed_case_assessment_analysis(
     sqlalchemy_session_factory: sessionmaker[Session],
     *,
     with_case_summary: bool = True,
+    with_chosen_precedent: bool = True,
 ) -> dict[str, str]:
     analysis_id = Id.create().value
     account_id = Id.create().value
@@ -81,7 +83,7 @@ def _seed_case_assessment_analysis(
         )
 
     for precedent_id, number, is_chosen in [
-        (chosen_precedent_id, 101, True),
+        (chosen_precedent_id, 101, with_chosen_precedent),
         (unchosen_precedent_id, 102, False),
     ]:
         session.add(
@@ -355,6 +357,59 @@ class TestGeneratePetitionDraftJob:
         assert (
             persisted_analysis.status
             == CaseAssessmentAnalysisStatus.create_as_case_analyzed().dto
+        )
+        assert (
+            _get_petition_draft(sqlalchemy_session_factory, seeded_data['analysis_id'])
+            is None
+        )
+
+    def test_should_raise_error_when_no_precedent_is_chosen_and_mark_analysis_as_failed(
+        self,
+        monkeypatch: MonkeyPatch,
+        sqlalchemy_session_factory: sessionmaker[Session],
+    ) -> None:
+        seeded_data = _seed_case_assessment_analysis(
+            sqlalchemy_session_factory,
+            with_chosen_precedent=False,
+        )
+        job_module = __import__(
+            'animus.pubsub.inngest.jobs.intake.generate_petition_draft_job',
+            fromlist=['_Payload'],
+        )
+        payload = job_module._Payload(analysis_id=seeded_data['analysis_id'])  # noqa: SLF001
+        context = SimpleNamespace(
+            event=SimpleNamespace(
+                data={
+                    'event': {
+                        'data': {'analysis_id': seeded_data['analysis_id']},
+                    }
+                }
+            )
+        )
+
+        monkeypatch.setattr(
+            Sqlalchemy,
+            'get_session',
+            staticmethod(lambda: sqlalchemy_session_factory()),
+        )
+
+        job_class = cast('Any', GeneratePetitionDraftJob)
+        generate_and_persist = job_class._generate_and_persist_petition_draft_sync  # noqa: SLF001
+        handle_failure = job_class._handle_failure  # noqa: SLF001
+
+        with pytest.raises(ChosenAnalysisPrecedentsRequiredError):
+            generate_and_persist(payload)
+
+        asyncio.run(handle_failure(cast('Any', context)))
+
+        persisted_analysis = _get_analysis(
+            sqlalchemy_session_factory,
+            seeded_data['analysis_id'],
+        )
+
+        assert (
+            persisted_analysis.status
+            == CaseAssessmentAnalysisStatus.create_as_failed().dto
         )
         assert (
             _get_petition_draft(sqlalchemy_session_factory, seeded_data['analysis_id'])

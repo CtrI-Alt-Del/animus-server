@@ -11,13 +11,13 @@ from animus.core.intake.domain.structures.first_instance_analysis_status import 
 from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
     AnalysisDocumentDto,
 )
-from animus.core.intake.domain.events import PetitionSummaryRequestedEvent
+from animus.core.intake.domain.events import FistInstanceCaseSummarizationTriggeredEvent
 from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     PetitionNotFoundError,
 )
 from animus.core.intake.interfaces import AnalysesRepository, PetitionsRepository
-from animus.core.intake.use_cases import RequestPetitionSummaryUseCase
+from animus.core.intake.use_cases import TriggerFistInstanceCaseSummarizationUseCase
 from animus.core.shared.domain.errors import ValidationError
 from animus.core.shared.domain.structures import Id
 from animus.core.shared.interfaces import Broker
@@ -25,7 +25,7 @@ from animus.fakers.intake.entities.analyses_faker import AnalysesFaker
 from animus.fakers.intake.entities.petitions_faker import PetitionsFaker
 
 
-class TestRequestPetitionSummaryUseCase:
+class TestTriggerFistInstanceCaseSummarizationUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
         self.petitions_repository_mock = create_autospec(
@@ -37,7 +37,7 @@ class TestRequestPetitionSummaryUseCase:
             instance=True,
         )
         self.broker_mock = create_autospec(Broker, instance=True)
-        self.use_case = RequestPetitionSummaryUseCase(
+        self.use_case = TriggerFistInstanceCaseSummarizationUseCase(
             petitions_repository=self.petitions_repository_mock,
             analyses_repository=self.analyses_repository_mock,
             broker=self.broker_mock,
@@ -81,7 +81,7 @@ class TestRequestPetitionSummaryUseCase:
             updated_analysis.status
             == FirstInstanceAnalysisStatus.create_as_analyzing_case()
         )
-        assert isinstance(published_event, PetitionSummaryRequestedEvent)
+        assert isinstance(published_event, FistInstanceCaseSummarizationTriggeredEvent)
         assert published_event.payload.petition_id == petition_id
 
     def test_should_raise_validation_error_when_petition_id_is_invalid(self) -> None:

@@ -10,7 +10,7 @@ from animus.core.intake.domain.errors import (
     InconsistentAnalysisTypeError,
 )
 from animus.core.intake.domain.events import (
-    CaseAssessmentCaseSummaryRequestedEvent,
+    CaseAssessmentCaseSummarizationTriggeredEvent,
 )
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.analysis_type import AnalysisType
@@ -83,7 +83,9 @@ class TestTriggerCaseAssessmentCaseSummarizationUseCase:
             updated_analysis.status
             == CaseAssessmentAnalysisStatus.create_as_analyzing_case()
         )
-        assert isinstance(published_event, CaseAssessmentCaseSummaryRequestedEvent)
+        assert isinstance(
+            published_event, CaseAssessmentCaseSummarizationTriggeredEvent
+        )
         assert published_event.payload.analysis_id == analysis_id
 
     def test_should_raise_analysis_document_not_found_error_when_document_does_not_exist(

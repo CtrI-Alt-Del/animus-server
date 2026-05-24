@@ -73,7 +73,7 @@ class TestVectorizePrecedentsJob:
         )
 
         response = inngest_runtime.post_event(
-            name='intake/vectorize-precedents.requested',
+            name='intake/vectorize-precedents.triggered',
             data={},
         )
 

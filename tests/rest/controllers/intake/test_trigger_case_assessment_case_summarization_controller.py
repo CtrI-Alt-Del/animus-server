@@ -68,7 +68,7 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         assert len(fake_inngest_client.sent_events) == 1
         assert (
             fake_inngest_client.sent_events[0].name
-            == 'intake/case_assessment.case_summary.requested'
+            == 'intake/case_assessment.case_summary.triggered'
         )
         assert fake_inngest_client.sent_events[0].data['analysis_id'] == analysis.id
 

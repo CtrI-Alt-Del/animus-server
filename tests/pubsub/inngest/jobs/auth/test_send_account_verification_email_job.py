@@ -42,7 +42,7 @@ class TestSendAccountVerificationEmailJob:
             _send_account_verification_email,
         )
         response = inngest_runtime.post_event(
-            name='auth/email-verification.requested',
+            name='auth/email-verification.triggered',
             data={
                 'account_email': 'maria@example.com',
                 'account_email_otp': '123456',

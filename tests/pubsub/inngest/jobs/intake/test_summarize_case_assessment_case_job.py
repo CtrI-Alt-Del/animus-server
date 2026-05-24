@@ -10,7 +10,7 @@ from pytest import MonkeyPatch
 from sqlalchemy.orm import Session, sessionmaker
 
 from animus.core.intake.domain.events import (
-    CaseAssessmentCaseSummaryRequestedEvent,
+    CaseAssessmentCaseSummarizationTriggeredEvent,
 )
 from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.case_assessment_analysis_status import (
@@ -108,7 +108,7 @@ class TestSummarizeCaseAssessmentCaseJob:
         function = SummarizeCaseAssessmentCaseJob.handle(Inngest(app_id='test'))
 
         assert function._triggers == [  # noqa: SLF001
-            TriggerEvent(event=CaseAssessmentCaseSummaryRequestedEvent.name)
+            TriggerEvent(event=CaseAssessmentCaseSummarizationTriggeredEvent.name)
         ]
 
     @pytest.mark.filterwarnings(
@@ -148,7 +148,7 @@ class TestSummarizeCaseAssessmentCaseJob:
         monkeypatch.setattr(InngestBroker, 'publish', _publish)
 
         response = inngest_runtime.post_event(
-            name=CaseAssessmentCaseSummaryRequestedEvent.name,
+            name=CaseAssessmentCaseSummarizationTriggeredEvent.name,
             data={'analysis_id': analysis_id},
         )
 
@@ -266,7 +266,7 @@ class TestSummarizeCaseAssessmentCaseJob:
         assert persisted_case_summary.case_summary == 'Resumo estruturado do caso'
         assert persisted_case_summary.legal_issue == 'Questão jurídica principal'
         assert persisted_case_summary.central_question == 'Pergunta central'
-        assert persisted_case_summary.requested_relief == ['Pedido 1']
+        assert persisted_case_summary.triggered_relief == ['Pedido 1']
         assert persisted_case_summary.procedural_issues == ['Questão processual 1']
 
     def test_should_mark_analysis_as_failed_when_failure_handler_receives_event_payload(
