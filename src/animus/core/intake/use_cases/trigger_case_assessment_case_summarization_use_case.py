@@ -4,7 +4,7 @@ from animus.core.intake.domain.errors import (
     InconsistentAnalysisTypeError,
 )
 from animus.core.intake.domain.events import (
-    CaseAssessmentCaseSummaryRequestedEvent,
+    CaseAssessmentCaseSummarizationTriggeredEvent,
 )
 from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
@@ -46,7 +46,7 @@ class TriggerCaseAssessmentCaseSummarizationUseCase:
 
         analysis.set_status(CaseAssessmentAnalysisStatus.create_as_analyzing_case())
 
-        event = CaseAssessmentCaseSummaryRequestedEvent(
+        event = CaseAssessmentCaseSummarizationTriggeredEvent(
             analysis_id=analysis_id_entity.value,
         )
         self._analyses_repository.replace(analysis)

@@ -3,9 +3,7 @@ from animus.core.intake.domain.errors import (
     AnalysisDocumentNotFoundError,
     InconsistentAnalysisTypeError,
 )
-from animus.core.intake.domain.events import (
-    CaseSummaryRequestedEvent,
-)
+from animus.core.intake.domain.events import FistInstanceCaseSummarizationTriggeredEvent
 from animus.core.intake.domain.structures.first_instance_analysis_status import (
     FirstInstanceAnalysisStatus,
 )
@@ -46,6 +44,8 @@ class TriggerFirstInstanceCaseSummarizationUseCase:
 
         analysis.set_status(FirstInstanceAnalysisStatus.create_as_analyzing_case())
 
-        event = CaseSummaryRequestedEvent(analysis_id=analysis_id_entity.value)
+        event = FistInstanceCaseSummarizationTriggeredEvent(
+            analysis_id=analysis_id_entity.value
+        )
         self._analyses_repository.replace(analysis)
         self._broker.publish(event)

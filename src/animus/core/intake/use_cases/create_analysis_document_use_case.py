@@ -7,7 +7,7 @@ from animus.core.intake.domain.structures.first_instance_analysis_status import 
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.domain.events import PetitionReplacedEvent
+from animus.core.intake.domain.events import AnalysisDocumentReplacedEvent
 from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
@@ -51,7 +51,7 @@ class CreateAnalysisDocumentUseCase:
             operation = self._analysis_documents_repository.add
         else:
             self._broker.publish(
-                PetitionReplacedEvent(
+                AnalysisDocumentReplacedEvent(
                     petition_document_path=existing_document.file_path.value,
                 )
             )
