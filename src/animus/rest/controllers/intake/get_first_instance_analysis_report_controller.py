@@ -20,7 +20,7 @@ class GetFirstInstanceAnalysisReportController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/analyses/{analysis_id}/first-instance-report',
+            '/analyses/{analysis_id}/reports/first-instance',
             status_code=200,
             response_model=FirstInstanceAnalysisReportDto,
         )

@@ -73,7 +73,7 @@ class SeedAnalysesPrecedentsDatasetJob:
         @inngest.create_function(
             fn_id='seed-analyses-precedents-dataset',
             trigger=TriggerEvent(
-                event='intake/seed-analyses-precedents-dataset.requested',
+                event='intake/seed-analyses-precedents-dataset.triggered',
             ),
         )
         async def _(context: Context) -> None:

@@ -3,7 +3,7 @@ from typing import Any
 
 from inngest import Context, Inngest, TriggerEvent
 
-from animus.core.intake.domain.events import PetitionReplacedEvent
+from animus.core.intake.domain.events import AnalysisDocumentReplacedEvent
 from animus.core.shared.domain.structures import FilePath
 from animus.providers.storage import GcsFileStorageProvider
 
@@ -18,7 +18,7 @@ class RemovePetitionDocumentFileJob:
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
             fn_id='remove-petition-document-file',
-            trigger=TriggerEvent(event=PetitionReplacedEvent.name),
+            trigger=TriggerEvent(event=AnalysisDocumentReplacedEvent.name),
         )
         async def _(context: Context) -> None:
             data = dict(context.event.data)

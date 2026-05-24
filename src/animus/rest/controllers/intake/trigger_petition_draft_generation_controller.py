@@ -18,7 +18,9 @@ from animus.pipes.pubsub_pipe import PubSubPipe
 class TriggerPetitionDraftGenerationController:
     @staticmethod
     def handle(router: APIRouter) -> None:
-        @router.post('/analyses/{analysis_id}/petition-drafts', status_code=202)
+        @router.post(
+            '/analyses/{analysis_id}/case-summaries/case-assessment', status_code=202
+        )
         async def _(
             analysis: Annotated[
                 Analysis,

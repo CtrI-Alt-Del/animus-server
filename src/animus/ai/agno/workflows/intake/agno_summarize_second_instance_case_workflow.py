@@ -110,7 +110,7 @@ class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeFirstInstanceCaseWorkflow
                 alternative_questions=output.alternative_questions,
                 jurisdiction_issue=output.jurisdiction_issue,
                 standing_issue=output.standing_issue,
-                requested_relief=output.requested_relief,
+                requested_relief=output.triggered_relief,
                 procedural_issues=output.procedural_issues,
                 excluded_or_accessory_topics=output.excluded_or_accessory_topics,
             )

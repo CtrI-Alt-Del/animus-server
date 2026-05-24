@@ -189,7 +189,7 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
             - alternative_questions: {', '.join(petition_summary_dto.alternative_questions)}
             - jurisdiction_issue: {petition_summary_dto.jurisdiction_issue}
             - standing_issue: {petition_summary_dto.standing_issue}
-            - requested_relief: {', '.join(petition_summary_dto.requested_relief)}
+            - requested_relief: {', '.join(petition_summary_dto.triggered_relief)}
             - procedural_issues: {', '.join(petition_summary_dto.procedural_issues)}
             - excluded_or_accessory_topics: {', '.join(petition_summary_dto.excluded_or_accessory_topics)}
 

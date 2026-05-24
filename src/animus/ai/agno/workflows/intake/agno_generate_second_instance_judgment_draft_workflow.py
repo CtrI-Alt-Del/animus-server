@@ -141,7 +141,7 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
             - type_of_action: {case_summary_dto.type_of_action}
             - relevant_laws: {', '.join(case_summary_dto.relevant_laws)}
             - key_facts: {', '.join(case_summary_dto.key_facts)}
-            - requested_relief: {', '.join(case_summary_dto.requested_relief)}
+            - requested_relief: {', '.join(case_summary_dto.triggered_relief)}
             - procedural_issues: {', '.join(case_summary_dto.procedural_issues)}
             - jurisdiction_issue: {case_summary_dto.jurisdiction_issue}
             - standing_issue: {case_summary_dto.standing_issue}

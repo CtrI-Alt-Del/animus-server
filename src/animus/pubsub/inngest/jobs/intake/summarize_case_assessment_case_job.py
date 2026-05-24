@@ -9,7 +9,7 @@ from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
 )
 from animus.core.intake.domain.events import (
-    CaseAssessmentCaseSummaryRequestedEvent,
+    CaseAssessmentCaseSummarizationTriggeredEvent,
     CaseSummaryFinishedEvent,
 )
 from animus.core.intake.domain.structures.case_assessment_analysis_status import (
@@ -51,7 +51,7 @@ class SummarizeCaseAssessmentCaseJob(InngestJob):
         @inngest.create_function(
             fn_id='summarize-case-assessment-case',
             trigger=TriggerEvent(
-                event=CaseAssessmentCaseSummaryRequestedEvent.name,
+                event=CaseAssessmentCaseSummarizationTriggeredEvent.name,
             ),
             retries=0,
             on_failure=SummarizeCaseAssessmentCaseJob._handle_failure,

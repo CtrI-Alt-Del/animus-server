@@ -19,7 +19,7 @@ class VectorizeAllPrecedentsJob:
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
             fn_id='vectorize-all-precedents',
-            trigger=TriggerEvent(event='intake/vectorize-all-precedents.requested'),
+            trigger=TriggerEvent(event='intake/vectorize-all-precedents.triggered'),
         )
         async def _(context: Context) -> None:
             page = 1
