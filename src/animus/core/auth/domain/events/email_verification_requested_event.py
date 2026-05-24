@@ -10,7 +10,7 @@ class _Payload:
 
 
 class EmailVerificationRequestedEvent(Event[_Payload]):
-    name = 'auth/email-verification.requested'
+    name = 'auth/email-verification.triggered'
 
     def __init__(
         self,

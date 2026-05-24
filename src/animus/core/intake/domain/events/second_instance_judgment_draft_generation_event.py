@@ -9,7 +9,7 @@ class _Payload:
 
 
 class SecondInstanceJudgmentDraftGenerationTriggeredEvent(Event[_Payload]):
-    name = 'intake/judgment_draft.generation.triggered'
+    name = 'intake/second.instance.judgment_draft.generation.triggered'
 
     def __init__(self, analysis_id: str) -> None:
         payload = _Payload(analysis_id=analysis_id)

@@ -9,7 +9,7 @@ class _Payload:
 
 
 class SecondInstanceCaseSummarizationTriggeredEvent(Event[_Payload]):
-    name = 'intake/petition.extraction.requested'
+    name = 'intake/second.instance.case.summary.triggered'
 
     def __init__(self, analysis_id: str) -> None:
         payload = _Payload(analysis_id=analysis_id)

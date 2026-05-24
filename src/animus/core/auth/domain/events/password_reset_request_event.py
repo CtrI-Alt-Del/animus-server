@@ -10,7 +10,7 @@ class _Payload:
 
 
 class PasswordResetRequestEvent(Event[_Payload]):
-    name = 'auth/password-reset.requested'
+    name = 'auth/password-reset.triggered'
 
     def __init__(self, account_email: str, account_email_otp: str) -> None:
         payload = _Payload(
