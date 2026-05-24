@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KRKEW0MNECWS8AQAJGFGZPC0
+@analysis_id = 01KRSQ2CMK61A4NV4NN2WVETWH
 @petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
 @folder_id = 01KQ5CG4D6QY8A1X7R2M4N8P0B
 @precedent_court = STJ
@@ -129,12 +129,12 @@ Content-Type: application/json
   }
 }
 
-### Disparar resumo de caso jurídico de primeira instância (TriggerFirstInstanceCaseSummarizationController)
-POST {{url}}/analyses/{{analysis_id}}/case-summaries
+### Disparar sumarização de avaliação de caso (TriggerCaseAssessmentCaseSummarizationController)
+POST {{url}}/analyses/{{analysis_id}}/case-assessment-case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Disparar sumarização de case assessment (TriggerCaseAssessmentCaseSummarizationController)
-POST {{url}}/analyses/{{analysis_id}}/case-assessment-case-summaries
+### Disparar resumo de caso jurídico de primeira instância (TriggerFirstInstanceCaseSummarizationController)
+POST {{url}}/analyses/{{analysis_id}}/case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar resumo de caso jurídico de segunda instância (SecondInstanceCaseSummarizationController)
@@ -143,6 +143,10 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar geração/regeneração de minuta de julgamento de 2a instancia (TriggerSecondInstanceJudgmentDraftGenerationController)
 POST {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Disparar geração/regeneração de minuta de petição (TriggerPetitionDraftGenerationController)
+POST {{url}}/analyses/{{analysis_id}}/petition-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Obter resumo de caso da analise (GetCaseSummaryController)
@@ -158,7 +162,7 @@ PATCH {{url}}/analyses/{{analysis_id}}/precedents/unchoose?court={{precedent_cou
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Obter relatorio de case assessment (GetCaseAssessmentAnalysisReportController)
-GET {{url}}/analyses/{{analysis_id}}/case-assessment-report
+GET {{url}}/analyses/{{analysis_id}}/reports/case-assessment
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Obter relatorio de primeira instancia (GetFirstInstanceAnalysisReportController)
