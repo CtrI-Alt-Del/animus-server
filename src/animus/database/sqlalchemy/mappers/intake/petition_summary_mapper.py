@@ -24,7 +24,7 @@ class PetitionSummaryMapper:
                 alternative_questions=model.alternative_questions,
                 jurisdiction_issue=model.jurisdiction_issue,
                 standing_issue=model.standing_issue,
-                requested_relief=model.requested_relief,
+                requested_relief=model.triggered_relief,
                 procedural_issues=model.procedural_issues,
                 excluded_or_accessory_topics=model.excluded_or_accessory_topics,
             )
@@ -64,7 +64,7 @@ class PetitionSummaryMapper:
                 if petition_summary.standing_issue is not None
                 else None
             ),
-            requested_relief=[item.value for item in petition_summary.requested_relief],
+            requested_relief=[item.value for item in petition_summary.triggered_relief],
             procedural_issues=[
                 item.value for item in petition_summary.procedural_issues
             ],

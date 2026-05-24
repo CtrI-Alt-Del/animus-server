@@ -78,8 +78,8 @@ class SqlalchemyPetitionSummariesRepository(PetitionSummariesRepository):
             if petition_summary.standing_issue is not None
             else None
         )
-        model.requested_relief = [
-            item.value for item in petition_summary.requested_relief
+        model.triggered_relief = [
+            item.value for item in petition_summary.triggered_relief
         ]
         model.procedural_issues = [
             item.value for item in petition_summary.procedural_issues

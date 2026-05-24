@@ -149,7 +149,7 @@ def upgrade() -> None:
                 ps.alternative_questions,
                 ps.jurisdiction_issue,
                 ps.standing_issue,
-                ps.requested_relief,
+                ps.triggered_relief,
                 ps.procedural_issues,
                 ps.excluded_or_accessory_topics,
                 ps.created_at,
@@ -298,6 +298,8 @@ def downgrade() -> None:
     op.drop_table('judgment_drafts')
     op.drop_table('petition_drafts')
     op.drop_table('case_summaries')
-    op.drop_index(op.f('ix_analysis_documents_analysis_id'), table_name='analysis_documents')
+    op.drop_index(
+        op.f('ix_analysis_documents_analysis_id'), table_name='analysis_documents'
+    )
     op.drop_table('analysis_documents')
     op.drop_column('analyses', 'type')
