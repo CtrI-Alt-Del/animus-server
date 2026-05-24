@@ -76,9 +76,13 @@ class GetCaseAssessmentAnalysisReportUseCase:
         if petition_draft is None:
             raise PetitionDraftUnavailableError
 
-        precedents = self._analysis_precedents_repository.find_many_by_analysis_id(
-            id_analysis
-        ).items
+        precedents = [
+            p
+            for p in self._analysis_precedents_repository.find_many_by_analysis_id(
+                id_analysis
+            ).items
+            if p.is_chosen.is_true
+        ]
 
         report = CaseAssessmentAnalysisReport(
             analysis=analysis,

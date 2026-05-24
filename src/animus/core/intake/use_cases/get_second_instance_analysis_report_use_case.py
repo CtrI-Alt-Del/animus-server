@@ -68,11 +68,13 @@ class GetSecondInstanceAnalysisReportUseCase:
         if case_summary is None:
             raise CaseSummaryUnavailableError
 
-        analysis_precedents_response = (
+        analysis_precedents = (
             self._analysis_precedents_repository.find_many_by_analysis_id(id_analysis)
         )
 
-        classified_precedents = analysis_precedents_response.items
+        classified_precedents = [
+            p for p in analysis_precedents.items if p.is_chosen.is_true
+        ]
         judgment_draft = None
         if self._judgment_drafts_repository is not None:
             judgment_draft = self._judgment_drafts_repository.find_by_analysis_id(
