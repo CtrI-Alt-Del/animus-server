@@ -266,7 +266,7 @@ class TestSummarizeCaseAssessmentCaseJob:
         assert persisted_case_summary.case_summary == 'Resumo estruturado do caso'
         assert persisted_case_summary.legal_issue == 'Questão jurídica principal'
         assert persisted_case_summary.central_question == 'Pergunta central'
-        assert persisted_case_summary.triggered_relief == ['Pedido 1']
+        assert persisted_case_summary.requested_relief == ['Pedido 1']
         assert persisted_case_summary.procedural_issues == ['Questão processual 1']
 
     def test_should_mark_analysis_as_failed_when_failure_handler_receives_event_payload(

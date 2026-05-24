@@ -142,7 +142,7 @@ class AgnoGeneratePetitionDraftWorkflow(GeneratePetitionDraftWorkflow):
             - type_of_action: {case_summary_dto.type_of_action}
             - relevant_laws: {', '.join(case_summary_dto.relevant_laws)}
             - key_facts: {', '.join(case_summary_dto.key_facts)}
-            - requested_relief: {', '.join(case_summary_dto.triggered_relief)}
+            - requested_relief: {', '.join(case_summary_dto.requested_relief)}
             - procedural_issues: {', '.join(case_summary_dto.procedural_issues)}
             - secondary_legal_issues: {', '.join(case_summary_dto.secondary_legal_issues)}
             - alternative_questions: {', '.join(case_summary_dto.alternative_questions)}

@@ -149,7 +149,7 @@ def upgrade() -> None:
                 ps.alternative_questions,
                 ps.jurisdiction_issue,
                 ps.standing_issue,
-                ps.triggered_relief,
+                ps.requested_relief,
                 ps.procedural_issues,
                 ps.excluded_or_accessory_topics,
                 ps.created_at,

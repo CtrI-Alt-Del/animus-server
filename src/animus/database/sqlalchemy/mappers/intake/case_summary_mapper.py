@@ -20,7 +20,7 @@ class CaseSummaryMapper:
                 alternative_questions=model.alternative_questions,
                 jurisdiction_issue=model.jurisdiction_issue,
                 standing_issue=model.standing_issue,
-                requested_relief=model.triggered_relief,
+                requested_relief=model.requested_relief,
                 procedural_issues=model.procedural_issues,
                 excluded_or_accessory_topics=model.excluded_or_accessory_topics,
             )
@@ -57,7 +57,7 @@ class CaseSummaryMapper:
                 if case_summary.standing_issue is not None
                 else None
             ),
-            requested_relief=[item.value for item in case_summary.triggered_relief],
+            requested_relief=[item.value for item in case_summary.requested_relief],
             procedural_issues=[item.value for item in case_summary.procedural_issues],
             excluded_or_accessory_topics=[
                 item.value for item in case_summary.excluded_or_accessory_topics

@@ -51,7 +51,7 @@ class CaseSummary(Structure):
                 if dto.standing_issue is not None
                 else None
             ),
-            requested_relief=[Text.create(item) for item in dto.triggered_relief],
+            requested_relief=[Text.create(item) for item in dto.requested_relief],
             procedural_issues=[Text.create(item) for item in dto.procedural_issues],
             excluded_or_accessory_topics=[
                 Text.create(item) for item in dto.excluded_or_accessory_topics
@@ -80,7 +80,7 @@ class CaseSummary(Structure):
             standing_issue=(
                 self.standing_issue.value if self.standing_issue is not None else None
             ),
-            requested_relief=[item.value for item in self.triggered_relief],
+            requested_relief=[item.value for item in self.requested_relief],
             procedural_issues=[item.value for item in self.procedural_issues],
             excluded_or_accessory_topics=[
                 item.value for item in self.excluded_or_accessory_topics

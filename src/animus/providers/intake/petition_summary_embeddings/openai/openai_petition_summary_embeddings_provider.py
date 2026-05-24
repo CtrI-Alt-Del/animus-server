@@ -106,7 +106,7 @@ class _ChunkBuilder:
             ('Questão jurídica secundária: ', s.secondary_legal_issues),
             ('Pergunta jurídica adicional: ', s.alternative_questions),
             ('Fato relevante: ', s.key_facts),
-            ('Pedido principal: ', s.triggered_relief),
+            ('Pedido principal: ', s.requested_relief),
             ('Tema processual relevante: ', s.procedural_issues),
             ('', s.search_terms),
         ]
@@ -172,7 +172,7 @@ class _ChunkBuilder:
         return 'Temas processuais e estruturais: ' + ' | '.join(issues)
 
     def _build_relief_chunk(self) -> str | None:
-        relief = [item.value for item in self._summary.triggered_relief]
+        relief = [item.value for item in self._summary.requested_relief]
         if not relief:
             return None
         return 'Pedidos principais: ' + ' | '.join(relief)
