@@ -1,6 +1,5 @@
 ---
 description: Prompt para concluir uma spec com review de código integrado, validação final, atualização de documentação e geração de resumo estruturado para PR.
-version: 2.0
 ---
 
 # Prompt: Conclude Spec

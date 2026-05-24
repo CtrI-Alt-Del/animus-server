@@ -14,7 +14,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 
 ## 2.1 In-scope
 
-- Criar evento dedicado para solicitar sumarização de `CASE_ASSESSMENT`, evitando colisão com o `CaseSummaryRequestedEvent` já consumido por `SummarizeFirstInstanceCaseJob`.
+- Criar evento dedicado para solicitar sumarização de `CASE_ASSESSMENT`, evitando colisão com o `CaseSummaryCaseSummarizationTriggeredEvent` já consumido por `SummarizeFirstInstanceCaseJob`.
 - Criar endpoint HTTP para solicitar a sumarização de `CASE_ASSESSMENT`.
 - Criar `TriggerCaseAssessmentCaseSummarizationUseCase` para validar pré-condições, atualizar status para `ANALYZING_CASE` e publicar o evento de sumarização.
 - Criar `SummarizeCaseAssessmentCaseJob` baseado estruturalmente em `SummarizeSecondInstanceCaseJob`, reutilizando o padrão de steps, `publish_finished_event`, `except` + `on_failure` e `run_in_executor`.
@@ -49,7 +49,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 
 ## 3.1 Funcionais
 
-- O fluxo de sumarização deve iniciar a partir de `CaseAssessmentCaseSummaryRequestedEvent` contendo `analysis_id`.
+- O fluxo de sumarização deve iniciar a partir de `CaseAssessmentCaseSummarizationTriggeredEvent` contendo `analysis_id`.
 - O endpoint HTTP de trigger da sumarização deve ser `POST /intake/analyses/{analysis_id}/case-assessment-case-summaries`.
 - O endpoint de trigger deve responder `202 Accepted` sem body quando a solicitação for aceita.
 - O endpoint deve depender de `IntakePipe.verify_analysis_by_account_from_request` para garantir que a análise pertença à conta autenticada.
@@ -59,7 +59,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - Se a análise não existir, a resposta HTTP deve seguir o mapeamento global já existente para `AnalysisNotFoundError`.
 - Se o documento da análise não existir, a resposta HTTP deve seguir o mapeamento global já existente para `AnalysisDocumentNotFoundError`.
 - Se a análise existir mas não for do tipo `CASE_ASSESSMENT`, a resposta HTTP deve seguir o mapeamento global já existente para `InconsistentAnalysisTypeError`.
-- Em sucesso, o endpoint deve publicar exatamente um `CaseAssessmentCaseSummaryRequestedEvent` com o `analysis_id` da análise validada.
+- Em sucesso, o endpoint deve publicar exatamente um `CaseAssessmentCaseSummarizationTriggeredEvent` com o `analysis_id` da análise validada.
 - Em sucesso, o endpoint deve persistir o status `ANALYZING_CASE` antes da publicação do evento.
 - O fluxo chamador da sumarização deve validar que existe `AnalysisDocument` para a análise.
 - O fluxo chamador da sumarização deve validar que a análise existe.
@@ -108,7 +108,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **Observabilidade por estado persistido:** o app deve acompanhar evolução por status da análise e pelo relatório de `CASE_ASSESSMENT` já existente.
 - **Segurança:** os endpoints de trigger de sumarização e de geração devem reutilizar a autorização já padronizada no módulo `intake` via `IntakePipe.verify_analysis_by_account_from_request`.
 - **Evolução de contrato e persistência:** deve haver alteração coordenada de schema HTTP, DTO de domínio, model SQLAlchemy, mapper, repository e schema de banco para refletir os novos campos estruturados de `PetitionDraft`.
-- **Compatibilidade de eventos:** o fluxo de sumarização de `CASE_ASSESSMENT` não deve reutilizar `CaseSummaryRequestedEvent`, porque esse evento já é consumido por `SummarizeFirstInstanceCaseJob` e criaria disparos concorrentes indevidos.
+- **Compatibilidade de eventos:** o fluxo de sumarização de `CASE_ASSESSMENT` não deve reutilizar `CaseSummaryCaseSummarizationTriggeredEvent`, porque esse evento já é consumido por `SummarizeFirstInstanceCaseJob` e criaria disparos concorrentes indevidos.
 - **Timeout de IA:** o agente de geração da minuta deve usar `timeout=60`, alinhado ao PRD e ao padrão dos agentes de intake.
 
 # 4. O que já existe?
@@ -191,7 +191,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 ## Camada Core (Eventos de Domínio)
 
 - **Localização:** `src/animus/core/intake/domain/events/case_assessment_case_summary_requested_event.py` (**novo arquivo**)
-- **`name`:** `"intake/case_assessment.case_summary.requested"`
+- **`name`:** `"intake/case_assessment.case_summary.triggered"`
 - **Payload:** `analysis_id: str`
 - **Métodos / factory:** `__init__(analysis_id: str) -> None` — cria evento dedicado para iniciar a sumarização de `CASE_ASSESSMENT` sem colidir com o trigger de `FIRST_INSTANCE`.
 
@@ -228,7 +228,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
   - Se `analysis.type.is_case_analysis.is_false`, lança `InconsistentAnalysisTypeError`.
   - Atualiza status com `analysis.set_status(CaseAssessmentAnalysisStatus.create_as_analyzing_case())`.
   - Persiste a análise via `AnalysesRepository.replace(analysis)`.
-  - Publica `CaseAssessmentCaseSummaryRequestedEvent(analysis_id=analysis_id_entity.value)` via `Broker.publish(...)`.
+  - Publica `CaseAssessmentCaseSummarizationTriggeredEvent(analysis_id=analysis_id_entity.value)` via `Broker.publish(...)`.
 
 - **Localização:** `src/animus/core/intake/use_cases/trigger_petition_draft_generation_use_case.py` (**novo arquivo**)
 - **Dependências (ports injetados):** `AnalysesRepository`, `CaseSummariesRepository`, `AnalysisPrecedentsRepository`, `Broker`
@@ -333,7 +333,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 ## Camada PubSub (Jobs Inngest)
 
 - **Localização:** `src/animus/pubsub/inngest/jobs/intake/summarize_case_assessment_case_job.py` (**novo arquivo**)
-- **Evento consumido:** `CaseAssessmentCaseSummaryRequestedEvent.name`
+- **Evento consumido:** `CaseAssessmentCaseSummarizationTriggeredEvent.name`
 - **Dependências:** `SqlalchemyAnalysisDocumentsRepository`, `SqlalchemyCaseSummariesRepository`, `SqlalchemyAnalysesRepository`, `GetDocumentContentUseCase`, `GcsFileStorageProvider`, `PypdfPdfProvider`, `PythonDocxProvider`, `AiPipe.get_summarize_case_assessment_case_workflow()`, `UpdateAnalysisStatusUseCase`, `InngestBroker`.
 - **Passos (`step.run`):**
   - `normalize_payload` — normaliza `analysis_id` do evento.
@@ -341,7 +341,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
   - `publish_finished_event` — publica `CaseSummaryFinishedEvent` quando a sumarização persistir com sucesso.
   - `mark_analysis_as_failed` — em exceções não tratadas, atualiza status para `FAILED` e executa `session.commit()`.
 - **Métodos internos:**
-  - `handle(inngest: Inngest) -> Any` — registra função com `fn_id='summarize-case-assessment-case'`, `trigger=TriggerEvent(event=CaseAssessmentCaseSummaryRequestedEvent.name)`, `retries=0` e `on_failure=SummarizeCaseAssessmentCaseJob._handle_failure`.
+  - `handle(inngest: Inngest) -> Any` — registra função com `fn_id='summarize-case-assessment-case'`, `trigger=TriggerEvent(event=CaseAssessmentCaseSummarizationTriggeredEvent.name)`, `retries=0` e `on_failure=SummarizeCaseAssessmentCaseJob._handle_failure`.
   - `_normalize_payload(data: dict[str, Any]) -> dict[str, str]` — retorna `{'analysis_id': str(data['analysis_id'])}`.
   - `_summarize_case(payload: _Payload) -> dict[str, str]` — delega execução síncrona via `run_in_executor`.
   - `_summarize_case_sync(payload: _Payload) -> dict[str, str]` — busca `AnalysisDocument` e `Analysis`, extrai conteúdo, instancia `AgnoSummarizeCaseAssessmentCaseWorkflow`, persiste `CaseSummary` e retorna `{ analysis_id, account_id }`.
@@ -376,7 +376,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 ## Core
 
 - **Arquivo:** `src/animus/core/intake/domain/events/__init__.py`
-- **Mudança:** exportar `CaseAssessmentCaseSummaryRequestedEvent`, `PetitionDraftGenerationTriggeredEvent` e `PetitionDraftGenerationFinishedEvent` em imports e `__all__`.
+- **Mudança:** exportar `CaseAssessmentCaseSummarizationTriggeredEvent`, `PetitionDraftGenerationTriggeredEvent` e `PetitionDraftGenerationFinishedEvent` em imports e `__all__`.
 - **Justificativa:** manter eventos públicos disponíveis para jobs, brokers e fluxos futuros.
 
 - **Arquivo:** `src/animus/core/intake/interfaces/__init__.py`
@@ -458,7 +458,7 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 - **Arquivo:** `tests/rest/controllers/intake/test_trigger_case_assessment_case_summarization_controller.py` (**novo arquivo**)
 - **Mudança:** criar testes de integração do endpoint HTTP de trigger.
 - **Cenários mínimos obrigatórios:**
-  - retorna `202`, publica `CaseAssessmentCaseSummaryRequestedEvent` e persiste `ANALYZING_CASE` quando a análise `CASE_ASSESSMENT` possui documento;
+  - retorna `202`, publica `CaseAssessmentCaseSummarizationTriggeredEvent` e persiste `ANALYZING_CASE` quando a análise `CASE_ASSESSMENT` possui documento;
   - retorna o status HTTP mapeado para `AnalysisDocumentNotFoundError` quando o documento não existir;
   - retorna o status HTTP mapeado para `InconsistentAnalysisTypeError` quando a análise não for `CASE_ASSESSMENT`;
   - não publica evento quando qualquer pré-condição falhar.
@@ -483,9 +483,9 @@ Implementar o pipeline assíncrono de `CASE_ASSESSMENT` para duas etapas: sumari
 
 # 8. Decisões Técnicas e Trade-offs
 
-- **Decisão:** criar `CaseAssessmentCaseSummaryRequestedEvent` em vez de reutilizar `CaseSummaryRequestedEvent`.
-- **Alternativas consideradas:** reutilizar `CaseSummaryRequestedEvent` com um segundo consumer; adicionar `analysis_type` ao payload do evento existente.
-- **Motivo da escolha:** hoje `SummarizeFirstInstanceCaseJob` já consome `CaseSummaryRequestedEvent` sem filtro por tipo; reutilizar o mesmo evento faria dois jobs reagirem ao mesmo trigger. Alterar o payload do evento existente ampliaria contrato já usado por `FIRST_INSTANCE`.
+- **Decisão:** criar `CaseAssessmentCaseSummarizationTriggeredEvent` em vez de reutilizar `CaseSummaryCaseSummarizationTriggeredEvent`.
+- **Alternativas consideradas:** reutilizar `CaseSummaryCaseSummarizationTriggeredEvent` com um segundo consumer; adicionar `analysis_type` ao payload do evento existente.
+- **Motivo da escolha:** hoje `SummarizeFirstInstanceCaseJob` já consome `CaseSummaryCaseSummarizationTriggeredEvent` sem filtro por tipo; reutilizar o mesmo evento faria dois jobs reagirem ao mesmo trigger. Alterar o payload do evento existente ampliaria contrato já usado por `FIRST_INSTANCE`.
 - **Impactos / trade-offs:** adiciona mais um evento no domínio, mas evita regressão e mantém isolamento claro entre pipelines assíncronos.
 
 - **Decisão:** criar `AgnoSummarizeCaseAssessmentCaseWorkflow` específico para `CASE_ASSESSMENT`.
@@ -535,7 +535,7 @@ POST /intake/analyses/{analysis_id}/case-assessment-case-summaries
   -> AnalysisDocumentsRepository.find_by_analysis_id(...)
   -> AnalysesRepository.find_by_id(...)
   -> AnalysesRepository.replace(... ANALYZING_CASE ...)
-  -> Broker.publish(CaseAssessmentCaseSummaryRequestedEvent)
+  -> Broker.publish(CaseAssessmentCaseSummarizationTriggeredEvent)
   -> HTTP 202
 ```
 
@@ -558,7 +558,7 @@ POST /intake/analyses/{analysis_id}/petition-drafts
 ```text
 TriggerCaseAssessmentCaseSummarizationUseCase.execute(analysis_id)
   -> AnalysesRepository.replace(... ANALYZING_CASE ...)
-  -> Broker.publish(CaseAssessmentCaseSummaryRequestedEvent)
+  -> Broker.publish(CaseAssessmentCaseSummarizationTriggeredEvent)
   -> Inngest
   -> SummarizeCaseAssessmentCaseJob.handle(...)
   -> normalize_payload
@@ -650,6 +650,6 @@ Sem pendências.
 - Os jobs podem montar repositories concretos e controlar `session.commit()` por etapa, seguindo o padrão atual de jobs Inngest.
 - Alterar `PetitionDraft` e `PetitionDraftDto` para refletir os campos estruturados persistidos.
 - Criar migration de banco para evoluir a tabela `petition_drafts`.
-- Não reutilizar `CaseSummaryRequestedEvent` no job de `CASE_ASSESSMENT`.
+- Não reutilizar `CaseSummaryCaseSummarizationTriggeredEvent` no job de `CASE_ASSESSMENT`.
 - Não publicar evento de conclusão da geração quando `CaseSummary` estiver ausente.
 - Toda instanciação concreta de workflow deve passar por `AiPipe`.

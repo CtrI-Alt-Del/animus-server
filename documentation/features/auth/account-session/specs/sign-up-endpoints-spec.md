@@ -178,7 +178,7 @@ Entregar o primeiro fluxo HTTP completo de `auth` no `animus-server`, cobrindo `
 ## Camada PubSub (Eventos de Dominio)
 
 - **Localizacao:** `src/animus/core/auth/domain/events/email_verification_requested_event.py` (**novo arquivo**)
-- **`NAME`:** `auth/email-verification.requested`
+- **`NAME`:** `auth/email-verification.triggered`
 - **Payload:** `account_email: str`, `account_email_verification_token: str`
 - **Convencao de payload:** o payload do evento deve usar uma classe nomeada apenas como `_Payload`, implementada com `dataclasses.dataclass`, mantendo o evento enxuto e serializavel.
 - **Construcao:** seguir o padrao de evento com `__init__(account_email: str, account_email_verification_token: str) -> None` que monta `_Payload` internamente e chama `super().__init__(EmailVerificationRequestedEvent.name, payload)`.
@@ -461,7 +461,7 @@ Entregar o primeiro fluxo HTTP completo de `auth` no `animus-server`, cobrindo `
 ## Camada PubSub
 
 - **Arquivo:** `src/animus/pubsub/inngest/inngest_pubsub.py`
-- **Mudanca:** remover placeholders herdados (`Equiny PubSub`), registrar o job de `auth` para `email-verification.requested`, parar de depender de `Env.INNGEST_SIGNING_KEY` inexistente e usar a configuracao padrao do SDK conforme ambiente.
+- **Mudanca:** remover placeholders herdados (`Equiny PubSub`), registrar o job de `auth` para `email-verification.triggered`, parar de depender de `Env.INNGEST_SIGNING_KEY` inexistente e usar a configuracao padrao do SDK conforme ambiente.
 - **Justificativa:** o arquivo local ja existe, mas ainda nao representa o contexto nem o bootstrap corretos do projeto.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/__init__.py`

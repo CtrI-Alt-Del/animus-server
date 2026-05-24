@@ -252,7 +252,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 ## Camada PubSub (Jobs Inngest)
 
 - **Localizacao:** `src/animus/pubsub/inngest/jobs/intake/seed_analyses_precedents_dataset_job.py` (**novo arquivo**)
-- **Evento consumido:** `TriggerEvent(event='intake/seed-analyses-precedents-dataset.requested')` diretamente no job; nao cria `Event` de dominio no `core`, porque o disparo e operacional.
+- **Evento consumido:** `TriggerEvent(event='intake/seed-analyses-precedents-dataset.triggered')` diretamente no job; nao cria `Event` de dominio no `core`, porque o disparo e operacional.
 - **Dependencias:** `SqlalchemyAccountsRepository`, `SqlalchemyAnalysesRepository`, `SqlalchemyPetitionsRepository`, `SqlalchemyPetitionSummariesRepository`, `SqlalchemyAnalysisPrecedentsRepository`, novos repositories de feedback/dataset row, `GcsFileStorageProvider`, `ParquetProvider`, `GetDocumentContentUseCase`, `AgnoSummarizePetitionWorkflow`, `SearchAnalysisPrecedentsUseCase`, `CreateAnalysisPrecedentsUseCase`, `AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow`.
 - **Passos (`step.run`):**
 - `resolve_account` - resolve a conta pelo e-mail `animus.ctrlaltdel@gmail.com`.
@@ -377,7 +377,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## 8.1 Reusar o pipeline atual dentro do job, sem encadear jobs existentes
 
-- **Decisao:** o `SeedAnalysesPrecedentsDatasetJob` deve chamar diretamente `CreateAnalysisUseCase`, `CreatePetitionUseCase`, `AgnoSummarizePetitionWorkflow`, `SearchAnalysisPrecedentsUseCase` e `CreateAnalysisPrecedentsUseCase`, em vez de publicar `PetitionSummaryRequestedEvent` e `AnalysisPrecedentsSearchRequestedEvent`.
+- **Decisao:** o `SeedAnalysesPrecedentsDatasetJob` deve chamar diretamente `CreateAnalysisUseCase`, `CreatePetitionUseCase`, `AgnoSummarizePetitionWorkflow`, `SearchAnalysisPrecedentsUseCase` e `CreateAnalysisPrecedentsUseCase`, em vez de publicar `FistInstanceCaseSummarizationTriggeredEvent` e `AnalysisPrecedentsSearchRequestedEvent`.
 - **Alternativas consideradas:** disparar os jobs existentes de resumo e busca; duplicar toda a logica no job de seed.
 - **Motivo da escolha:** evita orquestracao assincrona aninhada, reduz latencia operacional e permite exportar o dataset ao final do mesmo lote.
 - **Impactos / trade-offs:** o job fica mais longo e monta mais dependencias concretas, mas continua sem mover regra de negocio para a camada `pubsub`.
@@ -479,7 +479,7 @@ Inngest TriggerEvent
 
 ```text
 Operator / Inngest CLI
-  -> event: intake/seed-analyses-precedents-dataset.requested
+  -> event: intake/seed-analyses-precedents-dataset.triggered
   -> SeedAnalysesPrecedentsDatasetJob.handle
      -> step resolve_account
      -> step list_petition_files

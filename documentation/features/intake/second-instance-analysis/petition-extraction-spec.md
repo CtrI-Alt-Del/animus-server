@@ -55,7 +55,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **Segurança:** o job deve processar somente documentos vinculados à `analysis_id` persistida; a autorização do usuário permanece no endpoint existente via `IntakePipe.verify_analysis_by_account_from_request(...)`.
 - **Idempotência:** reexecuções do job devem reutilizar `ExtractedPetition` quando existir e substituir `CaseSummary` existente via fluxo já suportado por `CreateCaseSummaryUseCase`.
 - **Resiliência:** exceções na extração, leitura de PDF, sumarização ou persistência devem resultar em status `FAILED` na analysis, exceto quando a petição inicial não for encontrada, caso em que o status deve ser `PETITION_NOT_FOUND`.
-- **Compatibilidade retroativa:** o endpoint `POST /intake/analyses/{analysis_id}/case-summaries` deve manter o mesmo contrato HTTP e continuar publicando `CaseSummaryRequestedEvent` para `CASE_ASSESSMENT` e `FIRST_INSTANCE`.
+- **Compatibilidade retroativa:** o endpoint `POST /intake/analyses/{analysis_id}/case-summaries` deve manter o mesmo contrato HTTP e continuar publicando `CaseSummaryCaseSummarizationTriggeredEvent` para `CASE_ASSESSMENT` e `FIRST_INSTANCE`.
 - **Compatibilidade de fluxo:** a diferenciação entre jobs deve acontecer no `RequestCaseSummaryUseCase`, com branching por `AnalysisType` e publicação de eventos distintos, sem criar novo endpoint.
 - **Compatibilidade de dados:** a nova tabela `extracted_petitions` deve usar `analysis_id` como chave primária e `ON DELETE CASCADE` para acompanhar o ciclo de vida de `analyses`.
 
@@ -72,11 +72,11 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 - **`AnalysisDocumentsRepository`** (`src/animus/core/intake/interfaces/analysis_documents_repository.py`) - port para buscar o documento por `analysis_id`.
 - **`CaseSummariesRepository`** (`src/animus/core/intake/interfaces/case_summaries_repository.py`) - port para adicionar, substituir e buscar resumo por `analysis_id`.
 - **`SummarizeFirstInstanceCaseWorkflow`** (`src/animus/core/intake/interfaces/summarize_case_workflow.py`) - contrato atual de sumarização geral: `run(analysis_id: str, document_content: Text) -> CaseSummaryDto`.
-- **`RequestCaseSummaryUseCase`** (`src/animus/core/intake/use_cases/request_case_summary_use_case.py`) - use case que hoje atualiza status e publica `CaseSummaryRequestedEvent`.
+- **`RequestCaseSummaryUseCase`** (`src/animus/core/intake/use_cases/request_case_summary_use_case.py`) - use case que hoje atualiza status e publica `CaseSummaryCaseSummarizationTriggeredEvent`.
 - **`CreateCaseSummaryUseCase`** (`src/animus/core/intake/use_cases/create_case_summary_use_case.py`) - cria ou substitui `CaseSummary` e atualiza status para `CASE_ANALYZED`.
 - **`UpdateAnalysisStatusUseCase`** (`src/animus/core/intake/use_cases/update_analysis_status_use_case.py`) - altera status da analysis via `AnalysesRepository`.
 - **`CaseSummaryFinishedEvent`** (`src/animus/core/intake/domain/events/case_summary_finished_event.py`) - evento existente de conclusão do resumo.
-- **`CaseSummaryRequestedEvent`** (`src/animus/core/intake/domain/events/case_summary_requested_event.py`) - evento atual do fluxo de sumarização geral.
+- **`CaseSummaryCaseSummarizationTriggeredEvent`** (`src/animus/core/intake/domain/events/case_summary_requested_event.py`) - evento atual do fluxo de sumarização geral.
 
 ## Storage / Providers
 
@@ -211,7 +211,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 ## Camada Core (Eventos de Domínio)
 
 - **Localização:** `src/animus/core/intake/domain/events/petition_extraction_requested_event.py` (**novo arquivo**)
-- **`NAME`:** `intake/petition.extraction.requested`
+- **`NAME`:** `intake/petition.extraction.triggered`
 - **Payload:** `analysis_id: str`
 
 ## Camada PubSub (Jobs Inngest)
@@ -234,7 +234,7 @@ Implementar o pipeline assíncrono de extração da petição inicial dentro dos
 ## Core
 
 - **Arquivo:** `src/animus/core/intake/use_cases/request_case_summary_use_case.py`
-- **Mudança:** concentrar o branching por `AnalysisType`; quando `analysis.type.uses_case_assessment_or_first_instance_flow()` for `True`, manter status `ANALYZING_CASE` e publicar `CaseSummaryRequestedEvent`; quando `analysis.type == AnalysisType.SECOND_INSTANCE`, setar `SecondInstanceAnalysisStatus.EXTRACTING_PETITION` e publicar `SecondInstanceCaseSummarizationTriggeredEvent`.
+- **Mudança:** concentrar o branching por `AnalysisType`; quando `analysis.type.uses_case_assessment_or_first_instance_flow()` for `True`, manter status `ANALYZING_CASE` e publicar `CaseSummaryCaseSummarizationTriggeredEvent`; quando `analysis.type == AnalysisType.SECOND_INSTANCE`, setar `SecondInstanceAnalysisStatus.EXTRACTING_PETITION` e publicar `SecondInstanceCaseSummarizationTriggeredEvent`.
 - **Justificativa:** o endpoint existente continua sendo o gatilho do processamento, mas o fluxo de segunda instância precisa extrair a petição dos autos antes da sumarização.
 
 - **Arquivo:** `src/animus/core/intake/domain/events/__init__.py`
@@ -375,7 +375,7 @@ HTTP Request
   -> load Analysis
   -> [CASE_ASSESSMENT | FIRST_INSTANCE]
        status = ANALYZING_CASE
-       Broker.publish(CaseSummaryRequestedEvent)
+       Broker.publish(CaseSummaryCaseSummarizationTriggeredEvent)
   -> [SECOND_INSTANCE]
        status = EXTRACTING_PETITION
        Broker.publish(SecondInstanceCaseSummarizationTriggeredEvent)

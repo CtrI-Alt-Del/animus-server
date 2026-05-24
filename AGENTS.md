@@ -12,6 +12,6 @@ Leia estes arquivos antes de implementar mudancas, exceto quando a solicitacao f
 - `documentation/rules/rules.md`: indice de regras por tipo de mudanca.
 - `documentation/tooling.md`: comandos padrao de execucao e validacao.
 
-## Estio de Resposta
+## Estilo de Resposta
 
 Sempre responda em português do Brasil, utilizando acentuação e pontuação adequadas.

@@ -8,7 +8,7 @@ last_updated_at: 2026-04-02
 
 # 1. Objetivo
 
-Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a uma `Analysis` substitua corretamente a anterior no banco e no storage. Tecnicamente, a entrega deve manter os contratos HTTP atuais, remover a `Petition` anterior e seu `PetitionSummary` associado, publicar `PetitionReplacedEvent` para limpeza assincrona do arquivo antigo no GCS, expor endpoints de consulta da petição e do resumo e atualizar o `Analysis.status` para `PETITION_UPLOADED` apos a persistencia.
+Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a uma `Analysis` substitua corretamente a anterior no banco e no storage. Tecnicamente, a entrega deve manter os contratos HTTP atuais, remover a `Petition` anterior e seu `PetitionSummary` associado, publicar `AnalysisDocumentReplacedEvent` para limpeza assincrona do arquivo antigo no GCS, expor endpoints de consulta da petição e do resumo e atualizar o `Analysis.status` para `PETITION_UPLOADED` apos a persistencia.
 
 ---
 
@@ -17,7 +17,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## 2.1 In-scope
 
 - Ajustar `CreatePetitionUseCase` para tratar substituicao de petição na mesma analise.
-- Publicar `PetitionReplacedEvent` quando ja existir uma petição para a `Analysis`.
+- Publicar `AnalysisDocumentReplacedEvent` quando ja existir uma petição para a `Analysis`.
 - Remover a `Petition` anterior do banco de modo que o `PetitionSummary` relacionado seja removido junto.
 - Criar job Inngest no contexto `intake` para excluir o arquivo antigo via `FileStorageProvider`.
 - Completar o adaptador `GcsFileStorageProvider` com remocao fisica de arquivos.
@@ -41,7 +41,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## 3.1 Funcionais
 
 - Ao persistir uma nova `Petition` para uma `Analysis` que ja possui uma petição, o sistema deve substituir a anterior.
-- A substituicao deve publicar `PetitionReplacedEvent` com o `petition_document_path` do arquivo anterior.
+- A substituicao deve publicar `AnalysisDocumentReplacedEvent` com o `petition_document_path` do arquivo anterior.
 - A `Petition` anterior deve ser removida do repositorio antes da persistencia da nova.
 - O `PetitionSummary` associado a petição removida deve deixar de existir apos a substituicao.
 - O endpoint de criacao de petição deve continuar validando ownership da `Analysis` pela conta autenticada.
@@ -65,7 +65,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 
 - **`CreatePetitionUseCase`** (`src/animus/core/intake/use_cases/create_petition_use_case.py`) — use case atual que cria e adiciona uma `Petition`; sera estendido para tratar substituicao e atualizacao de status da analise.
 - **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) — port atual de persistencia de peticoes; ainda nao possui lookup direto por `analysis_id` nem remocao.
-- **`PetitionReplacedEvent`** (`src/animus/core/intake/domain/events/petition_replaced_event.py`) — evento de dominio ja existente para sinalizar substituicao do arquivo da petição.
+- **`AnalysisDocumentReplacedEvent`** (`src/animus/core/intake/domain/events/petition_replaced_event.py`) — evento de dominio ja existente para sinalizar substituicao do arquivo da petição.
 - **`RequestAnalysisPrecedentsSearchUseCase`** (`src/animus/core/intake/use_cases/request_analysis_precedents_search_use_case.py`) — referencia de publicacao de eventos via `Broker` a partir de use case.
 - **`ListAnalysisPetitionsUseCase`** (`src/animus/core/intake/use_cases/list_analysis_petitions_use_case.py`) — referencia de leitura orientada a `UseCase` no contexto `intake` para endpoints `GET`.
 
@@ -112,7 +112,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## Camada PubSub (Jobs Inngest)
 
 - **Localizacao:** `src/animus/pubsub/inngest/jobs/intake/remove_petition_document_file_job.py` (**novo arquivo**)
-- **Evento consumido:** `PetitionReplacedEvent.name` (`"intake/petition.replaced"`) com payload `{ petition_document_path: str }`
+- **Evento consumido:** `AnalysisDocumentReplacedEvent.name` (`"intake/petition.replaced"`) com payload `{ petition_document_path: str }`
 - **Dependencias:** `FileStorageProvider` concreto (`GcsFileStorageProvider` via instanciacao direta no job, seguindo o padrao de `SendAccountVerificationEmailJob`)
 - **Passos (`step.run`):**
   - `normalize_payload` — normaliza `petition_document_path` para `str`
@@ -154,7 +154,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 ## Core
 
 - **Arquivo:** `src/animus/core/intake/use_cases/create_petition_use_case.py`
-- **Mudanca:** estender o construtor para receber `analyses_repository: AnalysesRepository` e `broker: Broker` alem de `petitions_repository: PetitionsRepository`; no `execute(analysis_id: str, uploaded_at: str, document: PetitionDocumentDto) -> PetitionDto`, buscar petição existente da mesma analise, publicar `PetitionReplacedEvent`, remover a petição anterior, atualizar a `Analysis` para `PETITION_UPLOADED` e entao adicionar a nova.
+- **Mudanca:** estender o construtor para receber `analyses_repository: AnalysesRepository` e `broker: Broker` alem de `petitions_repository: PetitionsRepository`; no `execute(analysis_id: str, uploaded_at: str, document: PetitionDocumentDto) -> PetitionDto`, buscar petição existente da mesma analise, publicar `AnalysisDocumentReplacedEvent`, remover a petição anterior, atualizar a `Analysis` para `PETITION_UPLOADED` e entao adicionar a nova.
 - **Justificativa:** o use case e o ponto correto para orquestrar a regra de substituicao mantendo o `core` independente de HTTP e infraestrutura.
 
 - **Arquivo:** `src/animus/core/intake/interfaces/petitions_repository.py`
@@ -162,7 +162,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 - **Justificativa:** o use case precisa consultar e remover a petição atual sem depender de detalhes de SQLAlchemy.
 
 - **Arquivo:** `src/animus/core/intake/domain/events/__init__.py`
-- **Mudanca:** exportar `PetitionReplacedEvent` em `__all__`.
+- **Mudanca:** exportar `AnalysisDocumentReplacedEvent` em `__all__`.
 - **Justificativa:** estabilizar o import publico do evento para o wiring do job e do use case.
 
 ## Database
@@ -237,7 +237,7 @@ Corrigir o fluxo de upload de peticoes para que uma nova `Petition` vinculada a 
 - **Motivo da escolha:** `PetitionModel` ja possui relacao com `cascade='all, delete-orphan'`; usar delecao ORM da petição e o menor ajuste consistente com a modelagem atual.
 - **Impactos / trade-offs:** a implementacao concreta precisa evitar bulk delete para preservar o cascade ORM.
 
-- **Decisao:** fazer a remocao do arquivo antigo de forma assincrona por `PetitionReplacedEvent` + job Inngest no modulo `intake`.
+- **Decisao:** fazer a remocao do arquivo antigo de forma assincrona por `AnalysisDocumentReplacedEvent` + job Inngest no modulo `intake`.
 - **Alternativas consideradas:** excluir o arquivo sincronicamente dentro do use case; manter job em outro contexto.
 - **Motivo da escolha:** o fluxo de replace esta sendo entregue no contexto `intake` e o job ja foi registrado nesse modulo na implementacao atual.
 - **Impactos / trade-offs:** o evento e a reacao ficam agrupados no mesmo contexto de entrega, mesmo tratando um efeito colateral de storage.
@@ -261,7 +261,7 @@ HTTP POST /intake/petitions
   -> CreatePetitionUseCase.execute(analysis_id, uploaded_at, document)
       -> PetitionsRepository.find_by_analysis_id(analysis_id)
       -> [se existir]
-         -> Broker.publish(PetitionReplacedEvent(old_document_path))
+         -> Broker.publish(AnalysisDocumentReplacedEvent(old_document_path))
          -> PetitionsRepository.remove(old_petition_id)
             -> SQLAlchemy session.delete(PetitionModel)
             -> ORM cascade remove PetitionSummaryModel
@@ -295,7 +295,7 @@ HTTP GET /intake/petitions/{petition_id}/summary
 
 ```text
 CreatePetitionUseCase
-  -> Broker.publish(PetitionReplacedEvent)
+  -> Broker.publish(AnalysisDocumentReplacedEvent)
   -> InngestBroker.send_sync(...)
   -> RemovePetitionDocumentFileJob
       -> step.run('normalize_payload')

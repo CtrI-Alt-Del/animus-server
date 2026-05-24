@@ -185,7 +185,7 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
 ## Camada PubSub (Eventos de Domínio)
 
 - **Localização:** `src/animus/core/intake/domain/events/judgment_draft_generation_requested_event.py` (**novo arquivo**)
-- **`NAME`:** `"intake/judgment_draft.generation.requested"`
+- **`NAME`:** `"intake/judgment_draft.generation.triggered"`
 - **Payload:**
   - `analysis_id: str`
 
