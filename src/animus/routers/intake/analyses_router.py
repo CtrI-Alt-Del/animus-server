@@ -11,6 +11,7 @@ from animus.rest.controllers.intake import (
     GetAnalysisDocumentController,
     GetPrecedentController,
     GetFirstInstanceAnalysisReportController,
+    GetPetitionDraftController,
     GetAnalysisStatusController,
     GetCaseSummaryController,
     GetSecondInstanceAnalysisReportController,
@@ -54,6 +55,7 @@ class AnalysesRouter:
         TriggerPetitionDraftGenerationController.handle(router)
         TriggerSecondInstanceCaseSummarizationController.handle(router)
         TriggerSecondInstanceJudgmentDraftGenerationController.handle(router)
+        GetPetitionDraftController.handle(router)
         GetSecondInstanceJudgmentDraftController.handle(router)
         GetCaseSummaryController.handle(router)
         GetCaseAssessmentAnalysisReportController.handle(router)

@@ -16,6 +16,7 @@ from .get_case_summary_controller import GetCaseSummaryController
 from .get_first_instance_analysis_report_controller import (
     GetFirstInstanceAnalysisReportController,
 )
+from .get_petition_draft_controller import GetPetitionDraftController
 from .get_second_instance_analysis_report_controller import (
     GetSecondInstanceAnalysisReportController,
 )
@@ -62,6 +63,7 @@ __all__ = [
     'GetAnalysisStatusController',
     'GetAnalysisController',
     'GetCaseAssessmentAnalysisReportController',
+    'GetPetitionDraftController',
     'GetSecondInstanceJudgmentDraftController',
     'ListAnalysesController',
     'ListUnfolderedAnalysesController',
