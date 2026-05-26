@@ -10,14 +10,14 @@ from animus.providers.storage import GcsFileStorageProvider
 
 @dataclass(frozen=True)
 class _Payload:
-    petition_document_path: str
+    analysis_document_path: str
 
 
-class RemovePetitionDocumentFileJob:
+class RemoveAnalysisDocumentFileJob:
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
-            fn_id='remove-petition-document-file',
+            fn_id='remove-analysis-document-file',
             trigger=TriggerEvent(event=AnalysisDocumentReplacedEvent.name),
         )
         async def _(context: Context) -> None:
@@ -25,16 +25,16 @@ class RemovePetitionDocumentFileJob:
 
             normalized_data = await context.step.run(
                 'normalize_payload',
-                RemovePetitionDocumentFileJob._normalize_payload,
+                RemoveAnalysisDocumentFileJob._normalize_payload,
                 data,
             )
             payload = _Payload(
-                petition_document_path=str(normalized_data['petition_document_path'])
+                analysis_document_path=str(normalized_data['analysis_document_path'])
             )
 
             await context.step.run(
-                'remove_petition_document_file',
-                RemovePetitionDocumentFileJob._remove_petition_document_file,
+                'remove_analysis_document_file',
+                RemoveAnalysisDocumentFileJob._remove_analysis_document_file,
                 payload,
             )
 
@@ -42,11 +42,11 @@ class RemovePetitionDocumentFileJob:
 
     @staticmethod
     async def _normalize_payload(data: dict[str, Any]) -> dict[str, str]:
-        return {'petition_document_path': str(data['petition_document_path'])}
+        return {'analysis_document_path': str(data['analysis_document_path'])}
 
     @staticmethod
-    async def _remove_petition_document_file(payload: _Payload) -> None:
+    async def _remove_analysis_document_file(payload: _Payload) -> None:
         file_storage_provider = GcsFileStorageProvider()
         file_storage_provider.remove_files(
-            [FilePath.create(value=payload.petition_document_path)]
+            [FilePath.create(value=payload.analysis_document_path)]
         )

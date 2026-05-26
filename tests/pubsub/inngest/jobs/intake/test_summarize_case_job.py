@@ -86,7 +86,7 @@ class TestSummarizeFirstInstanceCaseJob:
         monkeypatch.setattr(InngestBroker, 'publish', _publish)
 
         response = inngest_runtime.post_event(
-            name='intake/case_summary.triggered',
+            name='intake/first.instance.case.summary.triggered',
             data={'analysis_id': analysis_id},
         )
 

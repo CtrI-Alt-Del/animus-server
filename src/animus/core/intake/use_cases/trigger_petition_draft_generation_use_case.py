@@ -6,6 +6,9 @@ from animus.core.intake.domain.errors import (
     InconsistentAnalysisTypeError,
 )
 from animus.core.intake.domain.events import PetitionDraftGenerationTriggeredEvent
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalysesRepository,
@@ -57,6 +60,11 @@ class TriggerPetitionDraftGenerationUseCase:
             for analysis_precedent in analysis_precedents_response.items
         ):
             raise ChosenAnalysisPrecedentsRequiredError
+
+        analysis.set_status(
+            CaseAssessmentAnalysisStatus.create_as_generating_synthesis()
+        )
+        self._analyses_repository.replace(analysis)
 
         self._broker.publish(
             PetitionDraftGenerationTriggeredEvent(

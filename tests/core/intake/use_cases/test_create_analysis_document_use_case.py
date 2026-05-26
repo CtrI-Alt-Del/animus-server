@@ -139,7 +139,7 @@ class TestCreateAnalysisDocumentUseCase:
 
         assert isinstance(published_event, AnalysisDocumentReplacedEvent)
         assert (
-            published_event.payload.petition_document_path
+            published_event.payload.analysis_document_path
             == 'intake/analyses/old-document.pdf'
         )
         assert result.file_path == 'intake/analyses/new-document.pdf'

@@ -14,6 +14,9 @@ from animus.core.intake.domain.errors import (
 from animus.core.intake.domain.entities.dtos import PrecedentDto
 from animus.core.intake.domain.events import PetitionDraftGenerationTriggeredEvent
 from animus.core.intake.domain.structures import AnalysisPrecedent, CaseSummary
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
 from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentDto,
@@ -93,11 +96,16 @@ class TestTriggerPetitionDraftGenerationUseCase:
         self.analysis_precedents_repository_mock.find_many_by_analysis_id.assert_called_once_with(
             analysis_id_entity,
         )
+        self.analyses_repository_mock.replace.assert_called_once_with(analysis)
         self.broker_mock.publish.assert_called_once()
 
         event = self.broker_mock.publish.call_args.args[0]
         assert isinstance(event, PetitionDraftGenerationTriggeredEvent)
         assert event.payload.analysis_id == analysis_id
+        assert (
+            analysis.status
+            == CaseAssessmentAnalysisStatus.create_as_generating_synthesis()
+        )
 
     def test_should_raise_when_no_precedent_is_chosen(self) -> None:
         analysis_id = Id.create().value
@@ -122,6 +130,7 @@ class TestTriggerPetitionDraftGenerationUseCase:
         with pytest.raises(ChosenAnalysisPrecedentsRequiredError):
             self.use_case.execute(analysis_id)
 
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
 
     def test_should_raise_when_analysis_has_no_precedents(self) -> None:
@@ -141,6 +150,7 @@ class TestTriggerPetitionDraftGenerationUseCase:
         with pytest.raises(AnalysisPrecedentsUnavailableError):
             self.use_case.execute(analysis_id)
 
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
 
     def test_should_raise_when_analysis_does_not_exist(self) -> None:
@@ -151,6 +161,7 @@ class TestTriggerPetitionDraftGenerationUseCase:
 
         self.case_summaries_repository_mock.find_by_analysis_id.assert_not_called()
         self.analysis_precedents_repository_mock.find_many_by_analysis_id.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
 
     def test_should_raise_when_analysis_is_not_case_assessment(self) -> None:
@@ -166,6 +177,7 @@ class TestTriggerPetitionDraftGenerationUseCase:
 
         self.case_summaries_repository_mock.find_by_analysis_id.assert_not_called()
         self.analysis_precedents_repository_mock.find_many_by_analysis_id.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
 
     def test_should_raise_when_case_summary_does_not_exist(self) -> None:
@@ -181,6 +193,7 @@ class TestTriggerPetitionDraftGenerationUseCase:
             self.use_case.execute(analysis_id)
 
         self.analysis_precedents_repository_mock.find_many_by_analysis_id.assert_not_called()
+        self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
 
     @staticmethod

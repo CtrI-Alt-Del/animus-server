@@ -52,7 +52,7 @@ class CreateAnalysisDocumentUseCase:
         else:
             self._broker.publish(
                 AnalysisDocumentReplacedEvent(
-                    petition_document_path=existing_document.file_path.value,
+                    analysis_document_path=existing_document.file_path.value,
                 )
             )
             operation = self._analysis_documents_repository.replace
