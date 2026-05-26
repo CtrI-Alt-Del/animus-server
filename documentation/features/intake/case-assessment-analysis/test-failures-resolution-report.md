@@ -194,6 +194,80 @@ O job Inngest já consumia `SecondInstanceJudgmentDraftGenerationTriggeredEvent.
 
 ---
 
+## 6. Endpoint de relatório de segunda instância retornava 404
+
+### Teste com erro
+
+`tests/rest/controllers/intake/test_get_analysis_report_controller.py::TestGetSecondInstanceAnalysisReportController::test_should_return_200_with_draft_when_second_instance_analysis_has_draft`
+
+### Erro observado
+
+```text
+assert response.status_code == 200
+E   assert 404 == 200
+```
+
+### Onde estava o erro
+
+O teste chamava a rota:
+
+```text
+/intake/analyses/{analysis_id}/second-instance-report
+```
+
+mas o controller de relatório de segunda instância registrava apenas:
+
+```text
+/intake/analyses/{analysis_id}/reports/second-instance
+```
+
+Durante a investigação foi identificado o mesmo padrão de divergência nos relatórios de primeira instância e de case assessment. Para manter compatibilidade com o formato já existente e atender o contrato exercitado pelos testes, os controllers passaram a registrar os dois formatos de rota.
+
+### Arquivos alterados
+
+* `src/animus/rest/controllers/intake/get_second_instance_analysis_report_controller.py`
+* `src/animus/rest/controllers/intake/get_first_instance_analysis_report_controller.py`
+* `src/animus/rest/controllers/intake/get_case_assessment_analysis_report_controller.py`
+
+---
+
+## 7. Relatório de primeira instância não retornava `judgment_draft`
+
+### Teste com erro
+
+`tests/rest/controllers/intake/test_get_analysis_report_controller.py::TestGetFirstInstanceAnalysisReportController::test_should_return_200_when_first_instance_analysis_exists`
+
+### Erro observado
+
+```text
+assert payload['judgment_draft'] == {
+E   KeyError: 'judgment_draft'
+```
+
+### Onde estava o erro
+
+O cenário de teste criava uma minuta de julgamento associada à análise, mas o relatório de primeira instância não carregava nem serializava esse dado.
+
+O DTO `FirstInstanceAnalysisReportDto` continha apenas:
+
+```text
+analysis
+document
+case_summary
+precedents
+```
+
+Além disso, `GetFirstInstanceAnalysisReportUseCase` não recebia `SecondInstanceJudgmentDraftsRepository` e o controller não injetava esse repositório no fluxo HTTP. Como consequência, mesmo existindo minuta persistida, o payload do endpoint não expunha `judgment_draft`.
+
+### Arquivos alterados
+
+* `src/animus/core/intake/domain/structures/dtos/first_instance_analysis_report_dto.py`
+* `src/animus/core/intake/domain/structures/first_instance_analysis_report.py`
+* `src/animus/core/intake/use_cases/get_first_instance_analysis_report_use_case.py`
+* `src/animus/rest/controllers/intake/get_first_instance_analysis_report_controller.py`
+
+---
+
 # Validação Final
 
 A suíte completa foi executada sem parar na primeira falha com:
@@ -206,4 +280,20 @@ Resultado final:
 
 ```text
 335 passed, 1 warning
+```
+
+Após as correções adicionais nos relatórios de análise, também foram executados:
+
+```powershell
+uv run pytest tests/rest/controllers/intake/test_get_analysis_report_controller.py
+uv run pytest tests/core/intake/use_cases/test_get_analysis_report_use_case.py
+uv run poe typecheck
+```
+
+Resultado:
+
+```text
+4 passed
+8 passed
+0 errors, 0 warnings, 0 notes
 ```
