@@ -1,3 +1,18 @@
+# [1.30.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.29.0...v1.30.0) (2026-05-26)
+
+
+### Bug Fixes
+
+* ANI-99 fix errors ([059a7c3](https://github.com/CtrI-Alt-Del/animus-server/commit/059a7c38617fdd70e9a9ffd5c18358b18536f5b6))
+* ANI-99 linter problem ([b0f526b](https://github.com/CtrI-Alt-Del/animus-server/commit/b0f526b61ad29d1852c4cb67169c188076664d5b))
+
+
+### Features
+
+* ANI-93 add case assessment petition draft pipeline ([23aed5a](https://github.com/CtrI-Alt-Del/animus-server/commit/23aed5a52ea9216ebd3cffc2ed510c64d598e784))
+* ANI-93 implement petition draft trigger flow and coverage ([bb50790](https://github.com/CtrI-Alt-Del/animus-server/commit/bb50790b16d56afe81635f68640bd2dc46c74f9b))
+* ANI-99 finish task ([2a64ad6](https://github.com/CtrI-Alt-Del/animus-server/commit/2a64ad6a4857efc383c44de2610b94c3d31e52e6))
+
 # [1.29.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.28.0...v1.29.0) (2026-05-22)
 
 
