@@ -1,3 +1,10 @@
+## [1.30.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.30.0...v1.30.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* ANI-99 correct intake generation endpoints ([71c09f6](https://github.com/CtrI-Alt-Del/animus-server/commit/71c09f6149182c86358ddd09fda21887e42c2610))
+
 # [1.30.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.29.0...v1.30.0) (2026-05-26)
 
 
