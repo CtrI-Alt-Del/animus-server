@@ -130,15 +130,15 @@ Content-Type: application/json
 }
 
 ### Disparar sumarização de avaliação de caso (TriggerCaseAssessmentCaseSummarizationController)
-POST {{url}}/analyses/{{analysis_id}}/case-summaries/case-assessment
+POST {{url}}/analyses/{{analysis_id}}/case-assessment-case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar resumo de caso jurídico de primeira instância (TriggerFirstInstanceCaseSummarizationController)
-POST {{url}}/analyses/{{analysis_id}}/case-summaries/first-instance
+POST {{url}}/analyses/{{analysis_id}}/case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Disparar resumo de caso jurídico de segunda instância (SecondInstanceCaseSummarizationController)
-POST {{url}}/analyses/{{analysis_id}}/case-summaries/second-instance
+### Disparar extração de petição de segunda instância (SecondInstanceCaseSummarizationController)
+POST {{url}}/analyses/{{analysis_id}}/petition-extraction
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar geração/regeneração de minuta de julgamento de 2a instancia (TriggerSecondInstanceJudgmentDraftGenerationController)

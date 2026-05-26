@@ -6,6 +6,7 @@ import pytest
 from pytest import MonkeyPatch
 from sqlalchemy.orm import Session, sessionmaker
 
+from animus.core.intake.domain.events import FistInstanceCaseSummarizationTriggeredEvent
 from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -86,7 +87,7 @@ class TestSummarizeFirstInstanceCaseJob:
         monkeypatch.setattr(InngestBroker, 'publish', _publish)
 
         response = inngest_runtime.post_event(
-            name='intake/first.instance.case.summary.triggered',
+            name=FistInstanceCaseSummarizationTriggeredEvent.name,
             data={'analysis_id': analysis_id},
         )
 

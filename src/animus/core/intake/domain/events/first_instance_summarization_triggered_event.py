@@ -9,7 +9,7 @@ class _Payload:
 
 
 class FistInstanceCaseSummarizationTriggeredEvent(Event[_Payload]):
-    name = 'intake/first.instance.case.summary.triggered'
+    name = 'intake/case_summary.triggered'
 
     def __init__(self, analysis_id: str) -> None:
         payload = _Payload(analysis_id=analysis_id)
