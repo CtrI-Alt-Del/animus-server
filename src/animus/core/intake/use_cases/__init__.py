@@ -63,6 +63,7 @@ from .trigger_petition_draft_generation_use_case import (
     TriggerPetitionDraftGenerationUseCase,
 )
 from .unchoose_analysis_precedent_use_case import UnchooseAnalysisPrecedentUseCase
+from .unarchive_analysis_use_case import UnarchiveAnalysisUseCase
 from .update_analysis_status_use_case import UpdateAnalysisStatusUseCase
 from .vectorize_all_precedents_use_case import VectorizeAllPrecedentsUseCase
 
@@ -104,6 +105,7 @@ __all__ = [
     'SearchAnalysisPrecedentsUseCase',
     'TriggerSecondInstanceCaseSummarizationUseCase',
     'UnchooseAnalysisPrecedentUseCase',
+    'UnarchiveAnalysisUseCase',
     'UpdateAnalysisStatusUseCase',
     'VectorizeAllPrecedentsUseCase',
 ]
