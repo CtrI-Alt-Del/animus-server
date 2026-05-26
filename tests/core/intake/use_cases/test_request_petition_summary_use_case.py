@@ -44,29 +44,29 @@ class TestTriggerFistInstanceCaseSummarizationUseCase:
         )
 
     def test_should_publish_event_and_update_analysis_status(self) -> None:
-        petition_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
-        petition_id_entity = Id.create(petition_id)
+        analysis_id = '01B3EAF4Q2V7D9N8M6K5J4H3G2'
+        analysis_id_entity = Id.create(analysis_id)
         petition = PetitionsFaker.fake(
-            petition_id=petition_id,
-            analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+            petition_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            analysis_id=analysis_id,
             document=AnalysisDocumentDto(
-                analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+                analysis_id=analysis_id,
                 uploaded_at='2026-03-31T10:30:00+00:00',
                 file_path='intake/analyses/01TEST/petitions/petition.pdf',
                 name='petition.pdf',
             ),
         )
         analysis = AnalysesFaker.fake(
-            analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+            analysis_id=analysis_id,
             status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
         )
         self.petitions_repository_mock.find_by_id.return_value = petition
         self.analyses_repository_mock.find_by_id.return_value = analysis
 
-        self.use_case.execute(petition_id=petition_id)
+        self.use_case.execute(analysis_id=analysis_id)
 
         self.petitions_repository_mock.find_by_id.assert_called_once_with(
-            petition_id_entity,
+            analysis_id_entity,
         )
         self.analyses_repository_mock.find_by_id.assert_called_once_with(
             petition.analysis_id,
@@ -82,11 +82,11 @@ class TestTriggerFistInstanceCaseSummarizationUseCase:
             == FirstInstanceAnalysisStatus.create_as_analyzing_case()
         )
         assert isinstance(published_event, FistInstanceCaseSummarizationTriggeredEvent)
-        assert published_event.payload.petition_id == petition_id
+        assert published_event.payload.analysis_id == analysis_id
 
     def test_should_raise_validation_error_when_petition_id_is_invalid(self) -> None:
         with pytest.raises(ValidationError):
-            self.use_case.execute(petition_id='invalid-petition-id')
+            self.use_case.execute(analysis_id='invalid-petition-id')
 
         self.petitions_repository_mock.find_by_id.assert_not_called()
         self.analyses_repository_mock.find_by_id.assert_not_called()
@@ -96,11 +96,11 @@ class TestTriggerFistInstanceCaseSummarizationUseCase:
     def test_should_raise_petition_not_found_error_when_petition_does_not_exist(
         self,
     ) -> None:
-        petition_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
+        analysis_id = '01B3EAF4Q2V7D9N8M6K5J4H3G2'
         self.petitions_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(PetitionNotFoundError):
-            self.use_case.execute(petition_id=petition_id)
+            self.use_case.execute(analysis_id=analysis_id)
 
         self.analyses_repository_mock.find_by_id.assert_not_called()
         self.analyses_repository_mock.replace.assert_not_called()
@@ -109,12 +109,12 @@ class TestTriggerFistInstanceCaseSummarizationUseCase:
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
         self,
     ) -> None:
-        petition_id = '01ARZ3NDEKTSV4RRFFQ69G5FAV'
+        analysis_id = '01B3EAF4Q2V7D9N8M6K5J4H3G2'
         petition = PetitionsFaker.fake(
-            petition_id=petition_id,
-            analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+            petition_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            analysis_id=analysis_id,
             document=AnalysisDocumentDto(
-                analysis_id='01B3EAF4Q2V7D9N8M6K5J4H3G2',
+                analysis_id=analysis_id,
                 uploaded_at='2026-03-31T10:30:00+00:00',
                 file_path='intake/analyses/01TEST/petitions/petition.pdf',
                 name='petition.pdf',
@@ -124,7 +124,7 @@ class TestTriggerFistInstanceCaseSummarizationUseCase:
         self.analyses_repository_mock.find_by_id.return_value = None
 
         with pytest.raises(AnalysisNotFoundError):
-            self.use_case.execute(petition_id=petition_id)
+            self.use_case.execute(analysis_id=analysis_id)
 
         self.analyses_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
