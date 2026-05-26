@@ -1,4 +1,3 @@
-from animus.core.intake.domain.entities.dtos import AnalysisStatusDto
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
 )
@@ -6,6 +5,9 @@ from animus.core.intake.domain.errors.precedent_not_found_error import (
     PrecedentNotFoundError,
 )
 from animus.core.intake.domain.structures.dtos import PrecedentIdentifierDto
+from animus.core.intake.domain.structures.dtos.analysis_status_dto import (
+    AnalysisStatusDto,
+)
 from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
 )

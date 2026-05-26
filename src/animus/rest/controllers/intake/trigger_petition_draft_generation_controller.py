@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response
@@ -19,7 +20,8 @@ class TriggerPetitionDraftGenerationController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.post(
-            '/analyses/{analysis_id}/case-summaries/case-assessment', status_code=202
+            '/analyses/{analysis_id}/petition-drafts',
+            status_code=HTTPStatus.CREATED,
         )
         async def _(
             analysis: Annotated[
