@@ -3,7 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from animus.core.intake.domain.entities import Analysis
-from animus.core.intake.domain.entities.dtos import AnalysisStatusDto
+from animus.core.intake.domain.structures.dtos.analysis_status_dto import (
+    AnalysisStatusDto,
+)
 from animus.pipes.intake_pipe import IntakePipe
 
 

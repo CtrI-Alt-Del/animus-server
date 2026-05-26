@@ -1,4 +1,6 @@
-from animus.core.intake.domain.entities.dtos import AnalysisStatusDto
+from animus.core.intake.domain.structures.dtos.analysis_status_dto import (
+    AnalysisStatusDto,
+)
 from animus.core.intake.domain.structures.precedent_identifier import (
     PrecedentIdentifier,
 )
