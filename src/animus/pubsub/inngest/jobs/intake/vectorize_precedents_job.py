@@ -24,7 +24,7 @@ class VectorizePrecedentsJob:
             fn_id='vectorize-precedents',
             trigger=[
                 TriggerCron(cron='0 2 * * 1'),
-                TriggerEvent(event='intake/vectorize-precedents.requested'),
+                TriggerEvent(event='intake/vectorize-precedents.triggered'),
             ],
         )
         async def _(context: Context) -> None:

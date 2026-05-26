@@ -12,6 +12,9 @@ from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
+from animus.core.intake.interfaces.generate_petition_draft_workflow import (
+    GeneratePetitionDraftWorkflow,
+)
 from animus.core.intake.interfaces.generate_judgment_draft_workflow import (
     GenerateSecondInstanceJudgmentDraftWorkflow,
 )
@@ -19,6 +22,7 @@ from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
 )
 from animus.core.intake.interfaces.summarize_case_workflow import (
+    SummarizeCaseAssessmentCaseWorkflow,
     SummarizeFirstInstanceCaseWorkflow,
 )
 from animus.core.intake.interfaces.synthesize_analysis_precedents_workflow import (
@@ -70,6 +74,22 @@ class AiPipe:
         )
 
     @staticmethod
+    def get_summarize_case_assessment_case_workflow(
+        case_summaries_repository: CaseSummariesRepository,
+        analysis_documents_repository: AnalysisDocumentsRepository,
+        analyses_repository: AnalysesRepository,
+    ) -> SummarizeCaseAssessmentCaseWorkflow:
+        from animus.ai.agno.workflows.intake.agno_summarize_case_assessment_case_workflow import (
+            AgnoSummarizeCaseAssessmentCaseWorkflow,
+        )
+
+        return AgnoSummarizeCaseAssessmentCaseWorkflow(
+            case_summaries_repository=case_summaries_repository,
+            analysis_documents_repository=analysis_documents_repository,
+            analyses_repository=analyses_repository,
+        )
+
+    @staticmethod
     def get_generate_judgment_draft_workflow() -> (
         GenerateSecondInstanceJudgmentDraftWorkflow
     ):
@@ -78,3 +98,11 @@ class AiPipe:
         )
 
         return AgnoGenerateSecondInstanceJudgmentDraftWorkflow()
+
+    @staticmethod
+    def get_generate_petition_draft_workflow() -> GeneratePetitionDraftWorkflow:
+        from animus.ai.agno.workflows.intake.agno_generate_petition_draft_workflow import (
+            AgnoGeneratePetitionDraftWorkflow,
+        )
+
+        return AgnoGeneratePetitionDraftWorkflow()

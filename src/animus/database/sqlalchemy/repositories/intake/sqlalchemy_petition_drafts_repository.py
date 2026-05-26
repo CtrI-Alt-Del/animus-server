@@ -35,4 +35,10 @@ class SqlalchemyPetitionDraftsRepository(PetitionDraftsRepository):
             self.add(petition_draft)
             return
 
-        model.content = petition_draft.content.value
+        model.structured_facts = petition_draft.structured_facts.value
+        model.legal_grounds = petition_draft.legal_grounds.value
+        model.central_thesis = petition_draft.central_thesis.value
+        model.requests = [item.value for item in petition_draft.requests]
+        model.precedent_citations = [
+            item.value for item in petition_draft.precedent_citations
+        ]

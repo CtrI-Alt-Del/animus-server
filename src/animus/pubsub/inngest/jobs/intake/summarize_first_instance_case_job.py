@@ -15,7 +15,9 @@ from animus.core.intake.domain.errors.analysis_not_found_error import (
 )
 from animus.core.intake.domain.events import (
     CaseSummaryFinishedEvent,
-    CaseSummaryRequestedEvent,
+)
+from animus.core.intake.domain.events.first_instance_summarization_triggered_event import (
+    FistInstanceCaseSummarizationTriggeredEvent,
 )
 from animus.core.intake.use_cases import UpdateAnalysisStatusUseCase
 from animus.core.shared.domain.structures import Id
@@ -50,8 +52,10 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
-            fn_id='summarize-case',
-            trigger=TriggerEvent(event=CaseSummaryRequestedEvent.name),
+            fn_id='summarize-first-instance-case',
+            trigger=TriggerEvent(
+                event=FistInstanceCaseSummarizationTriggeredEvent.name
+            ),
             retries=0,
             on_failure=SummarizeFirstInstanceCaseJob._handle_failure,
         )

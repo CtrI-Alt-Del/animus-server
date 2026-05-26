@@ -298,6 +298,8 @@ def downgrade() -> None:
     op.drop_table('judgment_drafts')
     op.drop_table('petition_drafts')
     op.drop_table('case_summaries')
-    op.drop_index(op.f('ix_analysis_documents_analysis_id'), table_name='analysis_documents')
+    op.drop_index(
+        op.f('ix_analysis_documents_analysis_id'), table_name='analysis_documents'
+    )
     op.drop_table('analysis_documents')
     op.drop_column('analyses', 'type')

@@ -8,7 +8,6 @@ from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
-    SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.intake.use_cases import GetFirstInstanceAnalysisReportUseCase
 from animus.core.shared.domain.structures import Id
@@ -20,7 +19,7 @@ class GetFirstInstanceAnalysisReportController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/analyses/{analysis_id}/first-instance-report',
+            '/analyses/{analysis_id}/reports/first-instance',
             status_code=200,
             response_model=FirstInstanceAnalysisReportDto,
         )
@@ -43,17 +42,12 @@ class GetFirstInstanceAnalysisReportController:
                 AnalysisPrecedentsRepository,
                 Depends(DatabasePipe.get_analysis_precedents_repository_from_request),
             ],
-            judgment_drafts_repository: Annotated[
-                SecondInstanceJudgmentDraftsRepository,
-                Depends(DatabasePipe.get_judgment_drafts_repository_from_request),
-            ],
         ) -> FirstInstanceAnalysisReportDto:
             use_case = GetFirstInstanceAnalysisReportUseCase(
                 analyses_repository=analyses_repository,
                 analysis_documents_repository=analysis_documents_repository,
                 case_summaries_repository=case_summaries_repository,
                 analysis_precedents_repository=analysis_precedents_repository,
-                judgment_drafts_repository=judgment_drafts_repository,
             )
 
             return use_case.execute(

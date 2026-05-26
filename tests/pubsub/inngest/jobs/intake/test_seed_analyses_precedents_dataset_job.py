@@ -63,7 +63,7 @@ class TestSeedAnalysesPrecedentsDatasetJob:
         )
 
         response = inngest_runtime.post_event(
-            name='intake/seed-analyses-precedents-dataset.requested',
+            name='intake/seed-analyses-precedents-dataset.triggered',
             data={},
         )
 

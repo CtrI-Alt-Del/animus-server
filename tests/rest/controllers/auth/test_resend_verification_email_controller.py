@@ -22,7 +22,7 @@ class TestResendVerificationEmailController:
         assert response.content == b''
         assert len(fake_inngest_client.sent_events) == 1
         assert fake_inngest_client.sent_events[0].name == (
-            'auth/email-verification.requested'
+            'auth/email-verification.triggered'
         )
         assert fake_inngest_client.sent_events[0].data['account_email'] == (
             'maria@example.com'

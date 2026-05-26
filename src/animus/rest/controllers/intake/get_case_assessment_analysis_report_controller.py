@@ -22,7 +22,7 @@ class GetCaseAssessmentAnalysisReportController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.get(
-            '/analyses/{analysis_id}/case-assessment-report',
+            '/analyses/{analysis_id}/reports/case-assessment',
             status_code=200,
             response_model=CaseAssessmentAnalysisReportDto,
         )

@@ -3,14 +3,14 @@ from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     PetitionNotFoundError,
 )
-from animus.core.intake.domain.events import PetitionSummaryRequestedEvent
+from animus.core.intake.domain.events import FistInstanceCaseSummarizationTriggeredEvent
 from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.petitions_repository import PetitionsRepository
 from animus.core.shared.domain.structures import Id
 from animus.core.shared.interfaces import Broker
 
 
-class RequestPetitionSummaryUseCase:
+class TriggerFistInstanceCaseSummarizationUseCase:
     def __init__(
         self,
         petitions_repository: PetitionsRepository,
@@ -21,9 +21,9 @@ class RequestPetitionSummaryUseCase:
         self._analyses_repository = analyses_repository
         self._broker = broker
 
-    def execute(self, petition_id: str) -> None:
-        petition_id_entity = Id.create(petition_id)
-        petition = self._petitions_repository.find_by_id(petition_id_entity)
+    def execute(self, analysis_id: str) -> None:
+        analysis_id_entity = Id.create(analysis_id)
+        petition = self._petitions_repository.find_by_id(analysis_id_entity)
         if petition is None:
             raise PetitionNotFoundError
 
@@ -37,7 +37,9 @@ class RequestPetitionSummaryUseCase:
         self._analyses_repository.replace(updated_analysis)
 
         self._broker.publish(
-            PetitionSummaryRequestedEvent(petition_id=petition_id_entity.value)
+            FistInstanceCaseSummarizationTriggeredEvent(
+                analysis_id=analysis_id_entity.value
+            )
         )
 
     @staticmethod

@@ -303,7 +303,7 @@ Implementar o disparo assincrono da busca de precedentes para uma `Analysis`, ex
 ## Camada PubSub (Eventos de Dominio)
 
 - **Localizacao:** `src/animus/core/intake/domain/events/analysis_precedents_search_requested_event.py` (**novo arquivo**)
-- **`NAME`:** `"intake/analyses.precedents.search.requested"`
+- **`NAME`:** `"intake/analyses.precedents.search.triggered"`
 - **Payload:** `analysis_id: str`, `courts: list[str]`, `precedent_kinds: list[str]`, `limit: int`
 
 ## Camada PubSub (Jobs Inngest)

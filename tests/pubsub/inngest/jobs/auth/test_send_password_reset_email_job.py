@@ -42,7 +42,7 @@ class TestSendPasswordResetEmailJob:
             _send_password_reset_email,
         )
         response = inngest_runtime.post_event(
-            name='auth/password-reset.requested',
+            name='auth/password-reset.triggered',
             data={
                 'account_email': 'maria@example.com',
                 'account_email_otp': '123456',

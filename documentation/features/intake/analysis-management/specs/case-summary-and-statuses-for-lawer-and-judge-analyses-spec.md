@@ -46,7 +46,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - O documento associado a uma analise deve deixar de ser representado por `Petition` e passar a ser representado por `AnalysisDocument`, com os campos `analysis_id`, `uploaded_at`, `file_path` e `name`.
 - Deve existir no maximo um `AnalysisDocument` ativo por analise; novo upload substitui o anterior no mesmo fluxo ja existente hoje para `Petition`.
 - O resumo estruturado do caso deve ser persistido como `CaseSummary` e consultado por `analysis_id`, nao por `petition_id`.
-- O request assíncrono de resumo deve partir de `analysis_id`, buscar `AnalysisDocument`, mover a analise para o status de processamento adequado e publicar `CaseSummaryRequestedEvent`.
+- O request assíncrono de resumo deve partir de `analysis_id`, buscar `AnalysisDocument`, mover a analise para o status de processamento adequado e publicar `CaseSummaryCaseSummarizationTriggeredEvent`.
 - O dominio de `CASE_ASSESSMENT` deve aceitar os status `WAITING_DOCUMENT_UPLOAD`, `DOCUMENT_UPLOADED`, `ANALYZING_CASE`, `CASE_ANALYZED`, `SEARCHING_PRECEDENTS`, `GENERATING_PETITION_DRAFT`, `DONE` e `FAILED`.
 - O dominio de `SECOND_INSTANCE` deve aceitar os status `WAITING_DOCUMENT_UPLOAD`, `DOCUMENT_UPLOADED`, `EXTRACTING_PETITION`, `ANALYZING_CASE`, `CASE_ANALYZED`, `SEARCHING_PRECEDENTS`, `GENERATING_JUDGMENT_DRAFT`, `DONE` e `FAILED`.
 - `FIRST_INSTANCE` deve usar `FirstInstanceAnalysisStatus` como contrato concreto de status no agregado `Analysis`.
@@ -88,7 +88,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **`PetitionSummary`** (`src/animus/core/intake/domain/structures/petition_summary.py`) - estrutura atual do resumo, ja usando o campo `case_summary`, mas com nomenclatura legada.
 - **`PetitionSummaryDto`** (`src/animus/core/intake/domain/structures/dtos/petition_summary_dto.py`) - DTO atual do resumo estruturado.
 - **`PetitionSummariesRepository`** (`src/animus/core/intake/interfaces/petition_summaries_repository.py`) - port atual do resumo, ainda centrado em `petition_id`.
-- **`RequestPetitionSummaryUseCase`** (`src/animus/core/intake/use_cases/request_petition_summary_use_case.py`) - request assíncrono de resumo, ainda centrado em `petition_id`.
+- **`TriggerFistInstanceCaseSummarizationUseCase`** (`src/animus/core/intake/use_cases/request_petition_summary_use_case.py`) - request assíncrono de resumo, ainda centrado em `petition_id`.
 - **`CreatePetitionSummaryUseCase`** (`src/animus/core/intake/use_cases/create_petition_summary_use_case.py`) - persistencia do resumo atual, ainda ligada a `PetitionsRepository`.
 - **`GetPetitionSummaryUseCase`** (`src/animus/core/intake/use_cases/get_petition_summary_use_case.py`) - leitura do resumo por `petition_id`.
 - **`SearchAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/search_analysis_precedents_use_case.py`) - depende de `PetitionSummariesRepository` e do provider de embeddings do resumo.
@@ -128,7 +128,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **`DatabasePipe`** (`src/animus/pipes/database_pipe.py`) - hoje expõe `PetitionsRepository` e `PetitionSummariesRepository`.
 - **`SummarizePetitionWorkflow`** (`src/animus/core/intake/interfaces/summarize_petition_workflow.py`) - interface atual do workflow de resumo.
 - **`AgnoSummarizePetitionWorkflow`** (`src/animus/ai/agno/workflows/intake/agno_summarize_petition_workflow.py`) - workflow atual de resumo.
-- **`PetitionSummaryRequestedEvent`** (`src/animus/core/intake/domain/events/petition_summary_requested_event.py`) - evento atual do resumo.
+- **`FistInstanceCaseSummarizationTriggeredEvent`** (`src/animus/core/intake/domain/events/petition_summary_requested_event.py`) - evento atual do resumo.
 - **`PetitionSummaryFinishedEvent`** (`src/animus/core/intake/domain/events/petition_summary_finished_event.py`) - evento atual de conclusao do resumo.
 - **`SummarizePetitionJob`** (`src/animus/pubsub/inngest/jobs/intake/summarize_petition_job.py`) - job atual de resumo.
 - **`OpenAICaseSummaryEmbeddingsProvider`** (`src/animus/providers/intake/petition_summary_embeddings/openai/openai_petition_summary_embeddings_provider.py`) - provider atual de embeddings do resumo.
@@ -273,7 +273,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Localizacao:** `src/animus/core/intake/use_cases/request_case_summary_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `AnalysisDocumentsRepository`, `AnalysesRepository`, `Broker`
 - **Metodo principal:** `execute(analysis_id: str) -> None` - valida a existencia do documento, move a analise para o estado de processamento do caso e publica o evento assíncrono do resumo.
-- **Fluxo resumido:** busca `AnalysisDocument` por `analysis_id`; busca `Analysis`; ajusta `analysis.status`; persiste a analise; publica `CaseSummaryRequestedEvent(analysis_id)`.
+- **Fluxo resumido:** busca `AnalysisDocument` por `analysis_id`; busca `Analysis`; ajusta `analysis.status`; persiste a analise; publica `CaseSummaryCaseSummarizationTriggeredEvent(analysis_id)`.
 
 - **Localizacao:** `src/animus/core/intake/use_cases/create_case_summary_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `CaseSummariesRepository`, `AnalysisDocumentsRepository`, `AnalysesRepository`
@@ -418,7 +418,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 ## Camada PubSub (Eventos de Dominio)
 
 - **Localizacao:** `src/animus/core/intake/domain/events/case_summary_requested_event.py` (**novo arquivo**)
-- **`NAME`:** `intake/case.summary.requested`
+- **`NAME`:** `intake/case.summary.triggered`
 - **Payload:** `analysis_id: str`
 
 - **Localizacao:** `src/animus/core/intake/domain/events/case_summary_finished_event.py` (**novo arquivo**)
@@ -428,7 +428,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 ## Camada PubSub (Jobs Inngest)
 
 - **Localizacao:** `src/animus/pubsub/inngest/jobs/intake/summarize_case_job.py` (**novo arquivo**)
-- **Evento consumido:** `CaseSummaryRequestedEvent.NAME`
+- **Evento consumido:** `CaseSummaryCaseSummarizationTriggeredEvent.NAME`
 - **Dependencias:** `AnalysisDocumentsRepository`, `CaseSummariesRepository`, `AnalysesRepository`, `SummarizeFirstInstanceCaseWorkflow`
 - **Passos (`step.run`):** normalizar payload -> carregar `AnalysisDocument` -> ler conteudo do arquivo -> executar workflow -> persistir `CaseSummary` -> publicar `CaseSummaryFinishedEvent`
 - **Idempotencia:** resumo e atualizado por `replace(...)` quando a analise ja possuir `CaseSummary`; reexecucoes nao criam duplicata.
@@ -580,7 +580,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Justificativa:** o provider deve refletir o novo artefato canonico.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/summarize_petition_job.py`
-- **Mudanca:** renomear arquivo/classe para `summarize_case_job.py` / `SummarizeFirstInstanceCaseJob`; trocar payload para `analysis_id`; buscar `AnalysisDocument` em vez de `Petition`; trocar evento trigger para `CaseSummaryRequestedEvent`; publicar `CaseSummaryFinishedEvent`.
+- **Mudanca:** renomear arquivo/classe para `summarize_case_job.py` / `SummarizeFirstInstanceCaseJob`; trocar payload para `analysis_id`; buscar `AnalysisDocument` em vez de `Petition`; trocar evento trigger para `CaseSummaryCaseSummarizationTriggeredEvent`; publicar `CaseSummaryFinishedEvent`.
 - **Justificativa:** o job de resumo deixa de depender de `petition_id`.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/notification/send_petition_summary_finished_notification_job.py`
@@ -646,7 +646,7 @@ Refatorar o dominio `intake` para suportar tres tipos de analise distintos, **Ca
 - **Impacto esperado:** atualizar `DatabasePipe`, use cases e jobs.
 
 - **Arquivo:** `src/animus/core/intake/domain/events/petition_summary_requested_event.py`
-- **Motivo da remocao:** substituido por `CaseSummaryRequestedEvent`.
+- **Motivo da remocao:** substituido por `CaseSummaryCaseSummarizationTriggeredEvent`.
 - **Impacto esperado:** atualizar trigger do job de resumo.
 
 - **Arquivo:** `src/animus/core/intake/domain/events/petition_summary_finished_event.py`
@@ -768,7 +768,7 @@ POST /intake/analyses/{analysis_id}/case-summaries
      -> AnalysesRepository.find_by_id
      -> Analysis.set_status(ANALYZING_CASE | EXTRACTING_PETITION)
      -> AnalysesRepository.replace
-     -> Broker.publish(CaseSummaryRequestedEvent)
+     -> Broker.publish(CaseSummaryCaseSummarizationTriggeredEvent)
 
 Inngest -> SummarizeFirstInstanceCaseJob
   -> AnalysisDocumentsRepository.find_by_analysis_id
@@ -791,7 +791,7 @@ GET /intake/analyses/{analysis_id}/case-summaries
 
 ```text
 RequestCaseSummaryUseCase
-  -> Broker.publish(CaseSummaryRequestedEvent)
+  -> Broker.publish(CaseSummaryCaseSummarizationTriggeredEvent)
   -> SummarizeFirstInstanceCaseJob
      -> SummarizeFirstInstanceCaseWorkflow
      -> CreateCaseSummaryUseCase

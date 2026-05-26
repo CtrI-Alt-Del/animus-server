@@ -12,7 +12,7 @@ class _Payload:
 
 
 class AnalysisPrecedentsSearchRequestedEvent(Event[_Payload]):
-    name = 'intake/analyses.precedents.search.requested'
+    name = 'intake/analyses.precedents.search.triggered'
 
     def __init__(
         self,

@@ -59,7 +59,7 @@ class TestTriggerFirstInstanceCaseSummarizationController:
         assert response.status_code == 202
         assert len(fake_inngest_client.sent_events) == 1
         assert (
-            fake_inngest_client.sent_events[0].name == 'intake/case_summary.requested'
+            fake_inngest_client.sent_events[0].name == 'intake/case_summary.triggered'
         )
         assert fake_inngest_client.sent_events[0].data['analysis_id'] == analysis.id
 

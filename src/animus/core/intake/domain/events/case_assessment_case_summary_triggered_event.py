@@ -8,9 +8,9 @@ class _Payload:
     analysis_id: str
 
 
-class CaseSummaryRequestedEvent(Event[_Payload]):
-    name = 'intake/case_summary.requested'
+class CaseAssessmentCaseSummarizationTriggeredEvent(Event[_Payload]):
+    name = 'intake/case_assessment.case_summarization.triggered'
 
     def __init__(self, analysis_id: str) -> None:
         payload = _Payload(analysis_id=analysis_id)
-        super().__init__(CaseSummaryRequestedEvent.name, payload)
+        super().__init__(CaseAssessmentCaseSummarizationTriggeredEvent.name, payload)

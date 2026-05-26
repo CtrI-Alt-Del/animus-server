@@ -6,3 +6,7 @@ from animus.core.shared.domain.structures import Text
 
 class SummarizeFirstInstanceCaseWorkflow(Protocol):
     def run(self, analysis_id: str, document_content: Text) -> CaseSummaryDto: ...
+
+
+class SummarizeCaseAssessmentCaseWorkflow(Protocol):
+    def run(self, analysis_id: str, document_content: Text) -> CaseSummaryDto: ...

@@ -11,7 +11,7 @@ from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.domain.events import PetitionReplacedEvent
+from animus.core.intake.domain.events import AnalysisDocumentReplacedEvent
 from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
@@ -137,7 +137,7 @@ class TestCreateAnalysisDocumentUseCase:
         published_event = self.broker_mock.publish.call_args.args[0]
         updated_analysis = self.analyses_repository_mock.replace.call_args.args[0]
 
-        assert isinstance(published_event, PetitionReplacedEvent)
+        assert isinstance(published_event, AnalysisDocumentReplacedEvent)
         assert (
             published_event.payload.petition_document_path
             == 'intake/analyses/old-document.pdf'
