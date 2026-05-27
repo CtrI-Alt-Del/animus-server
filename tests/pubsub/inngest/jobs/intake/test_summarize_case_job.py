@@ -7,6 +7,7 @@ from pytest import MonkeyPatch
 from sqlalchemy.orm import Session, sessionmaker
 
 from animus.core.intake.domain.events import FistInstanceCaseSummarizationTriggeredEvent
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.shared.domain.structures import Id
 from animus.database.sqlalchemy.models.intake.analysis_model import AnalysisModel
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -38,7 +39,11 @@ def _seed_analysis(
     session.commit()
     session.close()
 
-    return {'analysis_id': analysis_id, 'account_id': account_id}
+    return {
+        'analysis_id': analysis_id,
+        'account_id': account_id,
+        'analysis_type': AnalysisType.create_as_first_instance().dto,
+    }
 
 
 def _wait_until(predicate: Any, *, timeout_seconds: float = 30) -> None:
@@ -67,10 +72,15 @@ class TestSummarizeFirstInstanceCaseJob:
         captured_events: list[dict[str, str]] = []
         analysis_id = Id.create().value
         account_id = Id.create().value
+        analysis_type = AnalysisType.create_as_first_instance().dto
 
         async def _summarize_case(payload: Any) -> dict[str, str]:
             captured_payloads.append(payload.analysis_id)
-            return {'analysis_id': analysis_id, 'account_id': account_id}
+            return {
+                'analysis_id': analysis_id,
+                'account_id': account_id,
+                'analysis_type': analysis_type,
+            }
 
         def _publish(_self: InngestBroker, event: Any) -> None:
             captured_events.append(
@@ -78,6 +88,7 @@ class TestSummarizeFirstInstanceCaseJob:
                     'name': event.name,
                     'analysis_id': event.payload_data['analysis_id'],
                     'account_id': event.payload_data['account_id'],
+                    'analysis_type': event.payload_data['analysis_type'],
                 }
             )
 
@@ -101,6 +112,7 @@ class TestSummarizeFirstInstanceCaseJob:
                 'name': 'intake/case_summary.finished',
                 'analysis_id': analysis_id,
                 'account_id': account_id,
+                'analysis_type': analysis_type,
             }
         ]
 

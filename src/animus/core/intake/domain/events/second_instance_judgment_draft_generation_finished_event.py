@@ -10,8 +10,8 @@ class _Payload:
     analysis_type: str
 
 
-class PetitionSummaryFinishedEvent(Event[_Payload]):
-    name = 'intake/petition_summary.finished'
+class SecondInstanceJudgmentDraftGenerationFinishedEvent(Event[_Payload]):
+    name = 'intake/judgment_draft.generation.finished'
 
     def __init__(
         self,
@@ -24,4 +24,7 @@ class PetitionSummaryFinishedEvent(Event[_Payload]):
             account_id=account_id,
             analysis_type=analysis_type,
         )
-        super().__init__(PetitionSummaryFinishedEvent.name, payload)
+        super().__init__(
+            SecondInstanceJudgmentDraftGenerationFinishedEvent.name,
+            payload,
+        )

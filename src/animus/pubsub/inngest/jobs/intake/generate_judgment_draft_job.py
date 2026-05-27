@@ -4,11 +4,15 @@ from typing import Any
 
 from inngest import Context, Inngest, TriggerEvent
 
-from animus.core.intake.domain.errors import ChosenAnalysisPrecedentsRequiredError
+from animus.core.intake.domain.errors import (
+    AnalysisNotFoundError,
+    ChosenAnalysisPrecedentsRequiredError,
+)
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
 from animus.core.intake.domain.events import (
+    SecondInstanceJudgmentDraftGenerationFinishedEvent,
     SecondInstanceJudgmentDraftGenerationTriggeredEvent,
 )
 from animus.core.intake.use_cases import (
@@ -24,12 +28,20 @@ from animus.database.sqlalchemy.repositories.intake import (
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.pipes.ai_pipe import AiPipe
+from animus.pubsub.inngest.inngest_broker import InngestBroker
 from animus.pubsub.inngest.inngest_job import InngestJob
 
 
 @dataclass(frozen=True)
 class _Payload:
     analysis_id: str
+
+
+@dataclass(frozen=True)
+class _GenerationResult:
+    analysis_id: str
+    account_id: str
+    analysis_type: str
 
 
 class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
@@ -63,11 +75,30 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
                     ),
                 )
 
-                await context.step.run(
+                generation_result_data = await context.step.run(
                     'generate_and_persist_judgment_draft',
                     lambda payload=payload: (
                         GenerateSecondInstanceJudgmentDraftJob._generate_and_persist_judgment_draft(
                             payload
+                        )
+                    ),
+                )
+                if generation_result_data is None:
+                    return
+
+                generation_result = _GenerationResult(
+                    analysis_id=str(generation_result_data['analysis_id']),
+                    account_id=str(generation_result_data['account_id']),
+                    analysis_type=str(generation_result_data['analysis_type']),
+                )
+
+                await context.step.run(
+                    'publish_finished_event',
+                    lambda: InngestBroker(inngest).publish(  # type: ignore
+                        SecondInstanceJudgmentDraftGenerationFinishedEvent(
+                            analysis_id=generation_result.analysis_id,
+                            account_id=generation_result.account_id,
+                            analysis_type=generation_result.analysis_type,
                         )
                     ),
                 )
@@ -115,9 +146,11 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
             session.commit()
 
     @staticmethod
-    async def _generate_and_persist_judgment_draft(payload: _Payload) -> None:
+    async def _generate_and_persist_judgment_draft(
+        payload: _Payload,
+    ) -> dict[str, str] | None:
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
+        return await loop.run_in_executor(
             None,
             lambda: (
                 GenerateSecondInstanceJudgmentDraftJob._generate_and_persist_judgment_draft_sync(
@@ -127,7 +160,9 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
         )
 
     @staticmethod
-    def _generate_and_persist_judgment_draft_sync(payload: _Payload) -> None:
+    def _generate_and_persist_judgment_draft_sync(
+        payload: _Payload,
+    ) -> dict[str, str] | None:
         with Sqlalchemy.session() as session:
             analyses_repository = SqlalchemyAnalysesRepository(session)
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
@@ -139,9 +174,13 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
             )
 
             analysis_id = Id.create(payload.analysis_id)
+            analysis = analyses_repository.find_by_id(analysis_id)
+            if analysis is None:
+                raise AnalysisNotFoundError
+
             case_summary = case_summaries_repository.find_by_analysis_id(analysis_id)
             if case_summary is None:
-                return
+                return None
 
             precedents = analysis_precedents_repository.find_many_by_analysis_id(
                 analysis_id=analysis_id
@@ -172,6 +211,12 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
                 dto=judgment_draft_dto,
             )
             session.commit()
+
+            return {
+                'analysis_id': analysis_id.value,
+                'account_id': analysis.account_id.value,
+                'analysis_type': analysis.type.dto,
+            }
 
     @staticmethod
     async def _mark_analysis_as_failed(payload: _Payload) -> None:

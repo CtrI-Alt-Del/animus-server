@@ -64,7 +64,11 @@ def _seed_case_assessment_analysis_with_document(
     session.commit()
     session.close()
 
-    return {'analysis_id': analysis_id, 'account_id': account_id}
+    return {
+        'analysis_id': analysis_id,
+        'account_id': account_id,
+        'analysis_type': AnalysisType.create_as_case_assessment().dto,
+    }
 
 
 def _get_analysis(
@@ -124,12 +128,17 @@ class TestSummarizeCaseAssessmentCaseJob:
     ) -> None:
         analysis_id = Id.create().value
         account_id = Id.create().value
+        analysis_type = AnalysisType.create_as_case_assessment().dto
         captured_payloads: list[str] = []
         captured_events: list[dict[str, str]] = []
 
         async def _summarize_case(payload: Any) -> dict[str, str]:
             captured_payloads.append(payload.analysis_id)
-            return {'analysis_id': analysis_id, 'account_id': account_id}
+            return {
+                'analysis_id': analysis_id,
+                'account_id': account_id,
+                'analysis_type': analysis_type,
+            }
 
         def _publish(_self: InngestBroker, event: Any) -> None:
             captured_events.append(
@@ -137,6 +146,7 @@ class TestSummarizeCaseAssessmentCaseJob:
                     'name': event.name,
                     'analysis_id': event.payload_data['analysis_id'],
                     'account_id': event.payload_data['account_id'],
+                    'analysis_type': event.payload_data['analysis_type'],
                 }
             )
 
@@ -162,6 +172,7 @@ class TestSummarizeCaseAssessmentCaseJob:
                 'name': 'intake/case_summary.finished',
                 'analysis_id': analysis_id,
                 'account_id': account_id,
+                'analysis_type': analysis_type,
             }
         ]
 

@@ -67,19 +67,26 @@ Fluxos de intake ja implementados:
 - `GET /intake/analyses/{analysis_id}/second-instance-report` -> `GetSecondInstanceAnalysisReportController` -> `AuthPipe` / `DatabasePipe` -> `GetSecondInstanceAnalysisReportUseCase` -> `AnalysesRepository` / `AnalysisDocumentsRepository` / `CaseSummariesRepository` / `AnalysisPrecedentsRepository` -> PostgreSQL (`analyses`, `analysis_documents`, `case_summaries`, `analysis_precedents`) -> `SecondInstanceAnalysisReportDto`.
 
 Fluxo assincrono de resumo do caso:
-- `CaseSummaryCaseSummarizationTriggeredEvent` -> `SummarizeFirstInstanceCaseJob` -> `GetDocumentContentUseCase` -> `AgnoSummarizeFirstInstanceCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent`.
-- `CaseAssessmentCaseSummarizationTriggeredEvent` -> `SummarizeCaseAssessmentCaseJob` -> `GetDocumentContentUseCase` -> `AgnoSummarizeCaseAssessmentCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent`.
+- `CaseSummaryCaseSummarizationTriggeredEvent` -> `SummarizeFirstInstanceCaseJob` -> `GetDocumentContentUseCase` -> `AgnoSummarizeFirstInstanceCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent` com `analysis_type`.
+- `CaseAssessmentCaseSummarizationTriggeredEvent` -> `SummarizeCaseAssessmentCaseJob` -> `GetDocumentContentUseCase` -> `AgnoSummarizeCaseAssessmentCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent` com `analysis_type`.
 
 Fluxo assincrono de segunda instancia:
-- `SecondInstanceCaseSummarizationTriggeredEvent` -> `SummarizeSecondInstanceCaseJob` -> `AnalysisDocumentsRepository` / `FileStorageProvider` / `PdfProvider` -> cache em `ExtractedPetitionsRepository` -> `AgnoExtractPetitionWorkflow` -> `AgnoSummarizeSecondInstanceCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent`.
+- `SecondInstanceCaseSummarizationTriggeredEvent` -> `SummarizeSecondInstanceCaseJob` -> `AnalysisDocumentsRepository` / `FileStorageProvider` / `PdfProvider` -> cache em `ExtractedPetitionsRepository` -> `AgnoExtractPetitionWorkflow` -> `AgnoSummarizeSecondInstanceCaseWorkflow` -> `CreateCaseSummaryUseCase` / `CaseSummaryFinishedEvent` com `analysis_type`.
 
 Fluxo assincrono de minuta de petição inicial:
-- `PetitionDraftGenerationTriggeredEvent` -> `GeneratePetitionDraftJob` -> `UpdateAnalysisStatusUseCase` (`GENERATING_PETITION_DRAFT`) -> `AgnoGeneratePetitionDraftWorkflow` -> `CreatePetitionDraftUseCase` -> PostgreSQL (`petition_drafts`) / `PetitionDraftGenerationFinishedEvent`.
+- `PetitionDraftGenerationTriggeredEvent` -> `GeneratePetitionDraftJob` -> `UpdateAnalysisStatusUseCase` (`GENERATING_PETITION_DRAFT`) -> `AgnoGeneratePetitionDraftWorkflow` -> `CreatePetitionDraftUseCase` -> PostgreSQL (`petition_drafts`) / `PetitionDraftGenerationFinishedEvent` com `analysis_type`.
+
+Fluxo assincrono de minuta de sentença:
+- `SecondInstanceJudgmentDraftGenerationTriggeredEvent` -> `GenerateSecondInstanceJudgmentDraftJob` -> `UpdateAnalysisStatusUseCase` (`GENERATING_JUDGMENT_DRAFT`) -> `AgnoGenerateJudgmentDraftWorkflow` -> `CreateSecondInstanceJudgmentDraftUseCase` -> PostgreSQL (`judgment_drafts`) / `SecondInstanceJudgmentDraftGenerationFinishedEvent` com `analysis_type`.
 
 Fluxo assincrono de precedentes:
 - `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratacao de precedentes.
-- O mesmo job segue para `GENERATING_SYNTHESIS`, executa o workflow de sintese, substitui os `analysis_precedents` persistidos e conclui em `WAITING_PRECEDENT_CHOISE`.
+- O mesmo job segue para `GENERATING_SYNTHESIS`, executa o workflow de sintese, substitui os `analysis_precedents` persistidos e publica `PrecedentsSearchFinishedEvent` com `analysis_type` ao concluir em `WAITING_PRECEDENT_CHOISE`.
 - Em falhas nao tratadas, o job marca a `Analysis` como `FAILED`, preservando observabilidade por polling via status persistido.
+
+Fluxo assincrono de notificacoes push:
+- Eventos de conclusao (`CaseSummaryFinishedEvent`, `PetitionSummaryFinishedEvent`, `PrecedentsSearchFinishedEvent`, `PetitionDraftGenerationFinishedEvent` e `SecondInstanceJudgmentDraftGenerationFinishedEvent`) -> jobs de notificacao do Inngest -> use cases de `core/notification` -> `PushNotificationProvider` -> `OneSignalPushNotificationProvider`.
+- O `data` enviado ao OneSignal preserva `type` e `analysis_id` e inclui `analysis_type` para permitir deep link correto no mobile.
 
 Fluxo assincrono de substituicao de petição:
 - `CreatePetitionUseCase` detecta petição anterior, publica `AnalysisDocumentReplacedEvent`, remove a petição antiga com cascade do `PetitionSummary` e atualiza a `Analysis` para `PETITION_UPLOADED` antes de persistir a nova petição.

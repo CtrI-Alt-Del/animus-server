@@ -121,6 +121,7 @@ def _seed_case_assessment_analysis(
     return {
         'analysis_id': analysis_id,
         'account_id': account_id,
+        'analysis_type': AnalysisType.create_as_case_assessment().dto,
         'chosen_precedent_id': chosen_precedent_id,
         'unchosen_precedent_id': unchosen_precedent_id,
     }
@@ -185,6 +186,7 @@ class TestGeneratePetitionDraftJob:
     ) -> None:
         analysis_id = Id.create().value
         account_id = Id.create().value
+        analysis_type = AnalysisType.create_as_case_assessment().dto
         captured_payloads: list[str] = []
         captured_events: list[dict[str, str]] = []
 
@@ -193,7 +195,11 @@ class TestGeneratePetitionDraftJob:
 
         async def _generate_and_persist_petition_draft(payload: Any) -> dict[str, str]:
             captured_payloads.append(payload.analysis_id)
-            return {'analysis_id': analysis_id, 'account_id': account_id}
+            return {
+                'analysis_id': analysis_id,
+                'account_id': account_id,
+                'analysis_type': analysis_type,
+            }
 
         def _publish(_self: InngestBroker, event: Any) -> None:
             captured_events.append(
@@ -201,6 +207,7 @@ class TestGeneratePetitionDraftJob:
                     'name': event.name,
                     'analysis_id': event.payload_data['analysis_id'],
                     'account_id': event.payload_data['account_id'],
+                    'analysis_type': event.payload_data['analysis_type'],
                 }
             )
 
@@ -231,6 +238,7 @@ class TestGeneratePetitionDraftJob:
                 'name': 'intake/petition_draft.generation.finished',
                 'analysis_id': analysis_id,
                 'account_id': account_id,
+                'analysis_type': analysis_type,
             }
         ]
 
@@ -303,6 +311,7 @@ class TestGeneratePetitionDraftJob:
         assert result == {
             'analysis_id': seeded_data['analysis_id'],
             'account_id': seeded_data['account_id'],
+            'analysis_type': seeded_data['analysis_type'],
         }
         assert captured_workflow_calls == [
             {

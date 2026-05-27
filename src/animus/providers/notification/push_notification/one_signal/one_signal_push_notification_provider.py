@@ -10,12 +10,29 @@ class OneSignalPushNotificationProvider(PushNotificationProvider):
         self,
         recipient_id: Id,
         analysis_id: Id,
+        analysis_type: str,
     ) -> None:
         title = 'Análise de petição concluida'
         body = 'O resumo da sua petição ja esta disponivel.'
         data = {
             'type': 'case_summary_finished',
             'analysis_id': analysis_id.value,
+            'analysis_type': analysis_type,
+        }
+        self._send_push(recipient_id, title, body, data)
+
+    def send_petition_summary_finished_message(
+        self,
+        recipient_id: Id,
+        analysis_id: Id,
+        analysis_type: str,
+    ) -> None:
+        title = 'Resumo de petição finalizado'
+        body = 'O resumo da sua petição ja esta disponivel.'
+        data = {
+            'type': 'petition_summary_finished',
+            'analysis_id': analysis_id.value,
+            'analysis_type': analysis_type,
         }
         self._send_push(recipient_id, title, body, data)
 
@@ -23,12 +40,44 @@ class OneSignalPushNotificationProvider(PushNotificationProvider):
         self,
         recipient_id: Id,
         analysis_id: Id,
+        analysis_type: str,
     ) -> None:
         title = 'Busca de precedentes finalizada'
         body = 'A busca de precedentes para sua analise foi concluida.'
         data = {
             'type': 'precedents_search_finished',
             'analysis_id': analysis_id.value,
+            'analysis_type': analysis_type,
+        }
+        self._send_push(recipient_id, title, body, data)
+
+    def send_petition_draft_finished_message(
+        self,
+        recipient_id: Id,
+        analysis_id: Id,
+        analysis_type: str,
+    ) -> None:
+        title = 'Minuta de petição finalizada'
+        body = 'A minuta da sua petição ja esta disponivel.'
+        data = {
+            'type': 'petition_draft_finished',
+            'analysis_id': analysis_id.value,
+            'analysis_type': analysis_type,
+        }
+        self._send_push(recipient_id, title, body, data)
+
+    def send_judgment_draft_finished_message(
+        self,
+        recipient_id: Id,
+        analysis_id: Id,
+        analysis_type: str,
+    ) -> None:
+        title = 'Minuta de sentença finalizada'
+        body = 'A minuta de sentença ja esta disponivel.'
+        data = {
+            'type': 'judgment_draft_finished',
+            'analysis_id': analysis_id.value,
+            'analysis_type': analysis_type,
         }
         self._send_push(recipient_id, title, body, data)
 
