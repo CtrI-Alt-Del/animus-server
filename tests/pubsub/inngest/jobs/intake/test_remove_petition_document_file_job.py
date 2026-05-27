@@ -7,14 +7,14 @@ from pytest import MonkeyPatch
 from animus.providers.storage import GcsFileStorageProvider
 
 
-class TestRemovePetitionDocumentFileJob:
+class TestRemoveAnalysisDocumentFileJob:
     @pytest.mark.filterwarnings(
         r'ignore:websockets\.legacy is deprecated:DeprecationWarning'
     )
     @pytest.mark.filterwarnings(
         r'ignore:websockets\.server\.WebSocketServerProtocol is deprecated:DeprecationWarning'
     )
-    def test_should_process_event_with_real_inngest_dev_server_when_petition_is_replaced(
+    def test_should_process_event_with_real_inngest_dev_server_when_analysis_document_is_replaced(
         self,
         monkeypatch: MonkeyPatch,
         inngest_runtime: Any,
@@ -35,8 +35,8 @@ class TestRemovePetitionDocumentFileJob:
         )
 
         response = inngest_runtime.post_event(
-            name='intake/petition.replaced',
-            data={'petition_document_path': expected_path},
+            name='intake/analysis.document.replaced',
+            data={'analysis_document_path': expected_path},
         )
 
         assert response.status == 200

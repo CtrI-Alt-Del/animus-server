@@ -374,8 +374,9 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         assert result.analysis == analysis.dto
         assert result.document == document.dto
         assert result.case_summary == case_summary.dto
-        assert len(result.precedents) == 2
+        assert len(result.precedents) == 1
         assert result.precedents[0].precedent.id == precedent_1.precedent.id.value
+        assert result.precedents[0].is_chosen is True
         assert result.draft is None
 
         self.analyses_repository_mock.find_by_id.assert_called_once_with(
@@ -478,7 +479,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         with pytest.raises(AnalysisNotFoundError):
             self.use_case.execute(analysis_id=analysis_id, account_id=account_id)
 
-    def test_should_classify_precedents_correctly(self) -> None:
+    def test_should_return_empty_precedents_when_none_are_chosen(self) -> None:
         # Arrange
         analysis_id = Id.create().value
         account_id = Id.create().value
@@ -545,5 +546,4 @@ class TestGetSecondInstanceAnalysisReportUseCase:
         result = self.use_case.execute(analysis_id=analysis_id, account_id=account_id)
 
         # Assert
-        assert len(result.precedents) == 5
-        assert all(precedent.is_chosen is False for precedent in result.precedents)
+        assert result.precedents == []

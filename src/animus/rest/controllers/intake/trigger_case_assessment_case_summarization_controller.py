@@ -20,7 +20,7 @@ class TriggerCaseAssessmentCaseSummarizationController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.post(
-            '/analyses/{analysis_id}/case-summaries/case-assessment',
+            '/analyses/{analysis_id}/case-assessment-case-summaries',
             status_code=202,
         )
         def _(

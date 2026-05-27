@@ -63,6 +63,10 @@ class CaseAssessmentAnalysisStatus(Structure):
         return cls(CaseAssessmentAnalysisStatusValue.FAILED)
 
     @classmethod
+    def create_as_generating_synthesis(cls) -> CaseAssessmentAnalysisStatus:
+        return cls(CaseAssessmentAnalysisStatusValue.GENERATING_SYNTHESIS)
+
+    @classmethod
     def create_as_generating_petition_draft(cls) -> CaseAssessmentAnalysisStatus:
         return cls(CaseAssessmentAnalysisStatusValue.GENERATING_PETITION_DRAFT)
 
@@ -77,5 +81,8 @@ class CaseAssessmentAnalysisStatus(Structure):
         return (
             CaseAssessmentAnalysisStatusValue.ANALYZING_CASE,
             CaseAssessmentAnalysisStatusValue.SEARCHING_PRECEDENTS,
+            CaseAssessmentAnalysisStatusValue.ANALYZING_PRECEDENTS_SIMILARITY,
+            CaseAssessmentAnalysisStatusValue.ANALYZING_PRECEDENTS_APPLICABILITY,
+            CaseAssessmentAnalysisStatusValue.GENERATING_SYNTHESIS,
             CaseAssessmentAnalysisStatusValue.GENERATING_PETITION_DRAFT,
         )

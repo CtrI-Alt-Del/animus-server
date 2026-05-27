@@ -165,7 +165,9 @@ def inngest_runtime(
                 lambda: _is_inngest_http_ready(base_url=base_url),
                 timeout_seconds=30,
             )
-            time.sleep(5)
+            # The dev server can take a few extra seconds to sync functions
+            # after the HTTP healthcheck starts passing.
+            time.sleep(10)
 
             yield InngestTestRuntime(base_url=base_url)
     finally:
