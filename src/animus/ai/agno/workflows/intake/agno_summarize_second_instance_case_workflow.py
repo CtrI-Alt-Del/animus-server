@@ -78,18 +78,22 @@ class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeFirstInstanceCaseWorkflow
         document_content = str(run_context.session_state.get('document_content', ''))
         prompt = dedent(
             f"""
-            Resuma o conteudo da petição inicial em contexto de segunda instancia.
+            Resuma as pecas processuais de segunda instancia a seguir em portugues brasileiro.
             Entregue a saida estruturada contendo `case_summary`, `legal_issue`,
             `central_question`, `relevant_laws`, `key_facts` e `search_terms`.
 
             Diretrizes de segunda instancia:
+            - o `document_content` representa pecas extraidas dos autos, com cabecalhos
+              estaveis para `sentenca`, `apelacao` e `contrarrazoes` quando houver;
+            - integre a narrativa processual entre decisao recorrida, fundamentos do
+              recurso e resposta da parte contraria, quando disponivel;
             - destaque fundamentos e pedidos com foco recursal;
             - priorize `requested_relief`, `central_question`, `standing_issue` e
               `procedural_issues` no contexto de revisao da decisao;
             - identifique controversias estruturais que impactam admissibilidade,
               legitimidade e alcance do provimento pretendido.
 
-            Conteudo da petição:
+            Conteudo das pecas processuais:
             {document_content}
             """
         ).strip()

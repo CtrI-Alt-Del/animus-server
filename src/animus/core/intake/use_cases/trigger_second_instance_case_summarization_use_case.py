@@ -46,7 +46,7 @@ class TriggerSecondInstanceCaseSummarizationUseCase:
             raise InconsistentAnalysisTypeError
 
         analysis.set_status(
-            SecondInstanceAnalysisStatus.create_as_extracting_petition()
+            SecondInstanceAnalysisStatus.create_as_extracting_court_document_pieces()
         )
         self._analyses_repository.replace(analysis)
         self._broker.publish(

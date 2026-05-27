@@ -10,7 +10,7 @@ from animus.core.shared.domain.errors import ValidationError
 class SecondInstanceAnalysisStatusValue(StrEnum):
     WAITING_DOCUMENT_UPLOAD = 'WAITING_DOCUMENT_UPLOAD'
     DOCUMENT_UPLOADED = 'DOCUMENT_UPLOADED'
-    EXTRACTING_PETITION = 'EXTRACTING_PETITION'
+    EXTRACTING_COURT_DOCUMENT_PIECES = 'EXTRACTING_COURT_DOCUMENT_PIECES'
     ANALYZING_CASE = 'ANALYZING_CASE'
     CASE_ANALYZED = 'CASE_ANALYZED'
     SEARCHING_PRECEDENTS = 'SEARCHING_PRECEDENTS'
@@ -20,7 +20,7 @@ class SecondInstanceAnalysisStatusValue(StrEnum):
     GENERATING_SYNTHESIS = 'GENERATING_SYNTHESIS'
     PRECEDENTS_SEARCHED = 'PRECEDENTS_SEARCHED'
     DONE = 'DONE'
-    PETITION_NOT_FOUND = 'PETITION_NOT_FOUND'
+    COURT_DOCUMENT_PIECES_NOT_FOUND = 'COURT_DOCUMENT_PIECES_NOT_FOUND'
     FAILED = 'FAILED'
 
 
@@ -53,8 +53,10 @@ class SecondInstanceAnalysisStatus(Structure):
         return cls(SecondInstanceAnalysisStatusValue.CASE_ANALYZED)
 
     @classmethod
-    def create_as_extracting_petition(cls) -> SecondInstanceAnalysisStatus:
-        return cls(SecondInstanceAnalysisStatusValue.EXTRACTING_PETITION)
+    def create_as_extracting_court_document_pieces(
+        cls,
+    ) -> SecondInstanceAnalysisStatus:
+        return cls(SecondInstanceAnalysisStatusValue.EXTRACTING_COURT_DOCUMENT_PIECES)
 
     @classmethod
     def create_as_analyzing_precedents_similarity(cls) -> SecondInstanceAnalysisStatus:
@@ -65,8 +67,10 @@ class SecondInstanceAnalysisStatus(Structure):
         return cls(SecondInstanceAnalysisStatusValue.GENERATING_JUDGMENT_DRAFT)
 
     @classmethod
-    def create_as_petition_not_found(cls) -> SecondInstanceAnalysisStatus:
-        return cls(SecondInstanceAnalysisStatusValue.PETITION_NOT_FOUND)
+    def create_as_court_document_pieces_not_found(
+        cls,
+    ) -> SecondInstanceAnalysisStatus:
+        return cls(SecondInstanceAnalysisStatusValue.COURT_DOCUMENT_PIECES_NOT_FOUND)
 
     @classmethod
     def create_as_precedents_searched(cls) -> SecondInstanceAnalysisStatus:
@@ -95,7 +99,7 @@ class SecondInstanceAnalysisStatus(Structure):
     @classmethod
     def get_processing_statuses(cls) -> tuple[SecondInstanceAnalysisStatusValue, ...]:
         return (
-            SecondInstanceAnalysisStatusValue.EXTRACTING_PETITION,
+            SecondInstanceAnalysisStatusValue.EXTRACTING_COURT_DOCUMENT_PIECES,
             SecondInstanceAnalysisStatusValue.ANALYZING_CASE,
             SecondInstanceAnalysisStatusValue.SEARCHING_PRECEDENTS,
             SecondInstanceAnalysisStatusValue.ANALYZING_PRECEDENTS_SIMILARITY,
