@@ -20,7 +20,7 @@ class ExtractCourtDocumentPiecesUseCase:
         pdf_outline_items = self._pdf_provider.extract_outline(file)
         if not pdf_outline_items:
             raise CourtDocumentIndexNotFoundError
-
+        
         court_document_outline = CourtDocumentOutline.create_from_pdf_outline_items(
             pdf_outline_items
         )
@@ -50,7 +50,7 @@ class ExtractCourtDocumentPiecesUseCase:
             if contrarrazoes_pieces
             else None
         )
-
+        
         return ExtractedCourtDocumentPieces.create(
             sentenca=sentenca.value,
             apelacao=apelacao.value,

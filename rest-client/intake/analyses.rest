@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KSE1A4GNEJJV7VA8YV5DG5J4
+@analysis_id = 01KNK8F8A4HFJXX09GYYC4PDAJ
 @petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
 @folder_id = 01KQ5CG4D6QY8A1X7R2M4N8P0B
 @precedent_court = STJ
@@ -137,7 +137,7 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 POST {{url}}/analyses/{{analysis_id}}/case-summaries/first-instance
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Disparar resumo de caso jurídico de segunda instância (SecondInstanceCaseSummarizationController)
+### Disparar resumo de caso jurídico de segunda instância (TriggerSecondInstanceCaseSummarizationController)
 POST {{url}}/analyses/{{analysis_id}}/case-summaries/second-instance
 Authorization: Bearer {{ACCESS_TOKEN}}
 
