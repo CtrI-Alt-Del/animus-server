@@ -144,6 +144,9 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                     ),
                 )
 
+                if account_id == '' or analysis_type == '':
+                    return
+
                 await context.step.run(
                     'publish_finished_event',
                     lambda payload=payload: InngestBroker(inngest).publish(  # type: ignore
