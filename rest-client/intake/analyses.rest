@@ -115,18 +115,15 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 GET {{url}}/precedents/identifier?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Adicionar analysis precedent (CreateAnalysisPrecedentController)
-POST {{url}}/analyses/precedents
+### Adicionar precedente a análise (AddAnalysisPrecedentByIdentifierController)
+POST {{url}}/analyses/{{analysis_id}}/precedents
 Authorization: Bearer {{ACCESS_TOKEN}}
 Content-Type: application/json
 
 {
-  "analysis_id": "{{analysis_id}}",
-  "identifier": {
-    "court": "{{precedent_court}}",
-    "kind": "{{precedent_kind}}",
-    "number": {{precedent_number}}
-  }
+  "court": "{{precedent_court}}",
+  "kind": "{{precedent_kind}}",
+  "number": {{precedent_number}}
 }
 
 ### Disparar sumarização de avaliação de caso (TriggerCaseAssessmentCaseSummarizationController)

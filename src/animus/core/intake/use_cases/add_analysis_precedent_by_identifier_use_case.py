@@ -82,4 +82,7 @@ class AddAnalysisPrecedentByIdentifierUseCase:
         # Re-fetch analysis to get updated status
         updated_analysis = self._analyses_repository.find_by_id(analysis_id_vo)
 
+        if not updated_analysis:
+            raise AnalysisNotFoundError
+
         return AnalysisStatusDto(value=updated_analysis.status.dto)
