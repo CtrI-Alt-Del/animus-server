@@ -34,7 +34,6 @@ class TriggerSecondInstanceCaseSummarizationUseCase:
         analysis_document = self._analysis_documents_repository.find_by_analysis_id(
             analysis_id=analysis_id_entity,
         )
-        print(f'analysis_document: {analysis_document}')
         if analysis_document is None:
             raise AnalysisDocumentNotFoundError
 
@@ -45,9 +44,7 @@ class TriggerSecondInstanceCaseSummarizationUseCase:
         if analysis.type.is_second_instance.is_false:
             raise InconsistentAnalysisTypeError
 
-        analysis.set_status(
-            SecondInstanceAnalysisStatus.create_as_extracting_court_document_pieces()
-        )
+        analysis.set_status(SecondInstanceAnalysisStatus.create_as_analyzing_case())
         self._analyses_repository.replace(analysis)
         self._broker.publish(
             SecondInstanceCaseSummarizationTriggeredEvent(

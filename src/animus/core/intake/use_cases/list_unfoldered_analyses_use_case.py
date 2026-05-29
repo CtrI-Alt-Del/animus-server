@@ -20,7 +20,6 @@ class ListUnfolderedAnalysesUseCase:
         CaseAssessmentAnalysisStatus.create_as_failed().dto,
         SecondInstanceAnalysisStatus.create_as_waiting_document_upload().dto,
         SecondInstanceAnalysisStatus.create_as_document_uploaded().dto,
-        SecondInstanceAnalysisStatus.create_as_extracting_court_document_pieces().dto,
         SecondInstanceAnalysisStatus.create_as_case_analyzed().dto,
         SecondInstanceAnalysisStatus.create_as_done().dto,
         SecondInstanceAnalysisStatus.create_as_court_document_pieces_not_found().dto,
