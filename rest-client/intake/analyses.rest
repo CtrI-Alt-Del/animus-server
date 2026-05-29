@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KNK8F8A4HFJXX09GYYC4PDAJ
+@analysis_id = 01KRSTVEHZRQ2XBCAF6YB8NNWM
 @petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
 @folder_id = 01KQ5CG4D6QY8A1X7R2M4N8P0B
 @precedent_court = STJ
@@ -143,6 +143,10 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar geração/regeneração de minuta de julgamento de 2a instancia (TriggerSecondInstanceJudgmentDraftGenerationController)
 POST {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Obter de minuta de julgamento de 2a instancia (TriggerSecondInstanceJudgmentDraftGenerationController)
+GET {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar geração/regeneração de minuta de petição (TriggerPetitionDraftGenerationController)
