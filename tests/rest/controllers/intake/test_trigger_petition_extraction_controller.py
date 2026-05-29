@@ -81,7 +81,7 @@ class TestSecondInstanceCaseSummarizationController:
         assert persisted_analysis is not None
         assert (
             persisted_analysis.status.value
-            == SecondInstanceAnalysisStatus.create_as_extracting_court_document_pieces().dto
+            == SecondInstanceAnalysisStatus.create_as_analyzing_case().dto
         )
 
     def test_should_return_403_when_analysis_belongs_to_another_account(

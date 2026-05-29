@@ -36,7 +36,7 @@ def _seed_second_instance_analysis(
             account_id=account_id,
             folder_id=None,
             type=AnalysisType.create_as_second_instance().dto,
-            status=SecondInstanceAnalysisStatus.create_as_extracting_court_document_pieces().dto,
+            status=SecondInstanceAnalysisStatus.create_as_analyzing_case().dto,
             is_archived=False,
         )
     )
