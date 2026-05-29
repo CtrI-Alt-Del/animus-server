@@ -5,7 +5,6 @@ from typing import Any
 from inngest import Context, Inngest, TriggerEvent
 
 from animus.ai.agno.workflows.intake import (
-    AgnoExtractPetitionWorkflow,
     AgnoSummarizeSecondInstanceCaseWorkflow,
 )
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
@@ -14,22 +13,23 @@ from animus.core.intake.domain.structures.second_instance_analysis_status import
 from animus.core.intake.domain.errors import (
     AnalysisDocumentNotFoundError,
     AnalysisNotFoundError,
-    PetitionExtractionNotFoundError,
 )
 from animus.core.intake.domain.events import (
     CaseSummaryFinishedEvent,
     SecondInstanceCaseSummarizationTriggeredEvent,
 )
-from animus.core.intake.use_cases import (
-    CreateExtractedPetitionUseCase,
-    UpdateAnalysisStatusUseCase,
+from animus.core.intake.use_cases import UpdateAnalysisStatusUseCase
+from animus.core.shared.domain.structures import Id, Text
+from animus.core.storage.domain.errors import (
+    CourtDocumentIndexNotFoundError,
+    InsufficientCourtDocumentError,
 )
-from animus.core.shared.domain.structures import Id, Integer
+from animus.core.storage.domain.structures import ExtractedCourtDocumentPieces
+from animus.core.storage.use_cases import ExtractCourtDocumentPiecesUseCase
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisDocumentsRepository,
     SqlalchemyAnalysesRepository,
     SqlalchemyCaseSummariesRepository,
-    SqlalchemyExtractedPetitionsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.storage import GcsFileStorageProvider, PypdfPdfProvider
@@ -95,11 +95,14 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
                         )
                     ),
                 )
-            except PetitionExtractionNotFoundError:
+            except (
+                CourtDocumentIndexNotFoundError,
+                InsufficientCourtDocumentError,
+            ):
                 await context.step.run(
-                    'mark_petition_as_not_found',
+                    'mark_court_document_pieces_as_not_found',
                     lambda payload=payload: (
-                        SummarizeSecondInstanceCaseJob._mark_petition_as_not_found(
+                        SummarizeSecondInstanceCaseJob._mark_court_document_pieces_as_not_found(
                             payload
                         )
                     ),
@@ -135,9 +138,6 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
             analysis_documents_repository = SqlalchemyAnalysisDocumentsRepository(
                 session
             )
-            extracted_petitions_repository = SqlalchemyExtractedPetitionsRepository(
-                session
-            )
             case_summaries_repository = SqlalchemyCaseSummariesRepository(session)
             analyses_repository = SqlalchemyAnalysesRepository(session)
             pdf_provider = PypdfPdfProvider()
@@ -150,29 +150,13 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
                 raise AnalysisDocumentNotFoundError
 
             pdf_file = GcsFileStorageProvider().get_file(analysis_document.file_path)
-
-            extracted_petition = extracted_petitions_repository.find_by_analysis_id(
-                analysis_id
+            extracted_court_document_pieces = ExtractCourtDocumentPiecesUseCase(
+                pdf_provider
+            ).execute(
+                pdf_file=pdf_file.dto,
             )
-            if extracted_petition is None:
-                extraction = AgnoExtractPetitionWorkflow(pdf_provider=pdf_provider).run(
-                    pdf_file=pdf_file
-                )
-                CreateExtractedPetitionUseCase(extracted_petitions_repository).execute(
-                    analysis_id=analysis_id.value,
-                    first_page=extraction.first_page,
-                    last_page=extraction.last_page,
-                )
-                first_page = extraction.first_page
-                last_page = extraction.last_page
-            else:
-                first_page = extracted_petition.first_page.value
-                last_page = extracted_petition.last_page.value
-
-            petition_content = pdf_provider.extract_pages(
-                pdf_file=pdf_file,
-                start=Integer.create(first_page),
-                end=Integer.create(last_page),
+            document_content = SummarizeSecondInstanceCaseJob._build_document_content(
+                extracted_court_document_pieces
             )
 
             UpdateAnalysisStatusUseCase(analyses_repository).execute(
@@ -187,7 +171,7 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
                 analyses_repository=analyses_repository,
             ).run(
                 analysis_id=analysis_id.value,
-                document_content=petition_content,
+                document_content=document_content,
             )
             session.commit()
 
@@ -202,17 +186,46 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
             }
 
     @staticmethod
-    async def _mark_petition_as_not_found(payload: _Payload) -> None:
+    def _build_document_content(
+        extracted_court_document_pieces: ExtractedCourtDocumentPieces,
+    ) -> Text:
+        parts = [
+            (
+                'sentenca',
+                extracted_court_document_pieces.sentenca.value,
+            ),
+            (
+                'apelacao',
+                extracted_court_document_pieces.apelacao.value,
+            ),
+        ]
+
+        if extracted_court_document_pieces.contrarrazoes is not None:
+            parts.append(
+                (
+                    'contrarrazoes',
+                    extracted_court_document_pieces.contrarrazoes.value,
+                )
+            )
+
+        return Text.create(
+            '\n\n'.join(f'{header}:\n{content}' for header, content in parts)
+        )
+
+    @staticmethod
+    async def _mark_court_document_pieces_as_not_found(payload: _Payload) -> None:
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
-            lambda: SummarizeSecondInstanceCaseJob._mark_petition_as_not_found_sync(
-                payload
+            lambda: (
+                SummarizeSecondInstanceCaseJob._mark_court_document_pieces_as_not_found_sync(
+                    payload
+                )
             ),
         )
 
     @staticmethod
-    def _mark_petition_as_not_found_sync(payload: _Payload) -> None:
+    def _mark_court_document_pieces_as_not_found_sync(payload: _Payload) -> None:
         with Sqlalchemy.session() as session:
             analysis_id = Id.create(payload.analysis_id)
             analysis = SqlalchemyAnalysesRepository(session).find_by_id(analysis_id)
@@ -221,7 +234,7 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
 
             UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=analysis_id.value,
-                status=SecondInstanceAnalysisStatus.create_as_petition_not_found().dto,
+                status=SecondInstanceAnalysisStatus.create_as_court_document_pieces_not_found().dto,
             )
             session.commit()
 

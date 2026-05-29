@@ -735,6 +735,19 @@ class IntakeSquad:
         - Cada seção deve ser autossuficiente: o leitor não deve precisar consultar
           outro documento para entender o raciocínio.
 
+        ## Tópicos excluídos ou acessórios
+
+        - O campo excluded_or_accessory_topics lista matérias já resolvidas na sentença
+          ou que não são objeto do recurso.
+        - Nunca reinvente a destinação de custas, honorários ou caução que já constam
+          como resolvidos — reproduza o que foi decidido na sentença, não o contrário.
+        - Se custas foram atribuídas a uma parte específica pela sentença, o acórdão
+          deve manter essa determinação, salvo se houver recurso expresso sobre esse ponto.
+        - Se honorários foram afastados por vedação legal (ex: art. 25 da Lei 12.016/2009),
+          o acórdão deve confirmar o afastamento, não condenar nenhuma parte.
+        - Não inclua no dispositivo itens que não foram objeto do recurso e já estão
+          definitivamente resolvidos na sentença.
+
         ## Estrutura esperada da minuta
 
         - **Relatório**: síntese objetiva do caso, partes, pedido e decisão recorrida.

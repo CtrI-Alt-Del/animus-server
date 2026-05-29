@@ -36,7 +36,7 @@ def _seed_second_instance_analysis(
             account_id=account_id,
             folder_id=None,
             type=AnalysisType.create_as_second_instance().dto,
-            status=SecondInstanceAnalysisStatus.create_as_extracting_petition().dto,
+            status=SecondInstanceAnalysisStatus.create_as_extracting_court_document_pieces().dto,
             is_archived=False,
         )
     )
@@ -122,7 +122,7 @@ class TestSummarizeSecondInstanceCaseJob:
             }
         ]
 
-    def test_should_mark_analysis_as_petition_not_found_when_extraction_is_not_found(
+    def test_should_mark_analysis_as_court_document_pieces_not_found_when_extraction_is_not_found(
         self,
         monkeypatch: MonkeyPatch,
         sqlalchemy_session_factory: sessionmaker[Session],
@@ -133,9 +133,9 @@ class TestSummarizeSecondInstanceCaseJob:
             fromlist=['_Payload'],
         )
         payload_factory = getattr(job_module, '_Payload')  # noqa: B009
-        mark_petition_as_not_found_sync = getattr(  # noqa: B009
+        mark_court_document_pieces_as_not_found_sync = getattr(  # noqa: B009
             SummarizeSecondInstanceCaseJob,
-            '_mark_petition_as_not_found_sync',
+            '_mark_court_document_pieces_as_not_found_sync',
         )
         monkeypatch.setattr(
             Sqlalchemy,
@@ -143,7 +143,7 @@ class TestSummarizeSecondInstanceCaseJob:
             staticmethod(lambda: sqlalchemy_session_factory()),
         )
 
-        mark_petition_as_not_found_sync(
+        mark_court_document_pieces_as_not_found_sync(
             payload_factory(analysis_id=seeded_data['analysis_id'])
         )
 
@@ -154,5 +154,5 @@ class TestSummarizeSecondInstanceCaseJob:
         assert persisted_analysis is not None
         assert (
             persisted_analysis.status
-            == SecondInstanceAnalysisStatus.create_as_petition_not_found().dto
+            == SecondInstanceAnalysisStatus.create_as_court_document_pieces_not_found().dto
         )
