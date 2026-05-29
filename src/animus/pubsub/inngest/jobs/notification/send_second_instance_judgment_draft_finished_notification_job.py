@@ -19,11 +19,11 @@ class _Payload:
     analysis_type: str
 
 
-class SendJudgmentDraftFinishedNotificationJob:
+class SendSecondInstanceJudgmentDraftFinishedNotificationJob:
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
-            fn_id='send-judgment-draft-finished-notification',
+            fn_id='send-second-instance-judgment-draft-finished-notification',
             trigger=TriggerEvent(
                 event=SecondInstanceJudgmentDraftGenerationFinishedEvent.name,
             ),
@@ -33,7 +33,7 @@ class SendJudgmentDraftFinishedNotificationJob:
 
             normalized_data = await context.step.run(
                 'normalize_payload',
-                SendJudgmentDraftFinishedNotificationJob._normalize_payload,
+                SendSecondInstanceJudgmentDraftFinishedNotificationJob._normalize_payload,
                 data,
             )
             payload = _Payload(
@@ -45,7 +45,9 @@ class SendJudgmentDraftFinishedNotificationJob:
             await context.step.run(
                 'send_notification',
                 lambda payload=payload: (
-                    SendJudgmentDraftFinishedNotificationJob._send_notification(payload)
+                    SendSecondInstanceJudgmentDraftFinishedNotificationJob._send_notification(
+                        payload
+                    )
                 ),
             )
 
@@ -64,8 +66,10 @@ class SendJudgmentDraftFinishedNotificationJob:
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
-            lambda: SendJudgmentDraftFinishedNotificationJob._send_notification_sync(
-                payload
+            lambda: (
+                SendSecondInstanceJudgmentDraftFinishedNotificationJob._send_notification_sync(
+                    payload
+                )
             ),
         )
 

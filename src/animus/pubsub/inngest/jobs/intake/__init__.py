@@ -1,6 +1,8 @@
 from .generate_petition_draft_job import GeneratePetitionDraftJob
 from .summarize_second_instance_case_job import SummarizeSecondInstanceCaseJob
-from .generate_judgment_draft_job import GenerateSecondInstanceJudgmentDraftJob
+from .generate_second_instance_judgment_draft_job import (
+    GenerateSecondInstanceJudgmentDraftJob,
+)
 from .remove_petition_document_file_job import RemoveAnalysisDocumentFileJob
 from .search_analysis_precedents_job import SearchAnalysisPrecedentsJob
 from .seed_analyses_precedents_dataset_job import SeedAnalysesPrecedentsDatasetJob

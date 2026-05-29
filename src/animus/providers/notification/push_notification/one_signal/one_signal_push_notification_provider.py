@@ -66,7 +66,7 @@ class OneSignalPushNotificationProvider(PushNotificationProvider):
         }
         self._send_push(recipient_id, title, body, data)
 
-    def send_judgment_draft_finished_message(
+    def send_second_instance_judgment_draft_finished_message(
         self,
         recipient_id: Id,
         analysis_id: Id,

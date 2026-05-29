@@ -260,7 +260,7 @@ class TestNotificationJobs:
         seeded_data = _seed_analysis(sqlalchemy_session_factory)
         captured_calls: list[dict[str, str]] = []
 
-        def _send_judgment_draft_finished_message(
+        def _send_second_instance_judgment_draft_finished_message(
             _self: OneSignalPushNotificationProvider,
             recipient_id: Id,
             analysis_id: Id,
@@ -276,8 +276,8 @@ class TestNotificationJobs:
 
         monkeypatch.setattr(
             OneSignalPushNotificationProvider,
-            'send_judgment_draft_finished_message',
-            _send_judgment_draft_finished_message,
+            'send_second_instance_judgment_draft_finished_message',
+            _send_second_instance_judgment_draft_finished_message,
         )
         monkeypatch.setattr(
             Sqlalchemy,

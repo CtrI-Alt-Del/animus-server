@@ -23,7 +23,7 @@ from animus.pubsub.inngest.jobs.intake import (
 )
 from animus.pubsub.inngest.jobs.notification import (
     SendCaseSummaryFinishedNotificationJob,
-    SendJudgmentDraftFinishedNotificationJob,
+    SendSecondInstanceJudgmentDraftFinishedNotificationJob,
     SendPetitionDraftFinishedNotificationJob,
     SendPetitionSummaryFinishedNotificationJob,
     SendPrecedentsSearchFinishedNotificationJob,
@@ -62,7 +62,7 @@ class InngestPubSub:
             SendPetitionSummaryFinishedNotificationJob.handle(inngest),
             SendPrecedentsSearchFinishedNotificationJob.handle(inngest),
             SendPetitionDraftFinishedNotificationJob.handle(inngest),
-            SendJudgmentDraftFinishedNotificationJob.handle(inngest),
+            SendSecondInstanceJudgmentDraftFinishedNotificationJob.handle(inngest),
         ]
 
     @staticmethod

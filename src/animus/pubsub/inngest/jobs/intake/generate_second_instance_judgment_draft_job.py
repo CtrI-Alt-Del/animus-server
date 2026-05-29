@@ -48,7 +48,7 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
     @staticmethod
     def handle(inngest: Inngest) -> Any:
         @inngest.create_function(
-            fn_id='generate-judgment-draft',
+            fn_id='generate-second-instance-judgment-draft',
             trigger=TriggerEvent(
                 event=SecondInstanceJudgmentDraftGenerationTriggeredEvent.name,
             ),
@@ -101,6 +101,13 @@ class GenerateSecondInstanceJudgmentDraftJob(InngestJob):
                             analysis_type=generation_result.analysis_type,
                         )
                     ),
+                )
+                print(
+                    SecondInstanceJudgmentDraftGenerationFinishedEvent(
+                        analysis_id=generation_result.analysis_id,
+                        account_id=generation_result.account_id,
+                        analysis_type=generation_result.analysis_type,
+                    )
                 )
             except Exception:
                 await context.step.run(

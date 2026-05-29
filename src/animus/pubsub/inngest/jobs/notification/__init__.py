@@ -1,8 +1,8 @@
 from .send_case_summary_finished_notification_job import (
     SendCaseSummaryFinishedNotificationJob,
 )
-from .send_judgment_draft_finished_notification_job import (
-    SendJudgmentDraftFinishedNotificationJob,
+from .send_second_instance_judgment_draft_finished_notification_job import (
+    SendSecondInstanceJudgmentDraftFinishedNotificationJob,
 )
 from .send_petition_draft_finished_notification_job import (
     SendPetitionDraftFinishedNotificationJob,
@@ -16,7 +16,7 @@ from .send_precedents_search_finished_notification_job import (
 
 __all__ = [
     'SendCaseSummaryFinishedNotificationJob',
-    'SendJudgmentDraftFinishedNotificationJob',
+    'SendSecondInstanceJudgmentDraftFinishedNotificationJob',
     'SendPetitionDraftFinishedNotificationJob',
     'SendPetitionSummaryFinishedNotificationJob',
     'SendPrecedentsSearchFinishedNotificationJob',

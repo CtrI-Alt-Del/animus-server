@@ -7,7 +7,7 @@ class SendJudgmentDraftFinishedNotificationUseCase:
         self._push_notification_provider = push_notification_provider
 
     def execute(self, account_id: Id, analysis_id: Id, analysis_type: str) -> None:
-        self._push_notification_provider.send_judgment_draft_finished_message(
+        self._push_notification_provider.send_second_instance_judgment_draft_finished_message(
             recipient_id=account_id,
             analysis_id=analysis_id,
             analysis_type=analysis_type,

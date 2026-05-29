@@ -32,7 +32,7 @@ class PushNotificationProvider(Protocol):
         analysis_type: str,
     ) -> None: ...
 
-    def send_judgment_draft_finished_message(
+    def send_second_instance_judgment_draft_finished_message(
         self,
         recipient_id: Id,
         analysis_id: Id,

@@ -89,7 +89,7 @@ class TestNotificationUseCases:
             analysis_type=analysis_type,
         )
 
-        push_notification_provider.send_judgment_draft_finished_message.assert_called_once_with(
+        push_notification_provider.send_second_instance_judgment_draft_finished_message.assert_called_once_with(
             recipient_id=account_id,
             analysis_id=analysis_id,
             analysis_type=analysis_type,
