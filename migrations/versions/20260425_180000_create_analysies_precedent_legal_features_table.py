@@ -32,7 +32,7 @@ def upgrade() -> None:
         sa.Column('has_accessory_topic_overlap', sa.Integer(), nullable=False),
         sa.Column('jurisdiction_match', sa.Integer(), nullable=False),
         sa.Column('standing_match', sa.Integer(), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
             ['analysis_id', 'precedent_id'],

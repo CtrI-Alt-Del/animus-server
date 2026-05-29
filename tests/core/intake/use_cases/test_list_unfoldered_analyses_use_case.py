@@ -70,7 +70,7 @@ class TestListUnfolderedAnalysesUseCase:
             SecondInstanceAnalysisStatus.create_as_document_uploaded().dto,
             SecondInstanceAnalysisStatus.create_as_case_analyzed().dto,
             SecondInstanceAnalysisStatus.create_as_done().dto,
-            SecondInstanceAnalysisStatus.create_as_petition_not_found().dto,
+            SecondInstanceAnalysisStatus.create_as_court_document_pieces_not_found().dto,
             SecondInstanceAnalysisStatus.create_as_precedents_searched().dto,
             SecondInstanceAnalysisStatus.create_as_failed().dto,
         )

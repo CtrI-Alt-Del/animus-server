@@ -137,12 +137,16 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 POST {{url}}/analyses/{{analysis_id}}/case-summaries
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Disparar extração de petição de segunda instância (SecondInstanceCaseSummarizationController)
-POST {{url}}/analyses/{{analysis_id}}/petition-extraction
+### Disparar resumo de caso jurídico de segunda instância (TriggerSecondInstanceCaseSummarizationController)
+POST {{url}}/analyses/{{analysis_id}}/case-summaries/second-instance
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar geração/regeneração de minuta de julgamento de 2a instancia (TriggerSecondInstanceJudgmentDraftGenerationController)
 POST {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Obter de minuta de julgamento de 2a instancia (TriggerSecondInstanceJudgmentDraftGenerationController)
+GET {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar geração/regeneração de minuta de petição (TriggerPetitionDraftGenerationController)

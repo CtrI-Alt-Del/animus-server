@@ -5,6 +5,8 @@ from animus.core.notification.interfaces import (
 from animus.core.notification.use_cases import (
     SendAccountVerificationEmailUseCase,
     SendCaseSummaryFinishedNotificationUseCase,
+    SendJudgmentDraftFinishedNotificationUseCase,
+    SendPetitionDraftFinishedNotificationUseCase,
     SendPetitionSummaryFinishedNotificationUseCase,
     SendPrecedentsSearchFinishedNotificationUseCase,
 )
@@ -14,6 +16,8 @@ __all__ = [
     'PushNotificationProvider',
     'SendAccountVerificationEmailUseCase',
     'SendCaseSummaryFinishedNotificationUseCase',
+    'SendJudgmentDraftFinishedNotificationUseCase',
+    'SendPetitionDraftFinishedNotificationUseCase',
     'SendPetitionSummaryFinishedNotificationUseCase',
     'SendPrecedentsSearchFinishedNotificationUseCase',
 ]

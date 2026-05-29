@@ -28,12 +28,31 @@ def upgrade() -> None:
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
+        if_not_exists=True,
     )
-    op.create_index(op.f('ix_folders_account_id'), 'folders', ['account_id'])
-    op.create_index(op.f('ix_analyses_folder_id'), 'analyses', ['folder_id'])
+    op.create_index(
+        op.f('ix_folders_account_id'),
+        'folders',
+        ['account_id'],
+        if_not_exists=True,
+    )
+    op.create_index(
+        op.f('ix_analyses_folder_id'),
+        'analyses',
+        ['folder_id'],
+        if_not_exists=True,
+    )
 
 
 def downgrade() -> None:
-    op.drop_index(op.f('ix_analyses_folder_id'), table_name='analyses')
-    op.drop_index(op.f('ix_folders_account_id'), table_name='folders')
-    op.drop_table('folders')
+    op.drop_index(
+        op.f('ix_analyses_folder_id'),
+        table_name='analyses',
+        if_exists=True,
+    )
+    op.drop_index(
+        op.f('ix_folders_account_id'),
+        table_name='folders',
+        if_exists=True,
+    )
+    op.drop_table('folders', if_exists=True)

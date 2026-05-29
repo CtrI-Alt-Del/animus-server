@@ -36,14 +36,18 @@ def _seed_second_instance_analysis(
             account_id=account_id,
             folder_id=None,
             type=AnalysisType.create_as_second_instance().dto,
-            status=SecondInstanceAnalysisStatus.create_as_extracting_petition().dto,
+            status=SecondInstanceAnalysisStatus.create_as_analyzing_case().dto,
             is_archived=False,
         )
     )
     session.commit()
     session.close()
 
-    return {'analysis_id': analysis_id, 'account_id': account_id}
+    return {
+        'analysis_id': analysis_id,
+        'account_id': account_id,
+        'analysis_type': AnalysisType.create_as_second_instance().dto,
+    }
 
 
 def _wait_until(predicate: Any, *, timeout_seconds: float = 60) -> None:
@@ -70,12 +74,17 @@ class TestSummarizeSecondInstanceCaseJob:
     ) -> None:
         analysis_id = Id.create().value
         account_id = Id.create().value
+        analysis_type = AnalysisType.create_as_second_instance().dto
         captured_payloads: list[str] = []
         captured_events: list[dict[str, str]] = []
 
         async def _extract_and_summarize_case(payload: Any) -> dict[str, str]:
             captured_payloads.append(payload.analysis_id)
-            return {'analysis_id': analysis_id, 'account_id': account_id}
+            return {
+                'analysis_id': analysis_id,
+                'account_id': account_id,
+                'analysis_type': analysis_type,
+            }
 
         def _publish(_self: InngestBroker, event: Any) -> None:
             captured_events.append(
@@ -83,6 +92,7 @@ class TestSummarizeSecondInstanceCaseJob:
                     'name': event.name,
                     'analysis_id': event.payload_data['analysis_id'],
                     'account_id': event.payload_data['account_id'],
+                    'analysis_type': event.payload_data['analysis_type'],
                 }
             )
 
@@ -108,10 +118,11 @@ class TestSummarizeSecondInstanceCaseJob:
                 'name': CaseSummaryFinishedEvent.name,
                 'analysis_id': analysis_id,
                 'account_id': account_id,
+                'analysis_type': analysis_type,
             }
         ]
 
-    def test_should_mark_analysis_as_petition_not_found_when_extraction_is_not_found(
+    def test_should_mark_analysis_as_court_document_pieces_not_found_when_extraction_is_not_found(
         self,
         monkeypatch: MonkeyPatch,
         sqlalchemy_session_factory: sessionmaker[Session],
@@ -122,9 +133,9 @@ class TestSummarizeSecondInstanceCaseJob:
             fromlist=['_Payload'],
         )
         payload_factory = getattr(job_module, '_Payload')  # noqa: B009
-        mark_petition_as_not_found_sync = getattr(  # noqa: B009
+        mark_court_document_pieces_as_not_found_sync = getattr(  # noqa: B009
             SummarizeSecondInstanceCaseJob,
-            '_mark_petition_as_not_found_sync',
+            '_mark_court_document_pieces_as_not_found_sync',
         )
         monkeypatch.setattr(
             Sqlalchemy,
@@ -132,7 +143,7 @@ class TestSummarizeSecondInstanceCaseJob:
             staticmethod(lambda: sqlalchemy_session_factory()),
         )
 
-        mark_petition_as_not_found_sync(
+        mark_court_document_pieces_as_not_found_sync(
             payload_factory(analysis_id=seeded_data['analysis_id'])
         )
 
@@ -143,5 +154,5 @@ class TestSummarizeSecondInstanceCaseJob:
         assert persisted_analysis is not None
         assert (
             persisted_analysis.status
-            == SecondInstanceAnalysisStatus.create_as_petition_not_found().dto
+            == SecondInstanceAnalysisStatus.create_as_court_document_pieces_not_found().dto
         )

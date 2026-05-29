@@ -46,6 +46,7 @@ class _Payload:
 class _SummaryResult:
     analysis_id: str
     account_id: str
+    analysis_type: str
 
 
 class SummarizeFirstInstanceCaseJob(InngestJob):
@@ -79,6 +80,7 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
                 summary_result = _SummaryResult(
                     analysis_id=str(summary_result_data['analysis_id']),
                     account_id=str(summary_result_data['account_id']),
+                    analysis_type=str(summary_result_data['analysis_type']),
                 )
 
                 await context.step.run(
@@ -87,6 +89,7 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
                         CaseSummaryFinishedEvent(
                             analysis_id=summary_result.analysis_id,
                             account_id=summary_result.account_id,
+                            analysis_type=summary_result.analysis_type,
                         )
                     ),
                 )
@@ -152,6 +155,7 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
             return {
                 'analysis_id': analysis_id.value,
                 'account_id': analysis.account_id.value,
+                'analysis_type': analysis.type.dto,
             }
 
     @staticmethod

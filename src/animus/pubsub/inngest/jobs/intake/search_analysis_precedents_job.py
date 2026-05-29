@@ -103,19 +103,27 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                         )
                     )
                     account_id = str(search_result_data_dict.get('account_id', ''))
+                    analysis_type = str(
+                        search_result_data_dict.get('analysis_type', '')
+                    )
                 else:
                     analysis_precedents_data = list(search_result_data)
                     account_id = ''
+                    analysis_type = ''
 
-                if account_id == '':
-                    account_id = await context.step.run(
-                        'get_analysis_account_id',
+                if account_id == '' or analysis_type == '':
+                    notification_data = await context.step.run(
+                        'get_analysis_notification_data',
                         lambda payload=payload: (
-                            SearchAnalysisPrecedentsJob._get_analysis_account_id(
+                            SearchAnalysisPrecedentsJob._get_analysis_notification_data(
                                 payload
                             )
                         ),
                     )
+                    if account_id == '':
+                        account_id = str(notification_data['account_id'])
+                    if analysis_type == '':
+                        analysis_type = str(notification_data['analysis_type'])
 
                 await context.step.run(
                     'mark_analysis_as_analyzing_similarity',
@@ -136,12 +144,16 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                     ),
                 )
 
+                if account_id == '' or analysis_type == '':
+                    return
+
                 await context.step.run(
                     'publish_finished_event',
                     lambda payload=payload: InngestBroker(inngest).publish(  # type: ignore
                         PrecedentsSearchFinishedEvent(
                             analysis_id=payload.analysis_id,
                             account_id=account_id,
+                            analysis_type=analysis_type,
                         )
                     ),
                 )
@@ -213,23 +225,32 @@ class SearchAnalysisPrecedentsJob(InngestJob):
         ]
 
     @staticmethod
-    async def _get_analysis_account_id(payload: _Payload) -> str:
+    async def _get_analysis_notification_data(
+        payload: _Payload,
+    ) -> dict[str, str]:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             None,
-            lambda: SearchAnalysisPrecedentsJob._get_analysis_account_id_sync(payload),
+            lambda: SearchAnalysisPrecedentsJob._get_analysis_notification_data_sync(
+                payload
+            ),
         )
 
     @staticmethod
-    def _get_analysis_account_id_sync(payload: _Payload) -> str:
+    def _get_analysis_notification_data_sync(
+        payload: _Payload,
+    ) -> dict[str, str]:
         with Sqlalchemy.session() as session:
             analysis = SqlalchemyAnalysesRepository(session).find_by_id(
                 Id.create(payload.analysis_id)
             )
             if analysis is None:
-                return ''
+                return {'account_id': '', 'analysis_type': ''}
 
-            return analysis.account_id.value
+            return {
+                'account_id': analysis.account_id.value,
+                'analysis_type': analysis.type.dto,
+            }
 
     @staticmethod
     async def _mark_analysis_as_analyzing_similarity(payload: _Payload) -> None:

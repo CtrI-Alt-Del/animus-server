@@ -42,6 +42,7 @@ from animus.database.sqlalchemy.models.intake.petition_summary_model import (
 )
 from animus.database.sqlalchemy.models.intake.precedent_model import PrecedentModel
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
+from animus.pubsub.inngest.inngest_broker import InngestBroker
 from animus.pubsub.inngest.jobs.intake.search_analysis_precedents_job import (
     SearchAnalysisPrecedentsJob,
 )
@@ -280,6 +281,92 @@ class TestSearchAnalysisPrecedentsJob:
                 ],
             },
         ]
+
+    @pytest.mark.filterwarnings(
+        r'ignore:websockets\.legacy is deprecated:DeprecationWarning'
+    )
+    @pytest.mark.filterwarnings(
+        r'ignore:websockets\.server\.WebSocketServerProtocol is deprecated:DeprecationWarning'
+    )
+    def test_should_not_publish_finished_event_when_notification_data_is_missing(
+        self,
+        monkeypatch: MonkeyPatch,
+        inngest_runtime: Any,
+    ) -> None:
+        analysis_id = Id.create().value
+        captured_steps: list[str] = []
+        captured_events: list[Any] = []
+
+        async def _search_precedents(payload: Any) -> dict[str, Any]:
+            captured_steps.append('search_precedents')
+            return {
+                'analysis_precedents_data': [],
+                'account_id': '',
+                'analysis_type': '',
+            }
+
+        async def _get_analysis_notification_data(_payload: Any) -> dict[str, str]:
+            captured_steps.append('get_analysis_notification_data')
+            return {'account_id': '', 'analysis_type': ''}
+
+        async def _mark_analysis_as_analyzing_similarity(_payload: Any) -> None:
+            captured_steps.append('mark_analysis_as_analyzing_similarity')
+
+        async def _synthesize_analysis_precedents(
+            _payload: Any,
+            _analysis_precedents_data: list[dict[str, Any]],
+        ) -> None:
+            captured_steps.append('synthesize_analysis_precedents')
+
+        def _publish(_self: InngestBroker, event: Any) -> None:
+            captured_events.append(event)
+
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_search_precedents',
+            _search_precedents,
+        )
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_get_analysis_notification_data',
+            _get_analysis_notification_data,
+        )
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_mark_analysis_as_analyzing_similarity',
+            _mark_analysis_as_analyzing_similarity,
+        )
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_synthesize_analysis_precedents',
+            _synthesize_analysis_precedents,
+        )
+        monkeypatch.setattr(InngestBroker, 'publish', _publish)
+
+        response = inngest_runtime.post_event(
+            name='intake/analyses.precedents.search.triggered',
+            data={
+                'analysis_id': analysis_id,
+                'courts': ['STF'],
+                'precedent_kinds': ['RG'],
+                'limit': 5,
+            },
+        )
+
+        assert response.status == 200
+
+        _wait_until(
+            lambda: captured_steps[-1:] == ['synthesize_analysis_precedents'],
+            timeout_seconds=40,
+        )
+
+        assert captured_steps == [
+            'search_precedents',
+            'get_analysis_notification_data',
+            'mark_analysis_as_analyzing_similarity',
+            'synthesize_analysis_precedents',
+        ]
+        assert captured_events == []
 
     def test_should_persist_waiting_precedent_choise_status_when_sync_steps_succeed(
         self,

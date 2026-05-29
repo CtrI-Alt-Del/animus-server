@@ -9,6 +9,9 @@ from .case_summary_finished_event import CaseSummaryFinishedEvent
 from .second_instance_judgment_draft_generation_event import (
     SecondInstanceJudgmentDraftGenerationTriggeredEvent,
 )
+from .second_instance_judgment_draft_generation_finished_event import (
+    SecondInstanceJudgmentDraftGenerationFinishedEvent,
+)
 from .precedents_searching_started_event import PrecedentsSearchingStartedEvent
 from .analysis_document_replaced_event import AnalysisDocumentReplacedEvent
 from .secod_instance_summarization_triggered_event import (
@@ -33,6 +36,7 @@ __all__ = [
     'CaseSummaryFinishedEvent',
     'PetitionDraftGenerationFinishedEvent',
     'PetitionDraftGenerationTriggeredEvent',
+    'SecondInstanceJudgmentDraftGenerationFinishedEvent',
     'SecondInstanceJudgmentDraftGenerationTriggeredEvent',
     'AnalysisDocumentReplacedEvent',
     'SecondInstanceCaseSummarizationTriggeredEvent',

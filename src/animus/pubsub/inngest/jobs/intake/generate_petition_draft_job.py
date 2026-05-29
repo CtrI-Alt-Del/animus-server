@@ -41,6 +41,7 @@ class _Payload:
 class _GenerationResult:
     analysis_id: str
     account_id: str
+    analysis_type: str
 
 
 class GeneratePetitionDraftJob(InngestJob):
@@ -86,6 +87,7 @@ class GeneratePetitionDraftJob(InngestJob):
                 generation_result = _GenerationResult(
                     analysis_id=str(generation_result_data['analysis_id']),
                     account_id=str(generation_result_data['account_id']),
+                    analysis_type=str(generation_result_data['analysis_type']),
                 )
 
                 await context.step.run(
@@ -94,6 +96,7 @@ class GeneratePetitionDraftJob(InngestJob):
                         PetitionDraftGenerationFinishedEvent(
                             analysis_id=generation_result.analysis_id,
                             account_id=generation_result.account_id,
+                            analysis_type=generation_result.analysis_type,
                         )
                     ),
                 )
@@ -206,6 +209,7 @@ class GeneratePetitionDraftJob(InngestJob):
             return {
                 'analysis_id': analysis_id.value,
                 'account_id': analysis.account_id.value,
+                'analysis_type': analysis.type.dto,
             }
 
     @staticmethod

@@ -88,7 +88,7 @@ class TestTriggerSecondInstanceCaseSummarizationUseCase:
 
         assert (
             updated_analysis.status
-            == SecondInstanceAnalysisStatus.create_as_extracting_petition()
+            == SecondInstanceAnalysisStatus.create_as_analyzing_case()
         )
         assert isinstance(
             published_event, SecondInstanceCaseSummarizationTriggeredEvent

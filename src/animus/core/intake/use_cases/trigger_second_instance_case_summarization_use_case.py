@@ -44,9 +44,7 @@ class TriggerSecondInstanceCaseSummarizationUseCase:
         if analysis.type.is_second_instance.is_false:
             raise InconsistentAnalysisTypeError
 
-        analysis.set_status(
-            SecondInstanceAnalysisStatus.create_as_extracting_petition()
-        )
+        analysis.set_status(SecondInstanceAnalysisStatus.create_as_analyzing_case())
         self._analyses_repository.replace(analysis)
         self._broker.publish(
             SecondInstanceCaseSummarizationTriggeredEvent(

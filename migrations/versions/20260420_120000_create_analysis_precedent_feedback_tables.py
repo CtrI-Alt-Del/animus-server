@@ -25,7 +25,7 @@ def upgrade() -> None:
         sa.Column('precedent_id', sa.String(length=26), nullable=False),
         sa.Column('applicability_level', sa.Integer(), nullable=False),
         sa.Column('is_from_human', sa.Boolean(), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
             ['analysis_id', 'precedent_id'],
@@ -49,8 +49,10 @@ def upgrade() -> None:
         sa.Column('identifier_kind', sa.String(length=10), nullable=False),
         sa.Column('identifier_number', sa.Integer(), nullable=False),
         sa.Column('precedent_status', sa.String(length=120), nullable=False),
-        sa.Column('last_updated_in_pangea_at', sa.DateTime(timezone=True), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+        sa.Column(
+            'last_updated_in_pangea_at', sa.DateTime(timezone=True), nullable=False
+        ),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
             ['analysis_id', 'precedent_id'],

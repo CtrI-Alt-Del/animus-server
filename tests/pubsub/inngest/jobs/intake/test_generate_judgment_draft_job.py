@@ -28,7 +28,7 @@ from animus.database.sqlalchemy.models.intake import (
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.pipes.ai_pipe import AiPipe
-from animus.pubsub.inngest.jobs.intake.generate_judgment_draft_job import (
+from animus.pubsub.inngest.jobs.intake.generate_second_instance_judgment_draft_job import (
     GenerateSecondInstanceJudgmentDraftJob,
 )
 
@@ -151,7 +151,7 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
         )
         captured_calls: list[dict[str, Any]] = []
         job_module = __import__(
-            'animus.pubsub.inngest.jobs.intake.generate_judgment_draft_job',
+            'animus.pubsub.inngest.jobs.intake.generate_second_instance_judgment_draft_job',
             fromlist=['_Payload'],
         )
         payload = job_module._Payload(analysis_id=seeded_data['analysis_id'])  # noqa: SLF001

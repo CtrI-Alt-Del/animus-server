@@ -9,6 +9,9 @@ from animus.core.intake.domain.errors import (
 from animus.core.intake.domain.events import (
     SecondInstanceJudgmentDraftGenerationTriggeredEvent,
 )
+from animus.core.intake.domain.structures.second_instance_analysis_status import (
+    SecondInstanceAnalysisStatus,
+)
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalysesRepository,
@@ -60,6 +63,11 @@ class TriggerSecondInstanceJudgmentDraftGenerationUseCase:
             for analysis_precedent in analysis_precedents_response.items
         ):
             raise ChosenAnalysisPrecedentsRequiredError
+
+        analysis.set_status(
+            SecondInstanceAnalysisStatus.create_as_generating_judgment_draft()
+        )
+        self._analyses_repository.replace(analysis)
 
         self._broker.publish(
             SecondInstanceJudgmentDraftGenerationTriggeredEvent(

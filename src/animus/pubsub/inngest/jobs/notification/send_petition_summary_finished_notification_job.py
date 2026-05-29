@@ -5,7 +5,7 @@ from typing import Any
 from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.intake.domain.events import PetitionSummaryFinishedEvent
-from animus.core.notification import SendCaseSummaryFinishedNotificationUseCase
+from animus.core.notification import SendPetitionSummaryFinishedNotificationUseCase
 from animus.core.shared.domain.structures import Id
 from animus.providers.notification import OneSignalPushNotificationProvider
 
@@ -14,6 +14,7 @@ from animus.providers.notification import OneSignalPushNotificationProvider
 class _Payload:
     analysis_id: str
     account_id: str
+    analysis_type: str
 
 
 class SendPetitionSummaryFinishedNotificationJob:
@@ -36,6 +37,7 @@ class SendPetitionSummaryFinishedNotificationJob:
             payload = _Payload(
                 analysis_id=str(normalized_data['analysis_id']),
                 account_id=str(normalized_data['account_id']),
+                analysis_type=str(normalized_data['analysis_type']),
             )
 
             await context.step.run(
@@ -54,6 +56,7 @@ class SendPetitionSummaryFinishedNotificationJob:
         return {
             'analysis_id': str(data['analysis_id']),
             'account_id': str(data['account_id']),
+            'analysis_type': str(data['analysis_type']),
         }
 
     @staticmethod
@@ -68,10 +71,11 @@ class SendPetitionSummaryFinishedNotificationJob:
 
     @staticmethod
     def _send_notification_sync(payload: _Payload) -> None:
-        use_case = SendCaseSummaryFinishedNotificationUseCase(
+        use_case = SendPetitionSummaryFinishedNotificationUseCase(
             push_notification_provider=OneSignalPushNotificationProvider()
         )
         use_case.execute(
             account_id=Id.create(payload.account_id),
             analysis_id=Id.create(payload.analysis_id),
+            analysis_type=payload.analysis_type,
         )
