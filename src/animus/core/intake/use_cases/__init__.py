@@ -5,8 +5,8 @@ from .create_analysis_document_use_case import CreateAnalysisDocumentUseCase
 from .create_analysis_precedent_applicability_feedback_use_case import (
     CreateAnalysisPrecedentApplicabilityFeedbackUseCase,
 )
-from .add_analysis_precedent_by_identifier_use_case import (
-    AddAnalysisPrecedentByIdentifierUseCase,
+from .remove_analysis_precedent_use_case import (
+    RemoveAnalysisPrecedentUseCase,
 )
 from .create_analysis_precedent_dataset_row_use_case import (
     CreateAnalysisPrecedentDatasetRowUseCase,
@@ -76,7 +76,7 @@ __all__ = [
     'CreateAnalysisUseCase',
     'CreateAnalysisDocumentUseCase',
     'CreateAnalysisPrecedentApplicabilityFeedbackUseCase',
-    'AddAnalysisPrecedentByIdentifierUseCase',
+    'RemoveAnalysisPrecedentUseCase',
     'CreateAnalysisPrecedentDatasetRowUseCase',
     'CreateAnalysisPrecedentsUseCase',
     'CreateCaseSummaryUseCase',

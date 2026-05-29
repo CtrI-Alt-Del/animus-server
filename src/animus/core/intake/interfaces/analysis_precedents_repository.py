@@ -30,6 +30,12 @@ class AnalysisPrecedentsRepository(Protocol):
         precedent_id: Id,
     ) -> None: ...
 
+    def remove_by_analysis_id_and_precedent_id(
+        self,
+        analysis_id: Id,
+        precedent_id: Id,
+    ) -> None: ...
+
     def unchoose_by_analysis_id_and_precedent_id(
         self,
         analysis_id: Id,
