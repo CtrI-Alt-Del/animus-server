@@ -42,7 +42,7 @@ Este documento detalha o plano de execução para implementar notificações pus
 
 - [ ] **T1.4: Evoluir o port `PushNotificationProvider`**
   - **Arquivo:** `src/animus/core/notification/interfaces/push_notification_provider.py`
-  - **Ação:** Atualizar os métodos existentes para receber `analysis_type` e adicionar os métodos `send_petition_summary_finished_message(...)`, `send_petition_draft_finished_message(...)` e `send_judgment_draft_finished_message(...)` conforme a spec.
+  - **Ação:** Atualizar os métodos existentes para receber `analysis_type` e adicionar os métodos `send_petition_summary_finished_message(...)`, `send_petition_draft_finished_message(...)` e `send_second_instance_judgment_draft_finished_message(...)` conforme a spec.
   - **Dependência:** T1.3
   - **Resultado:** O contrato de push do `core` cobre todos os tipos de notificação exigidos pela ANI-120.
 
@@ -63,7 +63,7 @@ Este documento detalha o plano de execução para implementar notificações pus
 
 - [ ] **T1.7: Criar use case de notificação de minuta de sentença**
   - **Arquivo:** `src/animus/core/notification/use_cases/send_judgment_draft_finished_notification_use_case.py`
-  - **Ação:** Criar `SendJudgmentDraftFinishedNotificationUseCase.execute(account_id: Id, analysis_id: Id, analysis_type: str) -> None`, delegando para `send_judgment_draft_finished_message(...)`.
+  - **Ação:** Criar `SendJudgmentDraftFinishedNotificationUseCase.execute(account_id: Id, analysis_id: Id, analysis_type: str) -> None`, delegando para `send_second_instance_judgment_draft_finished_message(...)`.
   - **Dependência:** T1.4
   - **Resultado:** O `core` passa a expor o caso de uso específico para push de conclusão de minuta de sentença.
 
@@ -93,7 +93,7 @@ Este documento detalha o plano de execução para implementar notificações pus
 
 - [ ] **T2.3: Implementar mensagens de conclusão de minutas**
   - **Arquivo:** `src/animus/providers/notification/push_notification/one_signal/one_signal_push_notification_provider.py`
-  - **Ação:** Criar `send_petition_draft_finished_message(...)` com `data.type = 'petition_draft_finished'` e `send_judgment_draft_finished_message(...)` com `data.type = 'judgment_draft_finished'`.
+  - **Ação:** Criar `send_petition_draft_finished_message(...)` com `data.type = 'petition_draft_finished'` e `send_second_instance_judgment_draft_finished_message(...)` com `data.type = 'judgment_draft_finished'`.
   - **Dependência:** T1.4
   - **Resultado:** O adaptador externo passa a suportar os dois novos eventos de conclusão de minuta.
 
@@ -160,13 +160,13 @@ Este documento detalha o plano de execução para implementar notificações pus
 
 - [ ] **T3.10: Exportar jobs de notificação faltantes**
   - **Arquivo:** `src/animus/pubsub/inngest/jobs/notification/__init__.py`
-  - **Ação:** Exportar `SendPetitionSummaryFinishedNotificationJob`, `SendPetitionDraftFinishedNotificationJob` e `SendJudgmentDraftFinishedNotificationJob`.
+  - **Ação:** Exportar `SendPetitionSummaryFinishedNotificationJob`, `SendPetitionDraftFinishedNotificationJob` e `SendSecondInstanceJudgmentDraftFinishedNotificationJob`.
   - **Dependências:** T3.6, T3.8, T3.9
   - **Resultado:** Os jobs ficam disponíveis para registro centralizado.
 
 - [ ] **T3.11: Registrar jobs de notificação no InngestPubSub**
   - **Arquivo:** `src/animus/pubsub/inngest/inngest_pubsub.py`
-  - **Ação:** Importar e registrar `SendPetitionSummaryFinishedNotificationJob.handle(inngest)`, `SendPetitionDraftFinishedNotificationJob.handle(inngest)` e `SendJudgmentDraftFinishedNotificationJob.handle(inngest)` em `register_notification_jobs(...)`.
+  - **Ação:** Importar e registrar `SendPetitionSummaryFinishedNotificationJob.handle(inngest)`, `SendPetitionDraftFinishedNotificationJob.handle(inngest)` e `SendSecondInstanceJudgmentDraftFinishedNotificationJob.handle(inngest)` em `register_notification_jobs(...)`.
   - **Dependência:** T3.10
   - **Resultado:** Os novos/corrigidos jobs passam a ser expostos ao runtime do Inngest.
 

@@ -175,7 +175,7 @@ Estender o fluxo de notificacoes push do `animus-server` para avisar o usuario q
   - `send_petition_summary_finished_message(recipient_id: Id, analysis_id: Id, analysis_type: str) -> None`
   - `send_precedents_search_finished_message(recipient_id: Id, analysis_id: Id, analysis_type: str) -> None`
   - `send_petition_draft_finished_message(recipient_id: Id, analysis_id: Id, analysis_type: str) -> None`
-  - `send_judgment_draft_finished_message(recipient_id: Id, analysis_id: Id, analysis_type: str) -> None`
+  - `send_second_instance_judgment_draft_finished_message(recipient_id: Id, analysis_id: Id, analysis_type: str) -> None`
 - **Justificativa:** o port deve publicar todos os contratos de push usados pelo dominio de notificacao e manter `analysis_type` explicito.
 
 ## Camada Core (Use Cases)
@@ -243,14 +243,14 @@ Estender o fluxo de notificacoes push do `animus-server` para avisar o usuario q
 - **Justificativa:** compatibilizar consumidor com o evento atualizado.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/notification/__init__.py`
-- **Mudanca:** exportar `SendPetitionSummaryFinishedNotificationJob`, `SendPetitionDraftFinishedNotificationJob` e `SendJudgmentDraftFinishedNotificationJob`.
+- **Mudanca:** exportar `SendPetitionSummaryFinishedNotificationJob`, `SendPetitionDraftFinishedNotificationJob` e `SendSecondInstanceJudgmentDraftFinishedNotificationJob`.
 - **Justificativa:** permitir registro centralizado em `InngestPubSub`.
 
 - **Arquivo:** `src/animus/pubsub/inngest/inngest_pubsub.py`
 - **Mudanca:** importar e registrar:
   - `SendPetitionSummaryFinishedNotificationJob.handle(inngest)`
   - `SendPetitionDraftFinishedNotificationJob.handle(inngest)`
-  - `SendJudgmentDraftFinishedNotificationJob.handle(inngest)`
+  - `SendSecondInstanceJudgmentDraftFinishedNotificationJob.handle(inngest)`
 - **Justificativa:** jobs nao registrados nao serao expostos ao runtime do `Inngest`.
 
 ---
@@ -312,7 +312,7 @@ GenerateSecondInstanceJudgmentDraftJob
   -> CreateSecondInstanceJudgmentDraftUseCase
   -> PostgreSQL (judgment_drafts)
   -> SecondInstanceJudgmentDraftGenerationFinishedEvent { analysis_id, account_id, analysis_type }
-  -> SendJudgmentDraftFinishedNotificationJob
+  -> SendSecondInstanceJudgmentDraftFinishedNotificationJob
   -> SendJudgmentDraftFinishedNotificationUseCase
   -> PushNotificationProvider
   -> OneSignalPushNotificationProvider
