@@ -90,6 +90,18 @@ class SqlalchemyAnalysisPrecedentsRepository(AnalysisPrecedentsRepository):
             .values(is_chosen=True)
         )
 
+    def remove_by_analysis_id_and_precedent_id(
+        self,
+        analysis_id: Id,
+        precedent_id: Id,
+    ) -> None:
+        self._sqlalchemy.execute(
+            delete(AnalysisPrecedentModel).where(
+                AnalysisPrecedentModel.analysis_id == analysis_id.value,
+                AnalysisPrecedentModel.precedent_id == precedent_id.value,
+            )
+        )
+
     def unchoose_by_analysis_id_and_precedent_id(
         self,
         analysis_id: Id,

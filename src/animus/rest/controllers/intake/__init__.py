@@ -1,7 +1,9 @@
 from .archive_analyses_controller import ArchiveAnalysesController
 from .choose_analysis_precedent_controller import ChooseAnalysisPrecedentController
 from .create_analysis_controller import CreateAnalysisController
-from .create_analysis_precedent_controller import CreateAnalysisPrecedentController
+from .remove_analysis_precedent_controller import (
+    RemoveAnalysisPrecedentController,
+)
 from .create_analysis_document_controller import CreateAnalysisDocumentController
 from .get_analysis_controller import GetAnalysisController
 from .get_analysis_document_controller import GetAnalysisDocumentController
@@ -54,7 +56,7 @@ __all__ = [
     'ArchiveAnalysesController',
     'ChooseAnalysisPrecedentController',
     'CreateAnalysisController',
-    'CreateAnalysisPrecedentController',
+    'RemoveAnalysisPrecedentController',
     'CreateAnalysisDocumentController',
     'GetAnalysisDocumentController',
     'GetPrecedentController',

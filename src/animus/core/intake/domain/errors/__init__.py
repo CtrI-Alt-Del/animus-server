@@ -12,6 +12,7 @@ from .petition_draft_unavailable_error import PetitionDraftUnavailableError
 from .petition_document_not_found_error import PetitionDocumentNotFoundError
 from .petition_extraction_not_found_error import PetitionExtractionNotFoundError
 from .petition_not_found_error import PetitionNotFoundError
+from .precedent_not_found_error import PrecedentNotFoundError
 from .second_instance_analysis_required_error import (
     SecondInstanceAnalysisRequiredError,
 )
@@ -33,6 +34,7 @@ __all__ = [
     'PetitionExtractionNotFoundError',
     'PetitionDraftUnavailableError',
     'PetitionNotFoundError',
+    'PrecedentNotFoundError',
     'SecondInstanceAnalysisRequiredError',
     'UnsupportedPetitionDocumentTypeError',
     'UnreadablePetitionDocumentError',

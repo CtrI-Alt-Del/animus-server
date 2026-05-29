@@ -7,16 +7,13 @@
 GET {{url}}/precedents?court={{precedent_court}}&kind={{precedent_kind}}&number={{precedent_number}}
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Adicionar precedent a analise (CreateAnalysisPrecedentController)
-POST {{url}}/analyses/precedents
+### Adicionar precedente a análise (AddAnalysisPrecedentByIdentifierController)
+POST {{url}}/analyses/01KRKEW0MNECWS8AQAJGFGZPC0/precedents
 Authorization: Bearer {{ACCESS_TOKEN}}
 Content-Type: application/json
 
 {
-  "analysis_id": "01KRKEW0MNECWS8AQAJGFGZPC0",
-  "identifier": {
-    "court": "{{precedent_court}}",
-    "kind": "{{precedent_kind}}",
-    "number": {{precedent_number}}
-  }
+  "court": "{{precedent_court}}",
+  "kind": "{{precedent_kind}}",
+  "number": {{precedent_number}}
 }
