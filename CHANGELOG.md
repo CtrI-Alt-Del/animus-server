@@ -1,3 +1,22 @@
+# [1.32.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.31.0...v1.32.0) (2026-05-29)
+
+
+### Bug Fixes
+
+* address ANI-120 review comments ([9eb53da](https://github.com/CtrI-Alt-Del/animus-server/commit/9eb53da9c2dce7c5f5bffba35d492c5912ca62c0))
+* ANI-120 fix typecheck errors in tests by replacing non-existent method and fixing import path ([39f7432](https://github.com/CtrI-Alt-Del/animus-server/commit/39f74326e38acab47ceef522a571a85f491d8786))
+* ANI-121 adjust precedents search limit validation ([de021c7](https://github.com/CtrI-Alt-Del/animus-server/commit/de021c75fd9d5463f30895ab305bd9513652ca1e))
+
+
+### Features
+
+* ANI-120 add push notifications for draft completion with analysis type ([3bf3aaa](https://github.com/CtrI-Alt-Del/animus-server/commit/3bf3aaa5c5545eb70457ac6013364f8565bab255))
+* ANI-121 add court document outline extraction domain ([c56483e](https://github.com/CtrI-Alt-Del/animus-server/commit/c56483e45db872bb1db037ecee39a05b82cca3c7))
+* ANI-121 add court document pieces domain model ([4f23c88](https://github.com/CtrI-Alt-Del/animus-server/commit/4f23c8825733e40ebc7a840393868208d63b41e3))
+* ANI-121 add excluded_or_accessory_topics to judgment draft prompt ([b3d452f](https://github.com/CtrI-Alt-Del/animus-server/commit/b3d452f7c8117fd5091ac36ff16f3cf42096a232))
+* ANI-121 add pdf outline extraction to pdf provider ([7de1e23](https://github.com/CtrI-Alt-Del/animus-server/commit/7de1e23207e4385bfe5ac56d99ab96cf7364c595))
+* ANI-121 set generating_judgment_draft status on trigger ([273f9d2](https://github.com/CtrI-Alt-Del/animus-server/commit/273f9d2e0164493b9ccc88497a3d92def7629fda))
+
 # [1.31.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.30.1...v1.31.0) (2026-05-27)
 
 
