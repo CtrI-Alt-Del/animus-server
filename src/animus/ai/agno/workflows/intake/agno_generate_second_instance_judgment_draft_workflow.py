@@ -123,6 +123,12 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
             ]
         )
 
+        # Formata excluded_or_accessory_topics apenas se houver itens
+        excluded_topics = case_summary_dto.excluded_or_accessory_topics or []
+        excluded_topics_text = (
+            ', '.join(excluded_topics) if excluded_topics else 'nenhum'
+        )
+
         prompt = dedent(
             f"""
             Elabore minuta de julgamento para segunda instância com base no caso e precedentes abaixo.
@@ -145,6 +151,7 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
             - procedural_issues: {', '.join(case_summary_dto.procedural_issues)}
             - jurisdiction_issue: {case_summary_dto.jurisdiction_issue}
             - standing_issue: {case_summary_dto.standing_issue}
+            - excluded_or_accessory_topics: {excluded_topics_text}
 
             Precedentes classificados:
             {precedents_input}
