@@ -1,3 +1,16 @@
+# [1.33.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.32.0...v1.33.0) (2026-05-29)
+
+
+### Bug Fixes
+
+* ANI-118 fix linter problems ([9cceb2a](https://github.com/CtrI-Alt-Del/animus-server/commit/9cceb2ac5dff6c85cebcfde1a0d02c1658c49eef))
+
+
+### Features
+
+* ANI-119 add RemoveAnalysisPrecedentController to delete precedent from analysis ([239a670](https://github.com/CtrI-Alt-Del/animus-server/commit/239a670827c1938ae316927418fb0564a8a14e88))
+* ANI-119 finish endpoint ([80f291b](https://github.com/CtrI-Alt-Del/animus-server/commit/80f291b5ae941633495e8be7946a7db14ddbe8b0))
+
 # [1.32.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.31.0...v1.32.0) (2026-05-29)
 
 
