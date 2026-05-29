@@ -20,10 +20,8 @@ class AnalysisPrecedentsSearchFilters(Structure):
         cls,
         dto: AnalysisPrecedentsSearchFiltersDto,
     ) -> 'AnalysisPrecedentsSearchFilters':
-        if dto.limit < 5 or dto.limit > 10:
-            raise ValidationError(
-                f'Limite deve estar entre 5 e 10, recebido: {dto.limit}'
-            )
+        if dto.limit > 10:
+            raise ValidationError(f'Limite deve ser até 10, recebido: {dto.limit}')
 
         return cls(
             courts=cls._normalize_courts(dto.courts),
