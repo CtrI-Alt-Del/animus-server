@@ -52,9 +52,8 @@ class TestAddAnalysisPrecedentController:
         precedent = _create_precedent(sqlalchemy_session_factory)
 
         response = client.post(
-            '/intake/analyses/precedents',
+            f'/intake/analyses/{analysis.id}/precedents',
             json={
-                'analysis_id': analysis.id,
                 'identifier': {
                     'court': precedent.court,
                     'kind': precedent.kind,
@@ -87,13 +86,15 @@ class TestAddAnalysisPrecedentController:
         self,
         client: TestClient,
         create_account: CreateAccountFixture,
+        create_analysis: CreateAnalysisFixture,
         build_auth_headers: BuildAuthHeadersFixture,
     ) -> None:
         account = create_account(is_verified=True, is_active=True)
+        analysis = create_analysis(account_id=account.id)
 
         response = client.post(
-            '/intake/analyses/precedents',
-            json={'analysis_id': str(ULID())},
+            f'/intake/analyses/{analysis.id}/precedents',
+            json={},
             headers=build_auth_headers(account.id),
         )
 
