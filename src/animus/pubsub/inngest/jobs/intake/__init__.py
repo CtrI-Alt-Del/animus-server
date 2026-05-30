@@ -1,7 +1,11 @@
 from .generate_petition_draft_job import GeneratePetitionDraftJob
+from .regenerate_petition_draft_job import RegeneratePetitionDraftJob
 from .summarize_second_instance_case_job import SummarizeSecondInstanceCaseJob
 from .generate_second_instance_judgment_draft_job import (
     GenerateSecondInstanceJudgmentDraftJob,
+)
+from .regenerate_second_instance_judgment_draft_job import (
+    RegenerateSecondInstanceJudgmentDraftJob,
 )
 from .remove_petition_document_file_job import RemoveAnalysisDocumentFileJob
 from .search_analysis_precedents_job import SearchAnalysisPrecedentsJob
@@ -13,8 +17,10 @@ from .vectorize_all_precedents_job import VectorizeAllPrecedentsJob
 
 __all__ = [
     'GeneratePetitionDraftJob',
+    'RegeneratePetitionDraftJob',
     'SummarizeSecondInstanceCaseJob',
     'GenerateSecondInstanceJudgmentDraftJob',
+    'RegenerateSecondInstanceJudgmentDraftJob',
     'RemoveAnalysisDocumentFileJob',
     'SearchAnalysisPrecedentsJob',
     'SeedAnalysesPrecedentsDatasetJob',

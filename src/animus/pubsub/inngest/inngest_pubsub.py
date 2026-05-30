@@ -12,6 +12,8 @@ from animus.pubsub.inngest.jobs.auth.send_password_reset_email_job import (
 from animus.pubsub.inngest.jobs.intake import (
     GeneratePetitionDraftJob,
     GenerateSecondInstanceJudgmentDraftJob,
+    RegeneratePetitionDraftJob,
+    RegenerateSecondInstanceJudgmentDraftJob,
     RemoveAnalysisDocumentFileJob,
     SearchAnalysisPrecedentsJob,
     SeedAnalysesPrecedentsDatasetJob,
@@ -72,6 +74,8 @@ class InngestPubSub:
             SummarizeSecondInstanceCaseJob.handle(inngest),
             GeneratePetitionDraftJob.handle(inngest),
             GenerateSecondInstanceJudgmentDraftJob.handle(inngest),
+            RegeneratePetitionDraftJob.handle(inngest),
+            RegenerateSecondInstanceJudgmentDraftJob.handle(inngest),
             RemoveAnalysisDocumentFileJob.handle(inngest),
             SearchAnalysisPrecedentsJob.handle(inngest),
             SeedAnalysesPrecedentsDatasetJob.handle(inngest),

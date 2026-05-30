@@ -773,6 +773,37 @@ class IntakeSquad:
         )
 
     @property
+    def second_instance_judgment_draft_reviser_agent(self) -> Agent:
+        return Agent(
+            name='Second Instance Judgment Draft Reviser Agent',
+            description='An agent specialized in revising second instance judgment drafts in PT-BR',
+            instructions=dedent(
+                """
+                Você é especialista em revisar minutas estruturadas de acórdão para tribunais
+                de segunda instância brasileiros.
+
+                Receberá uma minuta atual, o resumo estruturado do caso, precedentes já
+                escolhidos e comentários do usuário indicando os ajustes desejados.
+
+                Regras obrigatórias:
+                - preserve tudo o que não foi solicitado para alterar;
+                - mantenha aderência estrita aos fatos, ao resumo do caso e aos precedentes fornecidos;
+                - não invente fatos, fundamentos, teses, pedidos recursais, datas ou precedentes;
+                - mantenha linguagem jurídica formal, clara e objetiva em português brasileiro;
+                - ajuste apenas o necessário para refletir os comentários do usuário com coerência técnica;
+                - retorne apenas o objeto estruturado esperado.
+                """
+            ),
+            model=OpenAIChat(
+                id='gpt-4o',
+                api_key=Env.OPENAI_API_KEY,
+                temperature=0,
+                timeout=60,
+            ),
+            output_schema=SecondInstanceJudgmentDraftOutput,
+        )
+
+    @property
     def petition_draft_generator_agent(self) -> Agent:
         return Agent(
             name='Petition Draft Generator Agent',
@@ -793,6 +824,38 @@ class IntakeSquad:
                   pedidos e citações de precedentes;
                 - cada item de precedent_citations deve identificar tribunal, tipo e número do
                   precedente de origem, além de destacar a tese ou trecho útil ao caso concreto;
+                - retorne apenas o objeto estruturado esperado.
+                """
+            ),
+            model=OpenAIChat(
+                id='gpt-4o',
+                api_key=Env.OPENAI_API_KEY,
+                temperature=0,
+                timeout=60,
+            ),
+            output_schema=PetitionDraftOutput,
+        )
+
+    @property
+    def petition_draft_reviser_agent(self) -> Agent:
+        return Agent(
+            name='Petition Draft Reviser Agent',
+            description='An agent specialized in revising petition drafts in PT-BR',
+            instructions=dedent(
+                """
+                Você é especialista em revisar minutas estruturadas de petição inicial para
+                análises jurídicas preliminares no contexto brasileiro.
+
+                Receberá uma minuta atual, o resumo estruturado do caso, precedentes já
+                escolhidos e comentários do usuário indicando os ajustes desejados.
+
+                Regras obrigatórias:
+                - preserve tudo o que não foi solicitado para alterar;
+                - mantenha aderência estrita aos fatos, ao resumo do caso e aos precedentes fornecidos;
+                - não invente fatos, datas, fundamentos, pedidos, partes, provas ou precedentes;
+                - trate a minuta como sugestão técnica inicial, sem afirmar estratégia obrigatória
+                  nem resultado garantido;
+                - ajuste apenas o necessário para refletir os comentários do usuário com coerência técnica;
                 - retorne apenas o objeto estruturado esperado.
                 """
             ),
