@@ -11,6 +11,7 @@ from animus.core.shared.domain.errors import (
     NotFoundError,
     ValidationError,
 )
+from animus.core.intake.domain.errors import DraftRegenerationPreconditionError
 
 
 logger = getLogger(__name__)
@@ -58,6 +59,12 @@ class AppErrorHandler:
         return AppErrorHandler._build_response(403, error)
 
     @staticmethod
+    async def handle_draft_regeneration_precondition_error(
+        _: Request, error: Exception
+    ) -> JSONResponse:
+        return AppErrorHandler._build_response(422, error)
+
+    @staticmethod
     async def handle_app_error(_: Request, error: Exception) -> JSONResponse:
         return AppErrorHandler._build_response(400, error)
 
@@ -71,5 +78,9 @@ class AppErrorHandler:
         app.add_exception_handler(AuthError, AppErrorHandler.handle_auth_error)
         app.add_exception_handler(
             ForbiddenError, AppErrorHandler.handle_forbidden_error
+        )
+        app.add_exception_handler(
+            DraftRegenerationPreconditionError,
+            AppErrorHandler.handle_draft_regeneration_precondition_error,
         )
         app.add_exception_handler(AppError, AppErrorHandler.handle_app_error)
