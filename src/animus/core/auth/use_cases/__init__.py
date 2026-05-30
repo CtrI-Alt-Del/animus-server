@@ -1,5 +1,6 @@
 from .get_account_use_case import GetAccountUseCase
 from .forgot_password_use_case import ForgotPasswordUseCase
+from .refresh_session_use_case import RefreshSessionUseCase
 from .resend_reset_password_otp_use_case import ResendResetPasswordOtpUseCase
 from .resend_verification_email_use_case import ResendVerificationEmailUseCase
 from .reset_password_use_case import ResetPasswordUseCase
@@ -18,6 +19,7 @@ __all__ = [
     'ResendVerificationEmailUseCase',
     'SignInWithGoogleUseCase',
     'ForgotPasswordUseCase',
+    'RefreshSessionUseCase',
     'ResendResetPasswordOtpUseCase',
     'VerifyResetPasswordOtpUseCase',
     'ResetPasswordUseCase',

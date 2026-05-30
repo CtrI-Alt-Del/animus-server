@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from animus.rest.controllers.intake import (
+    AddAnalysisPrecedentController,
     RemoveAnalysisPrecedentController,
     ArchiveAnalysesController,
     ChooseAnalysisPrecedentController,
@@ -44,6 +45,7 @@ class AnalysesRouter:
 
         ListProcessingAnalysesController.handle(router)
         CreateAnalysisController.handle(router)
+        AddAnalysisPrecedentController.handle(router)
         RemoveAnalysisPrecedentController.handle(router)
         ListAnalysesController.handle(router)
         ListUnfolderedAnalysesController.handle(router)

@@ -1,3 +1,4 @@
+from .add_analysis_precedent_use_case import AddAnalysisPrecedentUseCase
 from .archive_analyses_use_case import ArchiveAnalysesUseCase
 from .choose_analysis_precedent_use_case import ChooseAnalysisPrecedentUseCase
 from .create_analysis_use_case import CreateAnalysisUseCase
@@ -71,6 +72,7 @@ from .update_analysis_status_use_case import UpdateAnalysisStatusUseCase
 from .vectorize_all_precedents_use_case import VectorizeAllPrecedentsUseCase
 
 __all__ = [
+    'AddAnalysisPrecedentUseCase',
     'ArchiveAnalysesUseCase',
     'ChooseAnalysisPrecedentUseCase',
     'CreateAnalysisUseCase',

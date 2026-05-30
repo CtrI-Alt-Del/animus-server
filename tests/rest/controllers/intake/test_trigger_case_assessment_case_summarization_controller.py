@@ -60,7 +60,7 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/case-assessment-case-summaries',
+            f'/intake/analyses/{analysis.id}/case-summaries/case-assessment',
             headers=build_auth_headers(account.id),
         )
 
@@ -105,7 +105,7 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/case-assessment-case-summaries',
+            f'/intake/analyses/{analysis.id}/case-summaries/case-assessment',
             headers=build_auth_headers(authenticated_account.id),
         )
 
@@ -132,7 +132,7 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/case-assessment-case-summaries',
+            f'/intake/analyses/{analysis.id}/case-summaries/case-assessment',
             headers=build_auth_headers(account.id),
         )
 
@@ -163,7 +163,7 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/case-assessment-case-summaries',
+            f'/intake/analyses/{analysis.id}/case-summaries/case-assessment',
             headers=build_auth_headers(account.id),
         )
 

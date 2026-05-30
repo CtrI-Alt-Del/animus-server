@@ -60,7 +60,7 @@ class TestSecondInstanceCaseSummarizationController:
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/petition-extraction',
+            f'/intake/analyses/{analysis.id}/case-summaries/second-instance',
             headers=build_auth_headers(account.id),
         )
 
@@ -105,7 +105,7 @@ class TestSecondInstanceCaseSummarizationController:
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/petition-extraction',
+            f'/intake/analyses/{analysis.id}/case-summaries/second-instance',
             headers=build_auth_headers(authenticated_account.id),
         )
 
@@ -128,7 +128,7 @@ class TestSecondInstanceCaseSummarizationController:
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/petition-extraction',
+            f'/intake/analyses/{analysis.id}/case-summaries/second-instance',
             headers=build_auth_headers(account.id),
         )
 
