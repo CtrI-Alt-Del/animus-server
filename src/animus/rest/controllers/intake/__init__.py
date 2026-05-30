@@ -1,3 +1,4 @@
+from .add_analysis_precedent_controller import AddAnalysisPrecedentController
 from .archive_analyses_controller import ArchiveAnalysesController
 from .choose_analysis_precedent_controller import ChooseAnalysisPrecedentController
 from .create_analysis_controller import CreateAnalysisController
@@ -53,6 +54,7 @@ from .unchoose_analysis_precedent_controller import UnchooseAnalysisPrecedentCon
 from .update_analysis_status_controller import UpdateAnalysisStatusController
 
 __all__ = [
+    'AddAnalysisPrecedentController',
     'ArchiveAnalysesController',
     'ChooseAnalysisPrecedentController',
     'CreateAnalysisController',
