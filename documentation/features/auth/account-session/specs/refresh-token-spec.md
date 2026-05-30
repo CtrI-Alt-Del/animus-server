@@ -3,7 +3,7 @@ title: Endpoint para renovação de sessão
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/spaces/ANM/pages/16908291
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-124
 status: closed
-last_updated_at: 2026-05-29
+last_updated_at: 2026-05-30
 ---
 
 # 1. Objetivo
