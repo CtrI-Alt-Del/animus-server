@@ -1,3 +1,11 @@
+# [1.34.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.33.0...v1.34.0) (2026-05-30)
+
+
+### Features
+
+* ANI-124 add auth refresh session endpoint ([4f24491](https://github.com/CtrI-Alt-Del/animus-server/commit/4f2449154f7aa58f3ee563b622c448f3e471189e))
+* ANI-124 add manual precedent to analysis ([a2ae04a](https://github.com/CtrI-Alt-Del/animus-server/commit/a2ae04a99b045d222b5eb44e5a4f3e7c764f5c32))
+
 # [1.33.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.32.0...v1.33.0) (2026-05-29)
 
 
