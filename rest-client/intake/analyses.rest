@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KSQPX5CE80EQXX3YFZA2TEZD
+@analysis_id = 01KSTX4HH0CRX0DP547Y6QFWCC
 @petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
 @folder_id = 01KQ5CG4D6QY8A1X7R2M4N8P0B
 @precedent_court = STJ
@@ -142,6 +142,15 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 POST {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Disparar regeração assíncrona de minuta de julgamento de 2a instancia com comentários (TriggerSecondInstanceJudgmentDraftRegenerationController)
+POST {{url}}/analyses/{{analysis_id}}/judgment-drafts/regenerate
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "comments": "No dispositivo, inclua expressamente a condenação do Município em honorários advocatícios sucumbenciais fixados em 10% sobre o valor da causa."
+}
+
 ### Obter de minuta de julgamento de 2a instancia (TriggerSecondInstanceJudgmentDraftGenerationController)
 GET {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
@@ -149,6 +158,15 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 ### Disparar geração/regeneração de minuta de petição (TriggerPetitionDraftGenerationController)
 POST {{url}}/analyses/{{analysis_id}}/petition-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Disparar regeração assíncrona de minuta de petição com comentários (TriggerPetitionDraftRegenerationController)
+POST {{url}}/analyses/{{analysis_id}}/petition-drafts/regenerate
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "comments": "Acrescente nos pedidos o requerimento de produção de prova documental e pericial para comprovação do efetivo exercício em localidade estratégica. Não altere os fatos nem a tese central."
+}
 
 ### Obter minuta de petição da analise (GetPetitionDraftController)
 GET {{url}}/analyses/{{analysis_id}}/petition-drafts

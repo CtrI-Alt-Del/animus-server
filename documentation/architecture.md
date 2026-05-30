@@ -76,9 +76,11 @@ Fluxo assincrono de segunda instancia:
 
 Fluxo assincrono de minuta de petição inicial:
 - `PetitionDraftGenerationTriggeredEvent` -> `GeneratePetitionDraftJob` -> `UpdateAnalysisStatusUseCase` (`GENERATING_PETITION_DRAFT`) -> `AgnoGeneratePetitionDraftWorkflow` -> `CreatePetitionDraftUseCase` -> PostgreSQL (`petition_drafts`) / `PetitionDraftGenerationFinishedEvent` com `analysis_type`.
+- `PetitionDraftRegenerationTriggeredEvent` -> `RegeneratePetitionDraftJob` -> `UpdateAnalysisStatusUseCase` (`GENERATING_PETITION_DRAFT`) -> `AgnoRegeneratePetitionDraftWorkflow` com minuta atual + `CaseSummary` + precedentes escolhidos + comentários do usuário -> `CreatePetitionDraftUseCase` -> substituição em PostgreSQL (`petition_drafts`) / `PetitionDraftGenerationFinishedEvent` com `analysis_type`.
 
 Fluxo assincrono de minuta de sentença:
 - `SecondInstanceJudgmentDraftGenerationTriggeredEvent` -> `GenerateSecondInstanceJudgmentDraftJob` -> `UpdateAnalysisStatusUseCase` (`GENERATING_JUDGMENT_DRAFT`) -> `AgnoGenerateJudgmentDraftWorkflow` -> `CreateSecondInstanceJudgmentDraftUseCase` -> PostgreSQL (`judgment_drafts`) / `SecondInstanceJudgmentDraftGenerationFinishedEvent` com `analysis_type`.
+- `SecondInstanceJudgmentDraftRegenerationTriggeredEvent` -> `RegenerateSecondInstanceJudgmentDraftJob` -> `UpdateAnalysisStatusUseCase` (`GENERATING_JUDGMENT_DRAFT`) -> `AgnoRegenerateSecondInstanceJudgmentDraftWorkflow` com minuta atual + `CaseSummary` + precedentes escolhidos + comentários do usuário -> `CreateSecondInstanceJudgmentDraftUseCase` -> substituição em PostgreSQL (`judgment_drafts`) / `SecondInstanceJudgmentDraftGenerationFinishedEvent` com `analysis_type`.
 
 Fluxo assincrono de precedentes:
 - `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratacao de precedentes.
