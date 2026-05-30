@@ -18,7 +18,7 @@ class TriggerFirstInstanceCaseSummarizationController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.post(
-            '/analyses/{analysis_id}/case-summaries', status_code=202
+            '/analyses/{analysis_id}/case-summaries/first-instance', status_code=202
         )
         def _(
             analysis: Annotated[
