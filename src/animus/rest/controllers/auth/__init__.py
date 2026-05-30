@@ -1,4 +1,5 @@
 from .get_account_controller import GetAccountController
+from .refresh_session_controller import RefreshSessionController
 from .resend_reset_password_otp_controller import ResendResetPasswordOtpController
 from .resend_verification_email_controller import ResendVerificationEmailController
 from .sign_in_controller import SignInController
@@ -10,6 +11,7 @@ from .verify_reset_password_otp_controller import VerifyResetPasswordOtpControll
 
 __all__ = [
     'GetAccountController',
+    'RefreshSessionController',
     'ResendResetPasswordOtpController',
     'SignInController',
     'SignUpController',

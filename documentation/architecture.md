@@ -38,6 +38,7 @@ Fluxos de autenticacao ja implementados:
 - `POST /auth/resend-verification-email` -> `ResendVerificationEmailController` -> `ResendVerificationEmailUseCase` -> `AccountsRepository` / `OtpProvider` / `CacheProvider` -> `Broker` -> `SendAccountVerificationEmailJob`.
 - `POST /auth/verify-email` -> `VerifyEmailController` -> `VerifyEmailUseCase` -> `AccountsRepository` / `CacheProvider` / `JwtProvider` -> `SessionDto`.
 - `POST /auth/sign-in` -> `SignInController` -> `SignInUseCase` -> `AccountsRepository` / `HashProvider` / `JwtProvider` -> `SessionDto`.
+- `POST /auth/refresh` -> `RefreshSessionController` -> `RefreshSessionUseCase` -> `JwtProvider.decode` / `AccountsRepository` / `JwtProvider.encode` -> `SessionDto`.
 
 Fluxos de intake ja implementados:
 - `POST /intake/analyses` -> `CreateAnalysisController` -> `AuthPipe` / `DatabasePipe` -> `CreateAnalysisUseCase` -> `AnalysesRepository` -> PostgreSQL (`analyses`) -> `AnalysisDto`.

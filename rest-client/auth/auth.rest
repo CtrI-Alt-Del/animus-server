@@ -3,6 +3,7 @@
 @email = animus.ctrlaltdel@gmail.com
 @password = Senha@123
 @otp = 583108
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUtNWDNTQlowRjU1UlE3WDY5V1lFRlo3SyIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzgwMTAyODg3LCJleHAiOjE3ODAxODkyODd9.kzEIruYTbKd0SZ6FA6daXYan4Ch-KomQ70klQW4yn6c
 
 ### Entrar com email e senha (SignInController)
 POST {{url}}/sign-in
@@ -40,3 +41,10 @@ Content-Type: application/json
   "otp": "{{otp}}"
 }
 
+### Renovar sessao com refresh token (RefreshSessionController)
+POST {{url}}/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
