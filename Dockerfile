@@ -28,6 +28,8 @@ WORKDIR /app
 RUN useradd --create-home --shell /usr/sbin/nologin appuser
 
 COPY --from=builder /app/.venv /app/.venv
+COPY alembic.ini ./
+COPY migrations ./migrations
 COPY src ./src
 
 USER appuser
