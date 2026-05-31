@@ -18,6 +18,12 @@ from animus.core.intake.interfaces.generate_petition_draft_workflow import (
 from animus.core.intake.interfaces.generate_judgment_draft_workflow import (
     GenerateSecondInstanceJudgmentDraftWorkflow,
 )
+from animus.core.intake.interfaces.regenerate_judgment_draft_workflow import (
+    RegenerateSecondInstanceJudgmentDraftWorkflow,
+)
+from animus.core.intake.interfaces.regenerate_petition_draft_workflow import (
+    RegeneratePetitionDraftWorkflow,
+)
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
 )
@@ -106,3 +112,21 @@ class AiPipe:
         )
 
         return AgnoGeneratePetitionDraftWorkflow()
+
+    @staticmethod
+    def get_regenerate_judgment_draft_workflow() -> (
+        RegenerateSecondInstanceJudgmentDraftWorkflow
+    ):
+        from animus.ai.agno.workflows.intake.agno_regenerate_second_instance_judgment_draft_workflow import (
+            AgnoRegenerateSecondInstanceJudgmentDraftWorkflow,
+        )
+
+        return AgnoRegenerateSecondInstanceJudgmentDraftWorkflow()
+
+    @staticmethod
+    def get_regenerate_petition_draft_workflow() -> RegeneratePetitionDraftWorkflow:
+        from animus.ai.agno.workflows.intake.agno_regenerate_petition_draft_workflow import (
+            AgnoRegeneratePetitionDraftWorkflow,
+        )
+
+        return AgnoRegeneratePetitionDraftWorkflow()

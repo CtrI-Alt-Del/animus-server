@@ -32,6 +32,12 @@ from .list_analysis_petitions_controller import ListAnalysisPetitionsController
 from .list_analysis_precedents_controller import ListAnalysisPrecedentsController
 from .list_unfoldered_analyses_controller import ListUnfolderedAnalysesController
 from .move_analyses_to_folder_controller import MoveAnalysesToFolderController
+from .trigger_petition_draft_regeneration_controller import (
+    TriggerPetitionDraftRegenerationController,
+)
+from .trigger_second_instance_judgment_draft_regeneration_controller import (
+    TriggerSecondInstanceJudgmentDraftRegenerationController,
+)
 from .rename_analysis_controller import RenameAnalysisController
 from .trigger_first_instance_case_summarization_controller import (
     TriggerFirstInstanceCaseSummarizationController,
@@ -74,6 +80,8 @@ __all__ = [
     'ListAnalysisPetitionsController',
     'ListAnalysisPrecedentsController',
     'MoveAnalysesToFolderController',
+    'TriggerPetitionDraftRegenerationController',
+    'TriggerSecondInstanceJudgmentDraftRegenerationController',
     'TriggerCaseAssessmentCaseSummarizationController',
     'TriggerPetitionDraftGenerationController',
     'RenameAnalysisController',

@@ -34,6 +34,7 @@ jobs:
       GAR_REPOSITORY: ${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}
       CLOUD_RUN_REGION: ${{ vars.GCP_CLOUD_RUN_REGION }}
       CLOUD_RUN_SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+      CLOUD_RUN_MIGRATIONS_JOB: ${{ vars.GCP_CLOUD_RUN_MIGRATIONS_JOB != '' && vars.GCP_CLOUD_RUN_MIGRATIONS_JOB || format('{0}-migrations', vars.GCP_CLOUD_RUN_SERVICE) }}
       CLOUD_RUN_MEMORY: ${{ vars.GCP_CLOUD_RUN_MEMORY != '' &&
         vars.GCP_CLOUD_RUN_MEMORY || '1Gi' }}
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
@@ -151,6 +152,8 @@ jobs:
             INNGEST_EVENT_KEY
             RESEND_API_KEY
             RESEND_SENDER_EMAIL
+            ONESIGNAL_APP_ID
+            ONESIGNAL_REST_API_KEY
             GOOGLE_CLIENT_ID
             PANGEA_SERVICE_URL
             QDRANT_URL
@@ -162,6 +165,9 @@ jobs:
             RESET_PASSWORD_OTP_RESEND_COOLDOWN_SECONDS
             RESET_PASSWORD_CONTEXT_TTL_SECONDS
           )
+
+          cloud_sql_instances="$(jq -r '.spec.template.metadata.annotations["run.googleapis.com/cloudsql-instances"] // .metadata.annotations["run.googleapis.com/cloudsql-instances"] // empty' <<< "$service_json")"
+          cloud_sql_instance="${cloud_sql_instances%%,*}"
 
           missing=0
           for variable in "${required_env_vars[@]}"; do
@@ -176,8 +182,6 @@ jobs:
             postgres_user="$(env_value POSTGRES_USER)"
             postgres_password="$(env_value POSTGRES_PASSWORD)"
             postgres_db="$(env_value POSTGRES_DB)"
-            cloud_sql_instances="$(jq -r '.spec.template.metadata.annotations["run.googleapis.com/cloudsql-instances"] // .metadata.annotations["run.googleapis.com/cloudsql-instances"] // empty' <<< "$service_json")"
-            cloud_sql_instance="${cloud_sql_instances%%,*}"
 
             for variable in POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB; do
               if [ -z "$(env_value "$variable")" ]; then
@@ -223,6 +227,7 @@ jobs:
 
           echo "::add-mask::$database_url"
           echo "database_url=$database_url" >> "$GITHUB_OUTPUT"
+          echo "cloud_sql_instance=$cloud_sql_instance" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Artifact Registry
         uses: docker/login-action@v3
@@ -244,6 +249,41 @@ jobs:
           tags: ${{ steps.context.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Run database migrations
+        shell: bash
+        run: |
+          env_vars_file="$(mktemp)"
+          trap 'rm -f "$env_vars_file"' EXIT
+          printf 'DATABASE_URL=%s\n' "${{ steps.runtime.outputs.database_url }}" > "$env_vars_file"
+
+          deploy_args=(
+            "$CLOUD_RUN_MIGRATIONS_JOB"
+            --project "$GCP_PROJECT_ID"
+            --region "$CLOUD_RUN_REGION"
+            --image "${{ steps.context.outputs.deploy_image }}"
+            --command alembic
+            --args upgrade,head
+            --env-vars-file "$env_vars_file"
+            --service-account "${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}"
+            --max-retries 0
+            --tasks 1
+            --parallelism 1
+            --task-timeout 10m
+            --wait
+          )
+
+          if [ -n "${{ steps.runtime.outputs.cloud_sql_instance }}" ]; then
+            deploy_args+=(
+              --set-cloudsql-instances "${{ steps.runtime.outputs.cloud_sql_instance }}"
+            )
+          fi
+
+          gcloud run jobs deploy "${deploy_args[@]}"
+          gcloud run jobs execute "$CLOUD_RUN_MIGRATIONS_JOB" \
+            --project "$GCP_PROJECT_ID" \
+            --region "$CLOUD_RUN_REGION" \
+            --wait
 
       - name: Deploy to Cloud Run
         id: deploy

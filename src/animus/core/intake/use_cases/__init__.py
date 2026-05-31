@@ -50,6 +50,9 @@ from .request_analysis_precedents_search_use_case import (
 from .trigger_second_instance_judgment_draft_generation_use_case import (
     TriggerSecondInstanceJudgmentDraftGenerationUseCase,
 )
+from .trigger_second_instance_judgment_draft_regeneration_use_case import (
+    TriggerSecondInstanceJudgmentDraftRegenerationUseCase,
+)
 from .trigger_second_instance_case_summarization_use_case import (
     TriggerSecondInstanceCaseSummarizationUseCase,
 )
@@ -65,6 +68,9 @@ from .trigger_case_assessment_case_summarization_use_case import (
 )
 from .trigger_petition_draft_generation_use_case import (
     TriggerPetitionDraftGenerationUseCase,
+)
+from .trigger_petition_draft_regeneration_use_case import (
+    TriggerPetitionDraftRegenerationUseCase,
 )
 from .unchoose_analysis_precedent_use_case import UnchooseAnalysisPrecedentUseCase
 from .unarchive_analysis_use_case import UnarchiveAnalysisUseCase
@@ -104,8 +110,10 @@ __all__ = [
     'RenameAnalysisUseCase',
     'RequestAnalysisPrecedentsSearchUseCase',
     'TriggerSecondInstanceJudgmentDraftGenerationUseCase',
+    'TriggerSecondInstanceJudgmentDraftRegenerationUseCase',
     'TriggerCaseAssessmentCaseSummarizationUseCase',
     'TriggerPetitionDraftGenerationUseCase',
+    'TriggerPetitionDraftRegenerationUseCase',
     'TriggerFirstInstanceCaseSummarizationUseCase',
     'TriggerFistInstanceCaseSummarizationUseCase',
     'SearchAnalysisPrecedentsUseCase',

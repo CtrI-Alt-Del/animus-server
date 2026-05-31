@@ -1,9 +1,9 @@
+import os
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from animus.constants import Env
 from animus.database.sqlalchemy.models.model import Model
 import animus.database.sqlalchemy.models.auth
 import animus.database.sqlalchemy.models.intake
@@ -14,7 +14,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option('sqlalchemy.url', Env.DATABASE_URL)
+database_url = os.environ.get('DATABASE_URL')
+
+if database_url:
+    config.set_main_option('sqlalchemy.url', database_url)
 
 
 target_metadata = Model.metadata

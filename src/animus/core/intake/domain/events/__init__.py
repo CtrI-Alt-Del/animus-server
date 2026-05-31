@@ -9,6 +9,9 @@ from .case_summary_finished_event import CaseSummaryFinishedEvent
 from .second_instance_judgment_draft_generation_event import (
     SecondInstanceJudgmentDraftGenerationTriggeredEvent,
 )
+from .second_instance_judgment_draft_regeneration_triggered_event import (
+    SecondInstanceJudgmentDraftRegenerationTriggeredEvent,
+)
 from .second_instance_judgment_draft_generation_finished_event import (
     SecondInstanceJudgmentDraftGenerationFinishedEvent,
 )
@@ -23,6 +26,9 @@ from .petition_draft_generation_finished_event import (
 from .petition_draft_generation_triggered_event import (
     PetitionDraftGenerationTriggeredEvent,
 )
+from .petition_draft_regeneration_triggered_event import (
+    PetitionDraftRegenerationTriggeredEvent,
+)
 from .first_instance_summarization_triggered_event import (
     FistInstanceCaseSummarizationTriggeredEvent,
 )
@@ -36,8 +42,10 @@ __all__ = [
     'CaseSummaryFinishedEvent',
     'PetitionDraftGenerationFinishedEvent',
     'PetitionDraftGenerationTriggeredEvent',
+    'PetitionDraftRegenerationTriggeredEvent',
     'SecondInstanceJudgmentDraftGenerationFinishedEvent',
     'SecondInstanceJudgmentDraftGenerationTriggeredEvent',
+    'SecondInstanceJudgmentDraftRegenerationTriggeredEvent',
     'AnalysisDocumentReplacedEvent',
     'SecondInstanceCaseSummarizationTriggeredEvent',
     'FistInstanceCaseSummarizationTriggeredEvent',
