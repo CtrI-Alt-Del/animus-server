@@ -1,3 +1,10 @@
+## [1.35.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.35.0...v1.35.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* ANI-126 copy vpc settings to migration job ([15fa94e](https://github.com/CtrI-Alt-Del/animus-server/commit/15fa94e85e56a17072a346218fadcd172d71ef07))
+
 # [1.35.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.34.0...v1.35.0) (2026-05-31)
 
 
