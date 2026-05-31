@@ -1,11 +1,7 @@
 name: Continuous Deployment
 
 on:
-  workflow_run:
-    workflows:
-      - Continuous Integration
-    types:
-      - completed
+  push:
     branches:
       - main
       - production
@@ -17,15 +13,11 @@ permissions:
 jobs:
   publish:
     name: Publish Docker Image
-    if: ${{ github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      (github.event.workflow_run.head_branch == 'main' ||
-      github.event.workflow_run.head_branch == 'production') }}
     concurrency:
-      group: docker-cd-${{ github.event.workflow_run.head_branch }}
+      group: docker-cd-${{ github.ref_name }}
       cancel-in-progress: true
     runs-on: ubuntu-latest
-    environment: ${{ github.event.workflow_run.head_branch == 'production' &&
+    environment: ${{ github.ref_name == 'production' &&
       'production' || 'staging' }}
     timeout-minutes: 60
     env:
@@ -43,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
 
       - name: Validate required variables
         shell: bash
@@ -75,8 +67,8 @@ jobs:
         id: context
         shell: bash
         run: |
-          branch="${{ github.event.workflow_run.head_branch }}"
-          head_sha="${{ github.event.workflow_run.head_sha }}"
+          branch="${{ github.ref_name }}"
+          head_sha="${{ github.sha }}"
           short_sha="${head_sha::7}"
           registry="${GAR_REGION}-docker.pkg.dev"
           image="${registry}/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/${IMAGE_NAME}"
@@ -255,7 +247,18 @@ jobs:
         run: |
           env_vars_file="$(mktemp)"
           trap 'rm -f "$env_vars_file"' EXIT
-          printf 'DATABASE_URL=%s\n' "${{ steps.runtime.outputs.database_url }}" > "$env_vars_file"
+          export DATABASE_URL="${{ steps.runtime.outputs.database_url }}"
+          export ENV_VARS_FILE="$env_vars_file"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          database_url = os.environ['DATABASE_URL']
+          Path(os.environ['ENV_VARS_FILE']).write_text(
+              f'DATABASE_URL: {database_url!r}\n',
+              encoding='utf-8',
+          )
+          PY
 
           deploy_args=(
             "$CLOUD_RUN_MIGRATIONS_JOB"
