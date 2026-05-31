@@ -1,11 +1,11 @@
 @url = {{BASE_URL}}/storage
-@analysis_id = 01KRSC63JM222FW2SN0XXFQE74
+@analysis_id = 01KSZX2Z0S0MBNPTF7VNHJKP95
 
-### Gerar URL de upload para petição PDF (GenerateAnalysisDocumentUploadUrlController)
+### Gerar URL de upload para documento PDF (GenerateAnalysisDocumentUploadUrlController)
 POST {{url}}/analyses/{{analysis_id}}/documents?document_type=pdf
 Authorization: Bearer {{ACCESS_TOKEN}}
 
-### Gerar URL de upload para petição DOCX (GenerateAnalysisDocumentUploadUrlController)
+### Gerar URL de upload para documento DOCX (GenerateAnalysisDocumentUploadUrlController)
 POST {{url}}/analyses/{{analysis_id}}/documents?document_type=docx
 Authorization: Bearer {{ACCESS_TOKEN}}
 

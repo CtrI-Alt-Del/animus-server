@@ -1,9 +1,14 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
+from urllib.request import Request as UrlRequest, urlopen
 from urllib.parse import urlencode
 
+import google.auth
+from google.auth.transport.requests import Request
 from google.api_core.exceptions import NotFound
+from google.cloud.storage.blob import Blob
 from google.cloud.storage import Client
 
 from animus.constants import Env
@@ -12,9 +17,16 @@ from animus.core.storage.domain.structures import File, UploadUrl
 from animus.core.storage.domain.structures.url import Url
 from animus.core.storage.interfaces import FileStorageProvider
 
+if TYPE_CHECKING:
+    from google.auth.credentials import Credentials
+
 
 class GcsFileStorageProvider(FileStorageProvider):
     _PDFS_DIR = Path(__file__).resolve().parents[6] / 'assets' / 'pdfs'
+    _METADATA_SERVICE_ACCOUNT_EMAIL_URL = (
+        'http://metadata.google.internal/computeMetadata/v1/instance/'
+        'service-accounts/default/email'
+    )
     client: Client
 
     def __init__(self) -> None:
@@ -35,11 +47,7 @@ class GcsFileStorageProvider(FileStorageProvider):
         else:
             bucket_obj = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
             blob = bucket_obj.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
-            upload_url_str = blob.generate_signed_url(  # pyright: ignore[reportUnknownMemberType]
-                method='PUT',
-                version='v4',
-                expiration=timedelta(minutes=15),
-            )
+            upload_url_str = self._generate_gcs_upload_url(blob)
 
         url_obj = Url.create(upload_url_str)
         token_obj = Text.create('')
@@ -115,6 +123,50 @@ class GcsFileStorageProvider(FileStorageProvider):
         )
 
         return f'{base_url}/upload/storage/v1/b/{Env.GCS_BUCKET_NAME}/o?{query}'
+
+    def _generate_gcs_upload_url(self, blob: Blob) -> str:
+        credentials = cast(
+            'Credentials',
+            google.auth.default(  # pyright: ignore[reportUnknownMemberType]
+                scopes=['https://www.googleapis.com/auth/cloud-platform']
+            )[0],
+        )
+
+        if credentials.token is None:
+            credentials.refresh(Request())  # pyright: ignore[reportUnknownMemberType]
+
+        service_account_email = getattr(credentials, 'service_account_email', None)
+        if not isinstance(service_account_email, str):
+            service_account_email = self._get_metadata_service_account_email()
+
+        access_token = credentials.token
+
+        if isinstance(service_account_email, str) and access_token:
+            return blob.generate_signed_url(  # pyright: ignore[reportUnknownMemberType]
+                method='PUT',
+                version='v4',
+                expiration=timedelta(minutes=15),
+                service_account_email=service_account_email,
+                access_token=access_token,
+            )
+
+        return blob.generate_signed_url(  # pyright: ignore[reportUnknownMemberType]
+            method='PUT',
+            version='v4',
+            expiration=timedelta(minutes=15),
+        )
+
+    def _get_metadata_service_account_email(self) -> str | None:
+        request = UrlRequest(  # noqa: S310
+            self._METADATA_SERVICE_ACCOUNT_EMAIL_URL,
+            headers={'Metadata-Flavor': 'Google'},
+        )
+
+        try:
+            with urlopen(request, timeout=2) as response:  # noqa: S310
+                return response.read().decode('utf-8')
+        except OSError:
+            return None
 
     @staticmethod
     def _normalize_emulator_base_url(host: str | None) -> str:

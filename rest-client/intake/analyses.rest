@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KSTX4HH0CRX0DP547Y6QFWCC
+@analysis_id = 01KSZX2Z0S0MBNPTF7VNHJKP95
 @petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
 @folder_id = 01KQ5CG4D6QY8A1X7R2M4N8P0B
 @precedent_court = STJ
@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ### Listar analises (ListAnalysesController)
-GET {{url}}/analyses?limit={{list_limit}}&is_archived={{list_is_archived}}&cursor={{list_cursor}}
+GET {{url}}/analyses?limit={{list_limit}}&is_archived={{list_is_archived}}
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Obter analise por id (GetAnalysisController)
