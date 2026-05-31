@@ -1,3 +1,13 @@
+# [1.35.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.34.0...v1.35.0) (2026-05-31)
+
+
+### Features
+
+* ANI-126 add AI workflows, squad agents, pipe and pubsub jobs for draft regeneration ([199ae12](https://github.com/CtrI-Alt-Del/animus-server/commit/199ae1251ed32b3dc356bee5610953e478557e77))
+* ANI-126 add draft regeneration domain errors, events, interfaces and use cases ([d139960](https://github.com/CtrI-Alt-Del/animus-server/commit/d139960a4885c14047add3ab0cf2c449d3681aff))
+* ANI-126 add REST controllers, router endpoint and error handler for draft regeneration ([d37afc5](https://github.com/CtrI-Alt-Del/animus-server/commit/d37afc596ae3333616917cfa7fe274e3d93ea609))
+* ANI-126 run database migrations in cloud run cd ([8fe8405](https://github.com/CtrI-Alt-Del/animus-server/commit/8fe8405b2e76184b4e58dbd26325c753eceb71e4))
+
 # [1.34.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.33.0...v1.34.0) (2026-05-30)
 
 
