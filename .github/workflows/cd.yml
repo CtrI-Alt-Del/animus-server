@@ -160,6 +160,8 @@ jobs:
 
           cloud_sql_instances="$(jq -r '.spec.template.metadata.annotations["run.googleapis.com/cloudsql-instances"] // .metadata.annotations["run.googleapis.com/cloudsql-instances"] // empty' <<< "$service_json")"
           cloud_sql_instance="${cloud_sql_instances%%,*}"
+          vpc_connector="$(jq -r '.spec.template.metadata.annotations["run.googleapis.com/vpc-access-connector"] // .metadata.annotations["run.googleapis.com/vpc-access-connector"] // empty' <<< "$service_json")"
+          vpc_egress="$(jq -r '.spec.template.metadata.annotations["run.googleapis.com/vpc-access-egress"] // .metadata.annotations["run.googleapis.com/vpc-access-egress"] // empty' <<< "$service_json")"
 
           missing=0
           for variable in "${required_env_vars[@]}"; do
@@ -220,6 +222,8 @@ jobs:
           echo "::add-mask::$database_url"
           echo "database_url=$database_url" >> "$GITHUB_OUTPUT"
           echo "cloud_sql_instance=$cloud_sql_instance" >> "$GITHUB_OUTPUT"
+          echo "vpc_connector=$vpc_connector" >> "$GITHUB_OUTPUT"
+          echo "vpc_egress=$vpc_egress" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Artifact Registry
         uses: docker/login-action@v3
@@ -279,6 +283,18 @@ jobs:
           if [ -n "${{ steps.runtime.outputs.cloud_sql_instance }}" ]; then
             deploy_args+=(
               --set-cloudsql-instances "${{ steps.runtime.outputs.cloud_sql_instance }}"
+            )
+          fi
+
+          if [ -n "${{ steps.runtime.outputs.vpc_connector }}" ]; then
+            deploy_args+=(
+              --vpc-connector "${{ steps.runtime.outputs.vpc_connector }}"
+            )
+          fi
+
+          if [ -n "${{ steps.runtime.outputs.vpc_egress }}" ]; then
+            deploy_args+=(
+              --vpc-egress "${{ steps.runtime.outputs.vpc_egress }}"
             )
           fi
 
