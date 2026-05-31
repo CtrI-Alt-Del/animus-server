@@ -5,7 +5,7 @@
       "ACCESS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUtNWDNTQlowRjU1UlE3WDY5V1lFRlo3SyIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3ODAxNTYwOTQsImV4cCI6MTc4MDE1OTY5NH0.y-LJwujzS-uV8-zPSUayFx74A2BeU5vwh98HKxTq-5Y"
     },
     "PROD": {
-      "BASE_URL": "https://animus-stg-api-49381195836.us-east1.run.app",
+      "BASE_URL": "https://animus-prod-api-49381195836.us-east1.run.app",
       "ACCESS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUtNWDNTQlowRjU1UlE3WDY5V1lFRlo3SyIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3ODAxNTYwOTQsImV4cCI6MTc4MDE1OTY5NH0.y-LJwujzS-uV8-zPSUayFx74A2BeU5vwh98HKxTq-5Y"
     }
   }
