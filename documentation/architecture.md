@@ -129,6 +129,7 @@ Fluxo assincrono de substituicao de petição:
 | **Servidor ASGI** | Uvicorn (`fastapi[standard]`) | Runtime da aplicacao |
 | **Banco de Dados** | PostgreSQL | Persistencia relacional |
 | **ORM** | SQLAlchemy | Mapeamento e repositorios |
+| **Banco Vetorial** | Qdrant | Indexacao e busca semantica de precedentes |
 | **Driver SQL** | Psycopg 3 (`psycopg[binary]`) | Conexao PostgreSQL |
 | **Migracoes** | Alembic | Versionamento de schema |
 | **Cache/PubSub** | Redis | Cache e eventos em tempo real |
@@ -149,6 +150,7 @@ No ambiente de producao, os servicos principais estao distribuidos da seguinte f
 |---|---|---|
 | **API FastAPI** | Google Cloud Run | Executa a aplicacao HTTP em container (deploy serverless). |
 | **PostgreSQL** | Supabase | Banco relacional gerenciado para persistencia principal. |
+| **Qdrant** | Qdrant Cloud | Banco vetorial gerenciado para indexacao e busca semantica de precedentes. |
 | **Redis** | Upstash | Cache e pub/sub em servico gerenciado. |
 | **Inngest** | Inngest Cloud | Orquestracao de jobs e eventos assincronos. |
 

@@ -20,6 +20,7 @@ O projeto utiliza uma stack moderna para API, persistencia, processamento e mens
 - **Framework HTTP:** [FastAPI](https://fastapi.tiangolo.com/)
 - **Servidor ASGI:** [Uvicorn](https://www.uvicorn.org/)
 - **ORM e Persistencia:** [SQLAlchemy](https://www.sqlalchemy.org/) + [PostgreSQL](https://www.postgresql.org/)
+- **Banco Vetorial:** [Qdrant](https://qdrant.tech/) para indexacao e busca semantica de precedentes
 - **Migracoes:** [Alembic](https://alembic.sqlalchemy.org/)
 - **Jobs/Eventos:** [Inngest](https://www.inngest.com/)
 - **IA e orquestracao:** [Agno](https://www.agno.com/)
