@@ -1,3 +1,10 @@
+## [1.35.2](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.35.1...v1.35.2) (2026-05-31)
+
+
+### Bug Fixes
+
+* ANI-126 update email and analysis IDs in REST client configurations ([144c37c](https://github.com/CtrI-Alt-Del/animus-server/commit/144c37c72f0d559c58b3edbfca0c2b703f0d3249))
+
 ## [1.35.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.35.0...v1.35.1) (2026-05-31)
 
 
