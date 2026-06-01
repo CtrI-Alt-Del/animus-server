@@ -18,21 +18,10 @@ from animus.pipes.database_pipe import DatabasePipe
 from animus.pipes.intake_pipe import IntakePipe
 
 
-class _IdentifierBody(BaseModel):
+class _Body(BaseModel):
     court: str
     kind: str
     number: int
-
-    def to_dto(self) -> PrecedentIdentifierDto:
-        return PrecedentIdentifierDto(
-            court=self.court,
-            kind=self.kind,
-            number=self.number,
-        )
-
-
-class _Body(BaseModel):
-    identifier: _IdentifierBody
 
 
 class AddAnalysisPrecedentController:
@@ -70,5 +59,9 @@ class AddAnalysisPrecedentController:
 
             return use_case.execute(
                 analysis_id=analysis.id.value,
-                precedent_identifier_dto=body.identifier.to_dto(),
+                precedent_identifier_dto=PrecedentIdentifierDto(
+                    court=body.court,
+                    kind=body.kind,
+                    number=body.number,
+                ),
             )
