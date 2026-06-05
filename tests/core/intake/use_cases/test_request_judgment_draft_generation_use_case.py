@@ -10,6 +10,7 @@ from animus.core.intake.domain.errors import (
     CaseSummaryUnavailableError,
     ChosenAnalysisPrecedentsRequiredError,
     SecondInstanceAnalysisRequiredError,
+    SecondInstanceDecisionNotFoundError,
 )
 from animus.core.intake.domain.events import (
     SecondInstanceJudgmentDraftGenerationTriggeredEvent,
@@ -20,12 +21,17 @@ from animus.core.intake.domain.structures.dtos import (
     AnalysisPrecedentDto,
     CaseSummaryDto,
     PrecedentIdentifierDto,
+    SecondInstanceDecisionDto,
 )
 from animus.core.intake.domain.entities.dtos import PrecedentDto
+from animus.core.intake.domain.structures.second_instance_decision import (
+    SecondInstanceDecision,
+)
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
+    SecondInstanceDecisionsRepository,
 )
 from animus.core.intake.use_cases import (
     TriggerSecondInstanceJudgmentDraftGenerationUseCase,
@@ -46,6 +52,10 @@ class TestTriggerSecondInstanceJudgmentDraftGenerationUseCase:
             CaseSummariesRepository,
             instance=True,
         )
+        self.second_instance_decisions_repository_mock = create_autospec(
+            SecondInstanceDecisionsRepository,
+            instance=True,
+        )
         self.analysis_precedents_repository_mock = create_autospec(
             AnalysisPrecedentsRepository,
             instance=True,
@@ -53,6 +63,7 @@ class TestTriggerSecondInstanceJudgmentDraftGenerationUseCase:
         self.broker_mock = create_autospec(Broker, instance=True)
         self.use_case = TriggerSecondInstanceJudgmentDraftGenerationUseCase(
             analyses_repository=self.analyses_repository_mock,
+            second_instance_decisions_repository=self.second_instance_decisions_repository_mock,
             case_summaries_repository=self.case_summaries_repository_mock,
             analysis_precedents_repository=self.analysis_precedents_repository_mock,
             broker=self.broker_mock,
@@ -66,6 +77,9 @@ class TestTriggerSecondInstanceJudgmentDraftGenerationUseCase:
             analysis_id, AnalysisType.create_as_second_instance().dto
         )
         self.analyses_repository_mock.find_by_id.return_value = analysis
+        self.second_instance_decisions_repository_mock.find_by_analysis_id.return_value = self._create_decision(
+            analysis_id
+        )
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = (
             CaseSummary.create(self._create_case_summary_dto())
         )
@@ -97,6 +111,9 @@ class TestTriggerSecondInstanceJudgmentDraftGenerationUseCase:
             analysis_id, AnalysisType.create_as_second_instance().dto
         )
         self.analyses_repository_mock.find_by_id.return_value = analysis
+        self.second_instance_decisions_repository_mock.find_by_analysis_id.return_value = self._create_decision(
+            analysis_id
+        )
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = (
             CaseSummary.create(self._create_case_summary_dto())
         )
@@ -121,6 +138,9 @@ class TestTriggerSecondInstanceJudgmentDraftGenerationUseCase:
             analysis_id, AnalysisType.create_as_second_instance().dto
         )
         self.analyses_repository_mock.find_by_id.return_value = analysis
+        self.second_instance_decisions_repository_mock.find_by_analysis_id.return_value = self._create_decision(
+            analysis_id
+        )
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = (
             CaseSummary.create(self._create_case_summary_dto())
         )
@@ -147,12 +167,28 @@ class TestTriggerSecondInstanceJudgmentDraftGenerationUseCase:
         with pytest.raises(SecondInstanceAnalysisRequiredError):
             self.use_case.execute(analysis_id)
 
+    def test_should_raise_when_second_instance_decision_does_not_exist(self) -> None:
+        analysis_id = Id.create().value
+        analysis = self._create_analysis(
+            analysis_id, AnalysisType.create_as_second_instance().dto
+        )
+        self.analyses_repository_mock.find_by_id.return_value = analysis
+        self.second_instance_decisions_repository_mock.find_by_analysis_id.return_value = None
+
+        with pytest.raises(SecondInstanceDecisionNotFoundError):
+            self.use_case.execute(analysis_id)
+
+        self.case_summaries_repository_mock.find_by_analysis_id.assert_not_called()
+
     def test_should_raise_when_case_summary_does_not_exist(self) -> None:
         analysis_id = Id.create().value
         analysis = self._create_analysis(
             analysis_id, AnalysisType.create_as_second_instance().dto
         )
         self.analyses_repository_mock.find_by_id.return_value = analysis
+        self.second_instance_decisions_repository_mock.find_by_analysis_id.return_value = self._create_decision(
+            analysis_id
+        )
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = None
 
         with pytest.raises(CaseSummaryUnavailableError):
@@ -209,5 +245,14 @@ class TestTriggerSecondInstanceJudgmentDraftGenerationUseCase:
                 similarity_score=85.0,
                 synthesis='Sintese',
                 applicability_level=2 if is_chosen else 1,
+            )
+        )
+
+    @staticmethod
+    def _create_decision(analysis_id: str) -> SecondInstanceDecision:
+        return SecondInstanceDecision.create(
+            SecondInstanceDecisionDto(
+                analysis_id=analysis_id,
+                description='Dar provimento ao recurso',
             )
         )

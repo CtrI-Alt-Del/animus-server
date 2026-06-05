@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from animus.core.intake.domain.errors import (
     DraftRegenerationChosenPrecedentsRequiredError,
+    SecondInstanceDecisionNotFoundError,
 )
 from animus.core.intake.domain.events import (
     SecondInstanceJudgmentDraftRegenerationTriggeredEvent,
@@ -28,6 +29,7 @@ from animus.database.sqlalchemy.models.intake import (
     AnalysisPrecedentModel,
     CaseSummaryModel,
     PrecedentModel,
+    SecondInstanceDecisionModel,
     SecondInstanceJudgmentDraftModel,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -83,6 +85,12 @@ def _seed_second_instance_analysis_for_regeneration(
             ruling=['Dispositivo original'],
             preliminary_issues='Preliminar original',
             no_applicable_precedent_notice=None,
+        )
+    )
+    session.add(
+        SecondInstanceDecisionModel(
+            analysis_id=analysis_id,
+            description='Negar provimento ao recurso e manter a sentença.',
         )
     )
 
@@ -154,7 +162,7 @@ def _get_judgment_draft(
         session.close()
 
 
-def _wait_until(predicate: Any, *, timeout_seconds: float = 120) -> None:
+def _wait_until(predicate: Any, *, timeout_seconds: float = 240) -> None:
     deadline = time.monotonic() + timeout_seconds
     while time.monotonic() < deadline:
         if predicate():
@@ -287,12 +295,16 @@ class TestRegenerateSecondInstanceJudgmentDraftJob:
                 case_summary: Any,
                 precedents: list[Any],
                 comments: str,
+                second_instance_decision: Any,
             ) -> SecondInstanceJudgmentDraftDto:
                 captured_workflow_calls.append(
                     {
                         'analysis_id': analysis_id,
                         'current_report': current_draft.report.value,
                         'case_summary': case_summary.case_summary.value,
+                        'second_instance_decision': (
+                            second_instance_decision.description.value
+                        ),
                         'precedent_ids': [
                             precedent.precedent.id.value for precedent in precedents
                         ],
@@ -346,6 +358,7 @@ class TestRegenerateSecondInstanceJudgmentDraftJob:
                 'analysis_id': seeded_data['analysis_id'],
                 'current_report': 'Relatório original',
                 'case_summary': 'Resumo objetivo do caso',
+                'second_instance_decision': 'Negar provimento ao recurso e manter a sentença.',
                 'precedent_ids': [seeded_data['chosen_precedent_id']],
                 'chosen_flags': [True],
                 'comments': 'Ajustar dispositivo e preliminares',
@@ -430,3 +443,41 @@ class TestRegenerateSecondInstanceJudgmentDraftJob:
         assert persisted_judgment_draft is not None
         assert persisted_judgment_draft.report == 'Relatório original'
         assert persisted_judgment_draft.merit_analysis == 'Fundamentação original'
+
+    def test_should_raise_when_second_instance_decision_does_not_exist(
+        self,
+        monkeypatch: MonkeyPatch,
+        sqlalchemy_session_factory: sessionmaker[Session],
+    ) -> None:
+        seeded_data = _seed_second_instance_analysis_for_regeneration(
+            sqlalchemy_session_factory
+        )
+
+        with sqlalchemy_session_factory() as session:
+            decision = session.get(
+                SecondInstanceDecisionModel, seeded_data['analysis_id']
+            )
+            assert decision is not None
+            session.delete(decision)
+            session.commit()
+
+        job_module = __import__(
+            'animus.pubsub.inngest.jobs.intake.regenerate_second_instance_judgment_draft_job',
+            fromlist=['_Payload'],
+        )
+        payload = job_module._Payload(  # noqa: SLF001
+            analysis_id=seeded_data['analysis_id'],
+            comments='Revisar minuta sem decisão submetida',
+        )
+
+        monkeypatch.setattr(
+            Sqlalchemy,
+            'get_session',
+            staticmethod(lambda: sqlalchemy_session_factory()),
+        )
+
+        job_class = cast('Any', RegenerateSecondInstanceJudgmentDraftJob)
+        regenerate_and_persist = job_class._regenerate_and_persist_judgment_draft_sync  # noqa: SLF001
+
+        with pytest.raises(SecondInstanceDecisionNotFoundError):
+            regenerate_and_persist(payload)

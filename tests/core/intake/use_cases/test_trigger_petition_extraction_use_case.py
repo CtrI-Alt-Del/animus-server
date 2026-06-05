@@ -4,10 +4,10 @@ import pytest
 
 from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.domain.structures.analysis_type import AnalysisType
-from animus.core.intake.domain.structures.case_assessment_analysis_status import (
-    CaseAssessmentAnalysisStatus,
-)
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
@@ -148,7 +148,7 @@ class TestTriggerSecondInstanceCaseSummarizationUseCase:
                 id=analysis_id,
                 name='Análise',
                 account_id=Id.create().value,
-                status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+                status=FirstInstanceAnalysisStatus.create_as_document_uploaded().dto,
                 created_at='2026-03-31T10:30:00+00:00',
                 type=AnalysisType.create_as_first_instance().dto,
             )

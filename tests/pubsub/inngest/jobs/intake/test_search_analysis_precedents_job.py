@@ -17,8 +17,14 @@ from animus.core.intake.domain.structures.case_assessment_analysis_status import
     CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.domain.entities.dtos.precedent_dto import PrecedentDto
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
 from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
     AnalysisPrecedentDto,
+)
+from animus.core.intake.domain.structures.dtos.second_instance_decision_dto import (
+    SecondInstanceDecisionDto,
 )
 from animus.core.intake.domain.structures.dtos.precedent_identifier_dto import (
     PrecedentIdentifierDto,
@@ -41,6 +47,9 @@ from animus.database.sqlalchemy.models.intake.petition_summary_model import (
     PetitionSummaryModel,
 )
 from animus.database.sqlalchemy.models.intake.precedent_model import PrecedentModel
+from animus.database.sqlalchemy.models.intake.second_instance_decision_model import (
+    SecondInstanceDecisionModel,
+)
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.pubsub.inngest.inngest_broker import InngestBroker
 from animus.pubsub.inngest.jobs.intake.search_analysis_precedents_job import (
@@ -50,6 +59,9 @@ from animus.pubsub.inngest.jobs.intake.search_analysis_precedents_job import (
 
 def _seed_analysis_with_petition_summary(
     sqlalchemy_session_factory: sessionmaker[Session],
+    *,
+    analysis_type: AnalysisType | None = None,
+    second_instance_decision_description: str | None = None,
 ) -> dict[str, str]:
     analysis_id = Id.create().value
     petition_id = Id.create().value
@@ -62,8 +74,8 @@ def _seed_analysis_with_petition_summary(
             name='Análise de teste',
             account_id=Id.create().value,
             folder_id=None,
-            type=AnalysisType.create_as_first_instance().dto,
-            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+            type=(analysis_type or AnalysisType.create_as_first_instance()).dto,
+            status=FirstInstanceAnalysisStatus.create_as_document_uploaded().dto,
             is_archived=False,
         )
     )
@@ -99,6 +111,13 @@ def _seed_analysis_with_petition_summary(
             last_updated_in_pangea_at=datetime.now(UTC),
         )
     )
+    if second_instance_decision_description is not None:
+        session.add(
+            SecondInstanceDecisionModel(
+                analysis_id=analysis_id,
+                description=second_instance_decision_description,
+            )
+        )
     session.commit()
     session.close()
 
@@ -221,6 +240,18 @@ class TestSearchAnalysisPrecedentsJob:
                 }
             )
 
+        async def _get_analysis_notification_data(_payload: Any) -> dict[str, str]:
+            return {
+                'account_id': _get_analysis(
+                    sqlalchemy_session_factory,
+                    seeded_data['analysis_id'],
+                ).account_id,
+                'analysis_type': AnalysisType.create_as_first_instance().dto,
+            }
+
+        async def _mark_analysis_as_analyzing_similarity(_payload: Any) -> None:
+            return None
+
         monkeypatch.setattr(
             SearchAnalysisPrecedentsJob,
             '_search_precedents',
@@ -230,6 +261,16 @@ class TestSearchAnalysisPrecedentsJob:
             SearchAnalysisPrecedentsJob,
             '_synthesize_analysis_precedents',
             _synthesize_analysis_precedents,
+        )
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_get_analysis_notification_data',
+            _get_analysis_notification_data,
+        )
+        monkeypatch.setattr(
+            SearchAnalysisPrecedentsJob,
+            '_mark_analysis_as_analyzing_similarity',
+            _mark_analysis_as_analyzing_similarity,
         )
 
         response = inngest_runtime.post_event(
@@ -428,6 +469,7 @@ class TestSearchAnalysisPrecedentsJob:
             analysis_id: str,
             filters_dto: Any,
             analysis_precedents: list[AnalysisPrecedentDto],
+            second_instance_decision: Any = None,
         ) -> None:
             with Sqlalchemy.session() as session:
                 CreateAnalysisPrecedentsUseCase(
@@ -515,6 +557,167 @@ class TestSearchAnalysisPrecedentsJob:
         assert analysis.precedents_search_courts == ['STF']
         assert analysis.precedents_search_precedent_kinds == ['RG']
         assert analysis.precedents_search_limit == 5
+
+    def test_should_pass_second_instance_decision_only_for_second_instance_analysis(
+        self,
+        monkeypatch: MonkeyPatch,
+        sqlalchemy_session_factory: sessionmaker[Session],
+    ) -> None:
+        seeded_data = _seed_analysis_with_petition_summary(
+            sqlalchemy_session_factory,
+            analysis_type=AnalysisType.create_as_second_instance(),
+            second_instance_decision_description='Dar parcial provimento ao recurso.',
+        )
+        job_module = __import__(
+            'animus.pubsub.inngest.jobs.intake.search_analysis_precedents_job',
+            fromlist=['_Payload'],
+        )
+        payload = job_module._Payload(  # noqa: SLF001
+            analysis_id=seeded_data['analysis_id'],
+            courts=['STF'],
+            precedent_kinds=['RG'],
+            limit=5,
+        )
+        captured_calls: list[dict[str, Any]] = []
+
+        def _run(
+            _self: AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
+            *,
+            analysis_id: str,
+            filters_dto: Any,
+            analysis_precedents: list[AnalysisPrecedentDto],
+            second_instance_decision: Any = None,
+        ) -> None:
+            captured_calls.append(
+                {
+                    'analysis_id': analysis_id,
+                    'limit': filters_dto.limit,
+                    'precedents_count': len(analysis_precedents),
+                    'second_instance_decision': (
+                        None
+                        if second_instance_decision is None
+                        else second_instance_decision.dto()
+                    ),
+                }
+            )
+
+        monkeypatch.setattr(
+            Sqlalchemy,
+            'get_session',
+            staticmethod(lambda: sqlalchemy_session_factory()),
+        )
+        monkeypatch.setattr(
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
+            '__init__',
+            lambda *args, **kwargs: None,  # type: ignore
+        )
+        monkeypatch.setattr(
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow, 'run', _run
+        )
+
+        cast('Any', SearchAnalysisPrecedentsJob)._synthesize_analysis_precedents_sync(  # noqa: SLF001
+            payload,
+            [
+                {
+                    'analysis_id': seeded_data['analysis_id'],
+                    'precedent': {
+                        'id': seeded_data['precedent_id'],
+                        'identifier': {
+                            'court': 'STF',
+                            'kind': 'RG',
+                            'number': 101,
+                        },
+                        'status': 'vigente',
+                        'enunciation': 'Enunciado do precedente',
+                        'thesis': 'Tese do precedente',
+                        'last_updated_in_pangea_at': datetime.now(UTC).isoformat(),
+                    },
+                    'similarity_score': 84.5,
+                    'synthesis': None,
+                    'is_chosen': False,
+                }
+            ],
+        )
+
+        assert captured_calls == [
+            {
+                'analysis_id': seeded_data['analysis_id'],
+                'limit': 5,
+                'precedents_count': 1,
+                'second_instance_decision': SecondInstanceDecisionDto(
+                    analysis_id=seeded_data['analysis_id'],
+                    description='Dar parcial provimento ao recurso.',
+                ),
+            }
+        ]
+
+    def test_should_pass_none_as_second_instance_decision_for_first_instance_analysis(
+        self,
+        monkeypatch: MonkeyPatch,
+        sqlalchemy_session_factory: sessionmaker[Session],
+    ) -> None:
+        seeded_data = _seed_analysis_with_petition_summary(sqlalchemy_session_factory)
+        job_module = __import__(
+            'animus.pubsub.inngest.jobs.intake.search_analysis_precedents_job',
+            fromlist=['_Payload'],
+        )
+        payload = job_module._Payload(  # noqa: SLF001
+            analysis_id=seeded_data['analysis_id'],
+            courts=['STF'],
+            precedent_kinds=['RG'],
+            limit=5,
+        )
+        captured_decisions: list[Any] = []
+
+        def _run(
+            _self: AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
+            *,
+            analysis_id: str,
+            filters_dto: Any,
+            analysis_precedents: list[AnalysisPrecedentDto],
+            second_instance_decision: Any = None,
+        ) -> None:
+            captured_decisions.append(second_instance_decision)
+
+        monkeypatch.setattr(
+            Sqlalchemy,
+            'get_session',
+            staticmethod(lambda: sqlalchemy_session_factory()),
+        )
+        monkeypatch.setattr(
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow,
+            '__init__',
+            lambda *args, **kwargs: None,  # type: ignore
+        )
+        monkeypatch.setattr(
+            AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow, 'run', _run
+        )
+
+        cast('Any', SearchAnalysisPrecedentsJob)._synthesize_analysis_precedents_sync(  # noqa: SLF001
+            payload,
+            [
+                {
+                    'analysis_id': seeded_data['analysis_id'],
+                    'precedent': {
+                        'id': seeded_data['precedent_id'],
+                        'identifier': {
+                            'court': 'STF',
+                            'kind': 'RG',
+                            'number': 101,
+                        },
+                        'status': 'vigente',
+                        'enunciation': 'Enunciado do precedente',
+                        'thesis': 'Tese do precedente',
+                        'last_updated_in_pangea_at': datetime.now(UTC).isoformat(),
+                    },
+                    'similarity_score': 84.5,
+                    'synthesis': None,
+                    'is_chosen': False,
+                }
+            ],
+        )
+
+        assert captured_decisions == [None]
 
     def test_should_persist_failed_status_when_sync_failure_handler_runs(
         self,

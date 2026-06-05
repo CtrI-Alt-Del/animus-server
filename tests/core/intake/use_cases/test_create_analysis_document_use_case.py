@@ -46,7 +46,7 @@ class TestCreateAnalysisDocumentUseCase:
             broker=self.broker_mock,
         )
 
-    def test_should_add_analysis_document_and_update_case_assessment_status(
+    def test_should_add_analysis_document_without_updating_case_assessment_status(
         self,
     ) -> None:
         analysis_id = Id.create().value
@@ -62,8 +62,6 @@ class TestCreateAnalysisDocumentUseCase:
         )
 
         self.analyses_repository_mock.find_by_id.return_value = analysis
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = None
-
         result = self.use_case.execute(
             analysis_id=analysis_id,
             uploaded_at='2026-03-31T10:30:00+00:00',
@@ -72,11 +70,10 @@ class TestCreateAnalysisDocumentUseCase:
         )
 
         self.analysis_documents_repository_mock.add.assert_called_once()
+        self.analysis_documents_repository_mock.find_by_analysis_id.assert_not_called()
         self.analysis_documents_repository_mock.replace.assert_not_called()
         self.broker_mock.publish.assert_not_called()
-        self.analyses_repository_mock.replace.assert_called_once()
-
-        updated_analysis = self.analyses_repository_mock.replace.call_args.args[0]
+        self.analyses_repository_mock.replace.assert_not_called()
 
         assert (
             result
@@ -88,10 +85,6 @@ class TestCreateAnalysisDocumentUseCase:
                     name='document.pdf',
                 )
             ).dto
-        )
-        assert (
-            updated_analysis.status
-            == CaseAssessmentAnalysisStatus.create_as_document_uploaded()
         )
 
     def test_should_replace_analysis_document_publish_event_and_update_second_instance_status(

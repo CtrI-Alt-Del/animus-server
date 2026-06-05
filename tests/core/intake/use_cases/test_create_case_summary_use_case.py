@@ -11,18 +11,10 @@ from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.domain.errors import (
-    AnalysisDocumentNotFoundError,
-    AnalysisNotFoundError,
-)
-from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
+from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures.case_summary import CaseSummary
-from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
-    AnalysisDocumentDto,
-)
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
 from animus.core.intake.interfaces import (
-    AnalysisDocumentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
 )
@@ -48,31 +40,18 @@ class TestCreateCaseSummaryUseCase:
             CaseSummariesRepository,
             instance=True,
         )
-        self.analysis_documents_repository_mock = create_autospec(
-            AnalysisDocumentsRepository,
-            instance=True,
-        )
         self.analyses_repository_mock = create_autospec(
             AnalysesRepository,
             instance=True,
         )
         self.use_case = CreateCaseSummaryUseCase(
             case_summaries_repository=self.case_summaries_repository_mock,
-            analysis_documents_repository=self.analysis_documents_repository_mock,
             analyses_repository=self.analyses_repository_mock,
         )
 
     def test_should_add_case_summary_and_update_case_assessment_status(self) -> None:
         analysis_id = Id.create().value
         dto = _make_case_summary_dto()
-        analysis_document = AnalysisDocument.create(
-            AnalysisDocumentDto(
-                analysis_id=analysis_id,
-                uploaded_at='2026-03-31T10:30:00+00:00',
-                file_path='intake/analyses/document.pdf',
-                name='document.pdf',
-            )
-        )
         analysis = Analysis.create(
             AnalysisDto(
                 id=analysis_id,
@@ -84,9 +63,6 @@ class TestCreateCaseSummaryUseCase:
             )
         )
 
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
-            analysis_document
-        )
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = None
         self.analyses_repository_mock.find_by_id.return_value = analysis
 
@@ -109,14 +85,6 @@ class TestCreateCaseSummaryUseCase:
     ) -> None:
         analysis_id = Id.create().value
         dto = _make_case_summary_dto()
-        analysis_document = AnalysisDocument.create(
-            AnalysisDocumentDto(
-                analysis_id=analysis_id,
-                uploaded_at='2026-03-31T10:30:00+00:00',
-                file_path='intake/analyses/document.pdf',
-                name='document.pdf',
-            )
-        )
         analysis = Analysis.create(
             AnalysisDto(
                 id=analysis_id,
@@ -128,9 +96,6 @@ class TestCreateCaseSummaryUseCase:
             )
         )
 
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
-            analysis_document
-        )
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = object()
         self.analyses_repository_mock.find_by_id.return_value = analysis
 
@@ -148,35 +113,11 @@ class TestCreateCaseSummaryUseCase:
             == SecondInstanceAnalysisStatus.create_as_case_analyzed()
         )
 
-    def test_should_raise_analysis_document_not_found_error_when_document_does_not_exist(
-        self,
-    ) -> None:
-        dto = _make_case_summary_dto()
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = None
-
-        with pytest.raises(AnalysisDocumentNotFoundError):
-            self.use_case.execute(analysis_id=Id.create().value, dto=dto)
-
-        self.case_summaries_repository_mock.add.assert_not_called()
-        self.case_summaries_repository_mock.replace.assert_not_called()
-        self.analyses_repository_mock.replace.assert_not_called()
-
     def test_should_raise_analysis_not_found_error_when_analysis_does_not_exist(
         self,
     ) -> None:
         analysis_id = Id.create().value
         dto = _make_case_summary_dto()
-        analysis_document = AnalysisDocument.create(
-            AnalysisDocumentDto(
-                analysis_id=analysis_id,
-                uploaded_at='2026-03-31T10:30:00+00:00',
-                file_path='intake/analyses/document.pdf',
-                name='document.pdf',
-            )
-        )
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
-            analysis_document
-        )
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = None
         self.analyses_repository_mock.find_by_id.return_value = None
 

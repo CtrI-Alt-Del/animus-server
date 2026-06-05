@@ -7,7 +7,6 @@ import pytest
 from animus.ai.agno.outputs import PetitionSummaryOutput
 from animus.ai.agno.workflows.intake import AgnoSummarizeFirstInstanceCaseWorkflow
 from animus.core.intake.interfaces import (
-    AnalysisDocumentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
 )
@@ -21,10 +20,6 @@ class TestAgnoSummarizeFirstInstanceCaseWorkflow:
         self.workflow = AgnoSummarizeFirstInstanceCaseWorkflow(
             case_summaries_repository=create_autospec(
                 CaseSummariesRepository,
-                instance=True,
-            ),
-            analysis_documents_repository=create_autospec(
-                AnalysisDocumentsRepository,
                 instance=True,
             ),
             analyses_repository=create_autospec(

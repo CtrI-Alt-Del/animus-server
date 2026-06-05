@@ -2,9 +2,6 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from animus.core.intake.domain.structures.case_assessment_analysis_status import (
-    CaseAssessmentAnalysisStatus,
-)
 from animus.core.intake.domain.structures.first_instance_analysis_status import (
     FirstInstanceAnalysisStatus,
 )
@@ -58,7 +55,7 @@ class TestTriggerFistInstanceCaseSummarizationUseCase:
         )
         analysis = AnalysesFaker.fake(
             analysis_id=analysis_id,
-            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+            status=FirstInstanceAnalysisStatus.create_as_document_uploaded().dto,
         )
         self.petitions_repository_mock.find_by_id.return_value = petition
         self.analyses_repository_mock.find_by_id.return_value = analysis

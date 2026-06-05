@@ -9,8 +9,10 @@ from animus.database.sqlalchemy.models.intake import (
     AnalysisDocumentModel,
     AnalysisModel,
     AnalysisPrecedentModel,
+    CaseAssessmentBriefingModel,
     CaseSummaryModel,
     SecondInstanceJudgmentDraftModel,
+    SecondInstanceDecisionModel,
     PetitionDraftModel,
     PrecedentModel,
 )
@@ -24,8 +26,10 @@ def _create_report_analysis(
     account_id: str,
     analysis_type: str,
     with_case_summary: bool = True,
+    with_briefing: bool = False,
     with_petition_draft: bool = False,
     with_judgment_draft: bool = False,
+    with_second_instance_decision: bool = False,
 ) -> str:
     analysis_id = str(ULID())
     precedent_id = str(ULID())
@@ -62,6 +66,16 @@ def _create_report_analysis(
                 search_terms=['Termo'],
             )
         )
+    if with_briefing:
+        session.add(
+            CaseAssessmentBriefingModel(
+                analysis_id=analysis_id,
+                legal_area='CIVIL',
+                court_jurisdiction='TJSP',
+                main_claims='Pedidos principais',
+                intended_thesis='Tese pretendida',
+            )
+        )
     if with_petition_draft:
         session.add(
             PetitionDraftModel(
@@ -81,6 +95,13 @@ def _create_report_analysis(
                 merit_analysis='Fundamentacao',
                 precedent_adherence_analysis='Aderência',
                 ruling=['Dispositivo'],
+            )
+        )
+    if with_second_instance_decision:
+        session.add(
+            SecondInstanceDecisionModel(
+                analysis_id=analysis_id,
+                description='Dar parcial provimento ao recurso.',
             )
         )
     session.add(
@@ -124,6 +145,7 @@ class TestGetSecondInstanceAnalysisReportController:
             account_id=account.id,
             analysis_type=AnalysisType.create_as_second_instance().dto,
             with_judgment_draft=True,
+            with_second_instance_decision=True,
         )
 
         response = client.get(
@@ -162,6 +184,7 @@ class TestGetSecondInstanceAnalysisReportController:
             sqlalchemy_session_factory,
             account_id=account.id,
             analysis_type=AnalysisType.create_as_second_instance().dto,
+            with_second_instance_decision=True,
         )
 
         response = client.get(
@@ -186,6 +209,7 @@ class TestGetCaseAssessmentAnalysisReportController:
             sqlalchemy_session_factory,
             account_id=account.id,
             analysis_type=AnalysisType.create_as_case_assessment().dto,
+            with_briefing=True,
             with_petition_draft=True,
         )
 
@@ -199,6 +223,13 @@ class TestGetCaseAssessmentAnalysisReportController:
         assert (
             payload['analysis']['type'] == AnalysisType.create_as_case_assessment().dto
         )
+        assert payload['briefing'] == {
+            'analysis_id': analysis_id,
+            'legal_area': 'CIVIL',
+            'court_jurisdiction': 'TJSP',
+            'main_claims': 'Pedidos principais',
+            'intended_thesis': 'Tese pretendida',
+        }
         assert payload['petition_draft'] == {
             'analysis_id': analysis_id,
             'structured_facts': 'Fatos estruturados',
@@ -206,6 +237,36 @@ class TestGetCaseAssessmentAnalysisReportController:
             'central_thesis': 'Tese central',
             'requests': ['Pedido 1'],
             'precedent_citations': ['STJ REsp 123 - tese aplicável'],
+        }
+
+    def test_should_return_200_with_briefing_when_accessing_case_assessment_alias_route(
+        self,
+        client: TestClient,
+        create_account: CreateAccountFixture,
+        build_auth_headers: BuildAuthHeadersFixture,
+        sqlalchemy_session_factory: sessionmaker[Session],
+    ) -> None:
+        account = create_account(is_verified=True, is_active=True)
+        analysis_id = _create_report_analysis(
+            sqlalchemy_session_factory,
+            account_id=account.id,
+            analysis_type=AnalysisType.create_as_case_assessment().dto,
+            with_briefing=True,
+            with_petition_draft=True,
+        )
+
+        response = client.get(
+            f'/intake/analyses/{analysis_id}/reports/case-assessment',
+            headers=build_auth_headers(account.id),
+        )
+
+        assert response.status_code == 200
+        assert response.json()['briefing'] == {
+            'analysis_id': analysis_id,
+            'legal_area': 'CIVIL',
+            'court_jurisdiction': 'TJSP',
+            'main_claims': 'Pedidos principais',
+            'intended_thesis': 'Tese pretendida',
         }
 
 

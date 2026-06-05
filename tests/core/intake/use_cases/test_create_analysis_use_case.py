@@ -3,6 +3,9 @@ from unittest.mock import create_autospec
 import pytest
 
 from animus.core.intake.domain.structures.analysis_type import AnalysisType
+from animus.core.intake.domain.structures.case_assessment_analysis_status import (
+    CaseAssessmentAnalysisStatus,
+)
 from animus.core.intake.domain.structures.first_instance_analysis_status import (
     FirstInstanceAnalysisStatus,
 )
@@ -62,3 +65,21 @@ class TestCreateAnalysisUseCase:
 
         self.analyses_repository_mock.find_next_generated_name_number.assert_not_called()
         self.analyses_repository_mock.add.assert_not_called()
+
+    def test_should_create_case_assessment_analysis_with_waiting_briefing_status(
+        self,
+    ) -> None:
+        self.analyses_repository_mock.find_next_generated_name_number.return_value = (
+            Integer.create(4)
+        )
+
+        result = self.use_case.execute(
+            account_id='01ARZ3NDEKTSV4RRFFQ69G5FAV',
+            type=AnalysisType.create_as_case_assessment().dto,
+        )
+
+        assert result.type == AnalysisType.create_as_case_assessment().dto
+        assert (
+            result.status
+            == CaseAssessmentAnalysisStatus.create_as_waiting_briefing().dto
+        )

@@ -5,24 +5,26 @@ import pytest
 from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.errors import (
-    AnalysisDocumentNotFoundError,
     AnalysisNotFoundError,
+    CaseAssessmentBriefingNotFoundError,
     InconsistentAnalysisTypeError,
 )
 from animus.core.intake.domain.events import (
     CaseAssessmentCaseSummarizationTriggeredEvent,
 )
-from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
+from animus.core.intake.domain.structures.case_assessment_briefing import (
+    CaseAssessmentBriefing,
+)
 from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
-from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
-    AnalysisDocumentDto,
+from animus.core.intake.domain.structures.dtos.case_assessment_briefing_dto import (
+    CaseAssessmentBriefingDto,
 )
 from animus.core.intake.interfaces import (
-    AnalysisDocumentsRepository,
     AnalysesRepository,
+    CaseAssessmentBriefingsRepository,
 )
 from animus.core.intake.use_cases import (
     TriggerCaseAssessmentCaseSummarizationUseCase,
@@ -34,8 +36,8 @@ from animus.core.shared.interfaces import Broker
 class TestTriggerCaseAssessmentCaseSummarizationUseCase:
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
-        self.analysis_documents_repository_mock = create_autospec(
-            AnalysisDocumentsRepository,
+        self.case_assessment_briefings_repository_mock = create_autospec(
+            CaseAssessmentBriefingsRepository,
             instance=True,
         )
         self.analyses_repository_mock = create_autospec(
@@ -44,7 +46,7 @@ class TestTriggerCaseAssessmentCaseSummarizationUseCase:
         )
         self.broker_mock = create_autospec(Broker, instance=True)
         self.use_case = TriggerCaseAssessmentCaseSummarizationUseCase(
-            analysis_documents_repository=self.analysis_documents_repository_mock,
+            case_assessment_briefings_repository=self.case_assessment_briefings_repository_mock,
             analyses_repository=self.analyses_repository_mock,
             broker=self.broker_mock,
         )
@@ -54,20 +56,18 @@ class TestTriggerCaseAssessmentCaseSummarizationUseCase:
     ) -> None:
         analysis_id = Id.create().value
         analysis_id_entity = Id.create(analysis_id)
-        analysis_document = self._create_analysis_document(analysis_id=analysis_id)
+        briefing = self._create_briefing(analysis_id=analysis_id)
         analysis = self._create_analysis(
             analysis_id=analysis_id,
             analysis_type=AnalysisType.create_as_case_assessment().dto,
-            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+            status=CaseAssessmentAnalysisStatus.create_as_briefing_submitted().dto,
         )
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
-            analysis_document
-        )
+        self.case_assessment_briefings_repository_mock.find_by_analysis_id.return_value = briefing
         self.analyses_repository_mock.find_by_id.return_value = analysis
 
         self.use_case.execute(analysis_id=analysis_id)
 
-        self.analysis_documents_repository_mock.find_by_analysis_id.assert_called_once_with(
+        self.case_assessment_briefings_repository_mock.find_by_analysis_id.assert_called_once_with(
             analysis_id=analysis_id_entity,
         )
         self.analyses_repository_mock.find_by_id.assert_called_once_with(
@@ -88,13 +88,13 @@ class TestTriggerCaseAssessmentCaseSummarizationUseCase:
         )
         assert published_event.payload.analysis_id == analysis_id
 
-    def test_should_raise_analysis_document_not_found_error_when_document_does_not_exist(
+    def test_should_raise_case_assessment_briefing_not_found_error_when_briefing_does_not_exist(
         self,
     ) -> None:
         analysis_id = Id.create().value
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = None
+        self.case_assessment_briefings_repository_mock.find_by_analysis_id.return_value = None
 
-        with pytest.raises(AnalysisDocumentNotFoundError):
+        with pytest.raises(CaseAssessmentBriefingNotFoundError):
             self.use_case.execute(analysis_id=analysis_id)
 
         self.analyses_repository_mock.find_by_id.assert_not_called()
@@ -105,8 +105,8 @@ class TestTriggerCaseAssessmentCaseSummarizationUseCase:
         self,
     ) -> None:
         analysis_id = Id.create().value
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
-            self._create_analysis_document(analysis_id=analysis_id)
+        self.case_assessment_briefings_repository_mock.find_by_analysis_id.return_value = self._create_briefing(
+            analysis_id=analysis_id
         )
         self.analyses_repository_mock.find_by_id.return_value = None
 
@@ -120,8 +120,8 @@ class TestTriggerCaseAssessmentCaseSummarizationUseCase:
         self,
     ) -> None:
         analysis_id = Id.create().value
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
-            self._create_analysis_document(analysis_id=analysis_id)
+        self.case_assessment_briefings_repository_mock.find_by_analysis_id.return_value = self._create_briefing(
+            analysis_id=analysis_id
         )
         self.analyses_repository_mock.find_by_id.return_value = self._create_analysis(
             analysis_id=analysis_id,
@@ -139,13 +139,14 @@ class TestTriggerCaseAssessmentCaseSummarizationUseCase:
         self.broker_mock.publish.assert_not_called()
 
     @staticmethod
-    def _create_analysis_document(analysis_id: str) -> AnalysisDocument:
-        return AnalysisDocument.create(
-            AnalysisDocumentDto(
+    def _create_briefing(analysis_id: str) -> CaseAssessmentBriefing:
+        return CaseAssessmentBriefing.create(
+            CaseAssessmentBriefingDto(
                 analysis_id=analysis_id,
-                uploaded_at='2026-03-31T10:30:00+00:00',
-                file_path='intake/analyses/document.pdf',
-                name='document.pdf',
+                legal_area='CIVIL',
+                court_jurisdiction='TJSP',
+                main_claims='Pedido principal',
+                intended_thesis='Tese principal',
             )
         )
 

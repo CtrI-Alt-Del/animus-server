@@ -54,11 +54,9 @@ class TestAddAnalysisPrecedentController:
         response = client.post(
             f'/intake/analyses/{analysis.id}/precedents',
             json={
-                'identifier': {
-                    'court': precedent.court,
-                    'kind': precedent.kind,
-                    'number': precedent.number,
-                },
+                'court': precedent.court,
+                'kind': precedent.kind,
+                'number': precedent.number,
             },
             headers=build_auth_headers(account.id),
         )

@@ -13,6 +13,7 @@ from animus.database.sqlalchemy.models.intake import (
     AnalysisPrecedentModel,
     CaseSummaryModel,
     PrecedentModel,
+    SecondInstanceDecisionModel,
 )
 from tests.fixtures.auth_fixtures import CreateAccountFixture
 from tests.fixtures.inngest_fixtures import FakeInngestClient
@@ -48,6 +49,12 @@ def _create_second_instance_analysis_with_summary_and_precedents(
             relevant_laws=['Lei 1'],
             key_facts=['Fato 1'],
             search_terms=['Termo 1'],
+        )
+    )
+    session.add(
+        SecondInstanceDecisionModel(
+            analysis_id=analysis_id,
+            description='Dar parcial provimento ao recurso.',
         )
     )
 

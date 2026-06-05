@@ -8,7 +8,7 @@ from animus.core.intake.domain.structures.case_assessment_analysis_status import
     CaseAssessmentAnalysisStatus,
 )
 from animus.core.shared.domain.structures import Id
-from animus.database.sqlalchemy.models.intake import AnalysisDocumentModel
+from animus.database.sqlalchemy.models.intake import CaseAssessmentBriefingModel
 from animus.database.sqlalchemy.repositories.intake.sqlalchemy_analyses_repository import (
     SqlalchemyAnalysesRepository,
 )
@@ -20,18 +20,21 @@ from tests.rest.controllers.intake.conftest import (
 )
 
 
-def _persist_analysis_document(
+def _persist_case_assessment_briefing(
     sqlalchemy_session_factory: sessionmaker[Session],
     *,
     analysis_id: str,
 ) -> None:
     session = sqlalchemy_session_factory()
     session.add(
-        AnalysisDocumentModel(
+        CaseAssessmentBriefingModel(
             analysis_id=analysis_id,
-            uploaded_at=datetime(2026, 3, 27, 10, 30, tzinfo=UTC),
-            document_file_path='intake/analyses/document.pdf',
-            document_name='document.pdf',
+            legal_area='CIVIL',
+            court_jurisdiction='TJSP',
+            main_claims='Pedido principal',
+            intended_thesis='Tese principal',
+            created_at=datetime(2026, 3, 27, 10, 30, tzinfo=UTC),
+            updated_at=datetime(2026, 3, 27, 10, 30, tzinfo=UTC),
         )
     )
     session.commit()
@@ -52,15 +55,15 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         analysis = create_analysis(
             account_id=account.id,
             analysis_type=AnalysisType.create_as_case_assessment().dto,
-            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+            status=CaseAssessmentAnalysisStatus.create_as_briefing_submitted().dto,
         )
-        _persist_analysis_document(
+        _persist_case_assessment_briefing(
             sqlalchemy_session_factory,
             analysis_id=analysis.id,
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/case-summaries/case-assessment',
+            f'/intake/analyses/{analysis.id}/case-summary',
             headers=build_auth_headers(account.id),
         )
 
@@ -101,11 +104,11 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         analysis = create_analysis(
             account_id=owner_account.id,
             analysis_type=AnalysisType.create_as_case_assessment().dto,
-            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+            status=CaseAssessmentAnalysisStatus.create_as_briefing_submitted().dto,
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/case-summaries/case-assessment',
+            f'/intake/analyses/{analysis.id}/case-summary',
             headers=build_auth_headers(authenticated_account.id),
         )
 
@@ -116,7 +119,7 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         }
         assert len(fake_inngest_client.sent_events) == 0
 
-    def test_should_return_404_when_analysis_document_does_not_exist(
+    def test_should_return_404_when_case_assessment_briefing_does_not_exist(
         self,
         client: TestClient,
         create_account: CreateAccountFixture,
@@ -128,18 +131,18 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
         analysis = create_analysis(
             account_id=account.id,
             analysis_type=AnalysisType.create_as_case_assessment().dto,
-            status=CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+            status=CaseAssessmentAnalysisStatus.create_as_waiting_briefing().dto,
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/case-summaries/case-assessment',
+            f'/intake/analyses/{analysis.id}/case-summary',
             headers=build_auth_headers(account.id),
         )
 
         assert response.status_code == 404
         assert response.json() == {
             'title': 'Not Found Error',
-            'message': 'Documento da analise nao encontrado no storage',
+            'message': 'Briefing da analise nao encontrado',
         }
         assert len(fake_inngest_client.sent_events) == 0
 
@@ -157,13 +160,13 @@ class TestTriggerCaseAssessmentCaseSummarizationController:
             account_id=account.id,
             status='DOCUMENT_UPLOADED',
         )
-        _persist_analysis_document(
+        _persist_case_assessment_briefing(
             sqlalchemy_session_factory,
             analysis_id=analysis.id,
         )
 
         response = client.post(
-            f'/intake/analyses/{analysis.id}/case-summaries/case-assessment',
+            f'/intake/analyses/{analysis.id}/case-summary',
             headers=build_auth_headers(account.id),
         )
 

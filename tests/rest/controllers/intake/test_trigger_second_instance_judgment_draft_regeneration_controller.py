@@ -14,6 +14,7 @@ from animus.database.sqlalchemy.models.intake import (
     AnalysisPrecedentModel,
     CaseSummaryModel,
     PrecedentModel,
+    SecondInstanceDecisionModel,
     SecondInstanceJudgmentDraftModel,
 )
 from tests.fixtures.auth_fixtures import CreateAccountFixture
@@ -99,6 +100,22 @@ def _persist_chosen_precedent(
     session.close()
 
 
+def _persist_second_instance_decision(
+    sqlalchemy_session_factory: sessionmaker[Session],
+    *,
+    analysis_id: str,
+) -> None:
+    session = sqlalchemy_session_factory()
+    session.add(
+        SecondInstanceDecisionModel(
+            analysis_id=analysis_id,
+            description='Dar parcial provimento ao recurso.',
+        )
+    )
+    session.commit()
+    session.close()
+
+
 def _persist_judgment_draft(
     sqlalchemy_session_factory: sessionmaker[Session],
     *,
@@ -136,6 +153,10 @@ class TestTriggerSecondInstanceJudgmentDraftRegenerationController:
         )
         _persist_case_summary(sqlalchemy_session_factory, analysis_id=analysis_id)
         _persist_chosen_precedent(sqlalchemy_session_factory, analysis_id=analysis_id)
+        _persist_second_instance_decision(
+            sqlalchemy_session_factory,
+            analysis_id=analysis_id,
+        )
         _persist_judgment_draft(sqlalchemy_session_factory, analysis_id=analysis_id)
 
         response = client.post(
@@ -196,6 +217,10 @@ class TestTriggerSecondInstanceJudgmentDraftRegenerationController:
         )
         _persist_case_summary(sqlalchemy_session_factory, analysis_id=analysis_id)
         _persist_chosen_precedent(sqlalchemy_session_factory, analysis_id=analysis_id)
+        _persist_second_instance_decision(
+            sqlalchemy_session_factory,
+            analysis_id=analysis_id,
+        )
 
         response = client.post(
             f'/intake/analyses/{analysis_id}/judgment-drafts/regenerate',

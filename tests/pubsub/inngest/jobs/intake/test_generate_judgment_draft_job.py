@@ -5,9 +5,11 @@ from typing import Any
 from typing import cast
 
 from inngest import Inngest, TriggerEvent
+import pytest
 from pytest import MonkeyPatch
 from sqlalchemy.orm import Session, sessionmaker
 
+from animus.core.intake.domain.errors import SecondInstanceDecisionNotFoundError
 from animus.core.intake.domain.events import (
     SecondInstanceJudgmentDraftGenerationTriggeredEvent,
 )
@@ -24,6 +26,7 @@ from animus.database.sqlalchemy.models.intake import (
     AnalysisPrecedentModel,
     CaseSummaryModel,
     PrecedentModel,
+    SecondInstanceDecisionModel,
     SecondInstanceJudgmentDraftModel,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -64,6 +67,12 @@ def _seed_second_instance_analysis_with_summary_and_precedents(
             search_terms=['termo 1'],
             requested_relief=['Provimento do recurso'],
             procedural_issues=['Tempestividade'],
+        )
+    )
+    session.add(
+        SecondInstanceDecisionModel(
+            analysis_id=analysis_id,
+            description='Dar provimento ao recurso com reforma parcial da sentença.',
         )
     )
 
@@ -163,11 +172,15 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
                 analysis_id: str,
                 case_summary: Any,
                 precedents: list[Any],
+                second_instance_decision: Any,
             ) -> SecondInstanceJudgmentDraftDto:
                 captured_calls.append(
                     {
                         'analysis_id': analysis_id,
                         'case_summary': case_summary.case_summary.value,
+                        'second_instance_decision': (
+                            second_instance_decision.description.value
+                        ),
                         'precedent_ids': [
                             precedent.precedent.id.value for precedent in precedents
                         ],
@@ -212,6 +225,7 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
             {
                 'analysis_id': seeded_data['analysis_id'],
                 'case_summary': 'Resumo objetivo do caso',
+                'second_instance_decision': 'Dar provimento ao recurso com reforma parcial da sentença.',
                 'precedent_ids': [seeded_data['chosen_precedent_id']],
                 'chosen_flags': [True],
             }
@@ -267,3 +281,38 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
             _get_judgment_draft(sqlalchemy_session_factory, seeded_data['analysis_id'])
             is None
         )
+
+    def test_should_raise_when_second_instance_decision_does_not_exist(
+        self,
+        monkeypatch: MonkeyPatch,
+        sqlalchemy_session_factory: sessionmaker[Session],
+    ) -> None:
+        seeded_data = _seed_second_instance_analysis_with_summary_and_precedents(
+            sqlalchemy_session_factory
+        )
+
+        with sqlalchemy_session_factory() as session:
+            decision = session.get(
+                SecondInstanceDecisionModel, seeded_data['analysis_id']
+            )
+            assert decision is not None
+            session.delete(decision)
+            session.commit()
+
+        job_module = __import__(
+            'animus.pubsub.inngest.jobs.intake.generate_second_instance_judgment_draft_job',
+            fromlist=['_Payload'],
+        )
+        payload = job_module._Payload(analysis_id=seeded_data['analysis_id'])  # noqa: SLF001
+
+        monkeypatch.setattr(
+            Sqlalchemy,
+            'get_session',
+            staticmethod(lambda: sqlalchemy_session_factory()),
+        )
+
+        job_class = cast('Any', GenerateSecondInstanceJudgmentDraftJob)
+        generate_and_persist = job_class._generate_and_persist_judgment_draft_sync  # noqa: SLF001
+
+        with pytest.raises(SecondInstanceDecisionNotFoundError):
+            generate_and_persist(payload)

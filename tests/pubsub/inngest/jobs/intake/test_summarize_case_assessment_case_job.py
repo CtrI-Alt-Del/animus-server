@@ -16,6 +16,9 @@ from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
+from animus.core.intake.domain.structures.dtos.case_assessment_briefing_dto import (
+    CaseAssessmentBriefingDto,
+)
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
 from animus.core.intake.use_cases.create_case_summary_use_case import (
     CreateCaseSummaryUseCase,
@@ -24,6 +27,7 @@ from animus.core.shared.domain.structures import Id, Text
 from animus.database.sqlalchemy.models.intake import (
     AnalysisDocumentModel,
     AnalysisModel,
+    CaseAssessmentBriefingModel,
     CaseSummaryModel,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -59,6 +63,15 @@ def _seed_case_assessment_analysis_with_document(
             uploaded_at=datetime.now(UTC),
             document_file_path='documents/analysis.pdf',
             document_name='analysis.pdf',
+        )
+    )
+    session.add(
+        CaseAssessmentBriefingModel(
+            analysis_id=analysis_id,
+            legal_area='CIVIL',
+            court_jurisdiction='TJSP',
+            main_claims='Pedido principal',
+            intended_thesis='Tese principal',
         )
     )
     session.commit()
@@ -196,12 +209,20 @@ class TestSummarizeCaseAssessmentCaseJob:
                 self._repositories = repositories
 
             def run(
-                self, *, analysis_id: str, document_content: Text
+                self,
+                *,
+                analysis_id: str,
+                briefing: CaseAssessmentBriefingDto,
+                document_contents: list[Text],
             ) -> CaseSummaryDto:
                 captured_calls.append(
                     {
                         'analysis_id': analysis_id,
-                        'document_content': document_content.value,
+                        'briefing': briefing,
+                        'document_contents': [
+                            document_content.value
+                            for document_content in document_contents
+                        ],
                     }
                 )
                 dto = CaseSummaryDto(
@@ -217,9 +238,6 @@ class TestSummarizeCaseAssessmentCaseJob:
                 return CreateCaseSummaryUseCase(
                     case_summaries_repository=self._repositories[
                         'case_summaries_repository'
-                    ],
-                    analysis_documents_repository=self._repositories[
-                        'analysis_documents_repository'
                     ],
                     analyses_repository=self._repositories['analyses_repository'],
                 ).execute(
@@ -266,7 +284,14 @@ class TestSummarizeCaseAssessmentCaseJob:
         assert captured_calls == [
             {
                 'analysis_id': seeded_data['analysis_id'],
-                'document_content': 'Conteúdo do documento para sumarização',
+                'briefing': CaseAssessmentBriefingDto(
+                    analysis_id=seeded_data['analysis_id'],
+                    legal_area='CIVIL',
+                    court_jurisdiction='TJSP',
+                    main_claims='Pedido principal',
+                    intended_thesis='Tese principal',
+                ),
+                'document_contents': ['Conteúdo do documento para sumarização'],
             }
         ]
         assert (
