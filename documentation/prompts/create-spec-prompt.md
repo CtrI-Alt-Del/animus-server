@@ -12,8 +12,8 @@ ambiguidades.
 
 ## Entrada
 
-- **PRD:** deve existir e estar finalizado antes de iniciar a spec.
-- **Esboço da tarefa no Jira:** descrição da feature, fix ou refatoração a implementar.
+- **PRD:** deve existir e estar finalizado antes de iniciar a spec. No `animus-server`, os PRDs vivem no Confluence; use a URL do PRD como fonte de verdade e registre essa URL no frontmatter.
+- **Esboço da tarefa no Jira:** descrição da feature, fix ou refatoração a implementar. Quando não houver ticket, explicite `ticket: N/A` no frontmatter e não trate isso como bloqueador.
 - **Acesso à codebase:** necessário para pesquisa e validação de padrões.
 
 > Se o PRD estiver ausente ou incompleto, não inicie a spec.
@@ -27,7 +27,7 @@ ambiguidades.
 
 **1.1 Leitura obrigatória antes de escrever:**
 
-- PRD associado à spec (localizado um nível acima na árvore de documentos).
+- PRD associado à spec no Confluence. Se houver espelho local, trate-o apenas como apoio; a referência oficial continua sendo a URL do Confluence.
 - `documentation/architecture.md` — fluxo de dados, princípios e armadilhas.
 - `documentation/rules/rules.md` — índice de regras; leia os docs acionados
   pelas camadas impactadas.
@@ -112,8 +112,8 @@ Use frontmatter e hierarquia de cabeçalhos sem pular níveis.
 ```md
 ---
 title: <Título claro>
-prd: <caminho para o PRD referente à spec, localizado um nível acima do diretório da spec>
-ticket: <link do ticket da tarefa no Jira>
+prd: <URL do PRD no Confluence>
+ticket: <link do ticket da tarefa no Jira ou N/A quando não existir>
 status: <open|closed> 
 last_updated_at: <YYYY-MM-DD>
 ---
