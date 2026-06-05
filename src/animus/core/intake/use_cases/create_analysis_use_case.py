@@ -3,6 +3,9 @@ from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
+from animus.core.intake.domain.structures.first_instance_analysis_status import (
+    FirstInstanceAnalysisStatus,
+)
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
@@ -28,11 +31,16 @@ class CreateAnalysisUseCase:
             normalized_account_id
         )
 
-        initial_status = (
-            SecondInstanceAnalysisStatus.create_as_waiting_document_upload()
-            if normalized_type.is_second_instance.is_true
-            else CaseAssessmentAnalysisStatus.create_as_waiting_document_upload()
-        )
+        if normalized_type.is_case_analysis.is_true:
+            initial_status = CaseAssessmentAnalysisStatus.create_as_waiting_briefing()
+        elif normalized_type.is_second_instance.is_true:
+            initial_status = (
+                SecondInstanceAnalysisStatus.create_as_waiting_document_upload()
+            )
+        else:
+            initial_status = (
+                FirstInstanceAnalysisStatus.create_as_waiting_document_upload()
+            )
 
         analysis = Analysis.create(
             AnalysisDto(

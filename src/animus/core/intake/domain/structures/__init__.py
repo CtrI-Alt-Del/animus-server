@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from .analysis_petition import AnalysisPetition
     from .analysis_precedents_search_filters import AnalysisPrecedentsSearchFilters
     from .case_assessment_analysis_report import CaseAssessmentAnalysisReport
+    from .case_assessment_briefing import CaseAssessmentBriefing
     from .case_summary import CaseSummary
     from .court import Court, CourtValue
     from .first_instance_analysis_report import FirstInstanceAnalysisReport
@@ -24,12 +25,14 @@ if TYPE_CHECKING:
     from .petition_summary import PetitionSummary
     from .case_summary_embedding import CaseSummaryEmbedding
     from .precedent_embedding import PrecedentEmbedding
+    from .second_instance_decision import SecondInstanceDecision
     from .second_instance_judgment_draft import SecondInstanceJudgmentDraft
     from .precedent_embedding_field import (
         PrecedentEmbeddingField,
         PrecedentEmbeddingFieldValue,
     )
     from .precedent_kind import PrecedentKind, PrecedentKindValue
+    from .legal_area import LegalArea, LegalAreaValue
 
 __all__ = [
     'AnalysisDocument',
@@ -42,15 +45,19 @@ __all__ = [
     'AnalysisPetition',
     'AnalysisPrecedentsSearchFilters',
     'CaseAssessmentAnalysisReport',
+    'CaseAssessmentBriefing',
     'CaseSummary',
     'Court',
     'CourtValue',
     'FirstInstanceAnalysisReport',
     'ExtractedPetition',
+    'SecondInstanceDecision',
     'SecondInstanceJudgmentDraft',
     'PetitionDraft',
     'PetitionSummary',
     'CaseSummaryEmbedding',
+    'LegalArea',
+    'LegalAreaValue',
     'PrecedentKind',
     'PrecedentKindValue',
     'PrecedentEmbeddingField',
@@ -92,6 +99,10 @@ def __getattr__(name: str) -> Any:
             '.case_assessment_analysis_report',
             'CaseAssessmentAnalysisReport',
         ),
+        'CaseAssessmentBriefing': (
+            '.case_assessment_briefing',
+            'CaseAssessmentBriefing',
+        ),
         'CaseSummary': ('.case_summary', 'CaseSummary'),
         'Court': ('.court', 'Court'),
         'CourtValue': ('.court', 'CourtValue'),
@@ -100,6 +111,10 @@ def __getattr__(name: str) -> Any:
             'FirstInstanceAnalysisReport',
         ),
         'ExtractedPetition': ('.extracted_petition', 'ExtractedPetition'),
+        'SecondInstanceDecision': (
+            '.second_instance_decision',
+            'SecondInstanceDecision',
+        ),
         'SecondInstanceJudgmentDraft': (
             '.second_instance_judgment_draft',
             'SecondInstanceJudgmentDraft',
@@ -110,6 +125,8 @@ def __getattr__(name: str) -> Any:
             '.case_summary_embedding',
             'CaseSummaryEmbedding',
         ),
+        'LegalArea': ('.legal_area', 'LegalArea'),
+        'LegalAreaValue': ('.legal_area', 'LegalAreaValue'),
         'PrecedentEmbedding': ('.precedent_embedding', 'PrecedentEmbedding'),
         'PrecedentEmbeddingField': (
             '.precedent_embedding_field',

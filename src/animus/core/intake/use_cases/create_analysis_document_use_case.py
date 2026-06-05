@@ -1,6 +1,3 @@
-from animus.core.intake.domain.structures.case_assessment_analysis_status import (
-    CaseAssessmentAnalysisStatus,
-)
 from animus.core.intake.domain.structures.first_instance_analysis_status import (
     FirstInstanceAnalysisStatus,
 )
@@ -44,19 +41,6 @@ class CreateAnalysisDocumentUseCase:
         if analysis is None:
             raise AnalysisNotFoundError
 
-        existing_document = self._analysis_documents_repository.find_by_analysis_id(
-            analysis_id=analysis_id_entity,
-        )
-        if existing_document is None:
-            operation = self._analysis_documents_repository.add
-        else:
-            self._broker.publish(
-                AnalysisDocumentReplacedEvent(
-                    analysis_document_path=existing_document.file_path.value,
-                )
-            )
-            operation = self._analysis_documents_repository.replace
-
         document = AnalysisDocument.create(
             AnalysisDocumentDto(
                 analysis_id=analysis_id_entity.value,
@@ -65,13 +49,25 @@ class CreateAnalysisDocumentUseCase:
                 name=name,
             )
         )
-        operation(document)
 
         if analysis.type.is_case_analysis.is_true:
-            analysis.set_status(
-                CaseAssessmentAnalysisStatus.create_as_document_uploaded()
+            self._analysis_documents_repository.add(document)
+            return document.dto
+
+        existing_document = self._analysis_documents_repository.find_by_analysis_id(
+            analysis_id=analysis_id_entity,
+        )
+        if existing_document is None:
+            self._analysis_documents_repository.add(document)
+        else:
+            self._broker.publish(
+                AnalysisDocumentReplacedEvent(
+                    analysis_document_path=existing_document.file_path.value,
+                )
             )
-        elif analysis.type.is_first_instance.is_true:
+            self._analysis_documents_repository.replace(document)
+
+        if analysis.type.is_first_instance.is_true:
             analysis.set_status(
                 FirstInstanceAnalysisStatus.create_as_document_uploaded()
             )

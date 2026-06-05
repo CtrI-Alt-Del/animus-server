@@ -1,10 +1,7 @@
 from animus.core.intake.domain.structures.case_assessment_analysis_status import (
     CaseAssessmentAnalysisStatus,
 )
-from animus.core.intake.domain.errors import (
-    AnalysisDocumentNotFoundError,
-    AnalysisNotFoundError,
-)
+from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures.first_instance_analysis_status import (
     FirstInstanceAnalysisStatus,
 )
@@ -14,7 +11,6 @@ from animus.core.intake.domain.structures.second_instance_analysis_status import
 from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
 from animus.core.intake.interfaces import (
-    AnalysisDocumentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
 )
@@ -25,21 +21,13 @@ class CreateCaseSummaryUseCase:
     def __init__(
         self,
         case_summaries_repository: CaseSummariesRepository,
-        analysis_documents_repository: AnalysisDocumentsRepository,
         analyses_repository: AnalysesRepository,
     ) -> None:
         self._case_summaries_repository = case_summaries_repository
-        self._analysis_documents_repository = analysis_documents_repository
         self._analyses_repository = analyses_repository
 
     def execute(self, analysis_id: str, dto: CaseSummaryDto) -> CaseSummaryDto:
         analysis_id_entity = Id.create(analysis_id)
-
-        analysis_document = self._analysis_documents_repository.find_by_analysis_id(
-            analysis_id=analysis_id_entity,
-        )
-        if analysis_document is None:
-            raise AnalysisDocumentNotFoundError
 
         case_summary = CaseSummary.create(dto)
         existing_case_summary = self._case_summaries_repository.find_by_analysis_id(

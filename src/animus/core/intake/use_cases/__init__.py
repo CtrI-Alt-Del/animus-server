@@ -2,7 +2,14 @@ from .add_analysis_precedent_use_case import AddAnalysisPrecedentUseCase
 from .archive_analyses_use_case import ArchiveAnalysesUseCase
 from .choose_analysis_precedent_use_case import ChooseAnalysisPrecedentUseCase
 from .create_analysis_use_case import CreateAnalysisUseCase
+from .create_case_assessment_briefing_use_case import (
+    CreateCaseAssessmentBriefingUseCase,
+)
+from .create_second_instance_decision_use_case import (
+    CreateSecondInstanceDecisionUseCase,
+)
 from .create_analysis_document_use_case import CreateAnalysisDocumentUseCase
+from .remove_analysis_document_use_case import RemoveAnalysisDocumentUseCase
 from .create_analysis_precedent_applicability_feedback_use_case import (
     CreateAnalysisPrecedentApplicabilityFeedbackUseCase,
 )
@@ -31,6 +38,9 @@ from .get_first_instance_analysis_report_use_case import (
 from .get_petition_draft_use_case import GetPetitionDraftUseCase
 from .get_second_instance_judgment_draft_use_case import (
     GetSecondInstanceJudgmentDraftUseCase,
+)
+from .get_second_instance_decision_use_case import (
+    GetSecondInstanceDecisionUseCase,
 )
 from .get_second_instance_analysis_report_use_case import (
     GetSecondInstanceAnalysisReportUseCase,
@@ -75,6 +85,10 @@ from .trigger_petition_draft_regeneration_use_case import (
 from .unchoose_analysis_precedent_use_case import UnchooseAnalysisPrecedentUseCase
 from .unarchive_analysis_use_case import UnarchiveAnalysisUseCase
 from .update_analysis_status_use_case import UpdateAnalysisStatusUseCase
+from .update_petition_draft_use_case import UpdatePetitionDraftUseCase
+from .update_second_instance_judgment_draft_use_case import (
+    UpdateSecondInstanceJudgmentDraftUseCase,
+)
 from .vectorize_all_precedents_use_case import VectorizeAllPrecedentsUseCase
 
 __all__ = [
@@ -82,7 +96,10 @@ __all__ = [
     'ArchiveAnalysesUseCase',
     'ChooseAnalysisPrecedentUseCase',
     'CreateAnalysisUseCase',
+    'CreateCaseAssessmentBriefingUseCase',
+    'CreateSecondInstanceDecisionUseCase',
     'CreateAnalysisDocumentUseCase',
+    'RemoveAnalysisDocumentUseCase',
     'CreateAnalysisPrecedentApplicabilityFeedbackUseCase',
     'RemoveAnalysisPrecedentUseCase',
     'CreateAnalysisPrecedentDatasetRowUseCase',
@@ -99,6 +116,7 @@ __all__ = [
     'GetCaseSummaryUseCase',
     'GetFirstInstanceAnalysisReportUseCase',
     'GetPetitionDraftUseCase',
+    'GetSecondInstanceDecisionUseCase',
     'GetSecondInstanceJudgmentDraftUseCase',
     'GetPetitionSummaryUseCase',
     'GetSecondInstanceAnalysisReportUseCase',
@@ -121,5 +139,7 @@ __all__ = [
     'UnchooseAnalysisPrecedentUseCase',
     'UnarchiveAnalysisUseCase',
     'UpdateAnalysisStatusUseCase',
+    'UpdatePetitionDraftUseCase',
+    'UpdateSecondInstanceJudgmentDraftUseCase',
     'VectorizeAllPrecedentsUseCase',
 ]

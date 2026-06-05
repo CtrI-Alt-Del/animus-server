@@ -1,29 +1,19 @@
-from animus.core.intake.domain.errors.analysis_not_found_error import (
-    AnalysisNotFoundError,
-)
-from animus.core.intake.domain.errors.analysis_document_not_found_error import (
+from animus.core.intake.domain.errors import (
     AnalysisDocumentNotFoundError,
+    AnalysisNotFoundError,
+    CaseSummaryNotFoundError,
+    SecondInstanceDecisionNotFoundError,
 )
-from animus.core.intake.domain.errors.case_summary_unavailable_error import (
-    CaseSummaryUnavailableError,
-)
-from animus.core.intake.domain.structures.dtos.second_instance_analysis_report_dto import (
+from animus.core.intake.domain.structures import SecondInstanceAnalysisReport
+from animus.core.intake.domain.structures.dtos import (
     SecondInstanceAnalysisReportDto,
 )
-from animus.core.intake.domain.structures.second_instance_analysis_report import (
-    SecondInstanceAnalysisReport,
-)
-from animus.core.intake.interfaces.analysis_documents_repository import (
+from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
-)
-from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
-from animus.core.intake.interfaces.analysis_precedents_repository import (
     AnalysisPrecedentsRepository,
-)
-from animus.core.intake.interfaces.case_summaries_repository import (
+    AnalysesRepository,
     CaseSummariesRepository,
-)
-from animus.core.intake.interfaces.judgment_drafts_repository import (
+    SecondInstanceDecisionsRepository,
     SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.shared.domain.errors.forbidden_error import ForbiddenError
@@ -36,6 +26,7 @@ class GetSecondInstanceAnalysisReportUseCase:
         analyses_repository: AnalysesRepository,
         analysis_documents_repository: AnalysisDocumentsRepository,
         case_summaries_repository: CaseSummariesRepository,
+        second_instance_decisions_repository: SecondInstanceDecisionsRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
         judgment_drafts_repository: SecondInstanceJudgmentDraftsRepository
         | None = None,
@@ -43,6 +34,9 @@ class GetSecondInstanceAnalysisReportUseCase:
         self._analyses_repository = analyses_repository
         self._analysis_documents_repository = analysis_documents_repository
         self._case_summaries_repository = case_summaries_repository
+        self._second_instance_decisions_repository = (
+            second_instance_decisions_repository
+        )
         self._analysis_precedents_repository = analysis_precedents_repository
         self._judgment_drafts_repository = judgment_drafts_repository
 
@@ -66,7 +60,15 @@ class GetSecondInstanceAnalysisReportUseCase:
 
         case_summary = self._case_summaries_repository.find_by_analysis_id(id_analysis)
         if case_summary is None:
-            raise CaseSummaryUnavailableError
+            raise CaseSummaryNotFoundError
+
+        second_instance_decision = (
+            self._second_instance_decisions_repository.find_by_analysis_id(
+                id_analysis,
+            )
+        )
+        if second_instance_decision is None:
+            raise SecondInstanceDecisionNotFoundError
 
         analysis_precedents = (
             self._analysis_precedents_repository.find_many_by_analysis_id(id_analysis)
@@ -85,6 +87,7 @@ class GetSecondInstanceAnalysisReportUseCase:
             analysis=analysis,
             document=document,
             case_summary=case_summary,
+            second_instance_decision=second_instance_decision,
             precedents=classified_precedents,
             draft=judgment_draft,
         )

@@ -14,6 +14,7 @@ class GetAnalysisDocumentUseCase:
 
     def execute(self, analysis_id: str) -> AnalysisDocumentDto:
         analysis_id_entity = Id.create(analysis_id)
+        # Para CASE_ASSESSMENT, este contrato retorna apenas um documento compatível.
         analysis_document = self._analysis_documents_repository.find_by_analysis_id(
             analysis_id=analysis_id_entity,
         )

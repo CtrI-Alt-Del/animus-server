@@ -4,6 +4,9 @@ from animus.core.intake.domain.errors.analysis_document_not_found_error import (
 from animus.core.intake.domain.errors.analysis_not_found_error import (
     AnalysisNotFoundError,
 )
+from animus.core.intake.domain.errors.case_assessment_briefing_not_found_error import (
+    CaseAssessmentBriefingNotFoundError,
+)
 from animus.core.intake.domain.errors.case_summary_unavailable_error import (
     CaseSummaryUnavailableError,
 )
@@ -23,6 +26,9 @@ from animus.core.intake.interfaces.analysis_precedents_repository import (
     AnalysisPrecedentsRepository,
 )
 from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
+from animus.core.intake.interfaces.case_assessment_briefings_repository import (
+    CaseAssessmentBriefingsRepository,
+)
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
 )
@@ -37,12 +43,16 @@ class GetCaseAssessmentAnalysisReportUseCase:
     def __init__(
         self,
         analyses_repository: AnalysesRepository,
+        case_assessment_briefings_repository: CaseAssessmentBriefingsRepository,
         analysis_documents_repository: AnalysisDocumentsRepository,
         case_summaries_repository: CaseSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
         petition_drafts_repository: PetitionDraftsRepository,
     ) -> None:
         self._analyses_repository = analyses_repository
+        self._case_assessment_briefings_repository = (
+            case_assessment_briefings_repository
+        )
         self._analysis_documents_repository = analysis_documents_repository
         self._case_summaries_repository = case_summaries_repository
         self._analysis_precedents_repository = analysis_precedents_repository
@@ -61,6 +71,12 @@ class GetCaseAssessmentAnalysisReportUseCase:
 
         if analysis.account_id != id_account:
             raise ForbiddenError('Esta analise nao pertence a sua conta.')
+
+        briefing = self._case_assessment_briefings_repository.find_by_analysis_id(
+            id_analysis
+        )
+        if briefing is None:
+            raise CaseAssessmentBriefingNotFoundError
 
         document = self._analysis_documents_repository.find_by_analysis_id(id_analysis)
         if document is None:
@@ -86,6 +102,7 @@ class GetCaseAssessmentAnalysisReportUseCase:
 
         report = CaseAssessmentAnalysisReport(
             analysis=analysis,
+            briefing=briefing,
             document=document,
             case_summary=case_summary,
             precedents=precedents,

@@ -12,8 +12,8 @@ from animus.core.shared.responses import CursorPaginationResponse
 
 
 _ALLOWED_ANALYSIS_STATUSES: tuple[str, ...] = (
-    CaseAssessmentAnalysisStatus.create_as_waiting_document_upload().dto,
-    CaseAssessmentAnalysisStatus.create_as_document_uploaded().dto,
+    CaseAssessmentAnalysisStatus.create_as_waiting_briefing().dto,
+    CaseAssessmentAnalysisStatus.create_as_briefing_submitted().dto,
     CaseAssessmentAnalysisStatus.create_as_case_analyzed().dto,
     CaseAssessmentAnalysisStatus.create_as_done().dto,
     CaseAssessmentAnalysisStatus.create_as_failed().dto,

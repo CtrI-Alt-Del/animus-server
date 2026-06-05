@@ -1,0 +1,3 @@
+from .case_summary_unavailable_error import CaseSummaryUnavailableError
+
+CaseSummaryNotFoundError = CaseSummaryUnavailableError

@@ -1,6 +1,6 @@
 from animus.core.intake.domain.errors import (
-    AnalysisDocumentNotFoundError,
     AnalysisNotFoundError,
+    CaseAssessmentBriefingNotFoundError,
     InconsistentAnalysisTypeError,
 )
 from animus.core.intake.domain.events import (
@@ -10,8 +10,8 @@ from animus.core.intake.domain.structures.case_assessment_analysis_status import
     CaseAssessmentAnalysisStatus,
 )
 from animus.core.intake.interfaces import (
-    AnalysisDocumentsRepository,
     AnalysesRepository,
+    CaseAssessmentBriefingsRepository,
 )
 from animus.core.shared.domain.structures import Id
 from animus.core.shared.interfaces import Broker
@@ -20,22 +20,24 @@ from animus.core.shared.interfaces import Broker
 class TriggerCaseAssessmentCaseSummarizationUseCase:
     def __init__(
         self,
-        analysis_documents_repository: AnalysisDocumentsRepository,
+        case_assessment_briefings_repository: CaseAssessmentBriefingsRepository,
         analyses_repository: AnalysesRepository,
         broker: Broker,
     ) -> None:
-        self._analysis_documents_repository = analysis_documents_repository
+        self._case_assessment_briefings_repository = (
+            case_assessment_briefings_repository
+        )
         self._analyses_repository = analyses_repository
         self._broker = broker
 
     def execute(self, analysis_id: str) -> None:
         analysis_id_entity = Id.create(analysis_id)
 
-        analysis_document = self._analysis_documents_repository.find_by_analysis_id(
+        briefing = self._case_assessment_briefings_repository.find_by_analysis_id(
             analysis_id=analysis_id_entity,
         )
-        if analysis_document is None:
-            raise AnalysisDocumentNotFoundError
+        if briefing is None:
+            raise CaseAssessmentBriefingNotFoundError
 
         analysis = self._analyses_repository.find_by_id(analysis_id_entity)
         if analysis is None:

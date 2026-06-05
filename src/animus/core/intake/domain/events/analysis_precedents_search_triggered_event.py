@@ -11,7 +11,7 @@ class _Payload:
     limit: int
 
 
-class AnalysisPrecedentsSearchRequestedEvent(Event[_Payload]):
+class AnalysisPrecedentsSearchTriggeredEvent(Event[_Payload]):
     name = 'intake/analyses.precedents.search.triggered'
 
     def __init__(
@@ -27,4 +27,7 @@ class AnalysisPrecedentsSearchRequestedEvent(Event[_Payload]):
             precedent_kinds=precedent_kinds,
             limit=limit,
         )
-        super().__init__(AnalysisPrecedentsSearchRequestedEvent.name, payload)
+        super().__init__(AnalysisPrecedentsSearchTriggeredEvent.name, payload)
+
+
+AnalysisPrecedentsSearchRequestedEvent = AnalysisPrecedentsSearchTriggeredEvent

@@ -12,6 +12,7 @@ class SecondInstanceAnalysisStatusValue(StrEnum):
     DOCUMENT_UPLOADED = 'DOCUMENT_UPLOADED'
     ANALYZING_CASE = 'ANALYZING_CASE'
     CASE_ANALYZED = 'CASE_ANALYZED'
+    DECISION_SUBMITTED = 'DECISION_SUBMITTED'
     SEARCHING_PRECEDENTS = 'SEARCHING_PRECEDENTS'
     ANALYZING_PRECEDENTS_SIMILARITY = 'ANALYZING_PRECEDENTS_SIMILARITY'
     ANALYZING_PRECEDENTS_APPLICABILITY = 'ANALYZING_PRECEDENTS_APPLICABILITY'
@@ -50,6 +51,10 @@ class SecondInstanceAnalysisStatus(Structure):
     @classmethod
     def create_as_case_analyzed(cls) -> SecondInstanceAnalysisStatus:
         return cls(SecondInstanceAnalysisStatusValue.CASE_ANALYZED)
+
+    @classmethod
+    def create_as_decision_submitted(cls) -> SecondInstanceAnalysisStatus:
+        return cls(SecondInstanceAnalysisStatusValue.DECISION_SUBMITTED)
 
     @classmethod
     def create_as_analyzing_precedents_similarity(cls) -> SecondInstanceAnalysisStatus:

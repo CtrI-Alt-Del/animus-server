@@ -8,8 +8,8 @@ from animus.core.shared.domain.errors import ValidationError
 
 
 class CaseAssessmentAnalysisStatusValue(StrEnum):
-    WAITING_DOCUMENT_UPLOAD = 'WAITING_DOCUMENT_UPLOAD'
-    DOCUMENT_UPLOADED = 'DOCUMENT_UPLOADED'
+    WAITING_BRIEFING = 'WAITING_BRIEFING'
+    BRIEFING_SUBMITTED = 'BRIEFING_SUBMITTED'
     ANALYZING_CASE = 'ANALYZING_CASE'
     CASE_ANALYZED = 'CASE_ANALYZED'
     SEARCHING_PRECEDENTS = 'SEARCHING_PRECEDENTS'
@@ -39,12 +39,20 @@ class CaseAssessmentAnalysisStatus(Structure):
         return cls(CaseAssessmentAnalysisStatusValue.ANALYZING_CASE)
 
     @classmethod
+    def create_as_waiting_briefing(cls) -> CaseAssessmentAnalysisStatus:
+        return cls(CaseAssessmentAnalysisStatusValue.WAITING_BRIEFING)
+
+    @classmethod
     def create_as_waiting_document_upload(cls) -> CaseAssessmentAnalysisStatus:
-        return cls(CaseAssessmentAnalysisStatusValue.WAITING_DOCUMENT_UPLOAD)
+        return cls.create_as_waiting_briefing()
+
+    @classmethod
+    def create_as_briefing_submitted(cls) -> CaseAssessmentAnalysisStatus:
+        return cls(CaseAssessmentAnalysisStatusValue.BRIEFING_SUBMITTED)
 
     @classmethod
     def create_as_document_uploaded(cls) -> CaseAssessmentAnalysisStatus:
-        return cls(CaseAssessmentAnalysisStatusValue.DOCUMENT_UPLOADED)
+        return cls.create_as_briefing_submitted()
 
     @classmethod
     def create_as_case_analyzed(cls) -> CaseAssessmentAnalysisStatus:

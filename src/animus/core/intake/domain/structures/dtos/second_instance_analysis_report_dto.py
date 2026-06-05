@@ -11,6 +11,9 @@ from animus.core.intake.domain.structures.dtos.case_summary_dto import (
 from animus.core.intake.domain.structures.dtos.second_instance_judgment_draft_dto import (
     SecondInstanceJudgmentDraftDto,
 )
+from animus.core.intake.domain.structures.dtos.second_instance_decision_dto import (
+    SecondInstanceDecisionDto,
+)
 from animus.core.shared.domain.decorators import dto
 
 
@@ -19,5 +22,6 @@ class SecondInstanceAnalysisReportDto:
     analysis: AnalysisDto
     document: AnalysisDocumentDto
     case_summary: CaseSummaryDto
+    second_instance_decision: SecondInstanceDecisionDto
     precedents: list[AnalysisPrecedentDto]
     draft: SecondInstanceJudgmentDraftDto | None = None

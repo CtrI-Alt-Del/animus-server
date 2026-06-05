@@ -11,6 +11,7 @@ from .classify_analysis_precedents_applicability_workflow import (
     ClassifyAnalysisPrecedentsApplicabilityWorkflow,
 )
 from .case_summaries_repository import CaseSummariesRepository
+from .case_assessment_briefings_repository import CaseAssessmentBriefingsRepository
 from .case_summary_embeddings_provider import CaseSummaryEmbeddingsProvider
 from .extract_petition_workflow import ExtractPetitionWorkflow
 from .extracted_petitions_repository import ExtractedPetitionsRepository
@@ -25,6 +26,7 @@ from .petitions_repository import PetitionsRepository
 from .regenerate_judgment_draft_workflow import (
     RegenerateSecondInstanceJudgmentDraftWorkflow,
 )
+from .second_instance_decisions_repository import SecondInstanceDecisionsRepository
 from .regenerate_petition_draft_workflow import RegeneratePetitionDraftWorkflow
 from .precedent_embeddings_provider import PrecedentEmbeddingsProvider
 from .precedents_embeddings_repository import PrecedentsEmbeddingsRepository
@@ -44,6 +46,7 @@ __all__ = [
     'AnalysisPrecedentDatasetRowsRepository',
     'AnalysisPrecedentsRepository',
     'ClassifyAnalysisPrecedentsApplicabilityWorkflow',
+    'CaseAssessmentBriefingsRepository',
     'CaseSummariesRepository',
     'CaseSummaryEmbeddingsProvider',
     'ExtractPetitionWorkflow',
@@ -52,6 +55,7 @@ __all__ = [
     'GenerateSecondInstanceJudgmentDraftWorkflow',
     'RegeneratePetitionDraftWorkflow',
     'RegenerateSecondInstanceJudgmentDraftWorkflow',
+    'SecondInstanceDecisionsRepository',
     'SecondInstanceJudgmentDraftsRepository',
     'PetitionsRepository',
     'PetitionDraftsRepository',

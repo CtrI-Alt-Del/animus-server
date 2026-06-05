@@ -1,10 +1,10 @@
-from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     AnalysisPrecedentsUnavailableError,
-    CaseSummaryUnavailableError,
+    CaseSummaryNotFoundError,
     ChosenAnalysisPrecedentsRequiredError,
     SecondInstanceAnalysisRequiredError,
+    SecondInstanceDecisionNotFoundError,
 )
 from animus.core.intake.domain.events import (
     SecondInstanceJudgmentDraftGenerationTriggeredEvent,
@@ -16,6 +16,7 @@ from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
+    SecondInstanceDecisionsRepository,
 )
 from animus.core.shared.domain.structures import Id
 from animus.core.shared.interfaces import Broker
@@ -25,11 +26,15 @@ class TriggerSecondInstanceJudgmentDraftGenerationUseCase:
     def __init__(
         self,
         analyses_repository: AnalysesRepository,
+        second_instance_decisions_repository: SecondInstanceDecisionsRepository,
         case_summaries_repository: CaseSummariesRepository,
         analysis_precedents_repository: AnalysisPrecedentsRepository,
         broker: Broker,
     ) -> None:
         self._analyses_repository = analyses_repository
+        self._second_instance_decisions_repository = (
+            second_instance_decisions_repository
+        )
         self._case_summaries_repository = case_summaries_repository
         self._analysis_precedents_repository = analysis_precedents_repository
         self._broker = broker
@@ -41,14 +46,20 @@ class TriggerSecondInstanceJudgmentDraftGenerationUseCase:
         if analysis is None:
             raise AnalysisNotFoundError
 
-        if analysis.type != AnalysisType.create_as_second_instance():
+        if analysis.type.is_second_instance.is_false:
             raise SecondInstanceAnalysisRequiredError
+
+        decision = self._second_instance_decisions_repository.find_by_analysis_id(
+            analysis_id_entity,
+        )
+        if decision is None:
+            raise SecondInstanceDecisionNotFoundError
 
         case_summary = self._case_summaries_repository.find_by_analysis_id(
             analysis_id_entity,
         )
         if case_summary is None:
-            raise CaseSummaryUnavailableError
+            raise CaseSummaryNotFoundError
 
         analysis_precedents_response = (
             self._analysis_precedents_repository.find_many_by_analysis_id(

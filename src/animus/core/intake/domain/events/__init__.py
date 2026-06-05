@@ -1,4 +1,5 @@
 from .analysis_precedents_search_triggered_event import (
+    AnalysisPrecedentsSearchTriggeredEvent,
     AnalysisPrecedentsSearchRequestedEvent,
 )
 from .applicability_anaisys_started_event import ApplicabilityAnaisysStartedEvent
@@ -16,6 +17,7 @@ from .second_instance_judgment_draft_generation_finished_event import (
     SecondInstanceJudgmentDraftGenerationFinishedEvent,
 )
 from .precedents_searching_started_event import PrecedentsSearchingStartedEvent
+from .analysis_document_removed_event import AnalysisDocumentRemovedEvent
 from .analysis_document_replaced_event import AnalysisDocumentReplacedEvent
 from .secod_instance_summarization_triggered_event import (
     SecondInstanceCaseSummarizationTriggeredEvent,
@@ -37,6 +39,7 @@ from .precedents_search_finished_event import PrecedentsSearchFinishedEvent
 from .synthesis_generation_started_event import SynthesisGenerationStartedEvent
 
 __all__ = [
+    'AnalysisPrecedentsSearchTriggeredEvent',
     'AnalysisPrecedentsSearchRequestedEvent',
     'CaseAssessmentCaseSummarizationTriggeredEvent',
     'CaseSummaryFinishedEvent',
@@ -46,6 +49,7 @@ __all__ = [
     'SecondInstanceJudgmentDraftGenerationFinishedEvent',
     'SecondInstanceJudgmentDraftGenerationTriggeredEvent',
     'SecondInstanceJudgmentDraftRegenerationTriggeredEvent',
+    'AnalysisDocumentRemovedEvent',
     'AnalysisDocumentReplacedEvent',
     'SecondInstanceCaseSummarizationTriggeredEvent',
     'FistInstanceCaseSummarizationTriggeredEvent',

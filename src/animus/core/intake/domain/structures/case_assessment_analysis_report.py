@@ -1,6 +1,9 @@
 from animus.core.intake.domain.entities.analysis import Analysis
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.analysis_precedent import AnalysisPrecedent
+from animus.core.intake.domain.structures.case_assessment_briefing import (
+    CaseAssessmentBriefing,
+)
 from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.dtos.case_assessment_analysis_report_dto import (
     CaseAssessmentAnalysisReportDto,
@@ -13,6 +16,7 @@ from animus.core.shared.domain.decorators import structure
 @structure
 class CaseAssessmentAnalysisReport(Structure):
     analysis: Analysis
+    briefing: CaseAssessmentBriefing
     document: AnalysisDocument
     case_summary: CaseSummary
     precedents: list[AnalysisPrecedent]
@@ -24,6 +28,7 @@ class CaseAssessmentAnalysisReport(Structure):
     ) -> 'CaseAssessmentAnalysisReport':
         return cls(
             analysis=Analysis.create(dto.analysis),
+            briefing=CaseAssessmentBriefing.create(dto.briefing),
             document=AnalysisDocument.create(dto.document),
             case_summary=CaseSummary.create(dto.case_summary),
             precedents=[AnalysisPrecedent.create(item) for item in dto.precedents],
@@ -34,6 +39,7 @@ class CaseAssessmentAnalysisReport(Structure):
     def dto(self) -> CaseAssessmentAnalysisReportDto:
         return CaseAssessmentAnalysisReportDto(
             analysis=self.analysis.dto,
+            briefing=self.briefing.dto,
             document=self.document.dto,
             case_summary=self.case_summary.dto,
             precedents=[item.dto for item in self.precedents],
