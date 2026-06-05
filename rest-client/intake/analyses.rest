@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KSZX2Z0S0MBNPTF7VNHJKP95
+@analysis_id = 01KSK0QMYZJ70D3STWS98H4RAR
 @petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
 @folder_id = 01KQ5CG4D6QY8A1X7R2M4N8P0B
 @precedent_court = STJ
@@ -71,6 +71,19 @@ Content-Type: application/json
   "limit": 5
 } 
 
+### Criar ou substituir decisão de 2a instância (CreateSecondInstanceDecisionController)
+POST {{url}}/analyses/{{analysis_id}}/second-instance-decision
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "description": "Dar provimento parcial ao recurso para afastar a condenação por danos morais e manter a reparação material devidamente atualizada."
+}
+
+### Obter decisão de 2a instância (GetSecondInstanceDecisionController)
+GET {{url}}/analyses/{{analysis_id}}/second-instance-decision
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Consultar status da analise (GetAnalysisStatusController)
 GET {{url}}/analyses/{{analysis_id}}/status
 Authorization: Bearer {{ACCESS_TOKEN}}
@@ -103,8 +116,24 @@ Content-Type: application/json
   "uploaded_at": "2026-05-14T12:00:00+00:00"
 }
 
+### Criar/submeter briefing de case assessment (CreateCaseAssessmentBriefingController)
+POST {{url}}/analyses/{{analysis_id}}/case-assessment-briefing
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "legal_area": "CIVIL",
+  "court_jurisdiction": "TJSP",
+  "main_claims": "Indenização por danos materiais e morais por vício construtivo em imóvel residencial.",
+  "intended_thesis": "Responsabilidade objetiva da construtora com inversão do ônus da prova e reparação integral dos prejuízos."
+}
+
 ### Obter documento principal da analise (GetAnalysisDocumentController)
 GET {{url}}/analyses/{{analysis_id}}/documents
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Remover documento principal da analise (RemoveAnalysisDocumentController)
+DELETE {{url}}/analyses/{{analysis_id}}/documents?file_path=intake/analyses/document.pdf
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Listar precedentes da analise (ListAnalysisPrecedentsController)
@@ -127,11 +156,11 @@ Content-Type: application/json
 }
 
 ### Disparar sumarização de avaliação de caso (TriggerCaseAssessmentCaseSummarizationController)
-POST {{url}}/analyses/{{analysis_id}}/case-assessment-case-summaries
+POST {{url}}/analyses/{{analysis_id}}/case-summaries/case-assessment
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar resumo de caso jurídico de primeira instância (TriggerFirstInstanceCaseSummarizationController)
-POST {{url}}/analyses/{{analysis_id}}/case-summaries
+POST {{url}}/analyses/{{analysis_id}}/case-summaries/first-instance
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Disparar resumo de caso jurídico de segunda instância (TriggerSecondInstanceCaseSummarizationController)
@@ -155,6 +184,22 @@ Content-Type: application/json
 GET {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Atualizar minuta de julgamento de 2a instancia (UpdateSecondInstanceJudgmentDraftController)
+PUT {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "report": "Relatório da minuta revisado manualmente.",
+  "merit_analysis": "Mérito analisado com ajuste redacional objetivo.",
+  "precedent_adherence_analysis": "Os precedentes selecionados permanecem aderentes ao caso.",
+  "ruling": [
+    "Dar parcial provimento ao recurso."
+  ],
+  "preliminary_issues": null,
+  "no_applicable_precedent_notice": null
+}
+
 ### Disparar geração/regeneração de minuta de petição (TriggerPetitionDraftGenerationController)
 POST {{url}}/analyses/{{analysis_id}}/petition-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
@@ -171,6 +216,26 @@ Content-Type: application/json
 ### Obter minuta de petição da analise (GetPetitionDraftController)
 GET {{url}}/analyses/{{analysis_id}}/petition-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Atualizar minuta de petição da analise (UpdatePetitionDraftController)
+PUT {{url}}/analyses/{{analysis_id}}/petition-drafts
+Authorization: Bearer {{ACCESS_TOKEN}}
+Content-Type: application/json
+
+{
+  "structured_facts": "A autora adquiriu unidade residencial entregue com infiltrações recorrentes, fissuras estruturais e vícios de impermeabilização nas áreas molhadas.",
+  "legal_grounds": "Aplica-se a responsabilidade objetiva da construtora pelos vícios construtivos, com fundamento no CDC e no dever de reparação integral dos danos materiais e morais.",
+  "central_thesis": "A ré deve ser condenada a reparar integralmente os prejuízos decorrentes dos vícios construtivos, inclusive custeio dos reparos, lucros cessantes e indenização moral.",
+  "requests": [
+    "Citação da ré para contestar a ação, sob pena de revelia.",
+    "Condenação ao pagamento dos danos materiais apurados em liquidação.",
+    "Condenação ao pagamento de indenização por danos morais."
+  ],
+  "precedent_citations": [
+    "STJ, AgInt no REsp 1234567/SP, responsabilidade da construtora por vício oculto.",
+    "TJSP, Apelação 1000000-00.2024.8.26.0000, dever de reparação integral por defeito construtivo."
+  ]
+}
 
 ### Obter resumo de caso da analise (GetCaseSummaryController)
 GET {{url}}/analyses/{{analysis_id}}/case-summaries
