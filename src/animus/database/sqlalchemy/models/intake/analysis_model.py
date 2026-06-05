@@ -31,8 +31,13 @@ class AnalysisModel(Model):
         nullable=True,
     )
 
-    document: Mapped[Any] = relationship(
+    documents: Mapped[list[Any]] = relationship(
         'AnalysisDocumentModel',
+        back_populates='analysis',
+        cascade='all, delete-orphan',
+    )
+    case_assessment_briefing: Mapped[Any] = relationship(
+        'CaseAssessmentBriefingModel',
         back_populates='analysis',
         uselist=False,
         cascade='all, delete-orphan',
@@ -57,6 +62,12 @@ class AnalysisModel(Model):
     )
     judgment_draft: Mapped[Any] = relationship(
         'SecondInstanceJudgmentDraftModel',
+        back_populates='analysis',
+        uselist=False,
+        cascade='all, delete-orphan',
+    )
+    second_instance_decision: Mapped[Any] = relationship(
+        'SecondInstanceDecisionModel',
         back_populates='analysis',
         uselist=False,
         cascade='all, delete-orphan',

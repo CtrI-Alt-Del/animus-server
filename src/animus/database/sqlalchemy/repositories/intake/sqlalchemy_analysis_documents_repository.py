@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
@@ -19,11 +19,30 @@ class SqlalchemyAnalysisDocumentsRepository(AnalysisDocumentsRepository):
         self._sqlalchemy = sqlalchemy
 
     def find_by_analysis_id(self, analysis_id: Id) -> AnalysisDocument | None:
-        model = self._sqlalchemy.get(AnalysisDocumentModel, analysis_id.value)
+        model = self._sqlalchemy.scalar(
+            select(AnalysisDocumentModel)
+            .where(AnalysisDocumentModel.analysis_id == analysis_id.value)
+            .order_by(
+                AnalysisDocumentModel.uploaded_at.desc(),
+                AnalysisDocumentModel.document_file_path.desc(),
+            )
+        )
         if model is None:
             return None
 
         return AnalysisDocumentMapper.to_entity(model)
+
+    def find_many_by_analysis_id(self, analysis_id: Id) -> list[AnalysisDocument]:
+        models = self._sqlalchemy.scalars(
+            select(AnalysisDocumentModel)
+            .where(AnalysisDocumentModel.analysis_id == analysis_id.value)
+            .order_by(
+                AnalysisDocumentModel.uploaded_at.asc(),
+                AnalysisDocumentModel.document_file_path.asc(),
+            )
+        ).all()
+
+        return [AnalysisDocumentMapper.to_entity(model) for model in models]
 
     def find_by_file_path(self, file_path: FilePath) -> AnalysisDocument | None:
         model = self._sqlalchemy.scalar(
@@ -40,7 +59,14 @@ class SqlalchemyAnalysisDocumentsRepository(AnalysisDocumentsRepository):
         self._sqlalchemy.add(AnalysisDocumentMapper.to_model(document))
 
     def replace(self, document: AnalysisDocument) -> None:
-        model = self._sqlalchemy.get(AnalysisDocumentModel, document.analysis_id.value)
+        model = self._sqlalchemy.scalar(
+            select(AnalysisDocumentModel)
+            .where(AnalysisDocumentModel.analysis_id == document.analysis_id.value)
+            .order_by(
+                AnalysisDocumentModel.uploaded_at.desc(),
+                AnalysisDocumentModel.document_file_path.desc(),
+            )
+        )
         if model is None:
             self.add(document)
             return
@@ -49,9 +75,16 @@ class SqlalchemyAnalysisDocumentsRepository(AnalysisDocumentsRepository):
         model.document_file_path = document.file_path.value
         model.document_name = document.name.value
 
-    def remove_by_analysis_id(self, analysis_id: Id) -> None:
-        model = self._sqlalchemy.get(AnalysisDocumentModel, analysis_id.value)
+    def remove_by_file_path(self, file_path: FilePath) -> None:
+        model = self._sqlalchemy.get(AnalysisDocumentModel, file_path.value)
         if model is None:
             return
 
         self._sqlalchemy.delete(model)
+
+    def remove_by_analysis_id(self, analysis_id: Id) -> None:
+        self._sqlalchemy.execute(
+            delete(AnalysisDocumentModel).where(
+                AnalysisDocumentModel.analysis_id == analysis_id.value
+            )
+        )

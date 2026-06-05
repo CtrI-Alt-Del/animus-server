@@ -15,13 +15,17 @@ class AnalysisDocumentModel(Model):
     analysis_id: Mapped[str] = mapped_column(
         String(26),
         ForeignKey('analyses.id', ondelete='CASCADE'),
-        primary_key=True,
+        nullable=False,
+        index=True,
     )
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
     )
-    document_file_path: Mapped[str] = mapped_column(String, nullable=False)
+    document_file_path: Mapped[str] = mapped_column(
+        String,
+        primary_key=True,
+    )
     document_name: Mapped[str] = mapped_column(String, nullable=False)
 
-    analysis: Mapped[Any] = relationship('AnalysisModel', back_populates='document')
+    analysis: Mapped[Any] = relationship('AnalysisModel', back_populates='documents')

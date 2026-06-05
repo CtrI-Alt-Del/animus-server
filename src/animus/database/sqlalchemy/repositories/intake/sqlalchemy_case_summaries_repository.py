@@ -70,3 +70,10 @@ class SqlalchemyCaseSummariesRepository(CaseSummariesRepository):
         model.excluded_or_accessory_topics = [
             item.value for item in case_summary.excluded_or_accessory_topics
         ]
+
+    def remove_by_analysis_id(self, analysis_id: Id) -> None:
+        model = self._sqlalchemy.get(CaseSummaryModel, analysis_id.value)
+        if model is None:
+            return
+
+        self._sqlalchemy.delete(model)

@@ -11,12 +11,18 @@ from .sqlalchemy_analysis_precedents_repository import (
     SqlalchemyAnalysisPrecedentsRepository,
 )
 from .sqlalchemy_analyses_repository import SqlalchemyAnalysesRepository
+from .sqlalchemy_case_assessment_briefings_repository import (
+    SqlalchemyCaseAssessmentBriefingsRepository,
+)
 from .sqlalchemy_case_summaries_repository import SqlalchemyCaseSummariesRepository
 from .sqlalchemy_extracted_petitions_repository import (
     SqlalchemyExtractedPetitionsRepository,
 )
 from .sqlalchemy_judgment_drafts_repository import (
     SqlalchemySecondInstanceJudgmentDraftsRepository,
+)
+from .sqlalchemy_second_instance_decisions_repository import (
+    SqlalchemySecondInstanceDecisionsRepository,
 )
 from .sqlalchemy_petition_summaries_repository import (
     SqlalchemyPetitionSummariesRepository,
@@ -31,8 +37,10 @@ __all__ = [
     'SqlalchemyAnalysisDocumentsRepository',
     'SqlalchemyAnalysisPrecedentsRepository',
     'SqlalchemyAnalysesRepository',
+    'SqlalchemyCaseAssessmentBriefingsRepository',
     'SqlalchemyCaseSummariesRepository',
     'SqlalchemyExtractedPetitionsRepository',
+    'SqlalchemySecondInstanceDecisionsRepository',
     'SqlalchemySecondInstanceJudgmentDraftsRepository',
     'SqlalchemyPetitionsRepository',
     'SqlalchemyPetitionDraftsRepository',
