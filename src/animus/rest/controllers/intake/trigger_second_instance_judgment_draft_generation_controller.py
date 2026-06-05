@@ -7,6 +7,7 @@ from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
+    SecondInstanceDecisionsRepository,
 )
 from animus.core.intake.use_cases import (
     TriggerSecondInstanceJudgmentDraftGenerationUseCase,
@@ -32,6 +33,12 @@ class TriggerSecondInstanceJudgmentDraftGenerationController:
                 AnalysesRepository,
                 Depends(DatabasePipe.get_analyses_repository_from_request),
             ],
+            second_instance_decisions_repository: Annotated[
+                SecondInstanceDecisionsRepository,
+                Depends(
+                    DatabasePipe.get_second_instance_decisions_repository_from_request
+                ),
+            ],
             case_summaries_repository: Annotated[
                 CaseSummariesRepository,
                 Depends(DatabasePipe.get_case_summaries_repository_from_request),
@@ -44,6 +51,7 @@ class TriggerSecondInstanceJudgmentDraftGenerationController:
         ) -> Response:
             use_case = TriggerSecondInstanceJudgmentDraftGenerationUseCase(
                 analyses_repository=analyses_repository,
+                second_instance_decisions_repository=second_instance_decisions_repository,
                 case_summaries_repository=case_summaries_repository,
                 analysis_precedents_repository=analysis_precedents_repository,
                 broker=broker,

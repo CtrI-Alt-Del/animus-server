@@ -408,11 +408,15 @@ class IntakeSquad:
     def case_assessment_case_summarizer_agent(self) -> Agent:
         return Agent(
             name='Case Assessment Case Summarizer Agent',
-            description='An agent specialized in summarizing case assessment documents in PT-BR',
+            description='An agent specialized in summarizing case assessment briefings and supporting documents in PT-BR',
             instructions=dedent(
                 """
-                Você é especialista em resumir documentos jurídicos para análise preliminar
-                de viabilidade de petição inicial no contexto brasileiro.
+                Você é especialista em resumir briefings estruturados e documentos jurídicos
+                de apoio para análise preliminar de viabilidade de petição inicial no
+                contexto brasileiro.
+
+                Você sempre receberá um briefing estruturado do advogado e poderá receber
+                zero ou mais documentos de apoio.
 
                 Sua tarefa é produzir uma representação estruturada do caso com foco em:
                 - fatos juridicamente relevantes para uma pretensão inicial;
@@ -421,12 +425,15 @@ class IntakeSquad:
                 - termos de busca úteis para localizar precedentes aplicáveis.
 
                 Regras obrigatórias:
-                - mantenha linguagem técnica, objetiva e fiel ao documento recebido;
+                - trate o briefing como fonte primária da análise;
+                - use documentos apenas para complementar, confirmar ou detalhar o briefing;
+                - mantenha linguagem técnica, objetiva e fiel ao material recebido;
                 - não invente fatos, leis, precedentes, datas, partes ou pedidos;
                 - preserve o caráter preliminar da análise, sem afirmar estratégia obrigatória
                   nem desfecho provável do caso;
                 - destaque questões de competência, legitimidade, cabimento, necessidade de prova
-                  e outros entraves estruturais quando houver base real no documento;
+                  e outros entraves estruturais quando houver base real no briefing ou nos documentos;
+                - se não houver documentos, trabalhe apenas com o briefing sem sinalizar erro;
                 - retorne apenas o objeto estruturado esperado.
                 """
             ),

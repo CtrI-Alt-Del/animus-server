@@ -16,6 +16,9 @@ from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.dtos.second_instance_judgment_draft_dto import (
     SecondInstanceJudgmentDraftDto,
 )
+from animus.core.intake.domain.structures.second_instance_decision import (
+    SecondInstanceDecision,
+)
 from animus.core.intake.domain.structures.second_instance_judgment_draft import (
     SecondInstanceJudgmentDraft,
 )
@@ -47,6 +50,7 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
         case_summary: CaseSummary,
         precedents: list[AnalysisPrecedent],
         comments: str,
+        second_instance_decision: SecondInstanceDecision,
     ) -> SecondInstanceJudgmentDraftDto:
         workflow = Workflow(
             name='regenerate-second-instance-judgment-draft',
@@ -69,6 +73,7 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
                 'case_summary': case_summary,
                 'precedents': precedents,
                 'comments': comments,
+                'second_instance_decision': second_instance_decision,
             },
         )
 
@@ -87,6 +92,9 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
         case_summary = run_context.session_state.get('case_summary')
         precedents = run_context.session_state.get('precedents')
         comments = run_context.session_state.get('comments')
+        second_instance_decision = run_context.session_state.get(
+            'second_instance_decision'
+        )
 
         if not isinstance(current_draft, SecondInstanceJudgmentDraft):
             msg = 'Current judgment draft is required to build regeneration input'
@@ -110,6 +118,13 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
 
         if not isinstance(comments, str):
             msg = 'Comments are required to build judgment draft regeneration input'
+            raise AppError('Erro de execucao do workflow', msg)
+
+        if not isinstance(second_instance_decision, SecondInstanceDecision):
+            msg = (
+                'Second instance decision is required to build judgment draft '
+                'regeneration input'
+            )
             raise AppError('Erro de execucao do workflow', msg)
 
         precedents_list = cast('list[AnalysisPrecedent]', precedents_candidates)
@@ -197,6 +212,9 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
             - jurisdiction_issue: {case_summary_dto.jurisdiction_issue}
             - standing_issue: {case_summary_dto.standing_issue}
             - excluded_or_accessory_topics: {excluded_topics_text}
+
+            Decisão pretendida pelo julgador:
+            - second_instance_decision: {second_instance_decision.description.value}
 
             Precedentes escolhidos:
             {precedents_input}

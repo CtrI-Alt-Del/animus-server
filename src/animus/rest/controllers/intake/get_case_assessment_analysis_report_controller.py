@@ -9,6 +9,7 @@ from animus.core.intake.interfaces import (
     AnalysisDocumentsRepository,
     AnalysisPrecedentsRepository,
     AnalysesRepository,
+    CaseAssessmentBriefingsRepository,
     CaseSummariesRepository,
     PetitionDraftsRepository,
 )
@@ -38,6 +39,12 @@ class GetCaseAssessmentAnalysisReportController:
                 AnalysesRepository,
                 Depends(DatabasePipe.get_analyses_repository_from_request),
             ],
+            case_assessment_briefings_repository: Annotated[
+                CaseAssessmentBriefingsRepository,
+                Depends(
+                    DatabasePipe.get_case_assessment_briefings_repository_from_request
+                ),
+            ],
             analysis_documents_repository: Annotated[
                 AnalysisDocumentsRepository,
                 Depends(DatabasePipe.get_analysis_documents_repository_from_request),
@@ -57,6 +64,7 @@ class GetCaseAssessmentAnalysisReportController:
         ) -> CaseAssessmentAnalysisReportDto:
             use_case = GetCaseAssessmentAnalysisReportUseCase(
                 analyses_repository=analyses_repository,
+                case_assessment_briefings_repository=case_assessment_briefings_repository,
                 analysis_documents_repository=analysis_documents_repository,
                 case_summaries_repository=case_summaries_repository,
                 analysis_precedents_repository=analysis_precedents_repository,

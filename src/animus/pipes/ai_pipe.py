@@ -59,7 +59,6 @@ class AiPipe:
 
         return AgnoSummarizeFirstInstanceCaseWorkflow(
             case_summaries_repository=case_summaries_repository,
-            analysis_documents_repository=analysis_documents_repository,
             analyses_repository=analyses_repository,
         )
 
@@ -82,7 +81,6 @@ class AiPipe:
     @staticmethod
     def get_summarize_case_assessment_case_workflow(
         case_summaries_repository: CaseSummariesRepository,
-        analysis_documents_repository: AnalysisDocumentsRepository,
         analyses_repository: AnalysesRepository,
     ) -> SummarizeCaseAssessmentCaseWorkflow:
         from animus.ai.agno.workflows.intake.agno_summarize_case_assessment_case_workflow import (
@@ -91,7 +89,6 @@ class AiPipe:
 
         return AgnoSummarizeCaseAssessmentCaseWorkflow(
             case_summaries_repository=case_summaries_repository,
-            analysis_documents_repository=analysis_documents_repository,
             analyses_repository=analyses_repository,
         )
 

@@ -144,7 +144,6 @@ class SummarizeFirstInstanceCaseJob(InngestJob):
 
             workflow = AgnoSummarizeFirstInstanceCaseWorkflow(
                 case_summaries_repository=case_summaries_repository,
-                analysis_documents_repository=analysis_documents_repository,
                 analyses_repository=analyses_repository,
             )
             workflow.run(

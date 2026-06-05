@@ -76,10 +76,10 @@ class InngestPubSub:
             GenerateSecondInstanceJudgmentDraftJob.handle(inngest),
             RegeneratePetitionDraftJob.handle(inngest),
             RegenerateSecondInstanceJudgmentDraftJob.handle(inngest),
-            RemoveAnalysisDocumentFileJob.handle(inngest),
             SearchAnalysisPrecedentsJob.handle(inngest),
             SeedAnalysesPrecedentsDatasetJob.handle(inngest),
             SummarizeFirstInstanceCaseJob.handle(inngest),
             VectorizeAllPrecedentsJob.handle(inngest),
             VectorizePrecedentsJob.handle(inngest),
+            *RemoveAnalysisDocumentFileJob.handle(inngest),
         ]

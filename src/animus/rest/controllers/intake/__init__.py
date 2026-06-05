@@ -2,10 +2,17 @@ from .add_analysis_precedent_controller import AddAnalysisPrecedentController
 from .archive_analyses_controller import ArchiveAnalysesController
 from .choose_analysis_precedent_controller import ChooseAnalysisPrecedentController
 from .create_analysis_controller import CreateAnalysisController
+from .create_case_assessment_briefing_controller import (
+    CreateCaseAssessmentBriefingController,
+)
+from .create_second_instance_decision_controller import (
+    CreateSecondInstanceDecisionController,
+)
 from .remove_analysis_precedent_controller import (
     RemoveAnalysisPrecedentController,
 )
 from .create_analysis_document_controller import CreateAnalysisDocumentController
+from .remove_analysis_document_controller import RemoveAnalysisDocumentController
 from .get_analysis_controller import GetAnalysisController
 from .get_analysis_document_controller import GetAnalysisDocumentController
 from .get_precedent_controller import (
@@ -22,6 +29,9 @@ from .get_first_instance_analysis_report_controller import (
 from .get_petition_draft_controller import GetPetitionDraftController
 from .get_second_instance_analysis_report_controller import (
     GetSecondInstanceAnalysisReportController,
+)
+from .get_second_instance_decision_controller import (
+    GetSecondInstanceDecisionController,
 )
 from .get_second_instance_judgment_draft_controller import (
     GetSecondInstanceJudgmentDraftController,
@@ -58,14 +68,21 @@ from .trigger_second_instance_case_summarization_controller import (
 from .unarchive_analysis_controller import UnarchiveAnalysisController
 from .unchoose_analysis_precedent_controller import UnchooseAnalysisPrecedentController
 from .update_analysis_status_controller import UpdateAnalysisStatusController
+from .update_petition_draft_controller import UpdatePetitionDraftController
+from .update_second_instance_judgment_draft_controller import (
+    UpdateSecondInstanceJudgmentDraftController,
+)
 
 __all__ = [
     'AddAnalysisPrecedentController',
     'ArchiveAnalysesController',
     'ChooseAnalysisPrecedentController',
     'CreateAnalysisController',
+    'CreateCaseAssessmentBriefingController',
+    'CreateSecondInstanceDecisionController',
     'RemoveAnalysisPrecedentController',
     'CreateAnalysisDocumentController',
+    'RemoveAnalysisDocumentController',
     'GetAnalysisDocumentController',
     'GetPrecedentController',
     'GetAnalysisPetitionController',
@@ -74,6 +91,7 @@ __all__ = [
     'GetAnalysisController',
     'GetCaseAssessmentAnalysisReportController',
     'GetPetitionDraftController',
+    'GetSecondInstanceDecisionController',
     'GetSecondInstanceJudgmentDraftController',
     'ListAnalysesController',
     'ListUnfolderedAnalysesController',
@@ -92,6 +110,8 @@ __all__ = [
     'UnchooseAnalysisPrecedentController',
     'UnarchiveAnalysisController',
     'UpdateAnalysisStatusController',
+    'UpdatePetitionDraftController',
+    'UpdateSecondInstanceJudgmentDraftController',
     'GetFirstInstanceAnalysisReportController',
     'GetSecondInstanceAnalysisReportController',
 ]

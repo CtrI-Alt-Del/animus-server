@@ -13,6 +13,9 @@ from animus.core.intake.domain.structures.case_summary import CaseSummary
 from animus.core.intake.domain.structures.dtos.second_instance_judgment_draft_dto import (
     SecondInstanceJudgmentDraftDto,
 )
+from animus.core.intake.domain.structures.second_instance_decision import (
+    SecondInstanceDecision,
+)
 from animus.core.intake.interfaces import GenerateSecondInstanceJudgmentDraftWorkflow
 from animus.core.shared.domain.errors import AppError
 
@@ -37,6 +40,7 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
         analysis_id: str,
         case_summary: CaseSummary,
         precedents: list[AnalysisPrecedent],
+        second_instance_decision: SecondInstanceDecision,
     ) -> SecondInstanceJudgmentDraftDto:
         workflow = Workflow(
             name='generate-second-instance-judgment-draft',
@@ -57,6 +61,7 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
                 'analysis_id': analysis_id,
                 'case_summary': case_summary,
                 'precedents': precedents,
+                'second_instance_decision': second_instance_decision,
             },
         )
 
@@ -73,6 +78,9 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
 
         case_summary = run_context.session_state.get('case_summary')
         precedents = run_context.session_state.get('precedents')
+        second_instance_decision = run_context.session_state.get(
+            'second_instance_decision'
+        )
 
         if not isinstance(case_summary, CaseSummary):
             msg = 'Case summary is required to build judgment draft input'
@@ -80,6 +88,10 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
 
         if not isinstance(precedents, list):
             msg = 'Analysis precedents are required to build judgment draft input'
+            raise AppError('Erro de execucao do workflow', msg)
+
+        if not isinstance(second_instance_decision, SecondInstanceDecision):
+            msg = 'Second instance decision is required to build judgment draft input'
             raise AppError('Erro de execucao do workflow', msg)
 
         precedents_candidates = cast('list[object]', precedents)
@@ -152,6 +164,9 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
             - jurisdiction_issue: {case_summary_dto.jurisdiction_issue}
             - standing_issue: {case_summary_dto.standing_issue}
             - excluded_or_accessory_topics: {excluded_topics_text}
+
+            Decisão pretendida pelo julgador:
+            - second_instance_decision: {second_instance_decision.description.value}
 
             Precedentes classificados:
             {precedents_input}

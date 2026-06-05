@@ -17,6 +17,9 @@ from animus.core.intake.domain.structures.dtos.analysis_precedent_dto import (
 from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
     AnalysisPrecedentsSearchFiltersDto,
 )
+from animus.core.intake.domain.structures.second_instance_decision import (
+    SecondInstanceDecision,
+)
 from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalysesRepository,
@@ -64,6 +67,7 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
         analysis_id: str,
         filters_dto: AnalysisPrecedentsSearchFiltersDto,
         analysis_precedents: list[AnalysisPrecedentDto],
+        second_instance_decision: SecondInstanceDecision | None = None,
     ) -> None:
         if not analysis_precedents:
             return
@@ -94,6 +98,7 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
                 'analysis_id': analysis_id,
                 'filters_dto': filters_dto,
                 'analysis_precedents': analysis_precedents,
+                'second_instance_decision': second_instance_decision,
             },
         )
 
@@ -132,6 +137,9 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
 
         petition_summary = run_context.session_state.get('petition_summary')
         analysis_precedents = run_context.session_state.get('analysis_precedents')
+        second_instance_decision = run_context.session_state.get(
+            'second_instance_decision'
+        )
 
         if petition_summary is None:
             msg = 'Petition summary is required to build precedents synthesis input'
@@ -145,7 +153,22 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
             'list[AnalysisPrecedentDto]', analysis_precedents
         )
 
+        if second_instance_decision is not None and not isinstance(
+            second_instance_decision, SecondInstanceDecision
+        ):
+            msg = 'Second instance decision is invalid to build precedents synthesis input'
+            raise AppError('Erro de execução do workflow', msg)
+
         petition_summary_dto = petition_summary.dto
+        second_instance_decision_input = ''
+        if isinstance(second_instance_decision, SecondInstanceDecision):
+            second_instance_decision_input = dedent(
+                f"""
+
+                Contexto adicional sobre a decisão pretendida pelo julgador:
+                - second_instance_decision: {second_instance_decision.description.value}
+                """
+            )
         precedents_input = '\n'.join(
             [
                 dedent(
@@ -192,6 +215,7 @@ class AgnoSynthesizeAndClassifyAnalysisPrecedentsWorkflow(
             - requested_relief: {', '.join(petition_summary_dto.requested_relief)}
             - procedural_issues: {', '.join(petition_summary_dto.procedural_issues)}
             - excluded_or_accessory_topics: {', '.join(petition_summary_dto.excluded_or_accessory_topics)}
+            {second_instance_decision_input}
 
             Precedentes candidatos:
             {precedents_input}

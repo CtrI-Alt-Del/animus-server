@@ -5,8 +5,8 @@ from typing import Any
 from inngest import Context, Inngest, TriggerEvent
 
 from animus.core.intake.domain.errors import (
-    AnalysisDocumentNotFoundError,
     AnalysisNotFoundError,
+    CaseAssessmentBriefingNotFoundError,
 )
 from animus.core.intake.domain.events import (
     CaseAssessmentCaseSummarizationTriggeredEvent,
@@ -21,6 +21,7 @@ from animus.core.storage.use_cases import GetDocumentContentUseCase
 from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisDocumentsRepository,
     SqlalchemyAnalysesRepository,
+    SqlalchemyCaseAssessmentBriefingsRepository,
     SqlalchemyCaseSummariesRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -116,6 +117,9 @@ class SummarizeCaseAssessmentCaseJob(InngestJob):
     @staticmethod
     def _summarize_case_sync(payload: _Payload) -> dict[str, str]:
         with Sqlalchemy.session() as session:
+            case_assessment_briefings_repository = (
+                SqlalchemyCaseAssessmentBriefingsRepository(session)
+            )
             analysis_documents_repository = SqlalchemyAnalysisDocumentsRepository(
                 session
             )
@@ -123,30 +127,37 @@ class SummarizeCaseAssessmentCaseJob(InngestJob):
             analyses_repository = SqlalchemyAnalysesRepository(session)
 
             analysis_id = Id.create(payload.analysis_id)
-            analysis_document = analysis_documents_repository.find_by_analysis_id(
+            briefing = case_assessment_briefings_repository.find_by_analysis_id(
                 analysis_id
             )
-            if analysis_document is None:
-                raise AnalysisDocumentNotFoundError
+            if briefing is None:
+                raise CaseAssessmentBriefingNotFoundError
 
             analysis = analyses_repository.find_by_id(analysis_id)
             if analysis is None:
                 raise AnalysisNotFoundError
 
-            document_content = GetDocumentContentUseCase(
+            analysis_documents = analysis_documents_repository.find_many_by_analysis_id(
+                analysis_id
+            )
+            document_content_use_case = GetDocumentContentUseCase(
                 file_storage_provider=GcsFileStorageProvider(),
                 pdf_provider=PypdfPdfProvider(),
                 docx_provider=PythonDocxProvider(),
-            ).execute(file_path=analysis_document.file_path)
+            )
+            document_contents = [
+                document_content_use_case.execute(file_path=document.file_path)
+                for document in analysis_documents
+            ]
 
             workflow = AiPipe.get_summarize_case_assessment_case_workflow(
                 case_summaries_repository=case_summaries_repository,
-                analysis_documents_repository=analysis_documents_repository,
                 analyses_repository=analyses_repository,
             )
             workflow.run(
                 analysis_id=analysis_id.value,
-                document_content=document_content,
+                briefing=briefing.dto,
+                document_contents=document_contents,
             )
             session.commit()
 

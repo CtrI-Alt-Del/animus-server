@@ -10,6 +10,9 @@ from animus.core.intake.interfaces.analysis_precedents_repository import (
 from animus.core.intake.interfaces.analysis_documents_repository import (
     AnalysisDocumentsRepository,
 )
+from animus.core.intake.interfaces.case_assessment_briefings_repository import (
+    CaseAssessmentBriefingsRepository,
+)
 from animus.core.intake.interfaces.analyses_repository import AnalysesRepository
 from animus.core.intake.interfaces.case_summaries_repository import (
     CaseSummariesRepository,
@@ -19,6 +22,9 @@ from animus.core.intake.interfaces.extracted_petitions_repository import (
 )
 from animus.core.intake.interfaces.judgment_drafts_repository import (
     SecondInstanceJudgmentDraftsRepository,
+)
+from animus.core.intake.interfaces.second_instance_decisions_repository import (
+    SecondInstanceDecisionsRepository,
 )
 from animus.core.intake.interfaces.petition_summaries_repository import (
     PetitionSummariesRepository,
@@ -34,8 +40,10 @@ from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisDocumentsRepository,
     SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyAnalysesRepository,
+    SqlalchemyCaseAssessmentBriefingsRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemyExtractedPetitionsRepository,
+    SqlalchemySecondInstanceDecisionsRepository,
     SqlalchemySecondInstanceJudgmentDraftsRepository,
     SqlalchemyPetitionDraftsRepository,
     SqlalchemyPetitionSummariesRepository,
@@ -69,6 +77,12 @@ class DatabasePipe:
         return SqlalchemyCaseSummariesRepository(sqlalchemy)
 
     @staticmethod
+    def get_case_assessment_briefings_repository_from_request(
+        sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
+    ) -> CaseAssessmentBriefingsRepository:
+        return SqlalchemyCaseAssessmentBriefingsRepository(sqlalchemy)
+
+    @staticmethod
     def get_extracted_petitions_repository_from_request(
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
     ) -> ExtractedPetitionsRepository:
@@ -97,6 +111,12 @@ class DatabasePipe:
         sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
     ) -> SecondInstanceJudgmentDraftsRepository:
         return SqlalchemySecondInstanceJudgmentDraftsRepository(sqlalchemy)
+
+    @staticmethod
+    def get_second_instance_decisions_repository_from_request(
+        sqlalchemy: Annotated[Session, Depends(get_sqlalchemy_session_from_request)],
+    ) -> SecondInstanceDecisionsRepository:
+        return SqlalchemySecondInstanceDecisionsRepository(sqlalchemy)
 
     @staticmethod
     def get_analyses_repository_from_request(

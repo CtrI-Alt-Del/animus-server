@@ -8,6 +8,7 @@ from animus.core.intake.domain.events import (
     PrecedentsSearchFinishedEvent,
     AnalysisPrecedentsSearchRequestedEvent,
 )
+from animus.core.intake.domain.structures.analysis_type import AnalysisType
 from animus.core.intake.domain.structures.dtos import AnalysisPrecedentDto
 from animus.core.intake.domain.structures.dtos.analysis_precedents_search_filters_dto import (
     AnalysisPrecedentsSearchFiltersDto,
@@ -22,6 +23,7 @@ from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyCaseSummariesRepository,
     SqlalchemyPrecedentsRepository,
+    SqlalchemySecondInstanceDecisionsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
 from animus.providers.intake.case_summary_embeddings.openai.openai_case_summary_embeddings_provider import (
@@ -300,6 +302,9 @@ class SearchAnalysisPrecedentsJob(InngestJob):
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
                 session
             )
+            second_instance_decisions_repository = (
+                SqlalchemySecondInstanceDecisionsRepository(session)
+            )
 
             UpdateAnalysisStatusUseCase(analyses_repository).execute(
                 analysis_id=payload.analysis_id,
@@ -316,6 +321,18 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                 analyses_repository=analyses_repository,
             )
 
+            analysis = analyses_repository.find_by_id(Id.create(payload.analysis_id))
+            second_instance_decision = None
+            if (
+                analysis is not None
+                and analysis.type == AnalysisType.create_as_second_instance()
+            ):
+                second_instance_decision = (
+                    second_instance_decisions_repository.find_by_analysis_id(
+                        Id.create(payload.analysis_id)
+                    )
+                )
+
             workflow.run(
                 analysis_id=payload.analysis_id,
                 filters_dto=payload.filters_dto,
@@ -323,6 +340,7 @@ class SearchAnalysisPrecedentsJob(InngestJob):
                     AnalysisPrecedentDto(**analysis_precedent_data)
                     for analysis_precedent_data in analysis_precedents_data
                 ],
+                second_instance_decision=second_instance_decision,
             )
             session.commit()
 

@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Response
 
 from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.interfaces import (
-    AnalysisDocumentsRepository,
     AnalysesRepository,
+    CaseAssessmentBriefingsRepository,
 )
 from animus.core.intake.use_cases import (
     TriggerCaseAssessmentCaseSummarizationUseCase,
@@ -20,7 +20,7 @@ class TriggerCaseAssessmentCaseSummarizationController:
     @staticmethod
     def handle(router: APIRouter) -> None:
         @router.post(
-            '/analyses/{analysis_id}/case-summaries/case-assessment',
+            '/analyses/{analysis_id}/case-summary',
             status_code=202,
         )
         def _(
@@ -28,9 +28,11 @@ class TriggerCaseAssessmentCaseSummarizationController:
                 Analysis,
                 Depends(IntakePipe.verify_analysis_by_account_from_request),
             ],
-            analysis_documents_repository: Annotated[
-                AnalysisDocumentsRepository,
-                Depends(DatabasePipe.get_analysis_documents_repository_from_request),
+            case_assessment_briefings_repository: Annotated[
+                CaseAssessmentBriefingsRepository,
+                Depends(
+                    DatabasePipe.get_case_assessment_briefings_repository_from_request
+                ),
             ],
             analyses_repository: Annotated[
                 AnalysesRepository,
@@ -39,7 +41,7 @@ class TriggerCaseAssessmentCaseSummarizationController:
             broker: Annotated[Broker, Depends(PubSubPipe.get_broker_from_request)],
         ) -> Response:
             use_case = TriggerCaseAssessmentCaseSummarizationUseCase(
-                analysis_documents_repository=analysis_documents_repository,
+                case_assessment_briefings_repository=case_assessment_briefings_repository,
                 analyses_repository=analyses_repository,
                 broker=broker,
             )

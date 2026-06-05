@@ -8,6 +8,7 @@ from animus.core.intake.domain.errors import (
     AnalysisNotFoundError,
     DraftRegenerationCaseSummaryUnavailableError,
     DraftRegenerationChosenPrecedentsRequiredError,
+    SecondInstanceDecisionNotFoundError,
     SecondInstanceJudgmentDraftRegenerationUnavailableError,
 )
 from animus.core.intake.domain.events import (
@@ -26,6 +27,7 @@ from animus.database.sqlalchemy.repositories.intake import (
     SqlalchemyAnalysesRepository,
     SqlalchemyAnalysisPrecedentsRepository,
     SqlalchemyCaseSummariesRepository,
+    SqlalchemySecondInstanceDecisionsRepository,
     SqlalchemySecondInstanceJudgmentDraftsRepository,
 )
 from animus.database.sqlalchemy.sqlalchemy import Sqlalchemy
@@ -179,6 +181,9 @@ class RegenerateSecondInstanceJudgmentDraftJob(InngestJob):
             analysis_precedents_repository = SqlalchemyAnalysisPrecedentsRepository(
                 session
             )
+            second_instance_decisions_repository = (
+                SqlalchemySecondInstanceDecisionsRepository(session)
+            )
             judgment_drafts_repository = (
                 SqlalchemySecondInstanceJudgmentDraftsRepository(session)
             )
@@ -195,6 +200,12 @@ class RegenerateSecondInstanceJudgmentDraftJob(InngestJob):
             case_summary = case_summaries_repository.find_by_analysis_id(analysis_id)
             if case_summary is None:
                 raise DraftRegenerationCaseSummaryUnavailableError
+
+            second_instance_decision = (
+                second_instance_decisions_repository.find_by_analysis_id(analysis_id)
+            )
+            if second_instance_decision is None:
+                raise SecondInstanceDecisionNotFoundError
 
             precedents = analysis_precedents_repository.find_many_by_analysis_id(
                 analysis_id=analysis_id
@@ -213,6 +224,7 @@ class RegenerateSecondInstanceJudgmentDraftJob(InngestJob):
                 case_summary=case_summary,
                 precedents=chosen_precedents,
                 comments=payload.comments,
+                second_instance_decision=second_instance_decision,
             )
 
             CreateSecondInstanceJudgmentDraftUseCase(

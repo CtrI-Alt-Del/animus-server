@@ -167,7 +167,6 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
 
             AgnoSummarizeSecondInstanceCaseWorkflow(
                 case_summaries_repository=case_summaries_repository,
-                analysis_documents_repository=analysis_documents_repository,
                 analyses_repository=analyses_repository,
             ).run(
                 analysis_id=analysis_id.value,
@@ -232,6 +231,7 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
             if analysis is None:
                 return
 
+            print('mark_court_document_pieces_as_not_found_sync', analysis_id.value)
             UpdateAnalysisStatusUseCase(SqlalchemyAnalysesRepository(session)).execute(
                 analysis_id=analysis_id.value,
                 status=SecondInstanceAnalysisStatus.create_as_court_document_pieces_not_found().dto,

@@ -9,9 +9,11 @@ from pydantic import BaseModel
 
 from animus.ai.agno.outputs import CaseSummaryOutput, PetitionSummaryOutput
 from animus.ai.agno.squads import IntakeSquad
+from animus.core.intake.domain.structures.dtos.case_assessment_briefing_dto import (
+    CaseAssessmentBriefingDto,
+)
 from animus.core.intake.domain.structures.dtos.case_summary_dto import CaseSummaryDto
 from animus.core.intake.interfaces import (
-    AnalysisDocumentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
     SummarizeCaseAssessmentCaseWorkflow,
@@ -33,18 +35,21 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
     def __init__(
         self,
         case_summaries_repository: CaseSummariesRepository,
-        analysis_documents_repository: AnalysisDocumentsRepository,
         analyses_repository: AnalysesRepository,
     ) -> None:
         self._create_case_summary_use_case = CreateCaseSummaryUseCase(
             case_summaries_repository=case_summaries_repository,
-            analysis_documents_repository=analysis_documents_repository,
             analyses_repository=analyses_repository,
         )
         self._team = IntakeSquad()
         self._step_names = _StepNames()
 
-    def run(self, analysis_id: str, document_content: Text) -> CaseSummaryDto:
+    def run(
+        self,
+        analysis_id: str,
+        briefing: CaseAssessmentBriefingDto,
+        document_contents: list[Text],
+    ) -> CaseSummaryDto:
         workflow = Workflow(
             name='summarize-case-assessment-case',
             steps=[
@@ -61,12 +66,18 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
                 ),
             ],
             session_state={
-                'document_content': document_content.value,
+                'briefing': briefing,
+                'document_contents': [
+                    document_content.value for document_content in document_contents
+                ],
             },
         )
 
         output = workflow.run(input='start')
-        summary_output = self._normalize_case_assessment_summary_output(output.content)
+        summary_output = self._normalize_case_assessment_summary_output(
+            output.content,
+            briefing,
+        )
 
         return self._create_case_summary_use_case.execute(
             analysis_id=analysis_id,
@@ -81,10 +92,32 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
         if run_context.session_state is None:
             raise AppError('Erro de sessao', 'Session state is required')
 
-        document_content = str(run_context.session_state.get('document_content', ''))
+        briefing = cast(
+            'CaseAssessmentBriefingDto | None',
+            run_context.session_state.get('briefing'),
+        )
+        if briefing is None:
+            raise AppError('Erro de sessao', 'Briefing is required')
+
+        document_contents = cast(
+            'list[str]',
+            run_context.session_state.get('document_contents', []),
+        )
+        formatted_documents = '\n\n'.join(
+            f'Documento de apoio {index}:\n{content}'
+            for index, content in enumerate(document_contents, start=1)
+        )
+        documents_section = (
+            f'Documentos de apoio disponíveis:\n{formatted_documents}'
+            if formatted_documents
+            else 'Documentos de apoio disponíveis:\nNenhum documento de apoio foi enviado.'
+        )
+
         prompt = dedent(
             f"""
-            Resuma o documento jurídico abaixo para uma análise de viabilidade de petição inicial.
+            Produza um resumo estruturado para uma análise de viabilidade de petição inicial.
+            Use obrigatoriamente o briefing estruturado do advogado como fonte primária
+            e aproveite os documentos de apoio apenas quando existirem.
             Entregue a saída estruturada contendo `case_summary`, `legal_issue`,
             `central_question`, `relevant_laws`, `key_facts`, `search_terms`,
             `type_of_action`, `secondary_legal_issues`, `alternative_questions`,
@@ -97,12 +130,18 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
             - identifique controvérsias estruturais que impactem competência,
               legitimidade, cabimento ou necessidade de prova;
             - produza termos de busca úteis para localizar precedentes aplicáveis ao caso.
+            - use o briefing para contextualização do problema jurídico e os documentos apenas
+              como suporte fático ou normativo complementar;
             - seja conciso para evitar truncamento: `case_summary` com no máximo 120 palavras;
-            - `legal_issue` e `central_question` devem ter uma frase cada;
             - cada item de listas deve ser curto, específico e sem justificativas extensas.
 
-            Conteúdo do documento:
-            {document_content}
+            Briefing estruturado do advogado:
+            - área jurídica: {briefing.legal_area}
+            - jurisdição/tribunal: {briefing.court_jurisdiction}
+            - pedidos principais: {briefing.main_claims}
+            - tese pretendida: {briefing.intended_thesis}
+
+            {documents_section}
             """
         ).strip()
 
@@ -111,15 +150,16 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
     def _normalize_case_assessment_summary_output(
         self,
         output: object,
+        briefing: CaseAssessmentBriefingDto,
     ) -> CaseSummaryDto:
         normalized_output = self._coerce_summary_output(output)
 
         return CaseSummaryDto(
             case_summary=normalized_output.case_summary,
-            legal_issue=normalized_output.legal_issue,
-            central_question=normalized_output.central_question,
+            legal_issue=briefing.legal_area,
+            central_question=briefing.intended_thesis,
             relevant_laws=normalized_output.relevant_laws,
-            key_facts=normalized_output.key_facts,
+            key_facts=[briefing.main_claims],
             search_terms=normalized_output.search_terms,
             type_of_action=normalized_output.type_of_action,
             secondary_legal_issues=normalized_output.secondary_legal_issues,

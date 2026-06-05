@@ -8,6 +8,7 @@ from animus.core.intake.interfaces import (
     AnalysisPrecedentsRepository,
     AnalysesRepository,
     CaseSummariesRepository,
+    SecondInstanceDecisionsRepository,
     SecondInstanceJudgmentDraftsRepository,
 )
 from animus.core.intake.use_cases import GetSecondInstanceAnalysisReportUseCase
@@ -44,6 +45,12 @@ class GetSecondInstanceAnalysisReportController:
                 CaseSummariesRepository,
                 Depends(DatabasePipe.get_case_summaries_repository_from_request),
             ],
+            second_instance_decisions_repository: Annotated[
+                SecondInstanceDecisionsRepository,
+                Depends(
+                    DatabasePipe.get_second_instance_decisions_repository_from_request
+                ),
+            ],
             analysis_precedents_repository: Annotated[
                 AnalysisPrecedentsRepository,
                 Depends(DatabasePipe.get_analysis_precedents_repository_from_request),
@@ -57,6 +64,7 @@ class GetSecondInstanceAnalysisReportController:
                 analyses_repository=analyses_repository,
                 analysis_documents_repository=analysis_documents_repository,
                 case_summaries_repository=case_summaries_repository,
+                second_instance_decisions_repository=second_instance_decisions_repository,
                 analysis_precedents_repository=analysis_precedents_repository,
                 judgment_drafts_repository=judgment_drafts_repository,
             )
