@@ -18,14 +18,14 @@
 - Implementar interfaces `*Workflow` definidas em `core/{contexto}/interfaces/`.
 - Compor `Squads` (classes com agentes como `@property`) especializados por dominio.
 - Compor `Toolkits` (subclasses de `agno.tools.Toolkit`) especializados por dominio.
-- Orquestrar a execucao de tarefas AI via `Workflows` que montam steps sequenciais e paralelos.
+- Orquestrar a execução de tarefas AI via `Workflows` que montam steps sequenciais e paralelos.
 
 ### Limites da camada
 
 - Pode depender de `agno`, SDKs de LLM (Gemini, OpenAI etc.), `core`, `use_cases` e tipos de dominio.
 - Nao deve depender de `FastAPI`, `SQLAlchemy`, `request`, `response` ou detalhes de HTTP.
 - Nao deve conter regra de negocio — ela vive nos `use_cases` do `core`.
-- A orquestracao de *quando* chamar o `workflow` pode ficar em um `UseCase` ou em uma borda fina (`controller`/job), mas a implementacao de *como* usar o LLM continua sendo responsabilidade do `Workflow`.
+- A orquestração de *quando* chamar o `workflow` pode ficar em um `UseCase` ou em uma borda fina (`controller`/job), mas a implementação de *como* usar o LLM continua sendo responsabilidade do `Workflow`.
 
 > ⚠️ Se um `workflow` esta decidindo regra de negocio de dominio, ele ultrapassou sua responsabilidade.
 
@@ -49,14 +49,14 @@ src/animus/ai/agno/
         └── agno_{nome}_workflow.py  # ex.: agno_generate_icebreaker_workflow.py
 ```
 
-### Regras de organizacao e nomeacao
+### Regras de organização e nomeação
 
 - `squads/` contem classes de agentes Agno, agrupadas por dominio de negocio.
 - `toolkits/` contem subclasses de `agno.tools.Toolkit`, agrupadas por dominio de negocio.
 - `workflows/` contem implementacoes concretas de `*Workflow`, organizadas em sub-pastas por dominio.
 - Arquivos em `squads/` e `toolkits/` devem ser prefixados com o nome do dominio: `{dominio}_squad.py`, `{dominio}_toolkit.py`.
 - Arquivos em `workflows/{dominio}/` devem ser prefixados com o framework: `agno_{nome}_workflow.py`.
-- Classes devem seguir a convencao `Agno*Workflow`, `*Squad`, `*Toolkit`.
+- Classes devem seguir a convenção `Agno*Workflow`, `*Squad`, `*Toolkit`.
 - `__init__.py` deve expor apenas os contratos publicos do modulo.
 - Nao especificar arquivos especificos, pois isso muda constantemente.
 
@@ -64,14 +64,14 @@ src/animus/ai/agno/
 
 ## Glossario arquitetural da camada
 
-| Termo | Definicao |
+| Termo | Definição |
 |---|---|
-| `Workflow` | Implementacao concreta de uma interface `*Workflow` do `core`. Monta e executa um `agno.Workflow` internamente no metodo `run()`. |
+| `Workflow` | Implementação concreta de uma interface `*Workflow` do `core`. Monta e executa um `agno.Workflow` internamente no metodo `run()`. |
 | `Squad` | Classe que expoe agentes Agno como `@property`. Cada propriedade retorna um `Agent` configurado com modelo e instrucoes. |
 | `Toolkit` | Subclasse de `agno.tools.Toolkit`. Registra ferramentas Python no construtor e pode chamar `use_cases` do `core`. |
 | `Step` | Etapa interna do `agno.Workflow`. Pode ter `executor` (metodo Python) ou `agent` (agente Agno). |
 | `Parallel` | Agrupador de `Steps` que devem executar concorrentemente dentro do `agno.Workflow`. |
-| `session_state` | Dicionario de contexto compartilhado entre os `Steps` de um `agno.Workflow` durante a execucao. |
+| `session_state` | Dicionario de contexto compartilhado entre os `Steps` de um `agno.Workflow` durante a execução. |
 | `_StepNames` | `NamedTuple` interno ao `Workflow` que centraliza as constantes de nome de cada step, evitando strings magicas. |
 
 ---
@@ -93,12 +93,12 @@ Workflow
 
 ### Workflow
 
-O `Workflow` concreto implementa a interface `*Workflow` do `core`. Ele monta um `agno.Workflow` *dentro* do metodo `run()`, definindo steps, contexto inicial (`session_state`) e orquestracao (sequencial ou paralela com `Parallel`).
+O `Workflow` concreto implementa a interface `*Workflow` do `core`. Ele monta um `agno.Workflow` *dentro* do metodo `run()`, definindo steps, contexto inicial (`session_state`) e orquestração (sequencial ou paralela com `Parallel`).
 
 **Regras:**
 
 - Implementa exatamente o metodo definido na interface `*Workflow` do `core`.
-- Recebe dependencias por injecao no construtor (ex.: `Repository`, `UseCase`).
+- Recebe dependencias por injeção no construtor (ex.: `Repository`, `UseCase`).
 - Instancia o `Squad` no construtor; monta o `agno.Workflow` dentro de `run()`.
 - Usa `_StepNames` como `NamedTuple` interno para evitar strings magicas nos nomes de steps.
 - Steps com logica Python usam `executor=cast(StepExecutor, self._metodo)`.
@@ -211,7 +211,7 @@ class ProfilingSquad:
 
 ### Toolkit
 
-O `Toolkit` **estende `agno.tools.Toolkit`**. Registra as ferramentas no construtor via `tools=[self.metodo]` e pode receber `repository` ou `use_case` por injecao para executar operacoes de dominio.
+O `Toolkit` **estende `agno.tools.Toolkit`**. Registra as ferramentas no construtor via `tools=[self.metodo]` e pode receber `repository` ou `use_case` por injeção para executar operacoes de dominio.
 
 **Regras:**
 
@@ -219,7 +219,7 @@ O `Toolkit` **estende `agno.tools.Toolkit`**. Registra as ferramentas no constru
 - Cada ferramenta e um metodo da classe com **docstring obrigatoria** — o Agno usa a docstring para descrever a ferramenta ao LLM.
 - A docstring deve ter secoes `Args` e `Returns` explicitas.
 - Pode instanciar e chamar `use_cases` do `core` internamente.
-- Nao deve conter logica de orquestracao de workflow nem chamadas HTTP.
+- Nao deve conter logica de orquestração de workflow nem chamadas HTTP.
 
 **Exemplo:**
 
@@ -251,7 +251,7 @@ class ProfilingToolkit(Toolkit):
 
 ---
 
-## Integracao com as demais camadas
+## Integração com as demais camadas
 
 ### Como a camada AI se conecta ao resto do sistema
 
@@ -262,9 +262,9 @@ pipes/ai_pipe.py               ← instancia e injeta o Workflow via Depends(...
 rest/controllers/              ← recebe o Workflow injetado e delega
 ```
 
-### Mapa de integracao
+### Mapa de integração
 
-| Camada | Relacao com AI | Regra |
+| Camada | Relação com AI | Regra |
 |---|---|---|
 | `core` | Define `*Workflow` como `Protocol`; define DTOs de entrada e saida | O `core` nunca importa de `ai/agno`. |
 | `pipes` | `AiPipe` instancia `Agno*Workflow` e injeta via `Depends(...)` | O `pipe` e o unico ponto de montagem do `Workflow` concreto. |
@@ -292,7 +292,7 @@ class GenerateIcebreakerWorkflow(Protocol):
 
 **Regras:**
 
-- O nome da interface segue o padrao `{Acao}{Entidade}Workflow`.
+- O nome da interface segue o padrao `{Ação}{Entidade}Workflow`.
 - O metodo principal e sempre `run(...)`.
 - A interface recebe tipos de dominio e retorna DTO ou tipo de dominio.
 - Nao expoe detalhes de LLM, agentes ou framework na assinatura.
@@ -301,7 +301,7 @@ class GenerateIcebreakerWorkflow(Protocol):
 
 ## Montagem via AiPipe
 
-Toda instanciacao de `Workflow` concreto deve ocorrer no `AiPipe`, nunca diretamente em controllers ou jobs.
+Toda instanciação de `Workflow` concreto deve ocorrer no `AiPipe`, nunca diretamente em controllers ou jobs.
 
 **Padrao no AiPipe:**
 
@@ -347,7 +347,7 @@ class AiPipe:
 - `Squads` com agentes como `@property`, configurados com modelo, instrucoes e `textwrap.dedent`.
 - `Toolkits` subclasses de `agno.tools.Toolkit` com ferramentas documentadas por docstring.
 - `_StepNames` como `NamedTuple` para centralizar nomes de steps sem strings magicas.
-- Injecao de `repository` ou `use_case` no construtor do `Workflow` e do `Toolkit`.
+- Injeção de `repository` ou `use_case` no construtor do `Workflow` e do `Toolkit`.
 - Uso de `session_state` para compartilhar contexto entre steps paralelos.
 
 ## ❌ O que NUNCA deve conter
@@ -355,7 +355,7 @@ class AiPipe:
 - Regra de negocio de dominio dentro do `Workflow`, `Squad` ou `Toolkit`.
 - Acesso direto a banco de dados ou `session` SQLAlchemy — use `repository` injetado.
 - Imports de `FastAPI`, `request`, `response` ou mecanismos de transporte HTTP.
-- Instanciacao de `Workflow` fora do `AiPipe`.
+- Instanciação de `Workflow` fora do `AiPipe`.
 - Retorno de tipos nao definidos no `core` (ex: objetos internos do Agno expostos como contrato).
 - Ferramentas do `Toolkit` sem docstring — o LLM depende delas para entender o que a ferramenta faz.
 - `agno.Workflow` instanciado no construtor do `Workflow` concreto.

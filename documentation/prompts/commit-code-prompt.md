@@ -25,9 +25,9 @@ Nunca apenas sugira commits. Nunca pare somente na mensagem. **Sempre execute os
 
 ---
 
-## Diretrizes de Execucao
+## Diretrizes de Execução
 
-### Pre-condicao obrigatoria
+### Pre-condição obrigatoria
 
 Antes de qualquer comando git, valide se a entrada do usuario forneceu a task Jira.
 
@@ -48,17 +48,17 @@ Antes de qualquer comando git, valide se a entrada do usuario forneceu a task Ji
 >
 > Use o ID extraido como `JIRA-TASK-ID` para todos os commits.
 >
-> **Somente se a branch nao contiver um ID valido no formato `ANI-123`**, interrompa a execucao com:
+> **Somente se a branch nao contiver um ID valido no formato `ANI-123`**, interrompa a execução com:
 >
 > ```
 > ERROR: Missing Jira task id (expected format: ANI-123). Branch name also does not contain a valid task id.
 > ```
 
-Regras de validacao do ID:
+Regras de validação do ID:
 
 - Se **fornecido pelo usuario** no formato `ANI-123` → use diretamente
 - Se **nao fornecido** → tente extrair do nome da branch com `git branch --show-current`
-- Se **nenhuma das duas fontes** tiver um ID valido → interrompa a execucao
+- Se **nenhuma das duas fontes** tiver um ID valido → interrompa a execução
 
 ---
 
@@ -104,14 +104,14 @@ Tipos permitidos (Conventional Commits):
 
 ---
 
-### 4 Execucao Obrigatoria
+### 4 Execução Obrigatoria
 
 Para cada grupo de arquivos identificado, execute:
 
 `git add <arquivos-do-grupo>`
 `git commit -m "<type>: <JIRA-TASK-ID> <description>"`
 
-Nao peca confirmacao. Nao gere apenas sugestao. **Execute.**
+Nao peca confirmação. Nao gere apenas sugestao. **Execute.**
 
 ---
 
@@ -124,11 +124,11 @@ Nao peca confirmacao. Nao gere apenas sugestao. **Execute.**
 
 ---
 
-### 6 Verificacao Final (Antes de cada commit)
+### 6 Verificação Final (Antes de cada commit)
 
 - tipo valido de Conventional Commits
 - task Jira presente no formato `ANI-123`
-- descricao curta, objetiva e em ingles
+- descrição curta, objetiva e em ingles
 - representa corretamente o grupo de arquivos
 
 ---
@@ -140,4 +140,4 @@ Mostre apenas comandos executados:
 `EXECUTING: git add src/modules/auth/sign-in.tsx`
 `EXECUTING: git commit -m "feat: ANI-23 add sign in screen"`
 
-Sem explicacoes longas. Sem sugestoes. Sem parar antes de commitar.
+Sem explicacoes longas. Sem sugesões. Sem parar antes de commitar.

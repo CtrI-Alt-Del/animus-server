@@ -14,7 +14,7 @@ job com o runtime de eventos, sem deslocar a regra de negocio para a camada de
 
 - Arquivo: `test_<nome_job>.py`.
 - Classe de teste: `Test<JobName>`.
-- Metodo de teste: `test_should_<resultado>_when_<condicao>`.
+- Metodo de teste: `test_should_<resultado>_when_<condição>`.
 
 Exemplo real:
 
@@ -45,8 +45,8 @@ def test_should_process_event_with_real_inngest_dev_server(
 Organize cada teste em tres blocos logicos, separados por linha em branco:
 
 1. Arrange: patch de side effects externos, montagem do payload e capturas.
-2. Act: publicacao do evento via `inngest_runtime.post_event(...)`.
-3. Assert: validacao do processamento observavel do job.
+2. Act: publicação do evento via `inngest_runtime.post_event(...)`.
+3. Assert: validação do processamento observavel do job.
 
 ### O que sempre validar
 
@@ -62,13 +62,13 @@ Teste de job deve validar o contrato assincrono observavel entre:
 
 - nome do evento publicado;
 - payload consumido pelo job;
-- orquestracao do handler no runtime do Inngest;
+- orquestração do handler no runtime do Inngest;
 - side effect final disparado pelo job.
 
 ### O que NAO testar aqui
 
 - detalhes internos do SDK do Inngest;
-- implementacao detalhada do use case chamado pelo job;
+- implementação detalhada do use case chamado pelo job;
 - comportamento interno do provider externo real.
 
 ## Isolamento de dependencias e side effects
@@ -76,7 +76,7 @@ Teste de job deve validar o contrato assincrono observavel entre:
 ### O que mockar
 
 Mocke fronteiras externas nao deterministicas ou lentas, como providers de
-email, notificacao, storage ou integracoes terceiras.
+email, notificação, storage ou integracoes terceiras.
 
 Padrao observado:
 
@@ -86,7 +86,7 @@ Padrao observado:
 ### O que nao mockar por padrao
 
 - Nao mocke o runtime de disparo do evento quando o objetivo do teste for
-  validar a integracao real do job com o Inngest dev server.
+  validar a integração real do job com o Inngest dev server.
 - Nao mocke o proprio job.
 
 ### Regra pratica
@@ -95,13 +95,13 @@ Se o objetivo do teste e provar que o job esta registrado e processa o evento
 corretamente, prefira usar o runtime real do ambiente de teste e mockar apenas
 o efeito colateral externo final.
 
-## Sincronizacao e espera assincrona
+## Sincronização e espera assincrona
 
 Jobs do Inngest podem concluir alguns instantes apos o `post_event` retornar.
 Por isso:
 
 - use polling com timeout explicito para aguardar o side effect;
-- falhe com mensagem objetiva quando a condicao nao for satisfeita;
+- falhe com mensagem objetiva quando a condição nao for satisfeita;
 - mantenha timeout suficiente para evitar flakes, mas curto o bastante para nao
   mascarar travamentos.
 
@@ -124,7 +124,7 @@ else:
 - Publique payloads minimos e explicitos via `inngest_runtime.post_event(...)`.
 - Use valores literais curtos e legiveis, como emails e codigos fixos.
 - Quando o job normaliza ou converte dados, valide o valor final observado, nao
-  a implementacao interna da normalizacao.
+  a implementação interna da normalização.
 
 ### Assert recomendado
 
@@ -153,8 +153,8 @@ terceiros que nao fazem parte do contrato testado:
 Para cada job novo, incluir no minimo:
 
 - um teste validando que o evento correto e processado pelo runtime;
-- um teste validando o side effect principal ou a delegacao final;
-- um teste adicional quando houver ramificacao critica de payload, validacao ou
+- um teste validando o side effect principal ou a delegação final;
+- um teste adicional quando houver ramificação critica de payload, validação ou
   erro recuperavel.
 
 Se o job for apenas um orquestrador fino sem multiplos ramos, um teste de fluxo
@@ -173,7 +173,7 @@ payload e side effect.
 ## Checklist rapido para novo teste de job
 
 1. Arquivo no caminho correto: `tests/pubsub/inngest/jobs/<contexto>/`.
-2. Nome do arquivo e da classe seguindo convencao.
+2. Nome do arquivo e da classe seguindo convenção.
 3. Uso da fixture `inngest_runtime` para exercitar o runtime real.
 4. Patch apenas do side effect externo final.
 5. Assert de aceite do evento (`status == 200`).

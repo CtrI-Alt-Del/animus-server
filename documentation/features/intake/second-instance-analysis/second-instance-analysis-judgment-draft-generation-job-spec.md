@@ -47,7 +47,7 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
 - A solicitação deve ser aceita somente quando a análise existir, pertencer à conta autenticada, for `SECOND_INSTANCE`, possuir `CaseSummary` e possuir ao menos um `AnalysisPrecedent` persistido com `is_chosen = True`.
 - O job deve reutilizar `CaseSummary` e `AnalysisPrecedent` persistidos para a `analysis_id` recebida.
 - O job não deve reenviar autos, reextrair petição, recriar resumo de caso ou rebuscar precedentes.
-- A minuta gerada deve conter, no mínimo, as seções `relatorio`, `fundamentacao`, `analise_de_aderencia_ou_distincao` e `dispositivo_sugerido`.
+- A minuta gerada deve conter, no mínimo, as seções `relatorio`, `fundamentação`, `analise_de_aderencia_ou_distinção` e `dispositivo_sugerido`.
 - A ausência de precedente com `applicability_level = 2` não deve bloquear a geração da minuta desde que exista pelo menos um precedente manual ou automaticamente escolhido.
 - A primeira geração deve persistir a minuta via `SecondInstanceJudgmentDraftsRepository.add(...)`.
 - A regeração deve substituir a minuta anterior via `SecondInstanceJudgmentDraftsRepository.replace(...)`.
@@ -217,8 +217,8 @@ Implementar o disparo HTTP e o pipeline assíncrono para gerar ou regerar a minu
 - **Tipo:** `BaseModel`
 - **Atributos:**
   - `relatorio: str`
-  - `fundamentacao: str`
-  - `analise_de_aderencia_ou_distincao: str`
+  - `fundamentação: str`
+  - `analise_de_aderencia_ou_distinção: str`
   - `dispositivo_sugerido: str`
   - `aviso_ausencia_precedente_aplicavel: str | None = None`
 

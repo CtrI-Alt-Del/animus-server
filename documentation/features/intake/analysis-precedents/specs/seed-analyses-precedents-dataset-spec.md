@@ -18,13 +18,13 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 - Criar o `SeedAnalysesPrecedentsDatasetJob` em `Inngest` para processamento em lote das peticoes de `intake/xertica/petitions/`.
 - Resolver a conta tecnica existente pelo e-mail `animus.ctrlaltdel@gmail.com` antes de criar as `Analysis` do lote.
-- Reutilizar os fluxos existentes de criacao de `Analysis`, criacao de `Petition`, leitura do documento, resumo da petição e busca de precedentes.
+- Reutilizar os fluxos existentes de criação de `Analysis`, criação de `Petition`, leitura do documento, resumo da petição e busca de precedentes.
 - Permitir que a busca interna do job persista `20` `AnalysisPrecedent` por analise, sem ampliar o limite do endpoint publico.
-- Criar o workflow de classificacao de aplicabilidade dos precedentes da analise.
-- Persistir `AnalysisPrecedentApplicabilityFeedback` apenas quando a classificacao retornar `confidence = high`.
+- Criar o workflow de classificação de aplicabilidade dos precedentes da analise.
+- Persistir `AnalysisPrecedentApplicabilityFeedback` apenas quando a classificação retornar `confidence = high`.
 - Persistir `AnalysisPrecedentDatasetRow` derivado de cada feedback salvo.
 - Exportar as linhas geradas no lote atual para `intake/datasets/analyses-precedents/{ulid}-{date}.parquet`.
-- Tornar o job seguro para reexecucao, evitando recriar processamento para o mesmo `document_file_path` ja semeado.
+- Tornar o job seguro para reexecução, evitando recriar processamento para o mesmo `document_file_path` ja semeado.
 
 ## 2.2 Out-of-scope
 
@@ -32,7 +32,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - Alterar a UX do app de busca de precedentes ou o PRD do RF-03.
 - Persistir `synthesis` dos precedentes no fluxo de dataset.
 - Alterar a faixa publica de `limit` do endpoint `POST /intake/analyses/{analysis_id}/precedents/search`.
-- Treinar o modelo de ML, versionar artefatos de treino ou publicar modelo em producao.
+- Treinar o modelo de ML, versionar artefatos de treino ou publicar modelo em produção.
 - Criar conta nova automaticamente para a Xertica; a spec assume que a conta com e-mail `animus.ctrlaltdel@gmail.com` ja existe.
 
 ---
@@ -47,7 +47,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - O job deve extrair o conteudo do PDF via `GetDocumentContentUseCase` e gerar `PetitionSummary` pelo workflow atual de resumo.
 - O job deve executar a busca de precedentes usando o pipeline atual de embeddings e `Qdrant`, retornando `20` candidatos persistidos por analise.
 - O job nao deve gerar `synthesis` dos precedentes nesse fluxo; a persistencia deve ocorrer com `synthesis=None`.
-- O workflow de classificacao deve receber o resumo da petição e a lista de `AnalysisPrecedent` persistidos da analise.
+- O workflow de classificação deve receber o resumo da petição e a lista de `AnalysisPrecedent` persistidos da analise.
 - O workflow deve executar os steps `BUILD_CLASSIFICATION_INPUT` -> `CLASSIFY_PRECEDENTS_APPLICABILITY` -> `CREATE_CLASSIFICATIONS`.
 - A saida do agente deve incluir, por precedente, o nivel de aplicabilidade e um `confidence` textual.
 - Apenas classificacoes com `confidence = high` devem gerar `AnalysisPrecedentApplicabilityFeedback` com `is_from_human=False`.
@@ -59,10 +59,10 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 - **Performance:** o job deve reutilizar o fluxo existente de busca; o aumento de `K` para `20` deve existir apenas no caminho interno do seed, sem impactar o endpoint HTTP.
 - **Seguranca:** nao deve haver nova superficie HTTP; o acesso continua restrito ao bucket configurado e a uma conta interna existente do sistema.
-- **Idempotencia:** reexecucoes do job nao devem recriar `Analysis`/`Petition` para o mesmo `document_file_path`; feedbacks e dataset rows devem usar a chave natural `analysis_id + precedent_id` para permitir `replace` sem duplicacao.
+- **Idempotencia:** reexecucoes do job nao devem recriar `Analysis`/`Petition` para o mesmo `document_file_path`; feedbacks e dataset rows devem usar a chave natural `analysis_id + precedent_id` para permitir `replace` sem duplicação.
 - **Resiliencia:** falha ao resumir, buscar, classificar ou exportar deve falhar o lote com erro explicito no `Inngest`, preservando o rastreamento por step.
 - **Observabilidade:** o job deve usar `context.step.run(...)` por etapa relevante e por arquivo processado, com nomes deterministas e legiveis.
-- **Compatibilidade retroativa:** nenhum contrato HTTP existente deve mudar; a busca publica continua com validacao `5..10` e padrao `10`.
+- **Compatibilidade retroativa:** nenhum contrato HTTP existente deve mudar; a busca publica continua com validação `5..10` e padrao `10`.
 
 ---
 
@@ -71,12 +71,12 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 ## Core (Intake)
 
 - **`CreateAnalysisUseCase`** (`src/animus/core/intake/use_cases/create_analysis_use_case.py`) - cria uma `Analysis` com nome gerado e `status=WAITING_PETITION`.
-- **`CreatePetitionUseCase`** (`src/animus/core/intake/use_cases/create_petition_use_case.py`) - cria a `Petition`, atualiza o status da analise e trata substituicao de petição.
+- **`CreatePetitionUseCase`** (`src/animus/core/intake/use_cases/create_petition_use_case.py`) - cria a `Petition`, atualiza o status da analise e trata substituição de petição.
 - **`CreatePetitionSummaryUseCase`** (`src/animus/core/intake/use_cases/create_petition_summary_use_case.py`) - persiste o resumo e move a analise para `PETITION_ANALYZED`.
-- **`SearchAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/search_analysis_precedents_use_case.py`) - executa embeddings, busca vetorial, deduplicacao, score e ordenacao dos precedentes.
+- **`SearchAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/search_analysis_precedents_use_case.py`) - executa embeddings, busca vetorial, deduplicação, score e ordenação dos precedentes.
 - **`CreateAnalysisPrecedentsUseCase`** (`src/animus/core/intake/use_cases/create_analysis_precedents_use_case.py`) - persiste os `AnalysisPrecedent` e atualiza a analise para `WAITING_PRECEDENT_CHOISE`; ja suporta `synthesis_output=None`.
 - **`AnalysisPrecedent`** (`src/animus/core/intake/domain/structures/analysis_precedent.py`) - ja carrega `similarity_score`, `thesis_similarity_score`, `enunciation_similarity_score`, `total_search_hits`, `similarity_rank`, `final_rank` e `applicability_level`.
-- **`AnalysisPrecedentApplicabilityLevel`** (`src/animus/core/intake/domain/structures/analysis_precedent_applicability_level.py`) - encapsula a classificacao ordinal `NOT_APPLICABLE | POSSIBLY_APPLICABLE | APPLICABLE`.
+- **`AnalysisPrecedentApplicabilityLevel`** (`src/animus/core/intake/domain/structures/analysis_precedent_applicability_level.py`) - encapsula a classificação ordinal `NOT_APPLICABLE | POSSIBLY_APPLICABLE | APPLICABLE`.
 - **`AnalysisPrecedentApplicabilityFeedback`** (`src/animus/core/intake/domain/structures/analysis_precedent_applicability_feedback.py`) - estrutura existente, mas hoje modelada com `analysis_precedent_id`, ainda sem persistencia ou uso.
 - **`AnalysisPrecedentDatasetRow`** (`src/animus/core/intake/domain/structures/analysis_precedent_dataset_row.py`) - estrutura existente para dataset, tambem ainda sem persistencia ou uso.
 - **`PetitionsRepository`** (`src/animus/core/intake/interfaces/petitions_repository.py`) - contrato atual de leitura/escrita de `Petition`; ainda nao possui busca por `document_file_path`.
@@ -95,7 +95,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - **`AnalysisPrecedentModel`** (`src/animus/database/sqlalchemy/models/intake/analysis_precedent_model.py`) - tabela `analysis_precedents` ja contem `similarity_score`, `thesis_similarity_score`, `enunciation_similarity_score`, `total_search_hits`, `similarity_rank`, `final_rank` e `applicability_level`.
 - **`SqlalchemyAnalysisPrecedentsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedents_repository.py`) - referencia de persistencia dos precedentes da analise.
 - **`SqlalchemyPetitionsRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petitions_repository.py`) - repository atual de `Petition`; faltando busca por `document_file_path`.
-- **`SqlalchemyAccountsRepository`** (`src/animus/database/sqlalchemy/repositories/auth/sqlalchemy_accounts_repository.py`) - implementacao concreta de busca de conta por e-mail.
+- **`SqlalchemyAccountsRepository`** (`src/animus/database/sqlalchemy/repositories/auth/sqlalchemy_accounts_repository.py`) - implementação concreta de busca de conta por e-mail.
 - **`SqlalchemyAnalysesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analyses_repository.py`) - persistencia da analise, inclusive `add_many(...)` e `replace(...)`.
 - **`SqlalchemyPetitionSummariesRepository`** (`src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_petition_summaries_repository.py`) - suporte de persistencia/leitura do resumo.
 - **Migracoes existentes** (`migrations/versions/20260328_150000_create_analysis_precedents_table.py`, `migrations/versions/20260418_130000_add_analysis_precedent_scores_columns.py`, `migrations/versions/20260426_160000_add_final_rank_to_analysis_precedents.py`) - base atual da tabela `analysis_precedents` e das colunas de score/rank.
@@ -116,7 +116,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## PubSub
 
-- **`SearchAnalysisPrecedentsJob`** (`src/animus/pubsub/inngest/jobs/intake/search_analysis_precedents_job.py`) - principal referencia de job multi-step do contexto `intake`, com mudanca de status e execucao de `UseCase`/workflow.
+- **`SearchAnalysisPrecedentsJob`** (`src/animus/pubsub/inngest/jobs/intake/search_analysis_precedents_job.py`) - principal referencia de job multi-step do contexto `intake`, com mudanca de status e execução de `UseCase`/workflow.
 - **`SummarizePetitionJob`** (`src/animus/pubsub/inngest/jobs/intake/summarize_petition_job.py`) - referencia de job que reusa `GetDocumentContentUseCase` e workflow concreto de `Agno`.
 - **`VectorizeAllPrecedentsJob`** (`src/animus/pubsub/inngest/jobs/intake/vectorize_all_precedents_job.py`) - referencia de processamento em lote com pagina e `step.run(...)` iterativo.
 - **`InngestPubSub`** (`src/animus/pubsub/inngest/inngest_pubsub.py`) - composition root que registra os jobs `intake`.
@@ -124,7 +124,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 ## Lacunas identificadas
 
 - Nao existe job para seed do dataset de treino.
-- Nao existe workflow de classificacao de aplicabilidade dos precedentes.
+- Nao existe workflow de classificação de aplicabilidade dos precedentes.
 - Nao existem tabelas, models, mappers e repositories para `feedbacks` e `dataset_rows`.
 - As estruturas atuais de `feedback` e `dataset row` assumem `analysis_precedent_id`, mas `analysis_precedents` hoje usa chave primaria composta `analysis_id + precedent_id`.
 - `PetitionsRepository` ainda nao permite localizar uma `Petition` pelo `document_file_path`, o que impede idempotencia natural do seed.
@@ -136,21 +136,21 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## Camada Core (Interfaces / Ports)
 
-- **Localizacao:** `src/animus/core/storage/interfaces/parquet_provider.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/storage/interfaces/parquet_provider.py` (**novo arquivo**)
 - **Metodos:**
 - `write_analysis_precedents_dataset(rows: list[AnalysisPrecedentDatasetRowDto], local_file_path: FilePath) -> None` - materializa localmente um arquivo `.parquet` do dataset de precedentes em um caminho temporario do filesystem, sem fazer upload.
 
-- **Localizacao:** `src/animus/core/intake/interfaces/classify_analysis_precedents_applicability_workflow.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/intake/interfaces/classify_analysis_precedents_applicability_workflow.py` (**novo arquivo**)
 - **Metodos:**
-- `run(analysis_id: str, analysis_precedents: list[AnalysisPrecedentDto]) -> list[AnalysisPrecedentDatasetRowDto]` - classifica a aplicabilidade dos precedentes de uma analise, persiste feedbacks e dataset rows automaticos e retorna as linhas materializadas para exportacao.
+- `run(analysis_id: str, analysis_precedents: list[AnalysisPrecedentDto]) -> list[AnalysisPrecedentDatasetRowDto]` - classifica a aplicabilidade dos precedentes de uma analise, persiste feedbacks e dataset rows automaticos e retorna as linhas materializadas para exportação.
 
-- **Localizacao:** `src/animus/core/intake/interfaces/analysis_precedent_applicability_feedbacks_repository.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/intake/interfaces/analysis_precedent_applicability_feedbacks_repository.py` (**novo arquivo**)
 - **Metodos:**
 - `find_by_analysis_id_and_precedent_id(analysis_id: Id, precedent_id: Id) -> AnalysisPrecedentApplicabilityFeedback | None` - localiza o feedback do precedente da analise pela chave natural.
 - `add(feedback: AnalysisPrecedentApplicabilityFeedback) -> None` - persiste um feedback novo.
 - `replace(feedback: AnalysisPrecedentApplicabilityFeedback) -> None` - substitui o feedback existente para a mesma chave natural.
 
-- **Localizacao:** `src/animus/core/intake/interfaces/analysis_precedent_dataset_rows_repository.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/intake/interfaces/analysis_precedent_dataset_rows_repository.py` (**novo arquivo**)
 - **Metodos:**
 - `find_by_analysis_id_and_precedent_id(analysis_id: Id, precedent_id: Id) -> AnalysisPrecedentDatasetRow | None` - localiza a linha de dataset derivada para a mesma chave natural.
 - `add(dataset_row: AnalysisPrecedentDatasetRow) -> None` - persiste uma linha nova do dataset.
@@ -158,19 +158,19 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## Camada Core (Use Cases)
 
-- **Localizacao:** `src/animus/core/intake/use_cases/create_analysis_precedent_applicability_feedback_use_case.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/intake/use_cases/create_analysis_precedent_applicability_feedback_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `AnalysisPrecedentApplicabilityFeedbacksRepository`
 - **Metodo principal:** `execute(analysis_id: str, precedent_id: str, applicability_level: int) -> AnalysisPrecedentApplicabilityFeedbackDto` - cria ou substitui o feedback automatico para um precedente da analise.
 - **Fluxo resumido:** normaliza IDs -> monta `AnalysisPrecedentApplicabilityFeedback` com `created_at=now` -> `find_by...` -> `add(...)` ou `replace(...)` -> retorna DTO persistivel.
 
-- **Localizacao:** `src/animus/core/intake/use_cases/create_analysis_precedent_dataset_row_use_case.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/intake/use_cases/create_analysis_precedent_dataset_row_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `AnalysisPrecedentDatasetRowsRepository`
 - **Metodo principal:** `execute(analysis_precedent: AnalysisPrecedentDto, feedback: AnalysisPrecedentApplicabilityFeedbackDto) -> AnalysisPrecedentDatasetRowDto` - cria ou substitui a linha de dataset derivada de um precedente classificado.
-- **Fluxo resumido:** combina metadados do `AnalysisPrecedentDto` com o label do feedback -> monta `AnalysisPrecedentDatasetRow` -> `find_by...` -> `add(...)` ou `replace(...)` -> retorna DTO para exportacao.
+- **Fluxo resumido:** combina metadados do `AnalysisPrecedentDto` com o label do feedback -> monta `AnalysisPrecedentDatasetRow` -> `find_by...` -> `add(...)` ou `replace(...)` -> retorna DTO para exportação.
 
 ## Camada Database (Models SQLAlchemy)
 
-- **Localizacao:** `src/animus/database/sqlalchemy/models/intake/analysis_precedent_applicability_feedback_model.py` (**novo arquivo**)
+- **Localização:** `src/animus/database/sqlalchemy/models/intake/analysis_precedent_applicability_feedback_model.py` (**novo arquivo**)
 - **Tabela:** `analysis_precedent_applicability_feedbacks`
 - **Colunas:**
 - `analysis_id` - `String(26)`, `nullable=False`, parte da chave primaria e parte da `ForeignKeyConstraint` composta para `analysis_precedents`
@@ -179,7 +179,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - `created_at` / `updated_at` - herdados de `Model`
 - **Relacionamentos:** referencia composta para `AnalysisPrecedentModel`
 
-- **Localizacao:** `src/animus/database/sqlalchemy/models/intake/analysis_precedent_dataset_row_model.py` (**novo arquivo**)
+- **Localização:** `src/animus/database/sqlalchemy/models/intake/analysis_precedent_dataset_row_model.py` (**novo arquivo**)
 - **Tabela:** `analysis_precedent_dataset_rows`
 - **Colunas:**
 - `analysis_id` - `String(26)`, `nullable=False`, parte da chave primaria
@@ -199,19 +199,19 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## Camada Database (Mappers)
 
-- **Localizacao:** `src/animus/database/sqlalchemy/mappers/intake/analysis_precedent_applicability_feedback_mapper.py` (**novo arquivo**)
+- **Localização:** `src/animus/database/sqlalchemy/mappers/intake/analysis_precedent_applicability_feedback_mapper.py` (**novo arquivo**)
 - **Metodos:**
 - `to_entity(model: AnalysisPrecedentApplicabilityFeedbackModel) -> AnalysisPrecedentApplicabilityFeedback` - reconstrui o feedback a partir do model ORM.
 - `to_model(entity: AnalysisPrecedentApplicabilityFeedback) -> AnalysisPrecedentApplicabilityFeedbackModel` - converte o feedback para persistencia.
 
-- **Localizacao:** `src/animus/database/sqlalchemy/mappers/intake/analysis_precedent_dataset_row_mapper.py` (**novo arquivo**)
+- **Localização:** `src/animus/database/sqlalchemy/mappers/intake/analysis_precedent_dataset_row_mapper.py` (**novo arquivo**)
 - **Metodos:**
 - `to_entity(model: AnalysisPrecedentDatasetRowModel) -> AnalysisPrecedentDatasetRow` - reconstrui a linha do dataset a partir do model ORM.
 - `to_model(entity: AnalysisPrecedentDatasetRow) -> AnalysisPrecedentDatasetRowModel` - converte a linha do dataset para persistencia.
 
 ## Camada Database (Repositorios)
 
-- **Localizacao:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedent_applicability_feedbacks_repository.py` (**novo arquivo**)
+- **Localização:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedent_applicability_feedbacks_repository.py` (**novo arquivo**)
 - **Interface implementada:** `AnalysisPrecedentApplicabilityFeedbacksRepository`
 - **Dependencias:** `Session` SQLAlchemy
 - **Metodos:**
@@ -219,7 +219,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - `add(feedback: AnalysisPrecedentApplicabilityFeedback) -> None` - persiste um feedback novo.
 - `replace(feedback: AnalysisPrecedentApplicabilityFeedback) -> None` - atualiza `applicability_level` e `created_at` do feedback existente.
 
-- **Localizacao:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedent_dataset_rows_repository.py` (**novo arquivo**)
+- **Localização:** `src/animus/database/sqlalchemy/repositories/intake/sqlalchemy_analysis_precedent_dataset_rows_repository.py` (**novo arquivo**)
 - **Interface implementada:** `AnalysisPrecedentDatasetRowsRepository`
 - **Dependencias:** `Session` SQLAlchemy
 - **Metodos:**
@@ -229,7 +229,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## Camada AI (Outputs Estruturados)
 
-- **Localizacao:** `src/animus/ai/agno/outputs/intake/analysis_precedents_applicability_classification_output.py` (**novo arquivo**)
+- **Localização:** `src/animus/ai/agno/outputs/intake/analysis_precedents_applicability_classification_output.py` (**novo arquivo**)
 - **Tipo:** `BaseModel`
 - **Atributos:**
 - `items: list[AnalysisPrecedentApplicabilityClassificationItemOutput]`
@@ -239,19 +239,19 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## Camada AI (Workflows)
 
-- **Localizacao:** `src/animus/ai/agno/workflows/intake/agno_classify_analysis_precedents_applicability_workflow.py` (**novo arquivo**)
+- **Localização:** `src/animus/ai/agno/workflows/intake/agno_classify_analysis_precedents_applicability_workflow.py` (**novo arquivo**)
 - **Interface implementada:** `ClassifyAnalysisPrecedentsApplicabilityWorkflow`
 - **Dependencias:** `PetitionSummariesRepository`, `CreateAnalysisPrecedentApplicabilityFeedbackUseCase`, `CreateAnalysisPrecedentDatasetRowUseCase`
 - **Metodo principal:** `run(analysis_id: str, analysis_precedents: list[AnalysisPrecedentDto]) -> list[AnalysisPrecedentDatasetRowDto]` - classifica a aplicabilidade, filtra itens de alta confianca e persiste feedbacks/linhas de dataset.
 - **Passos (`step.run`/workflow steps):**
 - `BUILD_CLASSIFICATION_INPUT` - carrega o `PetitionSummary` da analise e monta o prompt estruturado.
-- `CLASSIFY_PRECEDENTS_APPLICABILITY` - delega ao agente `GPT-4o` a classificacao de cada precedente.
+- `CLASSIFY_PRECEDENTS_APPLICABILITY` - delega ao agente `GPT-4o` a classificação de cada precedente.
 - `CREATE_CLASSIFICATIONS` - filtra `confidence=high`, cria feedbacks automaticos e dataset rows, retornando a lista final exportavel.
 - **Idempotencia:** a persistencia final usa `replace(...)` pela chave natural `analysis_id + precedent_id`.
 
 ## Camada PubSub (Jobs Inngest)
 
-- **Localizacao:** `src/animus/pubsub/inngest/jobs/intake/seed_analyses_precedents_dataset_job.py` (**novo arquivo**)
+- **Localização:** `src/animus/pubsub/inngest/jobs/intake/seed_analyses_precedents_dataset_job.py` (**novo arquivo**)
 - **Evento consumido:** `TriggerEvent(event='intake/seed-analyses-precedents-dataset.triggered')` diretamente no job; nao cria `Event` de dominio no `core`, porque o disparo e operacional.
 - **Dependencias:** `SqlalchemyAccountsRepository`, `SqlalchemyAnalysesRepository`, `SqlalchemyPetitionsRepository`, `SqlalchemyPetitionSummariesRepository`, `SqlalchemyAnalysisPrecedentsRepository`, novos repositories de feedback/dataset row, `GcsFileStorageProvider`, `ParquetProvider`, `GetDocumentContentUseCase`, `AgnoSummarizePetitionWorkflow`, `SearchAnalysisPrecedentsUseCase`, `CreateAnalysisPrecedentsUseCase`, `AgnoClassifyAnalysisPrecedentsApplicabilityWorkflow`.
 - **Passos (`step.run`):**
@@ -263,7 +263,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## Camada Providers
 
-- **Localizacao:** `src/animus/providers/storage/parquet/pyarrow_parquet_provider.py` (**novo arquivo**)
+- **Localização:** `src/animus/providers/storage/parquet/pyarrow_parquet_provider.py` (**novo arquivo**)
 - **Interface implementada (port):** `ParquetProvider`
 - **Biblioteca/SDK utilizado:** `pyarrow`
 - **Metodos:**
@@ -271,7 +271,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 ## Migracoes Alembic
 
-- **Localizacao:** `migrations/versions/`
+- **Localização:** `migrations/versions/`
 - **Operacoes:** criar `analysis_precedent_applicability_feedbacks` e `analysis_precedent_dataset_rows` com FKs compostas para `analysis_precedents`; nao recriar colunas de score ja existentes em `analysis_precedents`.
 - **Reversibilidade:** `downgrade` seguro com `drop_table(...)` das duas novas tabelas.
 
@@ -294,19 +294,19 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 - **Justificativa:** a linha do dataset precisa refletir a chave natural do label persistido e nao um ID inexistente.
 
 - **Arquivo:** `src/animus/core/intake/domain/structures/dtos/analysis_precedent_dataset_dto.py`
-- **Mudanca:** alinhar os campos do DTO de dataset row a chave composta e ao schema de exportacao.
-- **Justificativa:** permitir persistencia e serializacao em `parquet` sem campo artificial.
+- **Mudanca:** alinhar os campos do DTO de dataset row a chave composta e ao schema de exportação.
+- **Justificativa:** permitir persistencia e serialização em `parquet` sem campo artificial.
 
 - **Arquivo:** `src/animus/core/intake/interfaces/petitions_repository.py`
 - **Mudanca:** adicionar `find_by_document_file_path(file_path: FilePath) -> Petition | None`.
-- **Justificativa:** o seed precisa deduplicar arquivos ja processados para ser seguro em reexecucao.
+- **Justificativa:** o seed precisa deduplicar arquivos ja processados para ser seguro em reexecução.
 
 - **Arquivo:** `src/animus/core/intake/use_cases/search_analysis_precedents_use_case.py`
 - **Mudanca:** adicionar um parametro interno opcional de quantidade final retornada, por exemplo `results_limit: int | None = None`, mantendo o comportamento atual quando ausente.
-- **Justificativa:** o job precisa persistir `20` precedentes sem ampliar a validacao publica `5..10` usada pelos endpoints.
+- **Justificativa:** o job precisa persistir `20` precedentes sem ampliar a validação publica `5..10` usada pelos endpoints.
 
 - **Arquivo:** `src/animus/core/intake/interfaces/__init__.py`
-- **Mudanca:** exportar os novos ports criados para feedbacks, dataset rows e workflow de classificacao.
+- **Mudanca:** exportar os novos ports criados para feedbacks, dataset rows e workflow de classificação.
 - **Justificativa:** manter o package de interfaces coerente com o novo dominio publico do contexto.
 
 - **Arquivo:** `src/animus/core/storage/interfaces/__init__.py`
@@ -338,8 +338,8 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 ## AI
 
 - **Arquivo:** `src/animus/ai/agno/teams/intake_team.py`
-- **Mudanca:** adicionar um novo agente, por exemplo `analysis_precedents_applicability_classifier_agent`, usando `GPT-4o` e output estruturado de classificacao.
-- **Justificativa:** o time `intake` ja e o ponto padrao de composicao dos agentes juridicos do contexto.
+- **Mudanca:** adicionar um novo agente, por exemplo `analysis_precedents_applicability_classifier_agent`, usando `GPT-4o` e output estruturado de classificação.
+- **Justificativa:** o time `intake` ja e o ponto padrao de composição dos agentes juridicos do contexto.
 
 ## PubSub
 
@@ -361,7 +361,7 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 - **Arquivo:** `src/animus/providers/storage/__init__.py`
 - **Mudanca:** exportar `PyarrowParquetProvider`.
-- **Justificativa:** manter o package de providers de storage coerente com a nova implementacao.
+- **Justificativa:** manter o package de providers de storage coerente com a nova implementação.
 
 > Nao ha necessidade de alterar `controllers`, `routers`, `pipes` HTTP ou contratos REST existentes.
 
@@ -379,14 +379,14 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 - **Decisao:** o `SeedAnalysesPrecedentsDatasetJob` deve chamar diretamente `CreateAnalysisUseCase`, `CreatePetitionUseCase`, `AgnoSummarizePetitionWorkflow`, `SearchAnalysisPrecedentsUseCase` e `CreateAnalysisPrecedentsUseCase`, em vez de publicar `FistInstanceCaseSummarizationTriggeredEvent` e `AnalysisPrecedentsSearchRequestedEvent`.
 - **Alternativas consideradas:** disparar os jobs existentes de resumo e busca; duplicar toda a logica no job de seed.
-- **Motivo da escolha:** evita orquestracao assincrona aninhada, reduz latencia operacional e permite exportar o dataset ao final do mesmo lote.
+- **Motivo da escolha:** evita orquestração assincrona aninhada, reduz latencia operacional e permite exportar o dataset ao final do mesmo lote.
 - **Impactos / trade-offs:** o job fica mais longo e monta mais dependencias concretas, mas continua sem mover regra de negocio para a camada `pubsub`.
 
 ## 8.2 Manter a PK composta de `analysis_precedents`
 
 - **Decisao:** nao adicionar `id` proprio em `analysis_precedents`; os novos feedbacks e dataset rows devem referenciar `analysis_id + precedent_id`.
 - **Alternativas consideradas:** adicionar surrogate key em `analysis_precedents`; manter o campo `analysis_precedent_id` nas estruturas atuais.
-- **Motivo da escolha:** e a menor mudanca correta frente ao schema ja em producao e evita migracao invasiva em uma tabela ja usada pelo fluxo publico.
+- **Motivo da escolha:** e a menor mudanca correta frente ao schema ja em produção e evita migração invasiva em uma tabela ja usada pelo fluxo publico.
 - **Impactos / trade-offs:** as estruturas de feedback/dataset row precisam ser ajustadas, e os novos repositories passam a operar com chave natural composta.
 
 ## 8.3 Reusar as colunas de score ja existentes
@@ -399,8 +399,8 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 ## 8.4 Separar o limite interno `K=20` do contrato publico `5..10`
 
 - **Decisao:** adicionar override interno no `SearchAnalysisPrecedentsUseCase` para a quantidade final retornada, sem alterar `AnalysisPrecedentsSearchFilters` nem o endpoint publico.
-- **Alternativas consideradas:** ampliar a validacao global para `20`; duplicar o caso de uso de busca apenas para o seed.
-- **Motivo da escolha:** preserva compatibilidade retroativa e evita um segundo algoritmo de scoring/deduplicacao.
+- **Alternativas consideradas:** ampliar a validação global para `20`; duplicar o caso de uso de busca apenas para o seed.
+- **Motivo da escolha:** preserva compatibilidade retroativa e evita um segundo algoritmo de scoring/deduplicação.
 - **Impactos / trade-offs:** o caso de uso ganha um caminho interno adicional, que deve ser documentado e usado apenas pelo job tecnico.
 
 ## 8.5 Persistir apenas labels de alta confianca
@@ -414,26 +414,26 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 - **Decisao:** `AnalysisPrecedentApplicabilityFeedback` e `AnalysisPrecedentDatasetRow` devem usar apenas `analysis_id + precedent_id` como identificador unico.
 - **Alternativas consideradas:** incluir `is_from_human` na chave primaria para suportar label automatico e humano em paralelo.
-- **Motivo da escolha:** e o escopo explicitamente desejado para esta task e reduz a complexidade de schema, repositories e regras de substituicao.
-- **Impactos / trade-offs:** o sistema passa a manter um unico label por precedente da analise; se no futuro houver revisao humana paralela, sera necessaria nova migracao/modelagem.
+- **Motivo da escolha:** e o escopo explicitamente desejado para esta task e reduz a complexidade de schema, repositories e regras de substituição.
+- **Impactos / trade-offs:** o sistema passa a manter um unico label por precedente da analise; se no futuro houver revisao humana paralela, sera necessaria nova migração/modelagem.
 
 ## 8.7 Resolver a conta tecnica por e-mail fixo existente
 
 - **Decisao:** o job deve resolver a conta pelo e-mail `animus.ctrlaltdel@gmail.com` usando `AccountsRepository.find_by_email(...)`.
-- **Alternativas consideradas:** receber `account_id` por configuracao; criar conta automaticamente; hardcode de `account_id` literal.
+- **Alternativas consideradas:** receber `account_id` por configuração; criar conta automaticamente; hardcode de `account_id` literal.
 - **Motivo da escolha:** o dado operacional fornecido para a task e o e-mail da conta existente, e o repository ja suporta lookup por e-mail.
-- **Impactos / trade-offs:** a execucao depende da existencia previa dessa conta em cada ambiente onde o job for rodado.
+- **Impactos / trade-offs:** a execução depende da existencia previa dessa conta em cada ambiente onde o job for rodado.
 
 ## 8.8 Gerar o arquivo via `ParquetProvider`
 
-- **Decisao:** a serializacao do dataset para `.parquet` deve acontecer via `ParquetProvider`, e nao diretamente dentro do job.
+- **Decisao:** a serialização do dataset para `.parquet` deve acontecer via `ParquetProvider`, e nao diretamente dentro do job.
 - **Alternativas consideradas:** usar `pyarrow` diretamente no `SeedAnalysesPrecedentsDatasetJob`; usar `pandas`.
-- **Motivo da escolha:** escrever `parquet` e detalhe de infraestrutura; isolar isso em um port/adaptador preserva a camada `pubsub` como orquestracao e segue o padrao do projeto para `PdfProvider`, `DocxProvider` e demais providers.
+- **Motivo da escolha:** escrever `parquet` e detalhe de infraestrutura; isolar isso em um port/adaptador preserva a camada `pubsub` como orquestração e segue o padrao do projeto para `PdfProvider`, `DocxProvider` e demais providers.
 - **Impactos / trade-offs:** adiciona um port e um provider concreto a mais, mas evita acoplamento do job a `pyarrow.Table` e `write_table(...)`.
 
-## 8.9 Exportar `parquet` com nome unico por execucao
+## 8.9 Exportar `parquet` com nome unico por execução
 
-- **Decisao:** cada execucao deve gerar `intake/datasets/analyses-precedents/{ulid}-{date}.parquet`.
+- **Decisao:** cada execução deve gerar `intake/datasets/analyses-precedents/{ulid}-{date}.parquet`.
 - **Alternativas consideradas:** usar apenas `{date}.parquet`; sobrescrever o arquivo do mesmo dia.
 - **Motivo da escolha:** evita colisao entre execucoes no mesmo dia e facilita rastrear o artefato produzido por cada run.
 - **Impactos / trade-offs:** multiplos arquivos podem ser gerados no mesmo dia, exigindo criterio de consumo posterior fora do escopo desta task.
@@ -442,8 +442,8 @@ Implementar um job tecnico de `Inngest` que percorre as peticoes da Xertica ja a
 
 - **Decisao:** o fluxo deve trabalhar com dois caminhos distintos no `export_dataset`: um `local_file_path` temporario para a escrita do `.parquet` e um `bucket_file_path` final em `intake/datasets/analyses-precedents/{ulid}-{date}.parquet` para upload.
 - **Alternativas consideradas:** fazer o `ParquetProvider` escrever diretamente no bucket; reutilizar o mesmo valor de `FilePath` para escrita local e remota.
-- **Motivo da escolha:** a escrita com `pyarrow` acontece no filesystem local do processo, enquanto o artefato definitivo precisa existir como objeto remoto no `GCS`; explicitar os dois caminhos elimina ambiguidade de implementacao.
-- **Impactos / trade-offs:** o job precisa coordenar a etapa adicional de upload e limpeza do arquivo temporario, mas o contrato do provider fica simples e focado em serializacao.
+- **Motivo da escolha:** a escrita com `pyarrow` acontece no filesystem local do processo, enquanto o artefato definitivo precisa existir como objeto remoto no `GCS`; explicitar os dois caminhos elimina ambiguidade de implementação.
+- **Impactos / trade-offs:** o job precisa coordenar a etapa adicional de upload e limpeza do arquivo temporario, mas o contrato do provider fica simples e focado em serialização.
 
 ---
 

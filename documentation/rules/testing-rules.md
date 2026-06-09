@@ -11,9 +11,9 @@ no `animus-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP e
 - Ferramenta: `pytest`
 - Comando padrao (task runner): `poe test` (executa `pytest -s -x -vv`)
 
-### Configuracao
+### Configuração
 
-- Arquivo: `pyproject.toml` (secao `[tool.pytest.ini_options]`)
+- Arquivo: `pyproject.toml` (seção `[tool.pytest.ini_options]`)
 - Defaults relevantes do repo:
   - `testpaths = ["tests"]`
   - `pythonpath = [".", "src"]` (imports a partir de `animus` funcionam nos testes)
@@ -31,12 +31,12 @@ no `animus-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP e
 ### Controllers (REST)
 
 - Leia `documentation/rules/controllers-testing-rules.md` antes de criar/alterar/revisar testes em `tests/rest/controllers/**`.
-- Use quando o alvo e contrato HTTP (status code, payload, validacao de entrada, comportamento do endpoint).
+- Use quando o alvo e contrato HTTP (status code, payload, validação de entrada, comportamento do endpoint).
 
 ### Jobs PubSub (Inngest)
 
 - Leia `documentation/rules/jobs-testing-rules.md` antes de criar/alterar/revisar testes em `tests/pubsub/inngest/jobs/**`.
-- Use quando o alvo e um job assincrono em `src/animus/pubsub/inngest/jobs/**`, com foco no evento consumido, na orquestracao do runtime e no side effect observavel.
+- Use quando o alvo e um job assincrono em `src/animus/pubsub/inngest/jobs/**`, com foco no evento consumido, na orquestração do runtime e no side effect observavel.
 
 ### Mudanca envolve mais de uma camada
 
@@ -52,9 +52,9 @@ no `animus-server` (Clean/Hexagonal: `core` puro, `rest` como borda HTTP e
 - Testes de `pubsub`: `tests/pubsub/inngest/jobs/<contexto>/` (jobs assincronos via runtime do Inngest)
 - Fakers: `tests/fakers/**` (massa de teste reutilizavel)
 
-### AAA + intencao unica
+### AAA + intenção unica
 
-- Mantenha Arrange / Act / Assert com separacao por linha em branco.
+- Mantenha Arrange / Act / Assert com separação por linha em branco.
 - Um teste deve validar uma unica regra/comportamento observavel.
 
 ### Banco de dados e infraestrutura em testes

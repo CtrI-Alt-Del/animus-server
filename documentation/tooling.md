@@ -1,18 +1,18 @@
 # Tooling do Projeto
 
-Este documento centraliza os comandos usados para validacao local do projeto Animus Server.
+Este documento centraliza os comandos usados para validação local do projeto Animus Server.
 
 ## Pre-requisito
 
-Antes de executar qualquer validacao, instale as dependencias do projeto:
+Antes de executar qualquer validação, instale as dependencias do projeto:
 
 ```bash
 uv sync
 ```
 
-## Execucao da aplicacao
+## Execução da aplicação
 
-Para executar a aplicacao em modo de desenvolvimento:
+Para executar a aplicação em modo de desenvolvimento:
 
 ```bash
 uv run poe dev
@@ -28,7 +28,7 @@ uv run poe typecheck
 
 ## Codecheck
 
-Para garantir padrao de formatacao e validacao estatica, execute:
+Para garantir padrao de formatação e validação estatica, execute:
 
 ```bash
 uv run poe codecheck

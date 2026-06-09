@@ -9,7 +9,7 @@
 | Aspecto | Diretriz |
 |---|---|
 | **Objetivo** | Expor a API HTTP e adaptar `request` para fluxos do `core`. |
-| **Papel arquitetural** | Ser a borda de entrada HTTP da aplicacao. |
+| **Papel arquitetural** | Ser a borda de entrada HTTP da aplicação. |
 | **Entrada principal** | `request`, `query params`, `path params`, `body`, `headers` e `dependencies`. |
 | **Saida principal** | Respostas HTTP baseadas em `DTOs`, `responses` e `schemas` estaveis. |
 
@@ -21,7 +21,7 @@
 
 ### Limites da camada
 
-- Pode depender de `FastAPI`, `pipes`, `validation`, `core` e contratos de resposta da aplicacao.
+- Pode depender de `FastAPI`, `pipes`, `validation`, `core` e contratos de resposta da aplicação.
 - Nao deve conter regra de negocio, `query SQL`, modelagem ORM ou acoplamento forte a implementacoes concretas de infraestrutura.
 - Deve agir como borda de entrada: validar, adaptar, delegar e responder.
 
@@ -35,24 +35,24 @@
 |---|---|
 | `src/animus/rest/controllers/` | Agrupamento de `controllers` por contexto funcional. |
 | `src/animus/rest/controllers/<context>/` | Endpoints HTTP do contexto, como `auth`, `profiling`, `matching`, `conversation`, `storage` e `docs`. |
-| `src/animus/rest/middlewares/` | `Middlewares` por `request` para sessao e clientes anexados ao estado da aplicacao. |
+| `src/animus/rest/middlewares/` | `Middlewares` por `request` para sessao e clientes anexados ao estado da aplicação. |
 
-### Regras de organizacao e nomeacao
+### Regras de organização e nomeação
 
 - Cada endpoint deve viver em um `controller` dedicado e no contexto correto.
-- `Controllers` devem seguir convencao `*Controller` e expor registro por `handle(router)`.
+- `Controllers` devem seguir convenção `*Controller` e expor registro por `handle(router)`.
 - `Middlewares` devem encapsular infraestrutura transversal, nao regra de negocio.
 - Nao especificar arquivos especificos, pois isso muda constantemente.
 
 ## Glossario arquitetural da camada
 
-| Termo | Definicao |
+| Termo | Definição |
 |---|---|
 | `Controller` | Adaptador HTTP que recebe `request`, resolve dependencias e delega ao `UseCase`. |
 | `Middleware` | Componente transversal executado por `request` para abrir ou anexar recursos. |
-| `Depends` | Mecanismo de injecao do `FastAPI` para montar `repositories`, providers, `guards` e dependencias reutilizaveis. |
+| `Depends` | Mecanismo de injeção do `FastAPI` para montar `repositories`, providers, `guards` e dependencias reutilizaveis. |
 | `response_model` | Contrato de saida do endpoint; deve refletir `DTOs`, `responses` ou `schemas`, nunca `ORM`. |
-| `Schema` | Estrutura de validacao e serializacao usada na borda HTTP. |
+| `Schema` | Estrutura de validação e serialização usada na borda HTTP. |
 
 ## Padroes de Projeto
 
@@ -67,8 +67,8 @@
 
 - Todo `controller` deve registrar rota, declarar `status_code` e `response_model`, resolver dependencias e chamar `UseCase.execute(...)`.
 - Conversoes de entrada devem acontecer na borda, preferencialmente via `schema` ou dependencia tipada.
-- `Repositories`, `brokers` e providers devem entrar por `pipes`, evitando instanciacao manual repetida.
-- `Errors` de dominio devem subir para os `handlers` globais da aplicacao e ser traduzidos fora do `core`.
+- `Repositories`, `brokers` e providers devem entrar por `pipes`, evitando instanciação manual repetida.
+- `Errors` de dominio devem subir para os `handlers` globais da aplicação e ser traduzidos fora do `core`.
 
 ### Quando evitar
 
@@ -76,9 +76,9 @@
 - Nao usar `middleware` para regra de negocio; ele existe para infraestrutura e concerns transversais.
 - Nao transformar o endpoint em `composition root` pesado quando um `pipe` resolve a dependencia de forma mais limpa.
 
-## Regras de Integracao com Outras Camadas
+## Regras de Integração com Outras Camadas
 
-### Mapa de integracao
+### Mapa de integração
 
 | Camada | Como integra com `rest` | Regra |
 |---|---|---|
@@ -92,7 +92,7 @@
 - `rest` pode depender de `core`, `validation`, `pipes` e mecanismos do `FastAPI`.
 - `rest` nao deve depender diretamente de `models` ORM, `query SQL` ou SDKs que deveriam entrar por `pipes`.
 
-### Contratos de comunicacao
+### Contratos de comunicação
 
 - Entrada HTTP deve ser validada por `schemas`, parametros tipados ou `dependencies` equivalentes.
 - Saida HTTP deve usar `DTOs`, `responses` ou `schemas` de saida.
@@ -110,16 +110,16 @@
 ## ✅ O que DEVE conter
 
 - `Controllers` finos, rotas explicitas e contratos HTTP claros.
-- Injecao de dependencias por `Depends(...)` e `pipes`.
-- `Middlewares` para recursos por `request` e adaptacao transversal.
+- Injeção de dependencias por `Depends(...)` e `pipes`.
+- `Middlewares` para recursos por `request` e adaptação transversal.
 - Conversao de entrada antes do `core`.
-- `Handlers` globais como ponto de traducao de erro para HTTP.
+- `Handlers` globais como ponto de tradução de erro para HTTP.
 
 ## ❌ O que NUNCA deve conter
 
-- Regra de negocio, `query SQL`, acesso direto a `ORM` ou controle manual de transacao dentro do endpoint.
+- Regra de negocio, `query SQL`, acesso direto a `ORM` ou controle manual de transação dentro do endpoint.
 - Contrato de resposta baseado em `Model` ORM.
-- Instanciacao espalhada de adaptadores concretos que poderiam ser reutilizados via `pipes`.
+- Instanciação espalhada de adaptadores concretos que poderiam ser reutilizados via `pipes`.
 - `Middleware` carregando fluxo de feature em vez de concern transversal.
 - Nomear Body com contexto em vez de `_Body`
 

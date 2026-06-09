@@ -2,12 +2,12 @@
 
 ## Visao Geral
 
-O animus Server usa arquitetura em camadas inspirada em Clean Architecture e Hexagonal Architecture (Ports and Adapters). O objetivo e reduzir acoplamento, isolar regra de negocio no `core` e facilitar testes unitarios e de integracao.
+O animus Server usa arquitetura em camadas inspirada em Clean Architecture e Hexagonal Architecture (Ports and Adapters). O objetivo e reduzir acoplamento, isolar regra de negocio no `core` e facilitar testes unitarios e de integração.
 
 ## Principios da Arquitetura
 
 - **Dependencias para dentro**: camadas externas dependem das internas; o `core` nao depende de infraestrutura.
-- **Separacao de responsabilidades**: cada camada tem um papel unico (dominio, transporte HTTP, persistencia, integracoes).
+- **Separação de responsabilidades**: cada camada tem um papel unico (dominio, transporte HTTP, persistencia, integracoes).
 - **Ports and Adapters**: o `core` define contratos e as camadas externas implementam adaptadores concretos.
 - **Use cases como orquestradores**: fluxos de negocio passam por `UseCase`, evitando logica espalhada.
 - **Inversao de Dependencias**: controllers e jobs consomem interfaces do `core`, nao implementacoes concretas.
@@ -19,13 +19,13 @@ O animus Server usa arquitetura em camadas inspirada em Clean Architecture e Hex
 
 - **Core (`src/animus/core/`)**: Entidades, DTOs, erros de dominio, interfaces (ports) e use cases.
 - **Rest (`src/animus/rest/`)**: Controllers HTTP e middlewares de request (sessao SQLAlchemy e client Inngest).
-- **Routers (`src/animus/routers/`)**: Composicao de rotas por contexto e registro de endpoints.
+- **Routers (`src/animus/routers/`)**: Composição de rotas por contexto e registro de endpoints.
 - **Pipes (`src/animus/pipes/`)**: Providers de dependencia para `Depends(...)` (repositorios, auth, broker e upload).
 - **Validation (`src/animus/validation/`)**: Schemas Pydantic de entrada/saida e conversao para DTO.
 - **Database (`src/animus/database/`)**: Models SQLAlchemy, mappers e implementacoes concretas de repositorios.
 - **Providers (`src/animus/providers/`)**: Adaptadores de infraestrutura.
 - **AI (`src/animus/ai/`)**: Workflows, squads e saídas estruturadas com Agno/Gemini para casos de uso síncronos guiados pelo `core`.
-- **PubSub (`src/animus/pubsub/`)**: Orquestracao assincrona por eventos (Inngest).
+- **PubSub (`src/animus/pubsub/`)**: Orquestração assincrona por eventos (Inngest).
 
 ## Fluxo de Dados (resumo)
 
@@ -33,7 +33,7 @@ HTTP Request -> Middleware -> Router -> Controller -> UseCase (`core`) -> Reposi
 
 Eventos assincronos: UseCase publica evento via `Broker` -> PubSub (Inngest) -> Job/Canal WebSocket -> Cliente conectado.
 
-Fluxos de autenticacao ja implementados:
+Fluxos de autenticação ja implementados:
 - `POST /auth/sign-up` -> `SignUpController` -> `SignUpUseCase` -> `AccountsRepository` / `HashProvider` / `OtpProvider` / `CacheProvider` -> `Broker` -> `SendAccountVerificationEmailJob` -> `EmailSenderProvider`.
 - `POST /auth/resend-verification-email` -> `ResendVerificationEmailController` -> `ResendVerificationEmailUseCase` -> `AccountsRepository` / `OtpProvider` / `CacheProvider` -> `Broker` -> `SendAccountVerificationEmailJob`.
 - `POST /auth/verify-email` -> `VerifyEmailController` -> `VerifyEmailUseCase` -> `AccountsRepository` / `CacheProvider` / `JwtProvider` -> `SessionDto`.
@@ -84,15 +84,15 @@ Fluxo assincrono de minuta de sentença:
 - `SecondInstanceJudgmentDraftRegenerationTriggeredEvent` -> `RegenerateSecondInstanceJudgmentDraftJob` -> `UpdateAnalysisStatusUseCase` (`GENERATING_JUDGMENT_DRAFT`) -> `AgnoRegenerateSecondInstanceJudgmentDraftWorkflow` com minuta atual + `CaseSummary` + precedentes escolhidos + comentários do usuário -> `CreateSecondInstanceJudgmentDraftUseCase` -> substituição em PostgreSQL (`judgment_drafts`) / `SecondInstanceJudgmentDraftGenerationFinishedEvent` com `analysis_type`.
 
 Fluxo assincrono de precedentes:
-- `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratacao de precedentes.
+- `AnalysisPrecedentsSearchRequestedEvent` -> `SearchAnalysisPrecedentsJob` -> `UpdateAnalysisStatusUseCase` (`SEARCHING_PRECEDENTS`) -> `SearchAnalysisPrecedentsUseCase` -> busca vetorial + hidratação de precedentes.
 - O mesmo job segue para `GENERATING_SYNTHESIS`, executa o workflow de sintese, substitui os `analysis_precedents` persistidos e publica `PrecedentsSearchFinishedEvent` com `analysis_type` ao concluir em `WAITING_PRECEDENT_CHOISE`.
 - Em falhas nao tratadas, o job marca a `Analysis` como `FAILED`, preservando observabilidade por polling via status persistido.
 
 Fluxo assincrono de notificacoes push:
-- Eventos de conclusao (`CaseSummaryFinishedEvent`, `PetitionSummaryFinishedEvent`, `PrecedentsSearchFinishedEvent`, `PetitionDraftGenerationFinishedEvent` e `SecondInstanceJudgmentDraftGenerationFinishedEvent`) -> jobs de notificacao do Inngest -> use cases de `core/notification` -> `PushNotificationProvider` -> `OneSignalPushNotificationProvider`.
+- Eventos de conclusao (`CaseSummaryFinishedEvent`, `PetitionSummaryFinishedEvent`, `PrecedentsSearchFinishedEvent`, `PetitionDraftGenerationFinishedEvent` e `SecondInstanceJudgmentDraftGenerationFinishedEvent`) -> jobs de notificação do Inngest -> use cases de `core/notification` -> `PushNotificationProvider` -> `OneSignalPushNotificationProvider`.
 - O `data` enviado ao OneSignal preserva `type` e `analysis_id` e inclui `analysis_type` para permitir deep link correto no mobile.
 
-Fluxo assincrono de substituicao de petição:
+Fluxo assincrono de substituição de petição:
 - `CreatePetitionUseCase` detecta petição anterior, publica `AnalysisDocumentReplacedEvent`, remove a petição antiga com cascade do `PetitionSummary` e atualiza a `Analysis` para `PETITION_UPLOADED` antes de persistir a nova petição.
 - `AnalysisDocumentReplacedEvent` -> `RemovePetitionDocumentFileJob` -> `GcsFileStorageProvider.remove_files(...)`, tratando blob inexistente como no-op para manter idempotencia.
 
@@ -101,7 +101,7 @@ Fluxo assincrono de substituicao de petição:
 - **Clean + Hexagonal** para separar regra de negocio de infraestrutura.
 - **Use Case** como ponto de entrada da regra de negocio.
 - **Port and Adapter** para repositorios, broker e providers externos.
-- **Data Mapper** para traducao dominio <-> ORM.
+- **Data Mapper** para tradução dominio <-> ORM.
 - **Dependency Injection** por `Depends(...)` e Pipes.
 - **Event-Driven** para notificacoes e processamento assincrono.
 
@@ -109,7 +109,7 @@ Fluxo assincrono de substituicao de petição:
 
 - `core` nao depende de FastAPI, SQLAlchemy, Redis ou Inngest.
 - Controllers sao finos: validam, convertem e delegam para use case.
-- Transacao SQLAlchemy e controlada por middleware por request/job.
+- Transação SQLAlchemy e controlada por middleware por request/job.
 - Repositorios concretos vivem em `database`, contratos vivem no `core`.
 - Eventos de dominio sao publicados por interface `Broker`, nao por SDK direto no dominio.
 
@@ -127,33 +127,33 @@ Fluxo assincrono de substituicao de petição:
 |------------|--------|------------|
 | **Linguagem** | Python 3.13+ | Linguagem principal |
 | **Framework** | FastAPI | API HTTP e DI |
-| **Servidor ASGI** | Uvicorn (`fastapi[standard]`) | Runtime da aplicacao |
+| **Servidor ASGI** | Uvicorn (`fastapi[standard]`) | Runtime da aplicação |
 | **Banco de Dados** | PostgreSQL | Persistencia relacional |
 | **ORM** | SQLAlchemy | Mapeamento e repositorios |
-| **Banco Vetorial** | Qdrant | Indexacao e busca semantica de precedentes |
+| **Banco Vetorial** | Qdrant | Indexação e busca semantica de precedentes |
 | **Driver SQL** | Psycopg 3 (`psycopg[binary]`) | Conexao PostgreSQL |
 | **Migracoes** | Alembic | Versionamento de schema |
 | **Cache/PubSub** | Redis | Cache e eventos em tempo real |
 | **Jobs/Eventos** | Inngest | Processamento assincrono |
-| **Validacao** | Pydantic | Schemas de request/response |
+| **Validação** | Pydantic | Schemas de request/response |
 | **Testes** | Pytest | Suite de testes |
 | **Lint/Format** | Ruff | Qualidade de codigo |
 | **Type Check** | Pyright | Checagem estatica de tipos |
-| **Task Runner** | Poe the Poet | Automacao de tarefas |
+| **Task Runner** | Poe the Poet | Automação de tarefas |
 | **Dependencias** | uv | Gerenciamento de pacotes |
 | **Infra Local** | Docker Compose | Ambientes locais (db/cache) |
 
 ## Infraestrutura de Hospedagem
 
-No ambiente de producao, os servicos principais estao distribuidos da seguinte forma:
+No ambiente de produção, os servicos principais estao distribuidos da seguinte forma:
 
-| Servico | Plataforma | Observacao |
+| Servico | Plataforma | Observação |
 |---|---|---|
-| **API FastAPI** | Google Cloud Run | Executa a aplicacao HTTP em container (deploy serverless). |
+| **API FastAPI** | Google Cloud Run | Executa a aplicação HTTP em container (deploy serverless). |
 | **PostgreSQL** | Supabase | Banco relacional gerenciado para persistencia principal. |
-| **Qdrant** | Qdrant Cloud | Banco vetorial gerenciado para indexacao e busca semantica de precedentes. |
+| **Qdrant** | Qdrant Cloud | Banco vetorial gerenciado para indexação e busca semantica de precedentes. |
 | **Redis** | Upstash | Cache e pub/sub em servico gerenciado. |
-| **Inngest** | Inngest Cloud | Orquestracao de jobs e eventos assincronos. |
+| **Inngest** | Inngest Cloud | Orquestração de jobs e eventos assincronos. |
 
 ## Estrutura de Diretorios (essencial)
 

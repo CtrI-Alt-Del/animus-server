@@ -8,7 +8,7 @@ last_updated_at: 2026-05-27
 
 # 1. Objetivo
 
-Implementar a extração determinística das peças processuais mais importantes para análise de segunda instância, usando exclusivamente o `outline` nativo do PDF dos autos. A entrega cria estruturas e use case em `core/storage`, estende o `PdfProvider` e o `PypdfPdfProvider` para ler bookmarks, substitui no job de segunda instância a extração por LLM/cache pela extração por outline, concatena `sentenca`, `apelacao` e `contrarrazoes` como `document_content`, e ajusta os status persistidos para refletir sucesso ou abort específico da extração de peças processuais, desbloqueando a sumarização que alimenta a geração posterior de minuta de decisão/acórdão de segunda instância.
+Implementar a extração determinística das peças processuais mais importantes para análise de segunda instância, usando exclusivamente o `outline` nativo do PDF dos autos. A entrega cria estruturas e use case em `core/storage`, estende o `PdfProvider` e o `PypdfPdfProvider` para ler bookmarks, substitui no job de segunda instância a extração por LLM/cache pela extração por outline, concatena `sentenca`, `apelação` e `contrarrazoes` como `document_content`, e ajusta os status persistidos para refletir sucesso ou abort específico da extração de peças processuais, desbloqueando a sumarização que alimenta a geração posterior de minuta de decisão/acórdão de segunda instância.
 
 # 2. Escopo
 
@@ -43,13 +43,13 @@ Implementar a extração determinística das peças processuais mais importantes
 - Ao processar uma análise `SECOND_INSTANCE`, o job deve baixar o PDF dos autos a partir de `AnalysisDocument.file_path` e extrair as peças por outline.
 - A extração deve priorizar as peças indicadas pelo Glossário Jurídico como entradas mais importantes para minuta de decisão de segunda instância: `Sentença`, `Apelação` e `Contrarrazões`, quando houver.
 - Se o PDF não possuir outline utilizável, o use case deve levantar `CourtDocumentIndexNotFoundError`.
-- Se `sentenca` ou `apelacao` não forem encontradas por string matching no outline, o use case deve levantar `InsufficientCourtDocumentError`.
+- Se `sentenca` ou `apelação` não forem encontradas por string matching no outline, o use case deve levantar `InsufficientCourtDocumentError`.
 - `contrarrazoes` são opcionais; a ausência desse tipo de peça não deve abortar o fluxo.
 - Os ranges de páginas devem ser derivados diretamente do outline bruto, sem LLM e sem sliding window.
 - Múltiplas sentenças devem ser extraídas e concatenadas em ordem crescente de página.
 - Múltiplas contrarrazões devem ser extraídas e concatenadas em ordem crescente de página.
 - Quando houver entradas `Apelação em PDF` e `Apelação`, a extração deve preferir as entradas com `em PDF`.
-- O `document_content` enviado para `AgnoSummarizeSecondInstanceCaseWorkflow` deve concatenar as peças na ordem estável `sentenca`, `apelacao`, `contrarrazoes`.
+- O `document_content` enviado para `AgnoSummarizeSecondInstanceCaseWorkflow` deve concatenar as peças na ordem estável `sentenca`, `apelação`, `contrarrazoes`.
 - O job deve marcar a análise como `COURT_DOCUMENT_PIECES_NOT_FOUND` para aborts de domínio causados por outline ausente ou peças obrigatórias ausentes.
 - O job deve marcar a análise como `FAILED` para falhas operacionais não tratadas, como PDF corrompido, erro de storage ou exceção inesperada no provider.
 
@@ -58,8 +58,8 @@ Regras de classificação por `CourtDocumentOutline._classify(...)`:
 | Título normalizado | Resultado |
 |---|---|
 | Contém `sentenca` | `CourtDocumentPieceKind.SENTENCA` |
-| Contém `apelacao em pdf` | `CourtDocumentPieceKind.APELACAO`, com preferência sobre entradas genéricas |
-| Contém `apelacao` | `CourtDocumentPieceKind.APELACAO` |
+| Contém `apelação em pdf` | `CourtDocumentPieceKind.APELACAO`, com preferência sobre entradas genéricas |
+| Contém `apelação` | `CourtDocumentPieceKind.APELACAO` |
 | Contém `contrarrazoes` ou `contra-razoes` | `CourtDocumentPieceKind.CONTRARRAZOES` |
 
 O título deve ser normalizado com `casefold()`, remoção de acentos e `strip()` antes do matching.
@@ -129,7 +129,7 @@ O título deve ser normalizado com `casefold()`, remoção de acentos e `strip()
 
 - **Localização:** `src/animus/core/storage/domain/structures/court_document_piece_kind.py` (**novo arquivo**)
 - **Tipo:** `StrEnum` auxiliar de domínio
-- **Atributos:** `SENTENCA = 'sentenca'`, `APELACAO = 'apelacao'`, `CONTRARRAZOES = 'contrarrazoes'`
+- **Atributos:** `SENTENCA = 'sentenca'`, `APELACAO = 'apelação'`, `CONTRARRAZOES = 'contrarrazoes'`
 - **Métodos / factory:** Não aplicável.
 
 - **Localização:** `src/animus/core/storage/domain/structures/pdf_outline_item.py` (**novo arquivo**)
@@ -147,15 +147,15 @@ O título deve ser normalizado com `casefold()`, remoção de acentos e `strip()
 - **Atributos:** `items: list[CourtDocumentOutlineItem]`
 - **Métodos / factory:** `create_from_pdf_outline_items(pdf_outline_items: list[PdfOutlineItem]) -> CourtDocumentOutline` — classifica os itens relevantes por string matching, preserva ordem e valida presença de sentença e apelação; lança `InsufficientCourtDocumentError` se faltar peça obrigatória.
 - **Métodos / factory:** `find_sentencas() -> list[CourtDocumentOutlineItem]` — retorna sentenças ordenadas por `page_start`.
-- **Métodos / factory:** `find_apelacoes() -> list[CourtDocumentOutlineItem]` — retorna apelações ordenadas por `page_start`, preferindo títulos com `apelacao em pdf` quando existirem.
+- **Métodos / factory:** `find_apelacoes() -> list[CourtDocumentOutlineItem]` — retorna apelações ordenadas por `page_start`, preferindo títulos com `apelação em pdf` quando existirem.
 - **Métodos / factory:** `find_contrarrazoes() -> list[CourtDocumentOutlineItem]` — retorna contrarrazões ordenadas por `page_start`.
 - **Métodos / factory:** `has_required_pieces() -> bool` — retorna `True` quando há pelo menos uma sentença e uma apelação.
 - **Métodos / factory:** `_classify(title: Text) -> CourtDocumentPieceKind | None` — aplica as regras de matching descritas nesta spec.
 
 - **Localização:** `src/animus/core/storage/domain/structures/extracted_court_document_pieces.py` (**novo arquivo**)
 - **Tipo:** `@structure`
-- **Atributos:** `sentenca: Text`, `apelacao: Text`, `contrarrazoes: Text | None`
-- **Métodos / factory:** `create(sentenca: Text, apelacao: Text, contrarrazoes: Text | None = None) -> ExtractedCourtDocumentPieces` — cria o resultado da extração após validação feita por `CourtDocumentOutline`.
+- **Atributos:** `sentenca: Text`, `apelação: Text`, `contrarrazoes: Text | None`
+- **Métodos / factory:** `create(sentenca: Text, apelação: Text, contrarrazoes: Text | None = None) -> ExtractedCourtDocumentPieces` — cria o resultado da extração após validação feita por `CourtDocumentOutline`.
 
 ## Camada Core (Erros de Domínio)
 
@@ -237,7 +237,7 @@ O título deve ser normalizado com `casefold()`, remoção de acentos e `strip()
 - **Justificativa:** o use case recebe `FileDto`, enquanto o `PdfProvider` permanece recebendo `File` internamente conforme contrato existente.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/summarize_second_instance_case_job.py`
-- **Mudança:** montar `document_content: Text` com cabeçalhos estáveis para `sentenca`, `apelacao` e `contrarrazoes` quando existirem, e passar esse valor para `AgnoSummarizeSecondInstanceCaseWorkflow.run(...)`.
+- **Mudança:** montar `document_content: Text` com cabeçalhos estáveis para `sentenca`, `apelação` e `contrarrazoes` quando existirem, e passar esse valor para `AgnoSummarizeSecondInstanceCaseWorkflow.run(...)`.
 - **Justificativa:** o workflow precisa receber um texto único, mas com separação explícita entre peças para reduzir ambiguidade no prompt.
 
 - **Arquivo:** `src/animus/pubsub/inngest/jobs/intake/summarize_second_instance_case_job.py`
@@ -266,7 +266,7 @@ O título deve ser normalizado com `casefold()`, remoção de acentos e `strip()
 | Adicionar `EXTRACTING_COURT_DOCUMENT_PIECES` como status de processamento. | Manter `EXTRACTING_PETITION` durante a extração. | O fluxo processado pelo job muda de petição inicial para peças processuais. | Há novo valor observável em `GET /status`; `EXTRACTING_PETITION` permanece no enum para compatibilidade com dados ou fluxos legados. |
 | Não persistir cache das peças extraídas. | Criar tabela de cache ou reaproveitar `extracted_petitions`. | A extração por outline é determinística e barata o suficiente para reexecução; as peças extraídas podem ser extensas e não há requisito de leitura posterior. | Reprocessamentos relerão o PDF, mas evitam migration e persistência de texto jurídico sensível adicional. |
 | Manter estruturas de extração em `core/storage`. | Criar os tipos em `core/intake`. | A leitura/classificação de peças de PDF é um fluxo de documento/storage e não depende de HTTP, DB, Inngest ou AI. | `core/intake` só conhece os efeitos via status e job; o processamento documental fica isolado. |
-| Preferir títulos com `apelacao em pdf` quando existirem. | Concatenar todas as entradas de apelação ou escolher a primeira entrada genérica. | O Jira explicita a preferência por `Apelação em PDF`. | Se houver mais de uma entrada preferencial, todas devem ser concatenadas em ordem de página. |
+| Preferir títulos com `apelação em pdf` quando existirem. | Concatenar todas as entradas de apelação ou escolher a primeira entrada genérica. | O Jira explicita a preferência por `Apelação em PDF`. | Se houver mais de uma entrada preferencial, todas devem ser concatenadas em ordem de página. |
 | Não remover o pipeline legado de extração de petição nesta tarefa. | Remover workflow, repository, model e migration de `extracted_petitions`. | Remoção exigiria análise de consumidores e possível cleanup de dados fora do recorte da task. | Código legado pode ficar sem uso neste fluxo até uma refatoração dedicada. |
 
 # 9. Diagramas e Referências
@@ -303,7 +303,7 @@ SecondInstanceCaseSummarizationTriggeredEvent(analysis_id)
       -> CourtDocumentOutline.create_from_pdf_outline_items(pdf_outline_items)
       -> PdfProvider.count_pages(File)
       -> PdfProvider.extract_pages(File, page_start, page_end)
-      -> ExtractedCourtDocumentPieces(sentenca, apelacao, contrarrazoes?)
+      -> ExtractedCourtDocumentPieces(sentenca, apelação, contrarrazoes?)
   -> Text.create(document_content com cabeçalhos por peça)
   -> UpdateAnalysisStatusUseCase(..., ANALYZING_CASE)
   -> AgnoSummarizeSecondInstanceCaseWorkflow.run(analysis_id, document_content)

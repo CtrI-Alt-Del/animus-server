@@ -1,5 +1,5 @@
 ---
-description: Implementar spec tecnica com execucao iterativa e validacoes por camada
+description: Implementar spec tecnica com execução iterativa e validacoes por camada
 ---
 
 # Prompt: Implementar spec (animus-server)
@@ -25,37 +25,37 @@ Antes de escrever codigo:
 Proibicoes:
 
 - Nao assumir padrao generico (Clean/MVC) sem seguir as regras do repo.
-- Nao implementar "do seu jeito" quando ja existir convencao/proximo exemplo nos testes.
+- Nao implementar "do seu jeito" quando ja existir convenção/proximo exemplo nos testes.
 
 ---
 
-## Diretrizes de execucao
+## Diretrizes de execução
 
-### 1) Validacao de arquitetura (o que ler)
+### 1) Validação de arquitetura (o que ler)
 
 - Arquitetura geral: `documentation/architecture.md`
 - Regras por camada:
   - `documentation/rules/core-layer-rules.md`
   - `documentation/rules/database-layer-rules.md`
   - `documentation/rules/rest-layer-rules.md`
-- Padrao de codigo/organizacao: `documentation/rules/code-conventions-rules.md`
+- Padrao de codigo/organização: `documentation/rules/code-conventions-rules.md`
 - Testes (indice + docs especializadas):
   - `documentation/rules/testing-rules.md`
   - `documentation/rules/use-cases-testing-rules.md` (quando for `core`)
   - `documentation/rules/controllers-testing-rules.md` (quando for `rest`)
 
-### 2) Decomposicao atomica
+### 2) Decomposição atomica
 
 - Quebre o plano em micro-tarefas que gerem codigo funcional a cada passo.
 - Evite PRs gigantes: prefira progresso incremental com testes acompanhando.
 
-### 3) Ordem de execucao (bottom-up)
+### 3) Ordem de execução (bottom-up)
 
 Implemente respeitando dependencia apontando para dentro:
 
 1) `core`: entidades/structures/DTOs, erros de dominio, interfaces (ports), use cases.
 2) `database`: models/mappers/repositorios SQLAlchemy (implementando ports).
-3) `rest`: routers/controllers + validacao (Pydantic) + injecao de dependencia.
+3) `rest`: routers/controllers + validação (Pydantic) + injeção de dependencia.
 4) Ajustes de wiring (app/DI/middlewares), se necessario.
 
 Regra: nao implemente um consumidor (ex.: controller) antes da logica (use case)
@@ -87,6 +87,6 @@ com o repo quebrado.
 
 ## Saida esperada
 
-- Implementacao completa da spec com testes relevantes.
+- Implementação completa da spec com testes relevantes.
 - Mudancas organizadas por camada (estrutura do repo preservada).
-- Comandos de verificacao executados e passando.
+- Comandos de verificação executados e passando.

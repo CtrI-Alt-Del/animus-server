@@ -12,7 +12,7 @@ exposto ao cliente.
 
 - Arquivo: `test_<nome_controller>.py`.
 - Classe de teste: `Test<ControllerName>`.
-- Metodo de teste: `test_should_<resultado>_when_<condicao>`.
+- Metodo de teste: `test_should_<resultado>_when_<condição>`.
 
 Exemplo real:
 
@@ -53,7 +53,7 @@ Organize cada teste em tres blocos logicos, separados por linha em branco:
 
 - `status_code` esperado para o cenario.
 - Contrato de resposta em sucesso (campos relevantes do JSON).
-- Comportamento de validacao em erro (`422` para input invalido).
+- Comportamento de validação em erro (`422` para input invalido).
 
 ## Escopo de teste REST (o que testar)
 
@@ -62,38 +62,38 @@ Organize cada teste em tres blocos logicos, separados por linha em branco:
 Teste de controller deve validar contrato de borda HTTP:
 
 - rota + verbo corretos;
-- validacao de entrada;
+- validação de entrada;
 - formato da resposta e status;
-- serializacao minima esperada para o cliente.
+- serialização minima esperada para o cliente.
 
 ### O que NAO testar aqui
 
 - detalhes internos do use case;
 - detalhes internos do repositorio/ORM;
-- implementacao de validadores do framework alem do contrato observavel.
+- implementação de validadores do framework alem do contrato observavel.
 
 ## Mocking e isolamento de dependencias
 
 ### Quando NAO mockar
 
-No estado atual, os testes REST exercitam fluxo real da aplicacao com
+No estado atual, os testes REST exercitam fluxo real da aplicação com
 `TestClient`, sem mock do controller/use case.
 
-Isso e desejavel para validar integracao HTTP real entre:
+Isso e desejavel para validar integração HTTP real entre:
 
 - roteamento;
 - schema de entrada;
 - controller;
-- camada de aplicacao.
+- camada de aplicação.
 
 ### Quando mockar
 
 Mocke apenas fronteiras externas nao deterministicas (ex.: servicos terceiros),
 quando forem introduzidas e tornarem o teste instavel/lento.
 
-## Padroes de validacao de entrada
+## Padroes de validação de entrada
 
-### Erro de validacao
+### Erro de validação
 
 Para payload invalido, valide ao menos:
 
@@ -102,7 +102,7 @@ Para payload invalido, valide ao menos:
 Evite acoplar teste a mensagem textual completa de erro do framework, salvo
 quando o contrato exigir esse detalhe explicitamente.
 
-### Parametrizacao para variacoes invalidas
+### Parametrização para variacoes invalidas
 
 Use `pytest.mark.parametrize` para agrupar variacoes da mesma regra.
 
@@ -130,7 +130,7 @@ Exemplo observado:
 Ao usar tempo atual, mantenha a assertiva robusta para nao depender de horario
 exato. Exemplo recomendado: comparar apenas regra de fronteira (ano futuro).
 
-## Integracao com banco em testes REST
+## Integração com banco em testes REST
 
 Os testes REST atuais usam fixture de banco em `tests/conftest.py` com schema
 isolado por sessao de testes.
@@ -146,14 +146,14 @@ Regras praticas:
 Para cada endpoint novo, incluir no minimo:
 
 - um teste de sucesso (`2xx`) validando `status_code` e payload principal;
-- um teste de erro de validacao (`4xx`, normalmente `422`).
+- um teste de erro de validação (`4xx`, normalmente `422`).
 
-Quando houver mais de uma regra de validacao relevante, adicione casos
+Quando houver mais de uma regra de validação relevante, adicione casos
 especificos (ou parametrizados) por regra.
 
 ## Boas praticas
 
-- Mantenha cada teste curto e com uma unica intencao.
+- Mantenha cada teste curto e com uma unica intenção.
 - Use nomes orientados a comportamento.
 - Faça asserts objetivos em campos chave; evite snapshots grandes.
 - Nao dependa de ordem incidental de campos no JSON.
@@ -163,9 +163,9 @@ especificos (ou parametrizados) por regra.
 ## Checklist rapido para novo teste de controller
 
 1. Arquivo no caminho correto: `tests/rest/controllers/<modulo>/`.
-2. Nome do arquivo e da classe seguindo convencao.
+2. Nome do arquivo e da classe seguindo convenção.
 3. Uso de `client: TestClient` e `auth_headers` (se autenticado) como fixtures.
 4. Cenario de sucesso com assert de `status_code` e payload.
-5. Cenario de erro de validacao com `status_code` apropriado (`422`).
-6. Parametrizacao para variacoes da mesma regra, quando aplicavel.
+5. Cenario de erro de validação com `status_code` apropriado (`422`).
+6. Parametrização para variacoes da mesma regra, quando aplicavel.
 7. Independencia entre testes (sem acoplamento de estado).

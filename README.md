@@ -1,15 +1,15 @@
 # <h1 align="center">Animus Server</h1>
 
-Backend da plataforma **Animus**, uma aplicacao de analise de precedentes juridicos que transforma peticoes iniciais em insumos objetivos para advogados e juizes. Este servico foi desenvolvido em **Python** com **FastAPI**, com foco em regras de negocio desacopladas, arquitetura em camadas e integracoes robustas para autenticacao, processamento com IA, armazenamento de analises e notificacoes assincronas.
+Backend da plataforma **Animus**, uma aplicação de analise de precedentes juridicos que transforma peticoes iniciais em insumos objetivos para advogados e juizes. Este servico foi desenvolvido em **Python** com **FastAPI**, com foco em regras de negocio desacopladas, arquitetura em camadas e integracoes robustas para autenticação, processamento com IA, armazenamento de analises e notificacoes assincronas.
 
 ## 🚀 Visao Geral
 
 O Animus Server sustenta os principais fluxos do produto:
 
-- **Auth e identidade:** cadastro, login, gestao de perfil e recuperacao de senha.
-- **Intake juridico:** upload de peticoes em PDF ou DOCX para extracao, resumacao e analise de precedentes com IA.
-- **Análise de precedentes:** classificacao de aplicabilidade, sintese explicativa e apoio a decisao processual.
-- **Storage e historico:** persistencia, organizacao, consulta e exportacao de analises anteriores.
+- **Auth e identidade:** cadastro, login, gestao de perfil e recuperação de senha.
+- **Intake juridico:** upload de peticoes em PDF ou DOCX para extração, resumação e analise de precedentes com IA.
+- **Análise de precedentes:** classificação de aplicabilidade, sintese explicativa e apoio a decisao processual.
+- **Storage e historico:** persistencia, organização, consulta e exportação de analises anteriores.
 - **Notificacoes assicronas:** eventos de conclusao de analise e outros fluxos desacoplados.
 
 ## 🛠 Tech Stack
@@ -20,12 +20,12 @@ O projeto utiliza uma stack moderna para API, persistencia, processamento e mens
 - **Framework HTTP:** [FastAPI](https://fastapi.tiangolo.com/)
 - **Servidor ASGI:** [Uvicorn](https://www.uvicorn.org/)
 - **ORM e Persistencia:** [SQLAlchemy](https://www.sqlalchemy.org/) + [PostgreSQL](https://www.postgresql.org/)
-- **Banco Vetorial:** [Qdrant](https://qdrant.tech/) para indexacao e busca semantica de precedentes
+- **Banco Vetorial:** [Qdrant](https://qdrant.tech/) para indexação e busca semantica de precedentes
 - **Migracoes:** [Alembic](https://alembic.sqlalchemy.org/)
 - **Jobs/Eventos:** [Inngest](https://www.inngest.com/)
-- **IA e orquestracao:** [Agno](https://www.agno.com/)
-- **Validacao e configuracao:** [Pydantic](https://docs.pydantic.dev/) + [pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
-- **Autenticacao e seguranca:** [PyJWT](https://pyjwt.readthedocs.io/) + [pwdlib](https://frankie567.github.io/pwdlib/)
+- **IA e orquestração:** [Agno](https://www.agno.com/)
+- **Validação e configuração:** [Pydantic](https://docs.pydantic.dev/) + [pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
+- **Autenticação e seguranca:** [PyJWT](https://pyjwt.readthedocs.io/) + [pwdlib](https://frankie567.github.io/pwdlib/)
 - **Tooling:** [uv](https://github.com/astral-sh/uv), [Poe the Poet](https://github.com/nat-n/poethepoet), [Ruff](https://docs.astral.sh/ruff/), [BasedPyright](https://docs.basedpyright.com/), [Pytest](https://docs.pytest.org/)
 
 ## 🏗 Arquitetura
@@ -36,15 +36,15 @@ O projeto segue uma arquitetura em camadas inspirada em **Clean Architecture** e
 
 - **Core (`src/animus/core/`)**: entidades, DTOs, erros de dominio, interfaces e use cases.
 - **Rest (`src/animus/rest/`)**: controllers HTTP e middlewares de request.
-- **Routers (`src/animus/routers/`)**: composicao e registro de rotas por contexto.
+- **Routers (`src/animus/routers/`)**: composição e registro de rotas por contexto.
 - **Pipes (`src/animus/pipes/`)**: providers de dependencia para `Depends(...)`.
 - **Validation (`src/animus/validation/`)**: schemas e conversao request/response.
 - **Database (`src/animus/database/`)**: models, mappers e repositorios SQLAlchemy.
 - **Providers (`src/animus/providers/`)**: adaptadores externos e servicos de infraestrutura.
-- **PubSub (`src/animus/pubsub/`)**: orquestracao assincrona por eventos com Inngest.
-- **AI (`src/animus/ai/`)**: integracoes e orquestracao dos fluxos de inteligencia artificial.
+- **PubSub (`src/animus/pubsub/`)**: orquestração assincrona por eventos com Inngest.
+- **AI (`src/animus/ai/`)**: integracoes e orquestração dos fluxos de inteligencia artificial.
 
-Para detalhes tecnicos, consulte a [Documentacao de Arquitetura](documentation/architecture.md).
+Para detalhes tecnicos, consulte a [Documentação de Arquitetura](documentation/architecture.md).
 
 ## 📂 Estrutura do Projeto
 
@@ -63,7 +63,7 @@ src/animus/
 └── validation/
 ```
 
-## ⚙️ Configuracao e Instalacao
+## ⚙️ Configuração e Instalação
 
 ### Pre-requisitos
 
@@ -88,7 +88,7 @@ src/animus/
    ```
 
    Preencha os valores necessarios no arquivo `.env`.
-   Consulte a secao `Variaveis de Ambiente` abaixo para o detalhamento completo de cada chave.
+   Consulte a seção `Variaveis de Ambiente` abaixo para o detalhamento completo de cada chave.
 
 3. **Instale as dependencias do projeto:**
 
@@ -194,7 +194,7 @@ Configure estas variaveis em `Settings > Secrets and variables > Actions` ou nos
 - `GCP_SERVICE_ACCOUNT_EMAIL`: email da service account usada pelo GitHub Actions.
 - `IMAGE_NAME`: opcional; nome da imagem. Padrao: `animus-server`.
 
-### Configuracao recomendada no GCP
+### Configuração recomendada no GCP
 
 Use `Workload Identity Federation` em vez de chave JSON fixa.
 
@@ -231,7 +231,7 @@ southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
   - Como obter: local `http://localhost:8080`; em cloud, use a URL publica do servico.
 
 - `MODE`
-  - O que e: modo de execucao (`dev`, `stg`, `prod`).
+  - O que e: modo de execução (`dev`, `stg`, `prod`).
   - Como obter: defina conforme ambiente de deploy.
 
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
@@ -248,7 +248,7 @@ southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
   - O que e: nome do bucket usado para arquivos.
   - Como obter:
     - Local (emulador): defina um nome fixo, ex. `animus`.
-    - Producao: crie bucket no Google Cloud Storage e use o nome exato.
+    - Produção: crie bucket no Google Cloud Storage e use o nome exato.
 
 - `GCS_EMULATOR_HOST`
   - O que e: endpoint do emulador de storage.
@@ -279,10 +279,10 @@ southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
 
 - `INNGEST_DEV`
   - O que e: flag para modo de desenvolvimento do Inngest.
-  - Como obter: use `1` localmente; em ambientes nao-dev normalmente remova/ajuste conforme configuracao do Inngest.
+  - Como obter: use `1` localmente; em ambientes nao-dev normalmente remova/ajuste conforme configuração do Inngest.
 
 - `INNGEST_SIGNING_KEY`
-  - O que e: chave de assinatura/validacao de eventos Inngest.
+  - O que e: chave de assinatura/validação de eventos Inngest.
   - Como obter: copie no dashboard/projeto do Inngest (environment keys).
 
 - `JWT_SECRET_KEY`
@@ -294,11 +294,11 @@ southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
   - Como obter: definir manualmente (`HS256` padrao do projeto).
 
 - `JWT_ACCESS_TOKEN_EXPIRATION_SECONDS`
-  - O que e: expiracao do access token em segundos.
+  - O que e: expiração do access token em segundos.
   - Como obter: definir manualmente (ex.: `3600`).
 
 - `JWT_REFRESH_TOKEN_EXPIRATION_SECONDS`
-  - O que e: expiracao do refresh token em segundos.
+  - O que e: expiração do refresh token em segundos.
   - Como obter: definir manualmente (ex.: `86400`).
 
 - `REDIS_URL`
@@ -308,7 +308,7 @@ southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
     - Gerenciado (ex.: Upstash): copie endpoint e credenciais no painel do provider.
 
 - `EMAIL_VERIFICATION_OTP_TTL_SECONDS`
-  - O que e: tempo de vida do OTP de verificacao de email (em segundos).
+  - O que e: tempo de vida do OTP de verificação de email (em segundos).
   - Como obter: definir manualmente entre 60 e 86400 (padrao recomendado: `3600`).
 
 - `RESEND_API_KEY`
@@ -321,16 +321,16 @@ southamerica-east1-docker.pkg.dev/<project-id>/<repository>/animus-server:prod
 
 ## 📖 Dominios do Produto
 
-Com base na documentacao funcional, os modulos centrais do produto sao:
+Com base na documentação funcional, os modulos centrais do produto sao:
 
-- **Auth:** identidade do usuario, login com email/senha ou Google, perfil e recuperacao de senha.
-- **Intake:** recebimento da petição inicial, extracao de informacoes e busca de precedentes juridicos relevantes.
-- **Storage:** historico, organizacao em pastas, nomeacao e exportacao das analises.
-- **Notification:** comunicacao assincrona quando uma analise e concluida ou um relatorio e gerado.
+- **Auth:** identidade do usuario, login com email/senha ou Google, perfil e recuperação de senha.
+- **Intake:** recebimento da petição inicial, extração de informacoes e busca de precedentes juridicos relevantes.
+- **Storage:** historico, organização em pastas, nomeação e exportação das analises.
+- **Notification:** comunicação assincrona quando uma analise e concluida ou um relatorio e gerado.
 
-O sistema e uma ferramenta de apoio a decisao. A interpretacao final e a escolha do precedente continuam sob responsabilidade do usuario.
+O sistema e uma ferramenta de apoio a decisao. A interpretação final e a escolha do precedente continuam sob responsabilidade do usuario.
 
-## 📖 Documentacao
+## 📖 Documentação
 
 Os principais documentos do projeto estao em `documentation/`:
 

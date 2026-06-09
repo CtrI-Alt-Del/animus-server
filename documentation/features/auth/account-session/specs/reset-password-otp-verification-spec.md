@@ -1,5 +1,5 @@
 ---
-title: Refatoracao do reset de senha para OTP com contexto temporario
+title: Refatoração do reset de senha para OTP com contexto temporario
 prd: https://joaogoliveiragarcia.atlassian.net/wiki/spaces/anm/pages/16908291/PRD+RF+01+Gerenciamento+de+sess+o+do+usu+rio
 ticket: https://joaogoliveiragarcia.atlassian.net/browse/ANI-70
 status: open
@@ -8,7 +8,7 @@ last_updated_at: 2026-04-13
 
 # 1. Objetivo
 
-Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por link/token para um fluxo por `OTP` numerico com cache temporario, sem enumeracao de e-mails e com contexto opaco de reset apos a verificacao bem-sucedida. Tecnicamente, a entrega substitui `GET /auth/password/verify-reset-token` por novos endpoints `POST` para reenvio e verificacao do `OTP`, evolui os `use_cases` e eventos de `auth` para gerar e validar o codigo no `core`, reaproveita `CacheProvider`, `OtpProvider`, `Broker` e o job Inngest existente para envio de e-mail, e altera o reset final para consumir um `reset_context` temporario em vez de `account_id` enviado pelo cliente.
+Migrar o fluxo de redefinição de senha do `animus-server` do modelo legado por link/token para um fluxo por `OTP` numerico com cache temporario, sem enumeração de e-mails e com contexto opaco de reset apos a verificação bem-sucedida. Tecnicamente, a entrega substitui `GET /auth/password/verify-reset-token` por novos endpoints `POST` para reenvio e verificação do `OTP`, evolui os `use_cases` e eventos de `auth` para gerar e validar o codigo no `core`, reaproveita `CacheProvider`, `OtpProvider`, `Broker` e o job Inngest existente para envio de e-mail, e altera o reset final para consumir um `reset_context` temporario em vez de `account_id` enviado pelo cliente.
 
 ---
 
@@ -17,12 +17,12 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 ## 2.1 In-scope
 
 - Evoluir `POST /auth/password/forgot` para gerar e persistir `OTP` de reset quando a conta existir, mantendo resposta silenciosa.
-- Criar `POST /auth/password/resend-reset-otp` com validacao de cooldown e republicacao do envio sem enumeracao de conta.
-- Criar `POST /auth/password/verify-reset-otp` com `email + otp`, validacao em cache, controle de tentativas e emissao de `ResetPasswordContextDto`.
+- Criar `POST /auth/password/resend-reset-otp` com validação de cooldown e republicação do envio sem enumeração de conta.
+- Criar `POST /auth/password/verify-reset-otp` com `email + otp`, validação em cache, controle de tentativas e emissao de `ResetPasswordContextDto`.
 - Alterar `POST /auth/password/reset` para receber `reset_context` opaco e resolver internamente a conta autorizada.
 - Reaproveitar `PasswordResetRequestEvent` e `SendPasswordResetEmailJob`, mudando o payload para `OTP` em vez de token/link.
 - Remover o endpoint legado `GET /auth/password/verify-reset-token`, o `VerifyResetTokenUseCase` e o acoplamento do reset com `EmailVerificationProvider`.
-- Atualizar `CacheKeys`, configuracao de ambiente e template de e-mail para o novo fluxo.
+- Atualizar `CacheKeys`, configuração de ambiente e template de e-mail para o novo fluxo.
 
 ## 2.2 Out-of-scope
 
@@ -30,7 +30,7 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 - Criar coluna, tabela ou migration Alembic para persistir `OTP` ou `reset_context` em PostgreSQL.
 - Introduzir `validation` compartilhada para os novos endpoints; os `*Body` permanecem nos controllers, seguindo o padrao atual de `auth`.
 - Refatorar o contrato geral de `AccountsRepository.replace(...)` alem do necessario para o reset final.
-- Alterar UX mobile, countdown visual, navegacao de telas ou copy final do aplicativo alem do contrato HTTP necessario.
+- Alterar UX mobile, countdown visual, navegação de telas ou copy final do aplicativo alem do contrato HTTP necessario.
 
 ---
 
@@ -43,7 +43,7 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 - `POST /auth/password/resend-reset-otp` deve receber `email: str`, validar cooldown antes de emitir novo codigo e manter a mesma semantica silenciosa de `204` para conta existente ou inexistente.
 - Quando o cooldown permitir e a conta existir, `POST /auth/password/resend-reset-otp` deve regerar o `OTP`, sobrescrever o codigo anterior, reinicializar tentativas, renovar o cooldown e republicar o evento de envio.
 - `POST /auth/password/verify-reset-otp` deve receber body JSON com `email: str` e `otp: str`.
-- `POST /auth/password/verify-reset-otp` deve validar formato do `OTP`, existencia do codigo no cache, expiracao implicita por TTL e tentativas restantes antes de liberar o reset.
+- `POST /auth/password/verify-reset-otp` deve validar formato do `OTP`, existencia do codigo no cache, expiração implicita por TTL e tentativas restantes antes de liberar o reset.
 - Em `OTP` divergente, o backend deve decrementar o contador de tentativas e responder com erro de dominio unico para codigo invalido ou expirado.
 - Em `OTP` valido, o backend deve invalidar o `OTP`, invalidar o contador de tentativas, criar um `reset_context` opaco de uso unico, armazenar esse contexto em cache com TTL proprio e retornar `200` com `ResetPasswordContextDto`.
 - `POST /auth/password/reset` deve receber `reset_context: str` e `new_password: str`.
@@ -53,15 +53,15 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 
 ## 3.2 Nao funcionais
 
-- **Seguranca:** `OTP` deve ter exatamente `6` digitos numericos e ser gerado por `OtpProvider`, como ja ocorre no fluxo de verificacao de e-mail.
-- **Seguranca:** `forgot` e `resend-reset-otp` devem preservar anti-enumeracao de e-mail, sempre respondendo `204` sem diferenciar conta inexistente, conta existente ou cooldown ativo.
+- **Seguranca:** `OTP` deve ter exatamente `6` digitos numericos e ser gerado por `OtpProvider`, como ja ocorre no fluxo de verificação de e-mail.
+- **Seguranca:** `forgot` e `resend-reset-otp` devem preservar anti-enumeração de e-mail, sempre respondendo `204` sem diferenciar conta inexistente, conta existente ou cooldown ativo.
 - **Seguranca:** `OTP` e `reset_context` devem ser de uso unico; apos sucesso em `verify-reset-otp` e `reset`, as chaves temporarias associadas devem ser removidas.
 - **Seguranca:** `reset_context` deve ser opaco para o cliente e nao pode carregar `account_id` em texto claro no payload HTTP de resposta alem do proprio contexto.
 - **Resiliencia:** retries do `SendPasswordResetEmailJob` nao podem regerar `OTP` nem `reset_context`; o job apenas entrega o e-mail com o payload ja publicado.
 - **Compatibilidade retroativa:** esta task quebra o contrato legado de `GET /auth/password/verify-reset-token?token=...` e tambem o body atual de `POST /auth/password/reset`, que hoje recebe `account_id`; clientes precisam migrar para `verify-reset-otp` + `reset_context`.
-- **Compatibilidade retroativa:** o schema SQLAlchemy da tabela `accounts` permanece inalterado; toda informacao temporaria do reset fica em cache.
+- **Compatibilidade retroativa:** o schema SQLAlchemy da tabela `accounts` permanece inalterado; toda informação temporaria do reset fica em cache.
 - **Observabilidade:** o fluxo assincrono continua centralizado no `InngestPubSub` atual, sem novo runtime de eventos.
-- **Configuracao:** TTL do `OTP`, TTL do `reset_context` e cooldown de reenvio devem ser lidos de configuracao de ambiente dedicada, nao hardcoded no controller ou job.
+- **Configuração:** TTL do `OTP`, TTL do `reset_context` e cooldown de reenvio devem ser lidos de configuração de ambiente dedicada, nao hardcoded no controller ou job.
 
 ---
 
@@ -73,7 +73,7 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 - O contador de tentativas e associado ao e-mail do reset e deve ser reiniciado quando um novo `OTP` e emitido.
 - Quando o numero de tentativas restantes atingir `0`, novas verificacoes com aquele `OTP` devem falhar ate que um novo codigo seja emitido.
 - O cooldown de reenvio impede emissao de um novo `OTP` antes do intervalo definido pelo produto; durante esse periodo o endpoint continua silencioso.
-- A verificacao bem-sucedida do `OTP` nao redefine a senha diretamente; ela apenas libera um `reset_context` temporario para a etapa final.
+- A verificação bem-sucedida do `OTP` nao redefine a senha diretamente; ela apenas libera um `reset_context` temporario para a etapa final.
 - O `reset_context` nao pode revelar `account_id` ao cliente e deve ser invalidado apos uso bem-sucedido.
 - A nova senha deve obedecer as regras ja existentes de `Password.create(...)`.
 - O envio de e-mail continua sendo side effect assincrono; nenhum controller ou `use_case` envia e-mail diretamente.
@@ -87,8 +87,8 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 - **`ForgotPasswordUseCase`** (`src/animus/core/auth/use_cases/forgot_password_use_case.py`) - hoje apenas valida `email`, busca a conta e publica `PasswordResetRequestEvent` sem cache nem `OTP`; sera o ponto principal de extensao do fluxo inicial.
 - **`ResetPasswordUseCase`** (`src/animus/core/auth/use_cases/reset_password_use_case.py`) - hoje recebe `account_id` diretamente do cliente e aplica `HashProvider`; precisa trocar o contrato para `reset_context`.
 - **`VerifyResetTokenUseCase`** (`src/animus/core/auth/use_cases/verify_reset_token_use_case.py`) - fluxo legado baseado em token assinado por `EmailVerificationProvider`; sera removido.
-- **`VerifyEmailUseCase`** (`src/animus/core/auth/use_cases/verify_email_use_case.py`) - referencia direta para validacao de `OTP`, decremento de tentativas, limpeza de cache e erro unico em caso de codigo invalido/expirado.
-- **`ResendVerificationEmailUseCase`** (`src/animus/core/auth/use_cases/resend_verification_email_use_case.py`) - referencia direta para regeracao de `OTP`, reset de tentativas e republicacao de evento.
+- **`VerifyEmailUseCase`** (`src/animus/core/auth/use_cases/verify_email_use_case.py`) - referencia direta para validação de `OTP`, decremento de tentativas, limpeza de cache e erro unico em caso de codigo invalido/expirado.
+- **`ResendVerificationEmailUseCase`** (`src/animus/core/auth/use_cases/resend_verification_email_use_case.py`) - referencia direta para regeração de `OTP`, reset de tentativas e republicação de evento.
 - **`Otp`** (`src/animus/core/auth/domain/structures/otp.py`) - `Structure` pronta para validar `OTP` numerico de 6 digitos e expor `MAX_VERIFICATION_ATTEMPTS`.
 - **`Password`** (`src/animus/core/auth/domain/structures/password.py`) - `Structure` existente para validar regra de forca da nova senha.
 - **`AccountsRepository`** (`src/animus/core/auth/interfaces/accounts_repository.py`) - port atual com `find_by_id(...)`, `find_by_email(...)`, `find_password_hash_by_email(...)`, `add(...)`, `add_many(...)` e `replace(...)`; suficiente para o fluxo, sem exigir persistencia nova.
@@ -97,9 +97,9 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 ## Camada Core Shared
 
 - **`CacheProvider`** (`src/animus/core/shared/interfaces/cache_provider.py`) - contrato ja consolidado com `get`, `set`, `set_with_ttl` e `delete`; e o adaptador correto para guardar `OTP`, tentativas, cooldown e `reset_context` sem acoplar o `core` ao Redis.
-- **`Ttl`** (`src/animus/core/shared/domain/structures/ttl.py`) - `Structure` tipada para TTL ja usada no fluxo de verificacao de e-mail.
+- **`Ttl`** (`src/animus/core/shared/domain/structures/ttl.py`) - `Structure` tipada para TTL ja usada no fluxo de verificação de e-mail.
 - **`Id`** (`src/animus/core/shared/domain/structures/id.py`) - gera `ULID` opaco quando chamado sem argumento; pode ser reaproveitado para produzir o valor do `reset_context` sem criar provider novo.
-- **`Broker`** (`src/animus/core/shared/interfaces/broker.py`) - port existente para publicacao de eventos de dominio.
+- **`Broker`** (`src/animus/core/shared/interfaces/broker.py`) - port existente para publicação de eventos de dominio.
 
 ## Camada REST
 
@@ -110,17 +110,17 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 
 ## Camada Routers
 
-- **`AuthRouter`** (`src/animus/routers/auth/auth_router.py`) - composicao atual das rotas de `auth`; ainda registra `VerifyResetTokenController` e ainda nao registra endpoints especificos de `resend-reset-otp` e `verify-reset-otp`.
+- **`AuthRouter`** (`src/animus/routers/auth/auth_router.py`) - composição atual das rotas de `auth`; ainda registra `VerifyResetTokenController` e ainda nao registra endpoints especificos de `resend-reset-otp` e `verify-reset-otp`.
 
 ## Camada Pipes
 
 - **`ProvidersPipe`** (`src/animus/pipes/providers_pipe.py`) - ja entrega `HashProvider`, `JwtProvider`, `CacheProvider`, `OtpProvider` e `EmailSenderProvider`; ainda expoe `get_email_verification_provider()` por causa do fluxo legado.
 - **`DatabasePipe`** (`src/animus/pipes/database_pipe.py`) - ja entrega `AccountsRepository` para os controllers de `auth`.
-- **`PubSubPipe`** (`src/animus/pipes/pubsub_pipe.py`) - ja entrega `Broker` para publicacao do evento de reset.
+- **`PubSubPipe`** (`src/animus/pipes/pubsub_pipe.py`) - ja entrega `Broker` para publicação do evento de reset.
 
 ## Camada Providers
 
-- **`RedisCacheProvider`** (`src/animus/providers/shared/cache/redis/redis_cache_provider.py`) - implementacao concreta ja pronta para `get`, `set`, `set_with_ttl` e `delete` no Redis.
+- **`RedisCacheProvider`** (`src/animus/providers/shared/cache/redis/redis_cache_provider.py`) - implementação concreta ja pronta para `get`, `set`, `set_with_ttl` e `delete` no Redis.
 - **`ResendEmailSenderProvider`** (`src/animus/providers/notification/email_sender/resend/resend_email_sender_provider.py`) - hoje envia e-mail de reset montando link para `GET /auth/password/verify-reset-token?token=...`; precisa migrar para `OTP`.
 - **`ItsdangerousEmailVerificationProvider`** (`src/animus/providers/auth/email_verification/itsdangerous_email_provider.py`) - provider legado de token assinado, hoje usado apenas pelo reset por link.
 
@@ -133,13 +133,13 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 ## Camada Database
 
 - **`SqlalchemyAccountsRepository`** (`src/animus/database/sqlalchemy/repositories/auth/sqlalchemy_accounts_repository.py`) - repositorio concreto atual para leitura e escrita de conta; o reset final continua reaproveitando `find_by_id(...)` e `replace(...)`.
-- **`AccountModel`** (`src/animus/database/sqlalchemy/models/auth/account_model.py`) - model atual da tabela `accounts` com `password_hash`; nao exige alteracao de schema.
+- **`AccountModel`** (`src/animus/database/sqlalchemy/models/auth/account_model.py`) - model atual da tabela `accounts` com `password_hash`; nao exige alteração de schema.
 - **`AccountMapper`** (`src/animus/database/sqlalchemy/mappers/auth/account_mapper.py`) - mapper atual de conta; nao precisa de extensao para esta task.
 
-## Configuracao
+## Configuração
 
-- **`CacheKeys`** (`src/animus/constants/cache_keys.py`) - hoje centraliza apenas chaves de verificacao de e-mail; faltam chaves dedicadas ao reset de senha.
-- **`Env`** (`src/animus/constants/env.py`) - hoje ainda mantem configuracoes do fluxo legado por token e nao tem configuracao dedicada para TTL/cooldown do reset por `OTP`.
+- **`CacheKeys`** (`src/animus/constants/cache_keys.py`) - hoje centraliza apenas chaves de verificação de e-mail; faltam chaves dedicadas ao reset de senha.
+- **`Env`** (`src/animus/constants/env.py`) - hoje ainda mantem configuracoes do fluxo legado por token e nao tem configuração dedicada para TTL/cooldown do reset por `OTP`.
 - **`.env.example`** (`.env.example`) - ainda documenta variaveis do fluxo legado por token e nao documenta as novas variaveis dedicadas ao reset via `OTP`.
 
 ---
@@ -148,36 +148,36 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 
 ## Camada Core (DTOs)
 
-- **Localizacao:** `src/animus/core/auth/domain/structures/dtos/reset_password_context_dto.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/domain/structures/dtos/reset_password_context_dto.py` (**novo arquivo**)
 - **Tipo:** `@dto`
 - **Atributos:** `reset_context: str`
-- **Metodos / factory:** nao aplicavel - DTO minimo para devolver o contexto temporario liberado apos a verificacao do `OTP`.
+- **Metodos / factory:** nao aplicavel - DTO minimo para devolver o contexto temporario liberado apos a verificação do `OTP`.
 
 ## Camada Core (Erros de Dominio)
 
-- **Localizacao:** `src/animus/core/auth/domain/errors/invalid_reset_password_otp_error.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/domain/errors/invalid_reset_password_otp_error.py` (**novo arquivo**)
 - **Classe base:** `AuthError`
 - **Motivo:** quando o `OTP` informado para reset for invalido, expirado, corrompido ou quando as tentativas restantes tiverem sido esgotadas.
 
-- **Localizacao:** `src/animus/core/auth/domain/errors/invalid_reset_password_context_error.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/domain/errors/invalid_reset_password_context_error.py` (**novo arquivo**)
 - **Classe base:** `AuthError`
 - **Motivo:** quando o `reset_context` estiver ausente, expirado, corrompido ou ja tiver sido consumido.
 
 ## Camada Core (Use Cases)
 
-- **Localizacao:** `src/animus/core/auth/use_cases/resend_reset_password_otp_use_case.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/use_cases/resend_reset_password_otp_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `AccountsRepository`, `OtpProvider`, `CacheProvider`, `Broker`, `Ttl` de cooldown e `Ttl` do `OTP`
 - **Metodo principal:** `execute(email: str) -> None` - valida o e-mail, mantem semantica silenciosa, respeita cooldown e, quando aplicavel, regenera o `OTP`, renova o estado temporario e republica o evento.
 - **Fluxo resumido:** `Email.create(...)` -> `AccountsRepository.find_by_email(...)` -> retorno silencioso se conta inexistente -> checar chave de cooldown -> retorno silencioso se cooldown ativo -> `OtpProvider.generate()` -> `CacheProvider.set_with_ttl(...)` para `OTP` -> `CacheProvider.set(...)` para tentativas -> `CacheProvider.set_with_ttl(...)` para cooldown -> `Broker.publish(PasswordResetRequestEvent(...))`.
 
-- **Localizacao:** `src/animus/core/auth/use_cases/verify_reset_password_otp_use_case.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/use_cases/verify_reset_password_otp_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `AccountsRepository`, `CacheProvider`, `Ttl` do `reset_context`
 - **Metodo principal:** `execute(email: str, otp: str) -> ResetPasswordContextDto` - valida `OTP` de reset em cache, decrementa tentativas quando necessario e, em sucesso, cria o contexto temporario de reset de uso unico.
 - **Fluxo resumido:** `Email.create(...)` / `Otp.create(...)` -> ler tentativas -> bloquear em `0` -> ler `OTP` armazenado -> decrementar tentativas em divergencia -> buscar conta por e-mail -> gerar `reset_context = Id.create().value` -> `CacheProvider.set_with_ttl(...)` mapeando contexto para `account_id` -> apagar chaves de `OTP`, tentativas e cooldown -> retornar `ResetPasswordContextDto`.
 
 ## Camada REST (Controllers)
 
-- **Localizacao:** `src/animus/rest/controllers/auth/resend_reset_password_otp_controller.py` (**novo arquivo**)
+- **Localização:** `src/animus/rest/controllers/auth/resend_reset_password_otp_controller.py` (**novo arquivo**)
 - **`*Body`:** `_Body` com `email: str`
 - **Metodo HTTP e path:** `POST /auth/password/resend-reset-otp`
 - **`status_code`:** `204`
@@ -185,7 +185,7 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 - **Dependencias injetadas via `Depends`:** `AccountsRepository` via `DatabasePipe`, `OtpProvider` e `CacheProvider` via `ProvidersPipe`, `Broker` via `PubSubPipe`
 - **Fluxo:** `_Body` -> `ResendResetPasswordOtpUseCase.execute(email=body.email)` -> sem body de resposta.
 
-- **Localizacao:** `src/animus/rest/controllers/auth/verify_reset_password_otp_controller.py` (**novo arquivo**)
+- **Localização:** `src/animus/rest/controllers/auth/verify_reset_password_otp_controller.py` (**novo arquivo**)
 - **`*Body`:** `_Body` com `email: str` e `otp: str`
 - **Metodo HTTP e path:** `POST /auth/password/verify-reset-otp`
 - **`status_code`:** `200`
@@ -205,7 +205,7 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 
 - **Arquivo:** `src/animus/core/auth/use_cases/reset_password_use_case.py`
 - **Mudanca:** trocar assinatura para `execute(reset_context: str, new_password: str) -> None`, remover dependencia de `account_id` vindo do cliente, adicionar `CacheProvider`, resolver `account_id` a partir do contexto salvo em cache, validar `Password.create(new_password)`, gerar hash com `HashProvider` e invalidar o `reset_context` apos sucesso.
-- **Justificativa:** o reset final precisa depender de um contexto temporario emitido apos a verificacao do `OTP`, e nao de um identificador arbitrario informado pelo cliente.
+- **Justificativa:** o reset final precisa depender de um contexto temporario emitido apos a verificação do `OTP`, e nao de um identificador arbitrario informado pelo cliente.
 
 - **Arquivo:** `src/animus/core/auth/domain/events/password_reset_request_event.py`
 - **Mudanca:** alterar o payload para carregar `account_email: str` e `account_email_otp: str`, ajustando `__init__(account_email: str, account_email_otp: str) -> None`.
@@ -221,7 +221,7 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 
 - **Arquivo:** `src/animus/core/auth/use_cases/__init__.py`
 - **Mudanca:** exportar `ResendResetPasswordOtpUseCase` e `VerifyResetPasswordOtpUseCase`, e remover `VerifyResetTokenUseCase` dos exports publicos.
-- **Justificativa:** manter o pacote de `use_cases` alinhado ao fluxo suportado pela aplicacao.
+- **Justificativa:** manter o pacote de `use_cases` alinhado ao fluxo suportado pela aplicação.
 
 ## Camada Core Notification
 
@@ -231,7 +231,7 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 
 - **Arquivo:** `src/animus/core/notification/use_cases/send_password_reset_email_use_case.py`
 - **Mudanca:** remover a dependencia de `EmailVerificationProvider`, trocar a assinatura para `execute(account_email: str, otp: str) -> None` e converter ambos para `Email.create(...)` e `Otp.create(...)` antes de repassar ao provider.
-- **Justificativa:** o `use_case` de notificacao passa a ser apenas um adaptador do payload para o provider de e-mail.
+- **Justificativa:** o `use_case` de notificação passa a ser apenas um adaptador do payload para o provider de e-mail.
 
 ## Camada REST
 
@@ -271,11 +271,11 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 - **Mudanca:** ajustar o payload normalizado para `account_email` e `account_email_otp`, remover a dependencia de `ItsdangerousEmailVerificationProvider` e fazer o job apenas chamar `SendPasswordResetEmailUseCase.execute(account_email=..., otp=...)`.
 - **Justificativa:** o job deve continuar idempotente e restrito a orquestrar envio, sem gerar `OTP` nem token.
 
-## Configuracao
+## Configuração
 
 - **Arquivo:** `src/animus/constants/cache_keys.py`
 - **Mudanca:** adicionar APIs explicitas para as chaves temporarias do reset, incluindo `OTP`, tentativas, cooldown e `reset_context`.
-- **Justificativa:** evitar string literals duplicadas entre `use_cases` e manter consistencia com o padrao ja usado em verificacao de e-mail.
+- **Justificativa:** evitar string literals duplicadas entre `use_cases` e manter consistencia com o padrao ja usado em verificação de e-mail.
 
 - **Arquivo:** `src/animus/constants/env.py`
 - **Mudanca:** remover as configuracoes do fluxo legado por token (`EMAIL_VERIFICATION_SECRET_KEY`, `EMAIL_VERIFICATION_SALT`, `EMAIL_VERIFICATION_TOKEN_MAX_AGE_SECONDS`) e adicionar configuracoes dedicadas ao reset por `OTP`, como `RESET_PASSWORD_OTP_TTL_SECONDS`, `RESET_PASSWORD_OTP_RESEND_COOLDOWN_SECONDS` e `RESET_PASSWORD_CONTEXT_TTL_SECONDS`.
@@ -283,7 +283,7 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 
 - **Arquivo:** `.env.example`
 - **Mudanca:** documentar as novas variaveis de reset via `OTP` e remover as variaveis do fluxo legado por token que ficarem sem uso.
-- **Justificativa:** manter o bootstrap local coerente com o comportamento suportado pela aplicacao.
+- **Justificativa:** manter o bootstrap local coerente com o comportamento suportado pela aplicação.
 
 ---
 
@@ -292,26 +292,26 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 ## Camada Core
 
 - **Arquivo:** `src/animus/core/auth/use_cases/verify_reset_token_use_case.py`
-- **Motivo da remocao:** o fluxo legado de validacao por token assinado deixa de existir na aplicacao.
+- **Motivo da remoção:** o fluxo legado de validação por token assinado deixa de existir na aplicação.
 - **Impacto esperado:** atualizar imports e exports em `src/animus/core/auth/use_cases/__init__.py` e remover qualquer referencia restante ao fluxo legado.
 
 - **Arquivo:** `src/animus/core/auth/interfaces/email_verification_provider.py`
-- **Motivo da remocao:** apos a migracao completa do reset para `OTP`, nao resta uso real do contrato de token assinado na codebase atual.
+- **Motivo da remoção:** apos a migração completa do reset para `OTP`, nao resta uso real do contrato de token assinado na codebase atual.
 - **Impacto esperado:** remover referencias em `ProvidersPipe`, job de reset, provider itsdangerous e qualquer import residual.
 
 ## Camada REST
 
 - **Arquivo:** `src/animus/rest/controllers/auth/verify_reset_token_controller.py`
-- **Motivo da remocao:** o endpoint `GET /auth/password/verify-reset-token` sai da superficie HTTP suportada.
+- **Motivo da remoção:** o endpoint `GET /auth/password/verify-reset-token` sai da superficie HTTP suportada.
 - **Impacto esperado:** atualizar `AuthRouter` e remover consumidores do contrato legado.
 
 ## Camada Providers
 
 - **Arquivo:** `src/animus/providers/auth/email_verification/itsdangerous_email_provider.py`
-- **Motivo da remocao:** o provider itsdangerous deixa de ter consumidor apos a remocao do reset por link.
+- **Motivo da remoção:** o provider itsdangerous deixa de ter consumidor apos a remoção do reset por link.
 - **Impacto esperado:** eliminar dependencias de `Env` e imports relacionados ao token legado.
 
-> Se a pasta `src/animus/providers/auth/email_verification/` ficar vazia apos a remocao, a limpeza estrutural pode ser feita na mesma implementacao.
+> Se a pasta `src/animus/providers/auth/email_verification/` ficar vazia apos a remoção, a limpeza estrutural pode ser feita na mesma implementação.
 
 ---
 
@@ -319,23 +319,23 @@ Migrar o fluxo de redefinicao de senha do `animus-server` do modelo legado por l
 
 - **Decisao:** gerar `reset_context` com `Id.create().value` e persisti-lo em `CacheProvider`, em vez de criar novo provider de token assinado.
 - **Alternativas consideradas:** reaproveitar `EmailVerificationProvider`; criar um provider novo dedicado para contexto assinado.
-- **Motivo da escolha:** `Id` ja existe no `core`, produz valor opaco e evita manter o acoplamento do reset a tokens assinados, respeitando a direcao de dependencias.
-- **Impactos / trade-offs:** o contexto passa a depender de cache para validacao e expiracao; isso reduz escopo e complexidade, mas o valor deixa de ser auto-contido fora do Redis.
+- **Motivo da escolha:** `Id` ja existe no `core`, produz valor opaco e evita manter o acoplamento do reset a tokens assinados, respeitando a direção de dependencias.
+- **Impactos / trade-offs:** o contexto passa a depender de cache para validação e expiração; isso reduz escopo e complexidade, mas o valor deixa de ser auto-contido fora do Redis.
 
 - **Decisao:** manter `forgot` e `resend-reset-otp` silenciosos com `204` mesmo para e-mail inexistente ou cooldown ativo.
 - **Alternativas consideradas:** retornar erro explicito de cooldown (`409` ou `429`) em `resend-reset-otp`.
-- **Motivo da escolha:** preservar o requisito de anti-enumeracao do ticket e do PRD, evitando qualquer sinal externo sobre a existencia da conta.
+- **Motivo da escolha:** preservar o requisito de anti-enumeração do ticket e do PRD, evitando qualquer sinal externo sobre a existencia da conta.
 - **Impactos / trade-offs:** o backend nao comunica ao cliente se o cooldown bloqueou o reenvio; o app precisa continuar controlando o countdown na borda.
 
 - **Decisao:** reaproveitar `PasswordResetRequestEvent` e `SendPasswordResetEmailJob`, alterando apenas o payload de token para `OTP`.
 - **Alternativas consideradas:** criar evento e job novos com nome especifico de `reset-password-otp`.
 - **Motivo da escolha:** a responsabilidade do evento continua a mesma - solicitar envio de e-mail de reset - e a menor mudanca correta preserva wiring existente no `InngestPubSub`.
-- **Impactos / trade-offs:** o nome do evento permanece generico para reset, mas o payload muda e exige atualizacao sincronizada do consumidor.
+- **Impactos / trade-offs:** o nome do evento permanece generico para reset, mas o payload muda e exige atualização sincronizada do consumidor.
 
 - **Decisao:** reutilizar o contrato atual `AccountsRepository.replace(account)` no reset final, sem introduzir novo metodo especifico de troca de senha nesta task.
 - **Alternativas consideradas:** criar `update_password(...)` ou alterar a assinatura de `replace(...)` para receber `password_hash` separado.
-- **Motivo da escolha:** reduzir escopo da refatoracao ao necessario para ANI-70 e manter consistencia com o comportamento atual do repositorio concreto.
-- **Impactos / trade-offs:** a implementacao continua dependendo do comportamento atual de `SqlalchemyAccountsRepository.replace(...)` para escrever `password_hash` a partir de `account.password`; isso merece revisita futura se o contexto `auth` passar por refactor maior.
+- **Motivo da escolha:** reduzir escopo da refatoração ao necessario para ANI-70 e manter consistencia com o comportamento atual do repositorio concreto.
+- **Impactos / trade-offs:** a implementação continua dependendo do comportamento atual de `SqlalchemyAccountsRepository.replace(...)` para escrever `password_hash` a partir de `account.password`; isso merece revisita futura se o contexto `auth` passar por refactor maior.
 
 ---
 
@@ -407,10 +407,10 @@ ForgotPasswordUseCase / ResendResetPasswordOtpUseCase
 
 # 11. Pendencias / Duvidas
 
-- **Descricao da pendencia:** o PRD em Confluence ainda descreve redefinicao de senha por link/deep link, enquanto o ticket `ANI-70` detalha a migracao completa para `OTP`.
-- **Impacto na implementacao:** a spec desta task precisa se apoiar no ticket como fonte de verdade funcional, mesmo com o PRD geral desatualizado para este subfluxo.
-- **Acao sugerida:** alinhar o PRD em Confluence apos a entrega da spec para remover a divergencia documental. Confirmacao do usuario nesta sessao: usar `ANI-70` como fonte principal.
+- **Descrição da pendencia:** o PRD em Confluence ainda descreve redefinição de senha por link/deep link, enquanto o ticket `ANI-70` detalha a migração completa para `OTP`.
+- **Impacto na implementação:** a spec desta task precisa se apoiar no ticket como fonte de verdade funcional, mesmo com o PRD geral desatualizado para este subfluxo.
+- **Ação sugerida:** alinhar o PRD em Confluence apos a entrega da spec para remover a divergencia documental. Confirmação do usuario nesta sessao: usar `ANI-70` como fonte principal.
 
-- **Descricao da pendencia:** o ticket exige cooldown e expiracoes para `OTP` e `reset_context`, mas nao fixa valores numericos para `RESET_PASSWORD_OTP_TTL_SECONDS`, `RESET_PASSWORD_OTP_RESEND_COOLDOWN_SECONDS` e `RESET_PASSWORD_CONTEXT_TTL_SECONDS`.
-- **Impacto na implementacao:** o wiring tecnico pode ser implementado imediatamente, mas os valores finais de produto precisam ser definidos para evitar defaults arbitrarios no backend.
-- **Acao sugerida:** validar com produto/arquitetura os valores finais antes da implementacao ou registrar explicitamente esses valores no proprio ticket/PRD.
+- **Descrição da pendencia:** o ticket exige cooldown e expiracoes para `OTP` e `reset_context`, mas nao fixa valores numericos para `RESET_PASSWORD_OTP_TTL_SECONDS`, `RESET_PASSWORD_OTP_RESEND_COOLDOWN_SECONDS` e `RESET_PASSWORD_CONTEXT_TTL_SECONDS`.
+- **Impacto na implementação:** o wiring tecnico pode ser implementado imediatamente, mas os valores finais de produto precisam ser definidos para evitar defaults arbitrarios no backend.
+- **Ação sugerida:** validar com produto/arquitetura os valores finais antes da implementação ou registrar explicitamente esses valores no proprio ticket/PRD.

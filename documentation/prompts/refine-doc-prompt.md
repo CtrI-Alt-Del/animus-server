@@ -1,5 +1,5 @@
 ---
-description: Refinar documentos tecnicos em Markdown com clareza e padronizacao
+description: Refinar documentos tecnicos em Markdown com clareza e padronização
 ---
 
 # Prompt: Refinar Documento (PRD/Spec/MD)

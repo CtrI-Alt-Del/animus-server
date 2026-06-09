@@ -1,5 +1,5 @@
 ---
-description: Concluir bug report com validacao final e consolidacao da correcao
+description: Concluir bug report com validação final e consolidação da correção
 ---
 
 # Prompt: Concluir Bug Report

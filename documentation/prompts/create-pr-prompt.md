@@ -34,7 +34,7 @@ de trabalho.
 
 ---
 
-### 2 Definicao do Titulo
+### 2 Definição do Titulo
 
 - Deve ser:
 
@@ -60,7 +60,7 @@ refactor/
 
 ---
 
-### 3 Estrutura da Descricao (Body)
+### 3 Estrutura da Descrição (Body)
 
 O corpo do PR deve seguir o template abaixo.
 
@@ -97,12 +97,12 @@ Lista técnica das mudanças:
 
 ## Novas dependencias (opcional)
 
-Informe se houve adicao de novas dependencias no PR.
+Informe se houve adição de novas dependencias no PR.
 
 Se houve, detalhe:
 
 - nome do pacote
-- local da adicao (`pyproject.toml`, `uv.lock`, etc.)
+- local da adição (`pyproject.toml`, `uv.lock`, etc.)
 - motivo da inclusao
 - impacto esperado em build/runtime/seguranca
 
@@ -129,7 +129,7 @@ Passo a passo claro para o revisor validar:
 
 > Não incluir as palavras entre parênteses, são meramente instruções.
 
-## 4 Criacao via gh CLI
+## 4 Criação via gh CLI
 
 Nao usar GitHub MCP. Nao usar APIs MCP. Usar exclusivamente **gh**.
 

@@ -4,7 +4,7 @@ description: Criar testes para core, rest e pubsub seguindo regras do repositori
 
 # Prompt: Criar testes (animus-server)
 
-Objetivo: orientar a criacao de testes consistentes para o `animus-server`, cobrindo
+Objetivo: orientar a criação de testes consistentes para o `animus-server`, cobrindo
 regra de negocio (`core`), contrato HTTP (`rest`) e jobs assincronos (`pubsub`)
 sem acoplar a infraestrutura no lugar errado.
 
@@ -16,7 +16,7 @@ Entrada:
 
 ---
 
-## Diretrizes de execucao
+## Diretrizes de execução
 
 ### 1 Aderência as regras do projeto (leitura progressiva)
 
@@ -32,22 +32,22 @@ Entrada:
   - caminho: `tests/core/<contexto>/use_cases/`
   - arquivo: `test_<nome_use_case>.py`
   - classe: `Test<UseCaseName>`
-  - metodo: `test_should_<resultado>_when_<condicao>`
+  - metodo: `test_should_<resultado>_when_<condição>`
 - Controllers (rest):
   - caminho: `tests/rest/controllers/<contexto>/`
   - arquivo: `test_<nome_controller>.py`
   - classe: `Test<ControllerName>`
-  - metodo: `test_should_<resultado>_when_<condicao>`
+  - metodo: `test_should_<resultado>_when_<condição>`
 - Jobs assincronos (pubsub/inngest):
   - caminho: `tests/pubsub/inngest/jobs/<contexto>/`
   - arquivo: `test_<nome_job>.py`
   - classe: `Test<JobName>`
-  - metodo: `test_should_<resultado>_when_<condicao>`
+  - metodo: `test_should_<resultado>_when_<condição>`
 
 ### 3 Stack de testes
 
 - Runner/framework: `pytest`
-- Execucao padrao: `poe test` (usa `pytest -s -x -vv`)
+- Execução padrao: `poe test` (usa `pytest -s -x -vv`)
 - Mocking:
   - preferencia: `unittest.mock.create_autospec(<Interface>, instance=True)` (use cases)
   - fixture util: `mocker` (pytest-mock), quando fizer sentido
@@ -55,7 +55,7 @@ Entrada:
 - REST client: `fastapi.testclient.TestClient` via fixture `client`
 - Runtime de jobs Inngest: fixture `inngest_runtime`
 
-### 4 Preparacao de dados (fakers)
+### 4 Preparação de dados (fakers)
 
 - Reaproveite massa de teste em `tests/fakers/**`.
 - Prefira dados explicitamente configurados quando forem parte da regra (evite aleatoriedade em asserts).
@@ -65,14 +65,14 @@ Entrada:
 - Use case (core):
   - foco: comportamento de negocio do metodo `execute(...)`
   - mocke apenas ports/repositorios (sem FastAPI, sem SQLAlchemy)
-  - cubra no minimo um caminho feliz e um caminho de erro (excecao de dominio)
+  - cubra no minimo um caminho feliz e um caminho de erro (exceção de dominio)
   - valide retorno + interacoes (ex.: `assert_called_once_with`)
 - Controller (rest):
-  - foco: contrato HTTP (rota/verbo, `status_code`, payload, validacao `422`)
+  - foco: contrato HTTP (rota/verbo, `status_code`, payload, validação `422`)
   - exercite o app com `TestClient` usando fixtures `client` e `auth_headers` (quando autenticado)
   - evite acoplar a detalhes internos do use case
 - Job assincrono (pubsub/inngest):
-  - foco: contrato do evento consumido, orquestracao do runtime e side effect observavel
+  - foco: contrato do evento consumido, orquestração do runtime e side effect observavel
   - use `inngest_runtime` para publicar o evento no ambiente de teste
   - mocke apenas a fronteira externa final (ex.: provider de email)
 
@@ -85,7 +85,7 @@ Entrada:
 
 ### 7 Qualidade
 
-- Use Arrange / Act / Assert com separacao por linha em branco (sem comentarios).
+- Use Arrange / Act / Assert com separação por linha em branco (sem comentarios).
 - Cada teste deve ser independente (nao depender de ordem/estado de outro teste).
 - Assert seja objetivo: valide campos chave e o contrato observavel.
 
@@ -95,7 +95,7 @@ Entrada:
 
 1) Escolha o tipo: use case (`core`), controller (`rest`) ou job (`pubsub`) e leia as regras correspondentes.
 2) Crie o arquivo de teste no caminho correto em `tests/`.
-3) Escreva primeiro o caminho feliz, depois erro(s)/validacao quando aplicavel.
+3) Escreva primeiro o caminho feliz, depois erro(s)/validação quando aplicavel.
 4) Rode localmente:
 
 ```bash

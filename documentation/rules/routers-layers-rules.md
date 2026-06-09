@@ -1,6 +1,6 @@
 # Regras da Camada Routers
 
-> 💡 Use este documento ao criar ou revisar composicao de rotas HTTP em `src/animus/routers/`.
+> 💡 Use este documento ao criar ou revisar composição de rotas HTTP em `src/animus/routers/`.
 
 ## Visao Geral
 
@@ -8,7 +8,7 @@
 
 | Aspecto | Diretriz |
 |---|---|
-| **Objetivo** | Compor a superficie de entrada HTTP da aplicacao. |
+| **Objetivo** | Compor a superficie de entrada HTTP da aplicação. |
 | **Papel arquitetural** | Organizar modulos, `prefix`, `tags` e hierarquia de rotas. |
 | **Entrada principal** | `Controllers` vindos de `rest`. |
 | **Saida principal** | Instancias de `APIRouter` prontas para o `app`. |
@@ -21,11 +21,11 @@
 
 ### Limites da camada
 
-- `routers` deve priorizar composicao e organizacao, nao implementacao de regra de negocio.
+- `routers` deve priorizar composição e organização, nao implementação de regra de negocio.
 - Routers HTTP nao devem conhecer `ORM`, `session`, providers ou detalhes de persistencia.
 - O fluxo de `WebSocket` fica fisicamente em `src/animus/routers/`, mas segue regras adicionais de `documentation/rules/websocket-layer-rules.md`.
 
-> 💡 Regra pratica: **`Router = composicao`** e **`Controller = endpoint`**.
+> 💡 Regra pratica: **`Router = composição`** e **`Controller = endpoint`**.
 
 ## Estrutura de Diretorios Globais
 
@@ -33,31 +33,31 @@
 
 | Caminho | Responsabilidade |
 |---|---|
-| `src/animus/routers/` | Ponto de composicao dos routers publicos da aplicacao. |
+| `src/animus/routers/` | Ponto de composição dos routers publicos da aplicação. |
 | `src/animus/routers/<context>/` | Routers HTTP agrupados por contexto, como `auth`, `profiling`, `conversation`, `matching`, `storage` e `docs`. |
 
-### Regras de organizacao e nomeacao
+### Regras de organização e nomeação
 
 - Cada contexto deve ter um router agregador e, quando fizer sentido, sub-routers por recurso.
-- Routers devem seguir convencao `*Router` com metodo estatico `register() -> APIRouter`.
+- Routers devem seguir convenção `*Router` com metodo estatico `register() -> APIRouter`.
 - Sub-routers devem existir para modularizar recursos, nao para repetir logica de endpoint.
 - Nao especificar arquivos especificos, pois isso muda constantemente.
 
 ## Glossario arquitetural da camada
 
-| Termo | Definicao |
+| Termo | Definição |
 |---|---|
-| `Router` | Unidade de composicao que monta um conjunto de rotas e devolve `APIRouter`. |
+| `Router` | Unidade de composição que monta um conjunto de rotas e devolve `APIRouter`. |
 | `Module Router` | Router principal de um contexto, responsavel por `prefix`, `tags` e sub-routers. |
 | `Sub-router` | Router subordinado usado para separar recursos internos do mesmo modulo. |
 | `register()` | Metodo padrao que cria o router, registra `controllers` e devolve a instancia final. |
-| `include_router(...)` | Mecanismo de composicao do `FastAPI` para montar hierarquia de rotas. |
+| `include_router(...)` | Mecanismo de composição do `FastAPI` para montar hierarquia de rotas. |
 
 ## Padroes de Projeto
 
 ### Padroes arquiteturais aceitos
 
-- **`Router as Composition Unit`** para separar organizacao de modulo da implementacao de endpoint.
+- **`Router as Composition Unit`** para separar organização de modulo da implementação de endpoint.
 - **`Hierarchical Routing`** para decompor recursos por contexto e subcontexto.
 - **`Explicit Registration`** para concentrar a montagem final no `composition root`.
 
@@ -73,9 +73,9 @@
 - Nao transformar router em endpoint; se existir logica de transporte ou de negocio, ela pertence a `rest`.
 - Nao espalhar inclusao global de routers em varios arquivos quando o `composition root` ja resolve o acoplamento.
 
-## Regras de Integracao com Outras Camadas
+## Regras de Integração com Outras Camadas
 
-### Mapa de integracao
+### Mapa de integração
 
 | Camada | Como integra com `routers` | Regra |
 |---|---|---|
@@ -85,10 +85,10 @@
 
 ### Dependencias permitidas e proibidas
 
-- Routers HTTP podem depender de `rest/controllers` e do `FastAPI` para composicao.
+- Routers HTTP podem depender de `rest/controllers` e do `FastAPI` para composição.
 - Routers HTTP nao devem depender de `database`, `providers`, `pipes` de dados, `ORM` ou `UseCase` diretamente.
 
-### Contratos de comunicacao
+### Contratos de comunicação
 
 - O contrato entre `routers` e `rest` e o metodo de registro do `controller`, normalmente `handle(router)`.
 - O contrato entre `routers` e `app` e o retorno de `register() -> APIRouter`.
@@ -99,21 +99,21 @@
 - [ ] O endpoint foi anexado ao router do contexto correto.
 - [ ] `Prefix` e `tags` permanecem consistentes com o modulo.
 - [ ] `Controllers` foram registrados sem mover logica de endpoint para o router.
-- [ ] Sub-routers so foram introduzidos quando melhoram a composicao.
+- [ ] Sub-routers so foram introduzidos quando melhoram a composição.
 - [ ] O `app` inclui o router correto no `composition root`.
 - [ ] Nenhum router HTTP conhece `session`, `repository` concreto ou provider externo.
 
 ## ✅ O que DEVE conter
 
 - Routers por contexto com `register() -> APIRouter`.
-- Composicao clara de `controllers` e sub-routers.
+- Composição clara de `controllers` e sub-routers.
 - `Prefix` e `tags` coerentes com o modulo.
 - Exports publicos em `__init__.py` para estabilizar imports.
 - Montagem global centralizada no `composition root`.
 
 ## ❌ O que NUNCA deve conter
 
-- Regra de negocio, acesso a banco, `session handling` ou validacao de dominio em routers HTTP.
+- Regra de negocio, acesso a banco, `session handling` ou validação de dominio em routers HTTP.
 - `Controllers` inteiros embutidos no router por conveniencia.
 - Dependencia direta de `UseCase`, `ORM` ou SDK externo em routers de modulo HTTP.
-- Hierarquia de rota artificial sem ganho real de organizacao.
+- Hierarquia de rota artificial sem ganho real de organização.

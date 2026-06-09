@@ -1,5 +1,5 @@
 ---
-description: Resolver comentarios de PR com implementacao e validacao das correcoes
+description: Resolver comentarios de PR com implementação e validação das correcoes
 ---
 
 # Prompt: Resolver conversas de PR

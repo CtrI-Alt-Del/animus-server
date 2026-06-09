@@ -1,40 +1,40 @@
 ---
-description: Criar um prompt genérico para gerar documento de regras de uma camada da aplicacao
+description: Criar um prompt genérico para gerar documento de regras de uma camada da aplicação
 ---
 
 # Prompt: Criar Regras de Camada
 
-**Objetivo:** Criar um meta-prompt reutilizavel para gerar um documento de regras arquiteturais de uma camada especifica da aplicacao. O resultado deve padronizar como a camada e descrita, quais limites ela possui, como integra com outras camadas e como validar novas features rapidamente. O prompt deve ser orientado a consistencia, clareza e aplicabilidade no dia a dia do time.
+**Objetivo:** Criar um meta-prompt reutilizavel para gerar um documento de regras arquiteturais de uma camada especifica da aplicação. O resultado deve padronizar como a camada e descrita, quais limites ela possui, como integra com outras camadas e como validar novas features rapidamente. O prompt deve ser orientado a consistencia, clareza e aplicabilidade no dia a dia do time.
 
 **Entrada:**
   - Preferencialmente em bullets.
   - Caminhos de diretorios como `rest/...`.
   - Trechos de regras e exemplos reais quando existirem.
 
-**Diretrizes de Execucao:**
+**Diretrizes de Execução:**
 
-1. **Entendimento e validacao de contexto**
+1. **Entendimento e validação de contexto**
    - Confirmar objetivo do documento de regras para a camada `{CAMADA}`.
    - Validar se as fontes fornecidas sao suficientes para cobrir arquitetura, convencoes e limites da camada.
-   - Quando houver lacunas, assumir padroes conservadores e registrar pendencias explicitamente na secao de observacoes.
+   - Quando houver lacunas, assumir padroes conservadores e registrar pendencias explicitamente na seção de observacoes.
 
 2. **Levantamento do que ja existe**
    - Consultar arquivos de arquitetura e regras do projeto antes de redigir.
    - Se houver ferramenta de busca no repositorio (MCP Serena), localizar documentos similares da camada e camadas analogas.
-   - Se houver duvida de biblioteca/framework, consultar documentacao oficial com ferramenta de docs (MCP Context7).
+   - Se houver duvida de biblioteca/framework, consultar documentação oficial com ferramenta de docs (MCP Context7).
    - Sem ferramentas, solicitar ao usuario trechos minimos necessarios (arquitetura, convencoes e exemplos de regra).
 
-3. **Geracao da estrutura final**
+3. **Geração da estrutura final**
    - Produzir o documento final com secoes obrigatorias e linguagem prescritiva (deve/nao deve).
    - Explicitar fronteiras da camada: o que pertence, o que nao pertence, e como comunicar com outras camadas.
    - Incluir exemplos praticos de padroes de projeto e padroes de uso aplicados ao contexto `{CAMADA}`.
-   - Incluir checklist rapido e objetivo para orientar criacao de novas features.
+   - Incluir checklist rapido e objetivo para orientar criação de novas features.
 
 4. **Checagens finais de qualidade**
-   - Verificar consistencia entre principios, padroes e regras de integracao.
+   - Verificar consistencia entre principios, padroes e regras de integração.
    - Verificar se nao ha contradicoes com arquitetura global e regras existentes.
    - Garantir que todas as secoes obrigatorias foram preenchidas.
-   - Marcar claramente qualquer premissa adotada e pendencia de informacao.
+   - Marcar claramente qualquer premissa adotada e pendencia de informação.
 
 **Template de Saida (Estrutura Obrigatoria):**
 
@@ -51,7 +51,7 @@ description: Criar um prompt genérico para gerar documento de regras de uma cam
 # Estrutura de Diretorios Globais
 - Mapa de pastas relevantes
 - Responsabilidade de cada diretorio
-- Regras de organizacao e nomeacao
+- Regras de organização e nomeação
 - Não especificar arquivos específicos, pois isso muda constantemente.
 
 # Glossario arquitetural da camada
@@ -63,13 +63,13 @@ description: Criar um prompt genérico para gerar documento de regras de uma cam
 - Como aplicar cada padrao na camada
 - Quando evitar cada padrao
 
-# Regras de Integracao com Outras Camadas
+# Regras de Integração com Outras Camadas
 - Dependencias permitidas e proibidas
-- Contratos/interface de comunicacao
-- Direcao de dependencia e limites de acoplamento
+- Contratos/interface de comunicação
+- Direção de dependencia e limites de acoplamento
 
 # Checklist Rapido para Novas Features na Camada
-- Itens objetivos de validacao antes de abrir PR
+- Itens objetivos de validação antes de abrir PR
 - Criterios minimos de conformidade arquitetural
 - Sinais de alerta para revisao tecnica
 

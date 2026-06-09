@@ -16,7 +16,7 @@ Ler um PRD do projeto ou um contexto tecnico do projeto e propor um ticket do ze
 
 - Quando o input indicar `tipo = task`, o ticket deve ser orientado pelos PRDs publicados do Confluence.
 - Quando o input indicar `tipo = logico` ou `tipo = bug`, o ticket pode nao ter PRD associado.
-- Para tickets `logico` ou `bug`, a secao `Requisitos de Produto` pode ser omitida completamente quando nao houver PRD relevante.
+- Para tickets `logico` ou `bug`, a seção `Requisitos de Produto` pode ser omitida completamente quando nao houver PRD relevante.
 
 ## Instrucoes
 
@@ -27,7 +27,7 @@ Ler um PRD do projeto ou um contexto tecnico do projeto e propor um ticket do ze
    - os PRDs funcionais publicados (`PRD - RF xx`) relacionados ao escopo
 4. Quando o tipo for `task`, liste explicitamente os links dos PRDs carregados e use esses links como referencia principal do trabalho.
 5. Quando o tipo for `task`, leia o documento principal e os PRDs relacionados e identifique funcionalidades, restricoes, regras de negocio, dependencias e riscos.
-6. Quando o tipo for `logico` ou `bug`, use como base o contexto tecnico fornecido, o link do ticket original quando houver, a codebase e a documentacao do projeto.
+6. Quando o tipo for `logico` ou `bug`, use como base o contexto tecnico fornecido, o link do ticket original quando houver, a codebase e a documentação do projeto.
 7. Considere o contexto da codebase desse projeto, sua arquitetura e os padroes documentados no projeto.
 8. Sugira os tickets necessarios para implementar o escopo descrito.
 9. Quando a funcionalidade couber em uma unica entrega coerente, proponha um unico ticket.
@@ -64,7 +64,7 @@ PRD: <!-- nome ou link do RF/RNF/PRD -->
 - [ ] Requisito funcional 2
 - [ ] Requisito funcional 3
 
-<!-- Esta secao e obrigatoria apenas para tickets do tipo `task`. Para tickets `logico` ou `bug`, omita completamente esta secao quando nao houver PRD associado. -->
+<!-- Esta seção e obrigatoria apenas para tickets do tipo `task`. Para tickets `logico` ou `bug`, omita completamente esta seção quando nao houver PRD associado. -->
 
 ## Requisitos Tecnicos
 
@@ -109,18 +109,18 @@ DoD - Verificar antes de mover para Concluido:
 - [ ] Code review realizado e PR aprovado
 - [ ] Commits seguem o padrao adotado pelo projeto
 - [ ] Nenhum erro critico ou warning relevante introduzido no build
-- [ ] Documentacao atualizada quando aplicavel
+- [ ] Documentação atualizada quando aplicavel
 
 ## Regras para preenchimento
 
 - O conteudo deve sair pronto para colar no Jira.
-- Nao resuma em excesso; detalhe o suficiente para orientar implementacao.
+- Nao resuma em excesso; detalhe o suficiente para orientar implementação.
 - Para tickets do tipo `task`, sempre carregue e considere primeiro os PRDs publicados no Confluence antes de redigir os tickets.
-- Para tickets do tipo `task`, sempre inclua os links reais dos PRDs usados como referencia, priorizando o link publicado no Confluence em vez de rascunhos ou links de edicao.
-- Para tickets do tipo `logico` ou `bug`, nao invente PRD nem mantenha a secao `Requisitos de Produto` por padrao; omita essa secao quando nao houver documento funcional associado.
+- Para tickets do tipo `task`, sempre inclua os links reais dos PRDs usados como referencia, priorizando o link publicado no Confluence em vez de rascunhos ou links de edição.
+- Para tickets do tipo `logico` ou `bug`, nao invente PRD nem mantenha a seção `Requisitos de Produto` por padrao; omita essa seção quando nao houver documento funcional associado.
 - Em tickets tecnicos, inclua fluxos, contratos esperados e referencias reais da codebase sempre que possivel.
 - Quando houver endpoints, descreva cada fluxo separadamente.
 - Quando houver lacunas arquiteturais, explicite o que ainda nao existe e precisa ser criado.
 - Ajuste as camadas impactadas conforme o ticket; nao mantenha exemplos genericos.
-- A secao `Observacoes / Dependencias` e sempre fixa e deve ser reproduzida exatamente como definida neste prompt.
+- A seção `Observacoes / Dependencias` e sempre fixa e deve ser reproduzida exatamente como definida neste prompt.
 - Vincule cada ticket a milestone/epic fornecida, quando aplicavel.

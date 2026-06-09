@@ -20,13 +20,13 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 - Criar o `SignInUseCase` no `core` com entrada por **named parameters**.
 - Criar erros de dominio especificos para `401` generico, `403` por e-mail nao confirmado e `403` por conta inativa.
 - Estender o contrato de `AccountsRepository` para recuperar o `password_hash` persistido sem expor hash em `Account` ou `AccountDto`.
-- Registrar o novo controller no `AuthRouter` e ajustar a traducao HTTP para suportar `403 Forbidden` mantendo o payload atual de erro.
+- Registrar o novo controller no `AuthRouter` e ajustar a tradução HTTP para suportar `403 Forbidden` mantendo o payload atual de erro.
 
 ## 2.2 Out-of-scope
 
-- Login com Google e qualquer alteracao no fluxo `POST /auth/sign-up/google`.
-- `refresh token`, renovacao de sessao, revoke de token ou logout.
-- Reset de senha, edicao de perfil e exclusao de conta.
+- Login com Google e qualquer alteração no fluxo `POST /auth/sign-up/google`.
+- `refresh token`, renovação de sessao, revoke de token ou logout.
+- Reset de senha, edição de perfil e exclusao de conta.
 - Mudancas em `SessionDto`, `TokenDto` ou no formato de sucesso ja usado pelos providers atuais.
 - Inclusao de campo `code` no payload de erro HTTP; o mobile vai diferenciar os casos por `status_code` + `message`.
 
@@ -39,8 +39,8 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 - `POST /auth/sign-in` deve receber `email` e `password` no body JSON.
 - O endpoint deve retornar `200` com `SessionDto`, contendo `access_token` e `refresh_token` com seus respectivos `expires_at`.
 - Se o e-mail nao existir, a senha estiver incorreta ou a conta nao possuir `password_hash` persistido, o endpoint deve retornar `401` com mensagem generica de credenciais invalidas.
-- Se a autenticacao por senha for valida e `account.is_verified == False`, o endpoint deve retornar `403` com mensagem especifica de e-mail nao confirmado.
-- Se a autenticacao por senha for valida e `account.is_active == False`, o endpoint deve retornar `403` com mensagem especifica de conta desativada.
+- Se a autenticação por senha for valida e `account.is_verified == False`, o endpoint deve retornar `403` com mensagem especifica de e-mail nao confirmado.
+- Se a autenticação por senha for valida e `account.is_active == False`, o endpoint deve retornar `403` com mensagem especifica de conta desativada.
 - O fluxo deve usar `HashProvider.verify()` para comparar a senha informada com o `password_hash` persistido e `JwtProvider.encode()` para emitir a sessao.
 
 ## 3.2 Nao funcionais
@@ -49,7 +49,7 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 - **Seguranca:** `password_hash` permanece restrito a `database`; ele nao deve entrar em `Account`, `AccountDto`, `SessionDto` ou resposta HTTP.
 - **Seguranca:** a checagem de senha deve acontecer antes de `is_verified` e `is_active`, evitando revelar estado da conta quando a credencial estiver errada.
 - **Compatibilidade retroativa:** o payload de erro deve permanecer no formato atual `{ "title": str, "message": str }`, sem novo campo `code`.
-- **Compatibilidade retroativa:** o contrato de sucesso continua sendo `SessionDto`, reutilizando `TokenDto.expires_at` como `str` ISO-8601, conforme implementacao atual de `JoseJwtProvider`.
+- **Compatibilidade retroativa:** o contrato de sucesso continua sendo `SessionDto`, reutilizando `TokenDto.expires_at` como `str` ISO-8601, conforme implementação atual de `JoseJwtProvider`.
 
 ---
 
@@ -63,37 +63,37 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 - **`Password`** (`src/animus/core/auth/domain/structures/password.py`) — `Structure` de senha forte usada no `sign-up`; serve de referencia para manter `sign-in` sem reintroduzir regra de cadastro no controller.
 - **`Session` / `SessionDto` / `TokenDto`** (`src/animus/core/auth/domain/structures/session.py`, `src/animus/core/auth/domain/structures/dtos/session_dto.py`, `src/animus/core/auth/domain/structures/dtos/token_dto.py`) — contrato atual de sessao retornado pelos fluxos autenticados.
 - **`AccountsRepository`** (`src/animus/core/auth/interfaces/accounts_repository.py`) — port de persistencia com `find_by_id()`, `find_by_email()` e `find_password_hash_by_email()`; expoe uma forma dedicada de recuperar `password_hash` sem acoplar hash na entidade de dominio.
-- **`HashProvider`** (`src/animus/core/auth/interfaces/hash_provider.py`) — contrato para geracao e verificacao de hash; `verify(password: Text, hashed_password: Text) -> Logical` ja existe.
+- **`HashProvider`** (`src/animus/core/auth/interfaces/hash_provider.py`) — contrato para geração e verificação de hash; `verify(password: Text, hashed_password: Text) -> Logical` ja existe.
 - **`JwtProvider`** (`src/animus/core/auth/interfaces/jwt_provider.py`) — contrato para emissao de `Session`; ja retorna o tipo de dominio necessario para o endpoint.
-- **`SignUpUseCase`** (`src/animus/core/auth/use_cases/sign_up_use_case.py`) — referencia direta de orquestracao com portas injetadas e retorno de DTO.
+- **`SignUpUseCase`** (`src/animus/core/auth/use_cases/sign_up_use_case.py`) — referencia direta de orquestração com portas injetadas e retorno de DTO.
 - **`SignInWithGoogleUseCase`** (`src/animus/core/auth/use_cases/sign_in_with_google_use_case.py`) — referencia de fluxo autenticado que emite `SessionDto` usando `JwtProvider`.
 
 ## Camada Database
 
 - **`AccountModel`** (`src/animus/database/sqlalchemy/models/auth/account_model.py`) — model ORM da tabela `accounts`; ja possui `password_hash` persistido e atualmente nullable para suportar contas do Google.
-- **`SqlalchemyAccountsRepository`** (`src/animus/database/sqlalchemy/repositories/auth/sqlalchemy_accounts_repository.py`) — implementacao concreta do port de contas; ja consulta por e-mail e persiste contas manuais e sociais.
+- **`SqlalchemyAccountsRepository`** (`src/animus/database/sqlalchemy/repositories/auth/sqlalchemy_accounts_repository.py`) — implementação concreta do port de contas; ja consulta por e-mail e persiste contas manuais e sociais.
 - **`AccountMapper`** (`src/animus/database/sqlalchemy/mappers/auth/account_mapper.py`) — reconstrui `Account` sem `password_hash`, reforcando que o hash nao pertence ao dominio.
 
 ## Camada REST
 
 - **`SignUpController`** (`src/animus/rest/controllers/auth/sign_up_controller.py`) — referencia de controller fino com `_Body`, `Depends(...)` e repasse por **named parameters**.
-- **`VerifyEmailController`** (`src/animus/rest/controllers/auth/verify_email_controller.py`) — referencia do padrao de composicao de dependencias no contexto `auth`.
+- **`VerifyEmailController`** (`src/animus/rest/controllers/auth/verify_email_controller.py`) — referencia do padrao de composição de dependencias no contexto `auth`.
 - **`ResendVerificationEmailController`** (`src/animus/rest/controllers/auth/resend_verification_email_controller.py`) — referencia adicional de controller sem regra de negocio.
 - **`SignInWithGoogleController`** (`src/animus/rest/controllers/auth/sign_in_with_google_controller.py`) — referencia de endpoint autenticado que retorna `SessionDto` sem camada `validation` dedicada.
 - **`AppErrorHandler`** (`src/animus/rest/handlers/app_error_handler.py`) — traduz hoje `400`, `401`, `404` e `409` para payload `{title, message}`; ainda nao cobre `ForbiddenError` com `403`.
 
 ## Camada Routers
 
-- **`AuthRouter`** (`src/animus/routers/auth/auth_router.py`) — router agregador de `auth`; ja registra `sign-up`, verificacao de e-mail, reenvio e Google.
+- **`AuthRouter`** (`src/animus/routers/auth/auth_router.py`) — router agregador de `auth`; ja registra `sign-up`, verificação de e-mail, reenvio e Google.
 
 ## Camada Providers
 
-- **`Argon2idHashProvider`** (`src/animus/providers/auth/hash/argon2id_hash_provider.py`) — adapter concreto de `HashProvider`; sera reutilizado sem alteracao de contrato.
-- **`JoseJwtProvider`** (`src/animus/providers/auth/jwt/jose/jose_jwt_provider.py`) — adapter concreto de `JwtProvider`; ja gera `Session` com `TokenDto` usando expiracao em formato ISO-8601.
+- **`Argon2idHashProvider`** (`src/animus/providers/auth/hash/argon2id_hash_provider.py`) — adapter concreto de `HashProvider`; sera reutilizado sem alteração de contrato.
+- **`JoseJwtProvider`** (`src/animus/providers/auth/jwt/jose/jose_jwt_provider.py`) — adapter concreto de `JwtProvider`; ja gera `Session` com `TokenDto` usando expiração em formato ISO-8601.
 
 ## Lacunas identificadas na codebase
 
-- Nao existe `SignInUseCase` para autenticacao por e-mail e senha.
+- Nao existe `SignInUseCase` para autenticação por e-mail e senha.
 - Nao existe `SignInController` para `POST /auth/sign-in`.
 - Nao existem erros de dominio especificos para credenciais invalidas, conta nao verificada e conta inativa.
 - O port `AccountsRepository` nao expoe hoje o `password_hash` persistido necessario para `HashProvider.verify()`.
@@ -105,28 +105,28 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 
 ## Camada Core (Erros de Dominio)
 
-- **Localizacao:** `src/animus/core/auth/domain/errors/invalid_credentials_error.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/domain/errors/invalid_credentials_error.py` (**novo arquivo**)
 - **Classe base:** `AuthError`
 - **Motivo:** usado quando o e-mail nao existe, a senha nao confere ou a conta nao possui `password_hash`; a mensagem deve ser `E-mail ou senha incorretos`.
 
-- **Localizacao:** `src/animus/core/auth/domain/errors/account_not_verified_error.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/domain/errors/account_not_verified_error.py` (**novo arquivo**)
 - **Classe base:** `ForbiddenError`
 - **Motivo:** usado quando a senha esta correta, mas `account.is_verified == False`; a mensagem deve ser `E-mail nao confirmado`.
 
-- **Localizacao:** `src/animus/core/auth/domain/errors/account_inactive_error.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/domain/errors/account_inactive_error.py` (**novo arquivo**)
 - **Classe base:** `ForbiddenError`
 - **Motivo:** usado quando a senha esta correta, mas `account.is_active == False`; a mensagem deve ser `Conta desativada`.
 
 ## Camada Core (Use Cases)
 
-- **Localizacao:** `src/animus/core/auth/use_cases/sign_in_use_case.py` (**novo arquivo**)
+- **Localização:** `src/animus/core/auth/use_cases/sign_in_use_case.py` (**novo arquivo**)
 - **Dependencias (ports injetados):** `AccountsRepository`, `HashProvider`, `JwtProvider`
 - **Metodo principal:** `execute(email: str, password: str) -> SessionDto` — autentica uma conta manual por e-mail e senha e retorna a sessao emitida.
 - **Fluxo resumido:** `Email.create(email)` -> `Text.create(password)` -> `AccountsRepository.find_by_email()` -> `AccountsRepository.find_password_hash_by_email()` -> `HashProvider.verify()` -> validar `is_verified` -> validar `is_active` -> `JwtProvider.encode(Text.create(account.id.value))` -> `SessionDto`.
 
 ## Camada REST (Controllers)
 
-- **Localizacao:** `src/animus/rest/controllers/auth/sign_in_controller.py` (**novo arquivo**)
+- **Localização:** `src/animus/rest/controllers/auth/sign_in_controller.py` (**novo arquivo**)
 - **`*Body`:** `_Body` com `email: str` e `password: str` definidos no mesmo arquivo do controller.
 - **Metodo HTTP e path:** `POST /auth/sign-in`
 - **`status_code`:** `200`
@@ -142,7 +142,7 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 
 - **Arquivo:** `src/animus/core/auth/interfaces/accounts_repository.py`
 - **Mudanca:** adicionar `find_password_hash_by_email(email: Email) -> Text | None` ao port.
-- **Justificativa:** o `SignInUseCase` precisa acessar o hash persistido sem mover `password_hash` para `Account` nem quebrar a separacao entre dominio e persistencia.
+- **Justificativa:** o `SignInUseCase` precisa acessar o hash persistido sem mover `password_hash` para `Account` nem quebrar a separação entre dominio e persistencia.
 
 - **Arquivo:** `src/animus/core/auth/domain/errors/__init__.py`
 - **Mudanca:** exportar `InvalidCredentialsError`, `AccountNotVerifiedError` e `AccountInactiveError`.
@@ -171,7 +171,7 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 ## Camada Routers
 
 - **Arquivo:** `src/animus/routers/auth/auth_router.py`
-- **Mudanca:** registrar `SignInController` no router de `auth` com o mesmo padrao de composicao ja usado pelos endpoints existentes.
+- **Mudanca:** registrar `SignInController` no router de `auth` com o mesmo padrao de composição ja usado pelos endpoints existentes.
 - **Justificativa:** expor o novo endpoint dentro da superficie HTTP ja consolidada do contexto `auth`.
 
 ---
@@ -196,18 +196,18 @@ Implementar o endpoint `POST /auth/sign-in` para autenticar contas manuais por e
 
 - **Decisao:** verificar a senha antes de checar `is_verified` e `is_active`.
   - **Alternativas consideradas:** validar status da conta logo apos localizar o e-mail.
-  - **Motivo da escolha:** evita vazar estado da conta quando a credencial esta errada, mantendo o requisito de erro generico para falhas de autenticacao.
+  - **Motivo da escolha:** evita vazar estado da conta quando a credencial esta errada, mantendo o requisito de erro generico para falhas de autenticação.
   - **Impactos / trade-offs:** um usuario com conta nao verificada ou inativa so recebe `403` depois de informar a senha correta.
 
 - **Decisao:** manter o payload de erro somente com `title` e `message`, sem novo campo `code`.
   - **Alternativas consideradas:** evoluir `AppError` e `AppErrorHandler` para incluir `code` especifico por erro.
-  - **Motivo da escolha:** decisao explicita desta spec para manter compatibilidade com o contrato HTTP atual e evitar uma mudanca transversal em todos os erros da aplicacao.
+  - **Motivo da escolha:** decisao explicita desta spec para manter compatibilidade com o contrato HTTP atual e evitar uma mudanca transversal em todos os erros da aplicação.
   - **Impactos / trade-offs:** o mobile passa a depender de `status_code` + `message` estavel para distinguir `401`, `403 e-mail nao confirmado` e `403 conta desativada`.
 
 - **Decisao:** reutilizar `SessionDto` como `response_model` diretamente no controller.
   - **Alternativas consideradas:** criar schemas dedicados em `validation/` para `SessionResponse` e `TokenResponse`.
   - **Motivo da escolha:** o contexto `auth` ja retorna `SessionDto` em `SignInWithGoogleController`, e o documento de regras orienta usar `validation/` apenas para schemas compartilhados ou reutilizaveis entre multiplos controllers.
-  - **Impactos / trade-offs:** o contrato HTTP fica fortemente alinhado ao DTO do `core`, mas preserva consistencia com a codebase atual e evita duplicacao de tipos.
+  - **Impactos / trade-offs:** o contrato HTTP fica fortemente alinhado ao DTO do `core`, mas preserva consistencia com a codebase atual e evita duplicação de tipos.
 
 ---
 

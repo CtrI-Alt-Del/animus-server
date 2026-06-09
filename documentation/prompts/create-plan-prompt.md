@@ -1,14 +1,14 @@
 # Prompt: Criar Plano
 
-**Objetivo principal** Criar um plano de implementacao a partir de um documento de spec tecnica.
+**Objetivo principal** Criar um plano de implementação a partir de um documento de spec tecnica.
 
 ## Entrada
 
 - Caminho do arquivo do documento de spec tecnica.
 
-## Diretrizes de execucao
+## Diretrizes de execução
 
-1. **Decomposicao atomica**
+1. **Decomposição atomica**
    - Quebre o trabalho em **fases** e **tarefas**.
    - Cada **fase** deve representar uma etapa macro do plano.
    - Cada **tarefa** deve ser uma unidade de trabalho executavel, com resultado observavel.
@@ -21,12 +21,12 @@
    | F1 | <definir> | - | - |
    | F2 | <definir> | F1 | - |
 
-3. **Ordem de execucao (bottom-up)**
+3. **Ordem de execução (bottom-up)**
    - Defina as tarefas seguindo rigorosamente a hierarquia de dependencias, nesta ordem:
      1. **Core**: DTOs, structures, Entidades, Interfaces e Use Cases.
      2. **Drivers/Infra**: implementacoes de Repositories, Providers e PubSub.
      3. **API layer**: Middlewares, Pipes, Schemas, Controllers e Routers.
-   - Inclua no plano uma tarefa obrigatoria de validacao operacional para executar migrations no ambiente local: `uv run alembic upgrade head`.
+   - Inclua no plano uma tarefa obrigatoria de validação operacional para executar migrations no ambiente local: `uv run alembic upgrade head`.
 
 > ⚠️ **Regra** Se uma tarefa exige outra (ex: um Controller depende de um Use Case), a tarefa dependente deve aparecer depois e referenciar explicitamente a dependencia.
 
@@ -34,7 +34,7 @@
 
 > ⚠️ **Regra** Não incluir testes automatizados.
 
-> ⚠️ **Regra** Sempre planejar a execucao de migration com `uv run alembic upgrade head`, mesmo quando nao houver nova migration no escopo.
+> ⚠️ **Regra** Sempre planejar a execução de migration com `uv run alembic upgrade head`, mesmo quando nao houver nova migration no escopo.
 
 ## Saida esperada
 
