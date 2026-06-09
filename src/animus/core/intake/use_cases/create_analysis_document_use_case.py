@@ -4,7 +4,6 @@ from animus.core.intake.domain.structures.first_instance_analysis_status import 
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.domain.events import AnalysisDocumentReplacedEvent
 from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
@@ -52,20 +51,10 @@ class CreateAnalysisDocumentUseCase:
 
         if analysis.type.is_case_analysis.is_true:
             self._analysis_documents_repository.add(document)
+            print(document.dto, flush=True)
             return document.dto
 
-        existing_document = self._analysis_documents_repository.find_by_analysis_id(
-            analysis_id=analysis_id_entity,
-        )
-        if existing_document is None:
-            self._analysis_documents_repository.add(document)
-        else:
-            self._broker.publish(
-                AnalysisDocumentReplacedEvent(
-                    analysis_document_path=existing_document.file_path.value,
-                )
-            )
-            self._analysis_documents_repository.replace(document)
+        self._analysis_documents_repository.add(document)
 
         if analysis.type.is_first_instance.is_true:
             analysis.set_status(
@@ -75,6 +64,7 @@ class CreateAnalysisDocumentUseCase:
             analysis.set_status(
                 SecondInstanceAnalysisStatus.create_as_document_uploaded()
             )
+
         self._analyses_repository.replace(analysis)
 
         return document.dto

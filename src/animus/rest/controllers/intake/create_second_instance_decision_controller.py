@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from animus.core.intake.domain.entities import Analysis
 from animus.core.intake.domain.structures.dtos import SecondInstanceDecisionDto
@@ -16,14 +16,6 @@ from animus.pipes.intake_pipe import IntakePipe
 
 class _Body(BaseModel):
     description: str = Field(..., min_length=1)
-
-    @field_validator('description')
-    @classmethod
-    def validate_description(cls, value: str) -> str:
-        normalized_value = value.strip()
-        if normalized_value == '':
-            raise ValueError('Description must not be blank')
-        return normalized_value
 
 
 class CreateSecondInstanceDecisionController:

@@ -11,7 +11,6 @@ from animus.core.intake.domain.entities.dtos.analysis_dto import AnalysisDto
 from animus.core.intake.domain.structures.second_instance_analysis_status import (
     SecondInstanceAnalysisStatus,
 )
-from animus.core.intake.domain.events import AnalysisDocumentReplacedEvent
 from animus.core.intake.domain.errors import AnalysisNotFoundError
 from animus.core.intake.domain.structures.analysis_document import AnalysisDocument
 from animus.core.intake.domain.structures.dtos.analysis_document_dto import (
@@ -87,7 +86,7 @@ class TestCreateAnalysisDocumentUseCase:
             ).dto
         )
 
-    def test_should_replace_analysis_document_publish_event_and_update_second_instance_status(
+    def test_should_add_analysis_document_without_replacing_existing_one_and_update_second_instance_status(
         self,
     ) -> None:
         analysis_id = Id.create().value
@@ -101,19 +100,7 @@ class TestCreateAnalysisDocumentUseCase:
                 type=AnalysisType.create_as_second_instance().dto,
             )
         )
-        existing_document = AnalysisDocument.create(
-            AnalysisDocumentDto(
-                analysis_id=analysis_id,
-                uploaded_at='2026-03-30T10:30:00+00:00',
-                file_path='intake/analyses/old-document.pdf',
-                name='old-document.pdf',
-            )
-        )
-
         self.analyses_repository_mock.find_by_id.return_value = analysis
-        self.analysis_documents_repository_mock.find_by_analysis_id.return_value = (
-            existing_document
-        )
 
         result = self.use_case.execute(
             analysis_id=analysis_id,
@@ -122,19 +109,14 @@ class TestCreateAnalysisDocumentUseCase:
             name='new-document.pdf',
         )
 
-        self.analysis_documents_repository_mock.add.assert_not_called()
-        self.analysis_documents_repository_mock.replace.assert_called_once()
-        self.broker_mock.publish.assert_called_once()
+        self.analysis_documents_repository_mock.add.assert_called_once()
+        self.analysis_documents_repository_mock.find_by_analysis_id.assert_not_called()
+        self.analysis_documents_repository_mock.replace.assert_not_called()
+        self.broker_mock.publish.assert_not_called()
         self.analyses_repository_mock.replace.assert_called_once()
 
-        published_event = self.broker_mock.publish.call_args.args[0]
         updated_analysis = self.analyses_repository_mock.replace.call_args.args[0]
 
-        assert isinstance(published_event, AnalysisDocumentReplacedEvent)
-        assert (
-            published_event.payload.analysis_document_path
-            == 'intake/analyses/old-document.pdf'
-        )
         assert result.file_path == 'intake/analyses/new-document.pdf'
         assert (
             updated_analysis.status
