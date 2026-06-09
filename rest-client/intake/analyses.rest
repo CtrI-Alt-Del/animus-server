@@ -1,5 +1,5 @@
 @url = {{BASE_URL}}/intake
-@analysis_id = 01KSK0QMYZJ70D3STWS98H4RAR
+@analysis_id = 01KT379PM2NWJYW7PGTX0WW39A
 @petition_id = 01KQ5CG4D4NEKDSCSB4M6164TX
 @folder_id = 01KQ5CG4D6QY8A1X7R2M4N8P0B
 @precedent_court = STJ
@@ -77,7 +77,7 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 Content-Type: application/json
 
 {
-  "description": "Dar provimento parcial ao recurso para afastar a condenação por danos morais e manter a reparação material devidamente atualizada."
+  "description": "Julgar parcialmente procedente o pedido para condenar o réu ao pagamento de danos materiais devidamente atualizados, afastando os danos morais por ausência de prova do abalo sofrido."
 }
 
 ### Obter decisão de 2a instância (GetSecondInstanceDecisionController)
@@ -127,6 +127,10 @@ Content-Type: application/json
   "main_claims": "Indenização por danos materiais e morais por vício construtivo em imóvel residencial.",
   "intended_thesis": "Responsabilidade objetiva da construtora com inversão do ônus da prova e reparação integral dos prejuízos."
 }
+
+### Obter briefing de case assessment (GetCaseAssessmentBriefingController)
+GET {{url}}/analyses/{{analysis_id}}/case-assessment-briefing
+Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Obter documento principal da analise (GetAnalysisDocumentController)
 GET {{url}}/analyses/{{analysis_id}}/documents
@@ -200,6 +204,10 @@ Content-Type: application/json
   "no_applicable_precedent_notice": null
 }
 
+### Exportar minuta de julgamento de 2a instancia em DOCX (ExportSecondInstanceJudgmentDraftDocxController)
+POST {{url}}/analyses/{{analysis_id}}/second-instance-judgment-drafts/docx
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Disparar geração/regeneração de minuta de petição (TriggerPetitionDraftGenerationController)
 POST {{url}}/analyses/{{analysis_id}}/petition-drafts
 Authorization: Bearer {{ACCESS_TOKEN}}
@@ -215,6 +223,10 @@ Content-Type: application/json
 
 ### Obter minuta de petição da analise (GetPetitionDraftController)
 GET {{url}}/analyses/{{analysis_id}}/petition-drafts
+Authorization: Bearer {{ACCESS_TOKEN}}
+
+### Exportar minuta de petição da analise em DOCX (ExportPetitionDraftDocxController)
+POST {{url}}/analyses/{{analysis_id}}/petition-drafts/docx
 Authorization: Bearer {{ACCESS_TOKEN}}
 
 ### Atualizar minuta de petição da analise (UpdatePetitionDraftController)

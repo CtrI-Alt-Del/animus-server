@@ -24,7 +24,7 @@ Content-Type: application/json
   "password": "{{password}}"
 }
 
-### Reenviar email de verificacao (ResendVerificationEmailController)
+### Reenviar email de verificação (ResendVerificationEmailController)
 POST {{url}}/resend-verification-email
 Content-Type: application/json
 

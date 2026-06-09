@@ -6,15 +6,15 @@ Descreva por que este PR foi criado e qual problema, entrega ou necessidade ele 
 Exemplos:
 - Implementa a feature descrita na Spec associada
 - Corrige um bug validado no fluxo X
-- Consolida uma refatoracao necessaria para suportar Y
+- Consolida uma refatoração necessaria para suportar Y
 -->
 
 ## Causa do bug
 
-Descreva a causa tecnica raiz, se este PR for uma correcao de bug.
+Descreva a causa tecnica raiz, se este PR for uma correção de bug.
 
 <!--
-Opcional. Remova esta secao se nao se aplicar.
+Opcional. Remova esta seção se nao se aplicar.
 -->
 
 ## Changelog
@@ -26,13 +26,13 @@ Opcional. Remova esta secao se nao se aplicar.
 
 ## Novas dependencias
 
-- [ ] Nao houve adicao de novas dependencias
+- [ ] Nao houve adição de novas dependencias
 
 <!--
 Se houver novas dependencias, detalhe:
 - nome do pacote
 - onde foi adicionado (`pyproject.toml`, `uv.lock`, etc.)
-- motivo da adicao
+- motivo da adição
 - impacto esperado (build, runtime, seguranca, custo)
 -->
 
@@ -41,7 +41,7 @@ Sugestao de conteudo:
 - atualiza `src/...` para ...
 - altera o contrato de `POST /...` para ...
 - remove fluxo legado de ...
-- adiciona validacao para ...
+- adiciona validação para ...
 -->
 
 ## Como testar

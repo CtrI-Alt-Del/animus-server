@@ -2,7 +2,7 @@
   "rest-client.environmentVariables": {
     "DEV": {
       "BASE_URL": "http://localhost:8080",
-      "ACCESS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUtNWDNTQlowRjU1UlE3WDY5V1lFRlo3SyIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3ODA2NjM2NTUsImV4cCI6MTc4MDY2NzI1NX0.bIV0Nib9g0j6AZwG_wrCxVOUJrB5YSS0b5CD69oZsNM"
+      "ACCESS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUtNWDNTQlowRjU1UlE3WDY5V1lFRlo3SyIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3ODA2ODk5OTMsImV4cCI6MTc4MDY5MzU5M30.aRmITErJiRvikwXkIKLiopMHxgUHowO6XBxV4kMUMC4"
     },
     "PROD": {
       "BASE_URL": "https://animus-stg-api-49381195836.us-east1.run.app",
