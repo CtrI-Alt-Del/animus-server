@@ -79,6 +79,6 @@ class IntakePipe:
             raise AnalysisNotFoundError
 
         if analysis.account_id.value != account_id.value:
-            raise ForbiddenError('Peticao nao pertence a conta autenticada')
+            raise ForbiddenError('Petição nao pertence a conta autenticada')
 
         return petition

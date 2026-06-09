@@ -55,7 +55,7 @@ def _create_analysis_with_document_summary(
             analysis_id=analysis_id,
             case_summary='Resumo objetivo da petição inicial',
             legal_issue='Controversia sobre inadimplemento contratual',
-            central_question='Ha inadimplemento apto a justificar condenacao?',
+            central_question='Ha inadimplemento apto a justificar condenação?',
             relevant_laws=['Codigo Civil, Art. 389'],
             key_facts=['Contrato firmado e nao adimplido'],
             search_terms=['inadimplemento contratual'],
@@ -98,7 +98,7 @@ class TestListAnalysisPetitionsController:
         assert response_payload['items'][0]['case_summary'] == {
             'case_summary': 'Resumo objetivo da petição inicial',
             'legal_issue': 'Controversia sobre inadimplemento contratual',
-            'central_question': 'Ha inadimplemento apto a justificar condenacao?',
+            'central_question': 'Ha inadimplemento apto a justificar condenação?',
             'relevant_laws': ['Codigo Civil, Art. 389'],
             'key_facts': ['Contrato firmado e nao adimplido'],
             'search_terms': ['inadimplemento contratual'],

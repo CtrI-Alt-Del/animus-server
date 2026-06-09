@@ -92,7 +92,7 @@ def _create_report_analysis(
             SecondInstanceJudgmentDraftModel(
                 analysis_id=analysis_id,
                 report='Relatório',
-                merit_analysis='Fundamentacao',
+                merit_analysis='Fundamentação',
                 precedent_adherence_analysis='Aderência',
                 ruling=['Dispositivo'],
             )
@@ -165,7 +165,7 @@ class TestGetSecondInstanceAnalysisReportController:
         assert payload['draft'] == {
             'analysis_id': analysis_id,
             'report': 'Relatório',
-            'merit_analysis': 'Fundamentacao',
+            'merit_analysis': 'Fundamentação',
             'precedent_adherence_analysis': 'Aderência',
             'ruling': ['Dispositivo'],
             'preliminary_issues': None,
@@ -299,7 +299,7 @@ class TestGetFirstInstanceAnalysisReportController:
         assert payload['judgment_draft'] == {
             'analysis_id': analysis_id,
             'report': 'Relatório',
-            'merit_analysis': 'Fundamentacao',
+            'merit_analysis': 'Fundamentação',
             'precedent_adherence_analysis': 'Aderência',
             'ruling': ['Dispositivo'],
             'preliminary_issues': None,

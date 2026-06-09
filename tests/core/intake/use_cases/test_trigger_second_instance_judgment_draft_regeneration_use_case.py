@@ -92,7 +92,7 @@ class TestTriggerSecondInstanceJudgmentDraftRegenerationUseCase:
         )
 
         self.use_case.execute(
-            analysis_id=analysis_id, comments='  Ajustar fundamentacao  '
+            analysis_id=analysis_id, comments='  Ajustar fundamentação  '
         )
 
         self.analyses_repository_mock.find_by_id.assert_called_once_with(
@@ -112,7 +112,7 @@ class TestTriggerSecondInstanceJudgmentDraftRegenerationUseCase:
         event = self.broker_mock.publish.call_args.args[0]
         assert isinstance(event, SecondInstanceJudgmentDraftRegenerationTriggeredEvent)
         assert event.payload.analysis_id == analysis_id
-        assert event.payload.comments == 'Ajustar fundamentacao'
+        assert event.payload.comments == 'Ajustar fundamentação'
         assert (
             analysis.status
             == SecondInstanceAnalysisStatus.create_as_generating_judgment_draft()

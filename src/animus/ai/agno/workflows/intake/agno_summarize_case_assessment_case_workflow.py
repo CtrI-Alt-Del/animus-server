@@ -189,7 +189,7 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
                 return CaseSummaryOutput.model_validate_json(stripped_output)
 
             msg = self._build_invalid_output_message(stripped_output)
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if isinstance(unwrapped_output, Mapping):
             data = cast(
@@ -199,7 +199,7 @@ class AgnoSummarizeCaseAssessmentCaseWorkflow(SummarizeCaseAssessmentCaseWorkflo
             return CaseSummaryOutput.model_validate(data)
 
         msg = 'Invalid summary output type from case assessment summarizer workflow'
-        raise AppError('Erro de execucao do workflow', msg)
+        raise AppError('Erro de execução do workflow', msg)
 
     def _build_invalid_output_message(self, output: str) -> str:
         compact_output = ' '.join(output.split())

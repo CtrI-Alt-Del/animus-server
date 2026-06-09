@@ -24,7 +24,7 @@ class PangeaBnpService(PangeaService):
         payload = {
             'filtro': {
                 'buscaGeral': '',
-                'ordenacao': 'Text',
+                'ordenação': 'Text',
                 'pagina': page,
                 'tamanhoPagina': page_size,
                 'tipos': tipos,
@@ -40,7 +40,7 @@ class PangeaBnpService(PangeaService):
                 items=[], total=0, page=page, page_size=page_size
             )
         actual_page_size = (
-            response_data.posicao_final - response_data.posicao_inicial
+            response_data.posição_final - response_data.posição_inicial
         ) + 1
         if actual_page_size <= 0:
             actual_page_size = page_size

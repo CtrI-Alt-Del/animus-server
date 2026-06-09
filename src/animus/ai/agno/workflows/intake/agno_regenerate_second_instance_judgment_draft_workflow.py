@@ -98,15 +98,15 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
 
         if not isinstance(current_draft, SecondInstanceJudgmentDraft):
             msg = 'Current judgment draft is required to build regeneration input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if not isinstance(case_summary, CaseSummary):
             msg = 'Case summary is required to build judgment draft regeneration input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if not isinstance(precedents, list):
             msg = 'Analysis precedents are required to build judgment draft regeneration input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         precedents_candidates = cast('list[object]', precedents)
         if not all(
@@ -114,18 +114,18 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
             for precedent in precedents_candidates
         ):
             msg = 'Analysis precedents are required to build judgment draft regeneration input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if not isinstance(comments, str):
             msg = 'Comments are required to build judgment draft regeneration input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if not isinstance(second_instance_decision, SecondInstanceDecision):
             msg = (
                 'Second instance decision is required to build judgment draft '
                 'regeneration input'
             )
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         precedents_list = cast('list[AnalysisPrecedent]', precedents_candidates)
         current_draft_dto = current_draft.dto
@@ -266,7 +266,7 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
                 )
 
             msg = self._build_invalid_output_message(stripped_output)
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if isinstance(unwrapped_output, Mapping):
             data = cast(
@@ -276,7 +276,7 @@ class AgnoRegenerateSecondInstanceJudgmentDraftWorkflow(
             return SecondInstanceJudgmentDraftOutput.model_validate(data)
 
         msg = 'Invalid output type from second instance judgment draft reviser agent'
-        raise AppError('Erro de execucao do workflow', msg)
+        raise AppError('Erro de execução do workflow', msg)
 
     def _build_invalid_output_message(self, output: str) -> str:
         compact_output = ' '.join(output.split())

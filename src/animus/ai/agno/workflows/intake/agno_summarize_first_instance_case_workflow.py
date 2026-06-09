@@ -117,4 +117,4 @@ class AgnoSummarizeFirstInstanceCaseWorkflow(SummarizeFirstInstanceCaseWorkflow)
             return CaseSummaryOutput.model_validate(output)
 
         msg = 'Invalid summary output type from case summarizer workflow'
-        raise AppError('Erro de execucao do workflow', msg)
+        raise AppError('Erro de execução do workflow', msg)

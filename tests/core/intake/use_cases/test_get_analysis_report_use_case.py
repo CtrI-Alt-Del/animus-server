@@ -499,7 +499,7 @@ class TestGetSecondInstanceAnalysisReportUseCase:
             SecondInstanceJudgmentDraftDto(
                 analysis_id=analysis_id,
                 report='Relatório',
-                merit_analysis='Fundamentacao',
+                merit_analysis='Fundamentação',
                 precedent_adherence_analysis='Aderência',
                 ruling=['Dispositivo'],
             )

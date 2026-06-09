@@ -165,7 +165,7 @@ class TestCreateSecondInstanceJudgmentDraftUseCase:
         return SecondInstanceJudgmentDraftDto(
             analysis_id=analysis_id,
             report='Relatório',
-            merit_analysis='Fundamentacao',
+            merit_analysis='Fundamentação',
             precedent_adherence_analysis='Aderência',
             ruling=['Dispositivo 1', 'Dispositivo 2'],
             preliminary_issues='Preliminar',

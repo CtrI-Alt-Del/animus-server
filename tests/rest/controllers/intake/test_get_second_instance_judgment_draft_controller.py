@@ -36,7 +36,7 @@ def _create_second_instance_analysis_with_draft(
         SecondInstanceJudgmentDraftModel(
             analysis_id=analysis_id,
             report='Relatório',
-            merit_analysis='Fundamentacao',
+            merit_analysis='Fundamentação',
             precedent_adherence_analysis='Aderência',
             ruling=['Item 1', 'Item 2'],
             preliminary_issues='Preliminar',
@@ -97,7 +97,7 @@ class TestGetSecondInstanceJudgmentDraftController:
         assert response.json() == {
             'analysis_id': analysis_id,
             'report': 'Relatório',
-            'merit_analysis': 'Fundamentacao',
+            'merit_analysis': 'Fundamentação',
             'precedent_adherence_analysis': 'Aderência',
             'ruling': ['Item 1', 'Item 2'],
             'preliminary_issues': 'Preliminar',

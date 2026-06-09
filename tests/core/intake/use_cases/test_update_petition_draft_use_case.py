@@ -58,7 +58,7 @@ class TestUpdatePetitionDraftUseCase:
                 legal_grounds='Fundamentos anteriores',
                 central_thesis='Tese anterior',
                 requests=['Pedido anterior'],
-                precedent_citations=['Citacao anterior'],
+                precedent_citations=['Citação anterior'],
             )
         )
         previous_status = analysis.status

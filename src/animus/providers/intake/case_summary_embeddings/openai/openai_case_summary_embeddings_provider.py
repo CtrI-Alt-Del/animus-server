@@ -76,7 +76,7 @@ class _ChunkBuilder:
         s = self._summary
 
         if s.type_of_action is not None:
-            self._add(f'Tipo de acao: {s.type_of_action.value}')
+            self._add(f'Tipo de ação: {s.type_of_action.value}')
 
         if s.jurisdiction_issue is not None:
             self._add(f'Questão de competencia: {s.jurisdiction_issue.value}')
@@ -127,7 +127,7 @@ class _ChunkBuilder:
         parts: list[str] = []
 
         if s.type_of_action is not None:
-            parts.append(f'Tipo de acao: {s.type_of_action.value}')
+            parts.append(f'Tipo de ação: {s.type_of_action.value}')
 
         parts.append(f'Questão juridica principal: {s.legal_issue.value}')
         parts.append(f'Pergunta juridica central: {s.central_question.value}')

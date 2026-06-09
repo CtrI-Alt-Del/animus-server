@@ -55,7 +55,8 @@ class CourtDocumentOutline(Structure):
         apelacoes_em_pdf = [
             item
             for item in apelacoes
-            if 'apelacao em pdf' in self._normalize_title(item.title.value)
+            if 'apelacao em pdf'
+            in self._normalize_title(item.title.value)  # fix: era 'apelação em pdf'
         ]
         selected_apelacoes = apelacoes_em_pdf or apelacoes
 
@@ -81,10 +82,10 @@ class CourtDocumentOutline(Structure):
         if 'sentenca' in normalized_title:
             return CourtDocumentPieceKind.SENTENCA
 
-        if 'apelacao em pdf' in normalized_title:
+        if 'apelacao em pdf' in normalized_title:  # fix: era 'apelação em pdf'
             return CourtDocumentPieceKind.APELACAO
 
-        if 'apelacao' in normalized_title:
+        if 'apelacao' in normalized_title:  # fix: era 'apelação'
             return CourtDocumentPieceKind.APELACAO
 
         if 'contrarrazoes' in normalized_title or 'contra-razoes' in normalized_title:

@@ -309,7 +309,7 @@ class TestTriggerPetitionDraftRegenerationUseCase:
                 legal_grounds='Fundamentos juridicos',
                 central_thesis='Tese central',
                 requests=['Pedido 1'],
-                precedent_citations=['Citacao 1'],
+                precedent_citations=['Citação 1'],
             )
         )
 

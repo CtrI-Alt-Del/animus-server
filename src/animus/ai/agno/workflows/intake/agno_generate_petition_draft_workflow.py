@@ -75,11 +75,11 @@ class AgnoGeneratePetitionDraftWorkflow(GeneratePetitionDraftWorkflow):
 
         if not isinstance(case_summary, CaseSummary):
             msg = 'Case summary is required to build petition draft input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if not isinstance(precedents, list):
             msg = 'Analysis precedents are required to build petition draft input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         precedents_candidates = cast('list[object]', precedents)
         if not all(
@@ -87,7 +87,7 @@ class AgnoGeneratePetitionDraftWorkflow(GeneratePetitionDraftWorkflow):
             for precedent in precedents_candidates
         ):
             msg = 'Analysis precedents are required to build petition draft input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         precedents_list = cast('list[AnalysisPrecedent]', precedents_candidates)
         case_summary_dto = case_summary.dto
@@ -166,12 +166,20 @@ class AgnoGeneratePetitionDraftWorkflow(GeneratePetitionDraftWorkflow):
 
         return PetitionDraftDto(
             analysis_id=analysis_id,
-            structured_facts=normalized_output.structured_facts,
-            legal_grounds=normalized_output.legal_grounds,
-            central_thesis=normalized_output.central_thesis,
-            requests=normalized_output.requests,
-            precedent_citations=normalized_output.precedent_citations,
+            structured_facts=self._normalize_text(normalized_output.structured_facts),
+            legal_grounds=self._normalize_text(normalized_output.legal_grounds),
+            central_thesis=self._normalize_text(normalized_output.central_thesis),
+            requests=self._normalize_text_list(normalized_output.requests),
+            precedent_citations=self._normalize_text_list(
+                normalized_output.precedent_citations,
+            ),
         )
+
+    def _normalize_text(self, value: str) -> str:
+        return value.replace('\\r\\n', '\n').replace('\\n', '\n').strip()
+
+    def _normalize_text_list(self, items: list[str]) -> list[str]:
+        return [self._normalize_text(item) for item in items]
 
     def _coerce_petition_draft_output(self, output: object) -> PetitionDraftOutput:
         unwrapped_output = self._unwrap_output_content(output)
@@ -188,7 +196,7 @@ class AgnoGeneratePetitionDraftWorkflow(GeneratePetitionDraftWorkflow):
                 return PetitionDraftOutput.model_validate_json(stripped_output)
 
             msg = self._build_invalid_output_message(stripped_output)
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if isinstance(unwrapped_output, Mapping):
             data = cast(
@@ -198,7 +206,7 @@ class AgnoGeneratePetitionDraftWorkflow(GeneratePetitionDraftWorkflow):
             return PetitionDraftOutput.model_validate(data)
 
         msg = 'Invalid output type from petition draft generator agent'
-        raise AppError('Erro de execucao do workflow', msg)
+        raise AppError('Erro de execução do workflow', msg)
 
     def _build_invalid_output_message(self, output: str) -> str:
         compact_output = ' '.join(output.split())

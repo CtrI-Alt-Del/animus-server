@@ -6,5 +6,5 @@ class DraftRegenerationChosenPrecedentsRequiredError(
 ):
     def __init__(self) -> None:
         super().__init__(
-            'Pelo menos um precedente escolhido e obrigatorio para regeracao'
+            'Pelo menos um precedente escolhido e obrigatorio para regeração'
         )

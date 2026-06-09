@@ -102,7 +102,7 @@ class AgnoExtractPetitionWorkflow(ExtractPetitionWorkflow):
             raise PetitionExtractionNotFoundError
 
         if first_page < 1 or last_page < first_page or last_page > total_pages:
-            msg = 'Limites de petição invalidados durante a extracao'
+            msg = 'Limites de petição invalidados durante a extração'
             raise AppError('Erro de execução do workflow', msg)
 
         return PetitionExtractionDto(

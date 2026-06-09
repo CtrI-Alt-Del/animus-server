@@ -31,7 +31,7 @@ class TestGetSecondInstanceJudgmentDraftUseCase:
             SecondInstanceJudgmentDraftDto(
                 analysis_id=analysis_id,
                 report='Relatório',
-                merit_analysis='Fundamentacao',
+                merit_analysis='Fundamentação',
                 precedent_adherence_analysis='Aderência',
                 ruling=['Item 1', 'Item 2'],
             )

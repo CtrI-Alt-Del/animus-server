@@ -81,7 +81,7 @@ class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeFirstInstanceCaseWorkflow
 
             Diretrizes de segunda instancia:
             - o `document_content` representa pecas extraidas dos autos, com cabecalhos
-              estaveis para `sentenca`, `apelacao` e `contrarrazoes` quando houver;
+              estaveis para `sentenca`, `apelação` e `contrarrazoes` quando houver;
             - integre a narrativa processual entre decisao recorrida, fundamentos do
               recurso e resposta da parte contraria, quando disponivel;
             - destaque fundamentos e pedidos com foco recursal;
@@ -119,4 +119,4 @@ class AgnoSummarizeSecondInstanceCaseWorkflow(SummarizeFirstInstanceCaseWorkflow
         msg = (
             'Invalid summary output type from second instance case summarizer workflow'
         )
-        raise AppError('Erro de execucao do workflow', msg)
+        raise AppError('Erro de execução do workflow', msg)

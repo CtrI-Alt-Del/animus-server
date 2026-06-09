@@ -5,4 +5,4 @@ class SecondInstanceJudgmentDraftRegenerationUnavailableError(
     DraftRegenerationPreconditionError
 ):
     def __init__(self) -> None:
-        super().__init__('Nao ha minuta de sentenca persistida para regeracao')
+        super().__init__('Nao ha minuta de sentenca persistida para regeração')

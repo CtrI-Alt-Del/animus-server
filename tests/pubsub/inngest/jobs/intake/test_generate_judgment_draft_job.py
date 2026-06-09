@@ -61,7 +61,7 @@ def _seed_second_instance_analysis_with_summary_and_precedents(
             analysis_id=analysis_id,
             case_summary='Resumo objetivo do caso',
             legal_issue='Questão juridica central',
-            central_question='Pergunta central da apelacao',
+            central_question='Pergunta central da apelação',
             relevant_laws=['Lei 1'],
             key_facts=['Fato 1'],
             search_terms=['termo 1'],
@@ -192,7 +192,7 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
                 return SecondInstanceJudgmentDraftDto(
                     analysis_id=analysis_id,
                     report='Relatório',
-                    merit_analysis='Fundamentacao',
+                    merit_analysis='Fundamentação',
                     precedent_adherence_analysis='Aderência',
                     ruling=['Dispositivo'],
                 )
@@ -236,7 +236,7 @@ class TestGenerateSecondInstanceJudgmentDraftJob:
         )
         assert persisted_judgment_draft is not None
         assert persisted_judgment_draft.report == 'Relatório'
-        assert persisted_judgment_draft.merit_analysis == 'Fundamentacao'
+        assert persisted_judgment_draft.merit_analysis == 'Fundamentação'
         assert persisted_judgment_draft.precedent_adherence_analysis == 'Aderência'
         assert persisted_judgment_draft.ruling == ['Dispositivo']
 

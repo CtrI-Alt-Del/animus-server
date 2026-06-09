@@ -60,7 +60,7 @@ class TestUpdateSecondInstanceJudgmentDraftUseCase:
             self._create_judgment_draft_dto(
                 analysis_id=analysis_id,
                 report='Relatorio anterior',
-                merit_analysis='Fundamentacao anterior',
+                merit_analysis='Fundamentação anterior',
                 precedent_adherence_analysis='Aderencia anterior',
                 ruling=['Dispositivo anterior'],
             )
@@ -112,7 +112,7 @@ class TestUpdateSecondInstanceJudgmentDraftUseCase:
         dto = self._create_judgment_draft_dto(
             analysis_id=Id.create().value,
             report='  Relatorio atualizado  ',
-            merit_analysis='  Fundamentacao atualizada  ',
+            merit_analysis='  Fundamentação atualizada  ',
             precedent_adherence_analysis='  Aderencia atualizada  ',
             ruling=['  Dispositivo 1  ', '  Dispositivo 2  '],
             preliminary_issues='  Preliminar atualizada  ',
@@ -137,7 +137,7 @@ class TestUpdateSecondInstanceJudgmentDraftUseCase:
                 SecondInstanceJudgmentDraftDto(
                     analysis_id=analysis_id,
                     report='Relatorio atualizado',
-                    merit_analysis='Fundamentacao atualizada',
+                    merit_analysis='Fundamentação atualizada',
                     precedent_adherence_analysis='Aderencia atualizada',
                     ruling=['Dispositivo 1', 'Dispositivo 2'],
                     preliminary_issues='Preliminar atualizada',
@@ -148,7 +148,7 @@ class TestUpdateSecondInstanceJudgmentDraftUseCase:
         assert result == SecondInstanceJudgmentDraftDto(
             analysis_id=analysis_id,
             report='Relatorio atualizado',
-            merit_analysis='Fundamentacao atualizada',
+            merit_analysis='Fundamentação atualizada',
             precedent_adherence_analysis='Aderencia atualizada',
             ruling=['Dispositivo 1', 'Dispositivo 2'],
             preliminary_issues='Preliminar atualizada',

@@ -230,7 +230,7 @@ class TestTriggerSecondInstanceJudgmentDraftRegenerationController:
 
         assert response.status_code == 422
         assert response.json() == {
-            'title': 'Pre-condicao de regeracao de minuta invalida',
-            'message': 'Nao ha minuta de sentenca persistida para regeracao',
+            'title': 'Pre-condição de regeração de minuta invalida',
+            'message': 'Nao ha minuta de sentenca persistida para regeração',
         }
         assert len(fake_inngest_client.sent_events) == 0

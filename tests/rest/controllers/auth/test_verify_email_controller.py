@@ -55,7 +55,7 @@ class TestVerifyEmailController:
         assert response.status_code == 401
         assert response.json() == {
             'title': 'Erro de autenticação',
-            'message': 'Codigo OTP de verificacao de email invalido ou expirado',
+            'message': 'Codigo OTP de verificação de email invalido ou expirado',
         }
 
     def test_should_return_422_when_payload_is_missing(

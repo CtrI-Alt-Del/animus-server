@@ -13,8 +13,8 @@ from animus.rest.pangea.services.models.pangea_bnp_process import (
 class PangeaBnpResponse(Structure):
     aggs_especies: list[PangeaBnpAggregation]
     aggs_orgaos: list[PangeaBnpAggregation]
-    posicao_final: int
-    posicao_inicial: int
+    posição_final: int
+    posição_inicial: int
     resultados: list[PangeaBnpPrecedentProcess]
     total: int
 
@@ -28,8 +28,8 @@ class PangeaBnpResponse(Structure):
             aggs_orgaos=[
                 PangeaBnpAggregation.create(**agg) for agg in data.get('aggsOrgaos', [])
             ],
-            posicao_final=int(data.get('posicao_final', 0)),
-            posicao_inicial=int(data.get('posicao_inicial', 0)),
+            posição_final=int(data.get('posição_final', 0)),
+            posição_inicial=int(data.get('posição_inicial', 0)),
             resultados=data.get('resultados', []),
             total=int(data.get('total', 0)),
         )

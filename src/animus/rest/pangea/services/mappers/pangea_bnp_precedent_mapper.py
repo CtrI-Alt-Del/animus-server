@@ -29,8 +29,8 @@ class PangeaBnpPrecedentMapper:
     def to_dto(process: PangeaBnpPrecedentProcess) -> PrecedentDto:
         try:
             last_updated = (
-                datetime.strptime(process.ultima_atualizacao, '%d/%m/%Y').isoformat()
-                if process.ultima_atualizacao
+                datetime.strptime(process.ultima_atualização, '%d/%m/%Y').isoformat()
+                if process.ultima_atualização
                 else datetime.now(UTC).isoformat()
             )
         except (ValueError, TypeError):
@@ -50,7 +50,7 @@ class PangeaBnpPrecedentMapper:
 
         return PrecedentDto(
             identifier=identifier,
-            status=process.situacao.strip(),
+            status=process.situação.strip(),
             enunciation=enunciation_text,
             thesis=thesis_text if thesis_text else enunciation_text,
             last_updated_in_pangea_at=last_updated,

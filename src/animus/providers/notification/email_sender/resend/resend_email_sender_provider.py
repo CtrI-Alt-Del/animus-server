@@ -24,7 +24,7 @@ class ResendEmailSenderProvider(EmailSenderProvider):
             {
                 'from': Env.RESEND_SENDER_EMAIL,
                 'to': [account_email.value],
-                'subject': 'Codigo de verificacao de email',
+                'subject': 'Codigo de verificação de email',
                 'html': html,
             }
         )

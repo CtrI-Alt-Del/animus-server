@@ -39,7 +39,7 @@ def _create_analysis_with_petition(
             analysis_id=analysis_id,
             uploaded_at=datetime(2026, 3, 27, 10, 30, tzinfo=UTC),
             document_file_path='petitions/current-petition.pdf',
-            document_name='Peticao atual.pdf',
+            document_name='Petição atual.pdf',
         )
     )
     session.commit()
@@ -72,7 +72,7 @@ class TestGetAnalysisPetitionController:
             'analysis_id': analysis_id,
             'uploaded_at': '2026-03-27T10:30:00+00:00',
             'file_path': 'petitions/current-petition.pdf',
-            'name': 'Peticao atual.pdf',
+            'name': 'Petição atual.pdf',
         }
 
     def test_should_return_422_when_analysis_id_is_invalid(

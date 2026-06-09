@@ -32,8 +32,8 @@ class PangeaBnpPrecedentProcess(Structure):
     orgao: str = ''
     tipo: str = ''
     questao: str = ''
-    situacao: str = ''
-    ultima_atualizacao: str | None = None
+    situação: str = ''
+    ultima_atualização: str | None = None
     numero_tema: int | None = None
     tese: str | None = None
     highlight: PangeaBnpHighlight | None = None
@@ -48,8 +48,8 @@ class PangeaBnpPrecedentProcess(Structure):
             orgao=str(data.get('orgao', '')),
             tipo=str(data.get('tipo', '')),
             questao=str(data.get('questao', '')),
-            situacao=str(data.get('situacao', '')),
-            ultima_atualizacao=data.get('ultimaAtualizacao'),
+            situação=str(data.get('situação', '')),
+            ultima_atualização=data.get('ultimaAtualização'),
             numero_tema=data.get('numeroTemaSobrestado'),
             tese=data.get('tese'),
             highlight=PangeaBnpHighlight.create(**highlight_data)

@@ -28,7 +28,7 @@ class SecondInstanceDecision(Structure):
     def strip(self) -> 'SecondInstanceDecision':
         description = self.description.value.strip()
         if not description:
-            raise ValidationError('Descricao da decisao obrigatoria')
+            raise ValidationError('Descrição da decisao obrigatoria')
 
         return self.__class__(
             analysis_id=self.analysis_id,

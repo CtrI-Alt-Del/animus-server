@@ -61,8 +61,8 @@ class TestSearchAnalysisPrecedentsUseCase:
         )
         rg_932 = self._create_precedent(
             number=932,
-            enunciation='Possibilidade de responsabilizacao objetiva do empregador por danos decorrentes de acidentes de trabalho.',
-            thesis='O art. 927, paragrafo unico, permite a responsabilizacao objetiva do empregador em atividade de risco.',
+            enunciation='Possibilidade de responsabilização objetiva do empregador por danos decorrentes de acidentes de trabalho.',
+            thesis='O art. 927, paragrafo unico, permite a responsabilização objetiva do empregador em atividade de risco.',
         )
         rr_556 = self._create_precedent(
             court='STJ',
@@ -74,13 +74,13 @@ class TestSearchAnalysisPrecedentsUseCase:
 
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = CaseSummary.create(
             CaseSummaryDto(
-                case_summary='Acao de indenizacao por danos morais e materiais decorrentes de acidente de trabalho com obito, proposta por sucessores e dependentes.',
-                legal_issue='Competencia da Justica do Trabalho e legitimidade dos sucessores para buscar responsabilizacao civil subjetiva do empregador por culpa e falha em normas de seguranca.',
+                case_summary='Ação de indenização por danos morais e materiais decorrentes de acidente de trabalho com obito, proposta por sucessores e dependentes.',
+                legal_issue='Competencia da Justica do Trabalho e legitimidade dos sucessores para buscar responsabilização civil subjetiva do empregador por culpa e falha em normas de seguranca.',
                 central_question='A Justica do Trabalho e competente para julgar a demanda proposta por sucessores de trabalhador falecido e, no merito, a culpa patronal por inobservancia de normas de seguranca gera dever de indenizar?',
                 relevant_laws=['CF, artigo 114', 'CF, artigo 7o, XXVIII'],
                 key_facts=[
                     'Os autores sao sucessores e dependentes do trabalhador falecido.',
-                    'Ha alegacao de culpa patronal por descumprimento de normas de seguranca.',
+                    'Ha alegação de culpa patronal por descumprimento de normas de seguranca.',
                 ],
                 search_terms=[
                     'competencia justica do trabalho sucessores',
@@ -131,15 +131,15 @@ class TestSearchAnalysisPrecedentsUseCase:
         )
         objective_precedent = self._create_precedent(
             number=932,
-            enunciation='Possibilidade de responsabilizacao objetiva do empregador por danos decorrentes de acidentes de trabalho.',
-            thesis='E constitucional a responsabilizacao objetiva do empregador quando a atividade normalmente desenvolvida apresentar exposicao habitual a risco especial.',
+            enunciation='Possibilidade de responsabilização objetiva do empregador por danos decorrentes de acidentes de trabalho.',
+            thesis='E constitucional a responsabilização objetiva do empregador quando a atividade normalmente desenvolvida apresentar exposição habitual a risco especial.',
         )
 
         self.case_summaries_repository_mock.find_by_analysis_id.return_value = CaseSummary.create(
             CaseSummaryDto(
-                case_summary='Acao de indenizacao por acidente de trabalho em atividade de risco, com pedido de reparacao civil.',
-                legal_issue='Responsabilidade objetiva do empregador por atividade de risco e exposicao habitual a risco especial.',
-                central_question='A atividade de risco normalmente desenvolvida pelo trabalhador autoriza a responsabilizacao objetiva do empregador nos termos do art. 927, paragrafo unico, do Codigo Civil?',
+                case_summary='Ação de indenização por acidente de trabalho em atividade de risco, com pedido de reparação civil.',
+                legal_issue='Responsabilidade objetiva do empregador por atividade de risco e exposição habitual a risco especial.',
+                central_question='A atividade de risco normalmente desenvolvida pelo trabalhador autoriza a responsabilização objetiva do empregador nos termos do art. 927, paragrafo unico, do Codigo Civil?',
                 relevant_laws=['CC, artigo 927, paragrafo unico'],
                 key_facts=[
                     'A atividade expunha o trabalhador a risco especial de forma habitual.',

@@ -194,7 +194,7 @@ class SummarizeSecondInstanceCaseJob(InngestJob):
                 extracted_court_document_pieces.sentenca.value,
             ),
             (
-                'apelacao',
+                'apelação',
                 extracted_court_document_pieces.apelacao.value,
             ),
         ]

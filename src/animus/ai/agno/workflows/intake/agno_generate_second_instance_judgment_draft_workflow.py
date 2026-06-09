@@ -84,15 +84,15 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
 
         if not isinstance(case_summary, CaseSummary):
             msg = 'Case summary is required to build judgment draft input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if not isinstance(precedents, list):
             msg = 'Analysis precedents are required to build judgment draft input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         if not isinstance(second_instance_decision, SecondInstanceDecision):
             msg = 'Second instance decision is required to build judgment draft input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         precedents_candidates = cast('list[object]', precedents)
         if not all(
@@ -100,7 +100,7 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
             for precedent in precedents_candidates
         ):
             msg = 'Analysis precedents are required to build judgment draft input'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         precedents_list = cast('list[AnalysisPrecedent]', precedents_candidates)
         case_summary_dto = case_summary.dto
@@ -184,7 +184,7 @@ class AgnoGenerateSecondInstanceJudgmentDraftWorkflow(
     ) -> SecondInstanceJudgmentDraftDto:
         if not isinstance(output, SecondInstanceJudgmentDraftOutput):
             msg = 'Invalid output type from second instance judgment draft generator agent'
-            raise AppError('Erro de execucao do workflow', msg)
+            raise AppError('Erro de execução do workflow', msg)
 
         return SecondInstanceJudgmentDraftDto(
             analysis_id=analysis_id,

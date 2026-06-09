@@ -32,7 +32,7 @@ class ExtractCourtDocumentPiecesUseCase:
             pdf_outline_items=pdf_outline_items,
             total_pages=total_pages,
         )
-        apelacao = self._extract_many(
+        apelacao = self._extract_many(  # fix: era 'apelação'
             pdf_file=file,
             pieces=court_document_outline.find_apelacoes(),
             pdf_outline_items=pdf_outline_items,

@@ -73,7 +73,7 @@ ACCOUNT_VERIFICATION_EMAIL_TEMPLATE = """<!doctype html>
                       <p
                         style="margin:0; font-size:11px; line-height:1.4; letter-spacing:1.2px; font-weight:700; color:#8e8e93; text-transform:uppercase; font-family:Arial, Helvetica, sans-serif;"
                       >
-                        Codigo de verificacao
+                        Codigo de verificação
                       </p>
                     </td>
                   </tr>
@@ -91,7 +91,7 @@ ACCOUNT_VERIFICATION_EMAIL_TEMPLATE = """<!doctype html>
                 <p
                   style="margin:16px 0 24px 0; font-size:13px; line-height:1.6; text-align:center; color:#4a4a50;"
                 >
-                  Digite este codigo na tela de confirmacao do app.
+                  Digite este codigo na tela de confirmação do app.
                 </p>
 
                 <p

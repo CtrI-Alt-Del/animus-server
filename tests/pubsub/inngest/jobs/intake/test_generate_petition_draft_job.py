@@ -281,7 +281,7 @@ class TestGeneratePetitionDraftJob:
                     legal_grounds='Fundamentos juridicos',
                     central_thesis='Tese central',
                     requests=['Pedido 1', 'Pedido 2'],
-                    precedent_citations=['Citacao 1'],
+                    precedent_citations=['Citação 1'],
                 )
 
         monkeypatch.setattr(
@@ -330,7 +330,7 @@ class TestGeneratePetitionDraftJob:
         assert persisted_petition_draft.legal_grounds == 'Fundamentos juridicos'
         assert persisted_petition_draft.central_thesis == 'Tese central'
         assert persisted_petition_draft.requests == ['Pedido 1', 'Pedido 2']
-        assert persisted_petition_draft.precedent_citations == ['Citacao 1']
+        assert persisted_petition_draft.precedent_citations == ['Citação 1']
 
     def test_should_return_none_and_not_persist_petition_draft_when_case_summary_does_not_exist(
         self,
