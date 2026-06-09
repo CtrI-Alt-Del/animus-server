@@ -1,4 +1,9 @@
-from .document import PythonDocxProvider, PypdfPdfProvider
+from .document import (
+    PypdfPdfProvider,
+    PythonDocxPetitionDraftProvider,
+    PythonDocxProvider,
+    PythonDocxSecondInstanceJudgmentDraftProvider,
+)
 from .file_storage import GcsFileStorageProvider, SupabaseFileStorageProvider
 from .parquet import PyarrowParquetProvider
 
@@ -7,5 +12,7 @@ __all__ = [
     'SupabaseFileStorageProvider',
     'PypdfPdfProvider',
     'PythonDocxProvider',
+    'PythonDocxPetitionDraftProvider',
+    'PythonDocxSecondInstanceJudgmentDraftProvider',
     'PyarrowParquetProvider',
 ]

@@ -8,6 +8,10 @@ from .create_case_assessment_briefing_controller import (
 from .create_second_instance_decision_controller import (
     CreateSecondInstanceDecisionController,
 )
+from .export_petition_draft_docx_controller import ExportPetitionDraftDocxController
+from .export_second_instance_judgment_draft_docx_controller import (
+    ExportSecondInstanceJudgmentDraftDocxController,
+)
 from .remove_analysis_precedent_controller import (
     RemoveAnalysisPrecedentController,
 )
@@ -20,6 +24,9 @@ from .get_precedent_controller import (
 )
 from .get_case_assessment_analysis_report_controller import (
     GetCaseAssessmentAnalysisReportController,
+)
+from .get_case_assessment_briefing_controller import (
+    GetCaseAssessmentBriefingController,
 )
 from .get_analysis_status_controller import GetAnalysisStatusController
 from .get_case_summary_controller import GetCaseSummaryController
@@ -80,6 +87,8 @@ __all__ = [
     'CreateAnalysisController',
     'CreateCaseAssessmentBriefingController',
     'CreateSecondInstanceDecisionController',
+    'ExportPetitionDraftDocxController',
+    'ExportSecondInstanceJudgmentDraftDocxController',
     'RemoveAnalysisPrecedentController',
     'CreateAnalysisDocumentController',
     'RemoveAnalysisDocumentController',
@@ -89,6 +98,7 @@ __all__ = [
     'GetCaseSummaryController',
     'GetAnalysisStatusController',
     'GetAnalysisController',
+    'GetCaseAssessmentBriefingController',
     'GetCaseAssessmentAnalysisReportController',
     'GetPetitionDraftController',
     'GetSecondInstanceDecisionController',

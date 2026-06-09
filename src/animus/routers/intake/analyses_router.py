@@ -9,7 +9,10 @@ from animus.rest.controllers.intake import (
     CreateCaseAssessmentBriefingController,
     CreateSecondInstanceDecisionController,
     CreateAnalysisDocumentController,
+    ExportPetitionDraftDocxController,
+    ExportSecondInstanceJudgmentDraftDocxController,
     GetAnalysisController,
+    GetCaseAssessmentBriefingController,
     GetCaseAssessmentAnalysisReportController,
     GetAnalysisDocumentController,
     RemoveAnalysisDocumentController,
@@ -59,6 +62,7 @@ class AnalysesRouter:
         ListUnfolderedAnalysesController.handle(router)
         GetAnalysisController.handle(router)
         CreateCaseAssessmentBriefingController.handle(router)
+        GetCaseAssessmentBriefingController.handle(router)
         CreateSecondInstanceDecisionController.handle(router)
         CreateAnalysisDocumentController.handle(router)
         GetAnalysisDocumentController.handle(router)
@@ -72,8 +76,10 @@ class AnalysesRouter:
         TriggerPetitionDraftRegenerationController.handle(router)
         TriggerSecondInstanceJudgmentDraftRegenerationController.handle(router)
         GetPetitionDraftController.handle(router)
+        ExportPetitionDraftDocxController.handle(router)
         UpdatePetitionDraftController.handle(router)
         GetSecondInstanceJudgmentDraftController.handle(router)
+        ExportSecondInstanceJudgmentDraftDocxController.handle(router)
         UpdateSecondInstanceJudgmentDraftController.handle(router)
         GetCaseSummaryController.handle(router)
         GetCaseAssessmentAnalysisReportController.handle(router)

@@ -24,11 +24,18 @@ from .create_case_summary_use_case import CreateCaseSummaryUseCase
 from .create_extracted_petition_use_case import CreateExtractedPetitionUseCase
 from .create_judgment_draft_use_case import CreateSecondInstanceJudgmentDraftUseCase
 from .create_petition_draft_use_case import CreatePetitionDraftUseCase
+from .export_petition_draft_docx_use_case import ExportPetitionDraftDocxUseCase
+from .export_second_instance_judgment_draft_docx_use_case import (
+    ExportSecondInstanceJudgmentDraftDocxUseCase,
+)
 from .get_analysis_document_use_case import GetAnalysisDocumentUseCase
 from .get_analysis_precedent_by_identifier_use_case import (
     GetPrecedentUseCase,
 )
 from .get_analysis_petition_use_case import GetAnalysisPetitionUseCase
+from .get_case_assessment_briefing_use_case import (
+    GetCaseAssessmentBriefingUseCase,
+)
 from .get_case_assessment_analysis_report_use_case import (
     GetCaseAssessmentAnalysisReportUseCase,
 )
@@ -108,9 +115,12 @@ __all__ = [
     'CreateExtractedPetitionUseCase',
     'CreateSecondInstanceJudgmentDraftUseCase',
     'CreatePetitionDraftUseCase',
+    'ExportPetitionDraftDocxUseCase',
+    'ExportSecondInstanceJudgmentDraftDocxUseCase',
     'GetAnalysisDocumentUseCase',
     'GetPrecedentUseCase',
     'GetAnalysisPetitionUseCase',
+    'GetCaseAssessmentBriefingUseCase',
     'GetCaseAssessmentAnalysisReportUseCase',
     'GetAnalysisUseCase',
     'GetCaseSummaryUseCase',

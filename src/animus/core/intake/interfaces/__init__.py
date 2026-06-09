@@ -21,12 +21,16 @@ from .generate_judgment_draft_workflow import (
 )
 from .judgment_drafts_repository import SecondInstanceJudgmentDraftsRepository
 from .petition_drafts_repository import PetitionDraftsRepository
+from .petition_draft_docx_provider import PetitionDraftDocxProvider
 from .petition_summaries_repository import PetitionSummariesRepository
 from .petitions_repository import PetitionsRepository
 from .regenerate_judgment_draft_workflow import (
     RegenerateSecondInstanceJudgmentDraftWorkflow,
 )
 from .second_instance_decisions_repository import SecondInstanceDecisionsRepository
+from .second_instance_judgment_draft_docx_provider import (
+    SecondInstanceJudgmentDraftDocxProvider,
+)
 from .regenerate_petition_draft_workflow import RegeneratePetitionDraftWorkflow
 from .precedent_embeddings_provider import PrecedentEmbeddingsProvider
 from .precedents_embeddings_repository import PrecedentsEmbeddingsRepository
@@ -56,8 +60,10 @@ __all__ = [
     'RegeneratePetitionDraftWorkflow',
     'RegenerateSecondInstanceJudgmentDraftWorkflow',
     'SecondInstanceDecisionsRepository',
+    'SecondInstanceJudgmentDraftDocxProvider',
     'SecondInstanceJudgmentDraftsRepository',
     'PetitionsRepository',
+    'PetitionDraftDocxProvider',
     'PetitionDraftsRepository',
     'PrecedentsRepository',
     'PrecedentsEmbeddingsRepository',

@@ -3,6 +3,10 @@ from animus.core.auth.interfaces import (
     HashProvider,
     JwtProvider,
 )
+from animus.core.intake.interfaces import (
+    PetitionDraftDocxProvider,
+    SecondInstanceJudgmentDraftDocxProvider,
+)
 from animus.core.notification.interfaces import EmailSenderProvider
 from animus.core.shared.interfaces import CacheProvider, OtpProvider
 from animus.core.storage.interfaces import (
@@ -18,7 +22,11 @@ from animus.providers.notification.email_sender.resend.resend_email_sender_provi
     ResendEmailSenderProvider,
 )
 from animus.providers.shared.cache.redis.redis_cache_provider import RedisCacheProvider
-from animus.providers.storage import GcsFileStorageProvider
+from animus.providers.storage import (
+    GcsFileStorageProvider,
+    PythonDocxPetitionDraftProvider,
+    PythonDocxSecondInstanceJudgmentDraftProvider,
+)
 from animus.providers.storage.document.docx.python_docx_provider import (
     PythonDocxProvider,
 )
@@ -61,3 +69,17 @@ class ProvidersPipe:
     @staticmethod
     def get_docx_provider() -> DocxProvider:
         return PythonDocxProvider()
+
+    @staticmethod
+    def get_petition_draft_docx_provider() -> PetitionDraftDocxProvider:
+        return PythonDocxPetitionDraftProvider(
+            file_storage_provider=ProvidersPipe.get_file_storage_provider(),
+        )
+
+    @staticmethod
+    def get_second_instance_judgment_draft_docx_provider() -> (
+        SecondInstanceJudgmentDraftDocxProvider
+    ):
+        return PythonDocxSecondInstanceJudgmentDraftProvider(
+            file_storage_provider=ProvidersPipe.get_file_storage_provider(),
+        )

@@ -25,7 +25,13 @@ from .judgment_draft_regeneration_unavailable_error import (
 from .judgment_draft_unavailable_error import (
     SecondInstanceJudgmentDraftUnavailableError,
 )
+from .second_instance_judgment_draft_export_incomplete_error import (
+    SecondInstanceJudgmentDraftExportIncompleteError,
+)
 from .petition_draft_unavailable_error import PetitionDraftUnavailableError
+from .petition_draft_export_incomplete_error import (
+    PetitionDraftExportIncompleteError,
+)
 from .petition_draft_regeneration_unavailable_error import (
     PetitionDraftRegenerationUnavailableError,
 )
@@ -60,9 +66,11 @@ __all__ = [
     'ChosenAnalysisPrecedentsRequiredError',
     'SecondInstanceJudgmentDraftRegenerationUnavailableError',
     'SecondInstanceJudgmentDraftUnavailableError',
+    'SecondInstanceJudgmentDraftExportIncompleteError',
     'PetitionDocumentNotFoundError',
     'PetitionExtractionNotFoundError',
     'PetitionDraftUnavailableError',
+    'PetitionDraftExportIncompleteError',
     'PetitionDraftRegenerationUnavailableError',
     'PetitionNotFoundError',
     'PrecedentNotFoundError',

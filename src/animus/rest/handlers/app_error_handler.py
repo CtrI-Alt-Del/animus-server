@@ -11,7 +11,10 @@ from animus.core.shared.domain.errors import (
     NotFoundError,
     ValidationError,
 )
-from animus.core.intake.domain.errors import DraftRegenerationPreconditionError
+from animus.core.intake.domain.errors import (
+    DraftRegenerationPreconditionError,
+    PetitionDraftExportIncompleteError,
+)
 
 
 logger = getLogger(__name__)
@@ -81,6 +84,10 @@ class AppErrorHandler:
         )
         app.add_exception_handler(
             DraftRegenerationPreconditionError,
+            AppErrorHandler.handle_draft_regeneration_precondition_error,
+        )
+        app.add_exception_handler(
+            PetitionDraftExportIncompleteError,
             AppErrorHandler.handle_draft_regeneration_precondition_error,
         )
         app.add_exception_handler(AppError, AppErrorHandler.handle_app_error)
