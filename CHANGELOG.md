@@ -1,3 +1,20 @@
+# [1.36.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.35.2...v1.36.0) (2026-06-11)
+
+
+### Bug Fixes
+
+* ANI-199 fix Portuguese accents in error messages and comments ([a5a6723](https://github.com/CtrI-Alt-Del/animus-server/commit/a5a67236242099b1573c04e2e063f6ff9c6a4f53))
+
+
+### Features
+
+* ANI-125 add and update tests for new intake features ([6e6bd69](https://github.com/CtrI-Alt-Del/animus-server/commit/6e6bd697fa0e1a51639406b3a4bcc6b9ed455de5))
+* ANI-125 add database migrations and persistence for briefings and decisions ([06312ba](https://github.com/CtrI-Alt-Del/animus-server/commit/06312ba2ec8655ef5dbb27c5b4d0cf7ddd20c401))
+* ANI-125 add domain entities and use cases for briefings, decisions, and draft edition ([0b42f9d](https://github.com/CtrI-Alt-Del/animus-server/commit/0b42f9df2cef2d8d84d06f596b34fb2502236217))
+* ANI-125 add REST API, AI workflows, and pubsub for new intake features ([35f2e1b](https://github.com/CtrI-Alt-Del/animus-server/commit/35f2e1be33989d6bccbd83c3a39ce295bc65a9a2))
+* ANI-199 add case assessment briefing endpoint and first instance case summary integration test ([98b659f](https://github.com/CtrI-Alt-Del/animus-server/commit/98b659f731ff6babc8797c25bea88c78310806b3))
+* ANI-199 add petition and judgment draft docx export use cases, providers and controllers ([29f05ae](https://github.com/CtrI-Alt-Del/animus-server/commit/29f05ae9132ed218eb9928f7d232099126d4489e))
+
 ## [1.35.2](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.35.1...v1.35.2) (2026-05-31)
 
 
