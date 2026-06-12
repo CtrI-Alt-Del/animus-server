@@ -1,3 +1,10 @@
+# [1.37.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.36.0...v1.37.0) (2026-06-12)
+
+
+### Features
+
+* ANI-199 add list analysis documents endpoint ([777eef1](https://github.com/CtrI-Alt-Del/animus-server/commit/777eef1fd7648b8cc7c09d77cd96710e7b1a6e33))
+
 # [1.36.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.35.2...v1.36.0) (2026-06-11)
 
 
