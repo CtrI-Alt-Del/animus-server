@@ -80,7 +80,7 @@ class PythonDocxSecondInstanceJudgmentDraftProvider(
 
         self._add_text_section(
             document=document,
-            title='Descrição da decisao pretendida',
+            title='Descrição da decisão pretendida',
             content=second_instance_decision.description.value,
         )
 
