@@ -1,3 +1,10 @@
+# [1.38.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.37.1...v1.38.0) (2026-06-12)
+
+
+### Features
+
+* ANI-199 Implement upload_file method in file storage providers and update usage in petition draft providers ([ba1785a](https://github.com/CtrI-Alt-Del/animus-server/commit/ba1785aa9413742be2884ff4139b1742c71082f8))
+
 ## [1.37.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.37.0...v1.37.1) (2026-06-12)
 
 
