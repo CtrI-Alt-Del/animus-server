@@ -74,7 +74,7 @@ class GcsFileStorageProvider(FileStorageProvider):
 
     def upload_files(self, file_paths: list[FilePath]) -> None:
         bucket = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
-        if not bucket.exists():  # pyright: ignore[reportUnknownMemberType]
+        if self._is_emulator and not bucket.exists():  # pyright: ignore[reportUnknownMemberType]
             self.client.create_bucket(bucket)  # pyright: ignore[reportUnknownMemberType]
 
         for file_path in file_paths:
@@ -90,7 +90,7 @@ class GcsFileStorageProvider(FileStorageProvider):
 
     def upload_file(self, source_path: Path, destination_path: FilePath) -> None:
         bucket = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
-        if not bucket.exists():  # pyright: ignore[reportUnknownMemberType]
+        if self._is_emulator and not bucket.exists():  # pyright: ignore[reportUnknownMemberType]
             self.client.create_bucket(bucket)  # pyright: ignore[reportUnknownMemberType]
 
         blob = bucket.blob(destination_path.value)  # pyright: ignore[reportUnknownMemberType]
