@@ -1,3 +1,10 @@
+## [1.38.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.38.0...v1.38.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* ANI-199 update GcsFileStorageProvider to check for emulator state before bucket existence ([4c3cd34](https://github.com/CtrI-Alt-Del/animus-server/commit/4c3cd349d8b2f146602d64db4dcc389b6f49b1a3))
+
 # [1.38.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.37.1...v1.38.0) (2026-06-12)
 
 
