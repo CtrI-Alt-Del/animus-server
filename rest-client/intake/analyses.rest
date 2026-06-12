@@ -136,6 +136,10 @@ Authorization: Bearer {{ACCESS_TOKEN}}
 GET {{url}}/analyses/{{analysis_id}}/documents
 Authorization: Bearer {{ACCESS_TOKEN}}
 
+### Listar documentos da analise (ListAnalysisDocumentsController)
+GET {{url}}/analyses/{{analysis_id}}/documents/all
+Authorization: Bearer {{ACCESS_TOKEN}}
+
 ### Remover documento principal da analise (RemoveAnalysisDocumentController)
 DELETE {{url}}/analyses/{{analysis_id}}/documents?file_path=intake/analyses/document.pdf
 Authorization: Bearer {{ACCESS_TOKEN}}

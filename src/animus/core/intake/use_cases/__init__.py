@@ -56,6 +56,7 @@ from .get_analysis_use_case import GetAnalysisUseCase
 from .get_case_summary_use_case import GetCaseSummaryUseCase
 from .get_petition_summary_use_case import GetPetitionSummaryUseCase
 from .list_analyses_use_case import ListAnalysesUseCase
+from .list_analysis_documents_use_case import ListAnalysisDocumentsUseCase
 from .list_unfoldered_analyses_use_case import ListUnfolderedAnalysesUseCase
 from .list_analysis_petitions_use_case import ListAnalysisPetitionsUseCase
 from .list_analysis_precedents_use_case import ListAnalysisPrecedentsUseCase
@@ -131,6 +132,7 @@ __all__ = [
     'GetPetitionSummaryUseCase',
     'GetSecondInstanceAnalysisReportUseCase',
     'ListAnalysesUseCase',
+    'ListAnalysisDocumentsUseCase',
     'ListUnfolderedAnalysesUseCase',
     'ListAnalysisPetitionsUseCase',
     'ListAnalysisPrecedentsUseCase',

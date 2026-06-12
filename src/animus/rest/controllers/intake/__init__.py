@@ -44,6 +44,7 @@ from .get_second_instance_judgment_draft_controller import (
     GetSecondInstanceJudgmentDraftController,
 )
 from .list_analyses_controller import ListAnalysesController
+from .list_analysis_documents_controller import ListAnalysisDocumentsController
 from .get_analysis_petition_controller import GetAnalysisPetitionController
 from .list_analysis_petitions_controller import ListAnalysisPetitionsController
 from .list_analysis_precedents_controller import ListAnalysisPrecedentsController
@@ -104,6 +105,7 @@ __all__ = [
     'GetSecondInstanceDecisionController',
     'GetSecondInstanceJudgmentDraftController',
     'ListAnalysesController',
+    'ListAnalysisDocumentsController',
     'ListUnfolderedAnalysesController',
     'ListAnalysisPetitionsController',
     'ListAnalysisPrecedentsController',
