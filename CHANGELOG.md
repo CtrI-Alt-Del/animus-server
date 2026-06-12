@@ -1,3 +1,10 @@
+## [1.37.1](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.37.0...v1.37.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* ANI-199 correct Portuguese accent in title for second instance judgment draft provider ([42b314c](https://github.com/CtrI-Alt-Del/animus-server/commit/42b314cd6221d9e04b95b06d481263f0b7039dca))
+
 # [1.37.0](https://github.com/CtrI-Alt-Del/animus-server/compare/v1.36.0...v1.37.0) (2026-06-12)
 
 
