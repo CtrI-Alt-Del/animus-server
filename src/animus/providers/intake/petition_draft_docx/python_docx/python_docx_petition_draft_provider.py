@@ -1,5 +1,4 @@
 import re
-import shutil
 import tempfile
 import unicodedata
 from pathlib import Path
@@ -39,17 +38,12 @@ class PythonDocxPetitionDraftProvider(PetitionDraftDocxProvider):
         ) as temporary_file:
             local_file_path = Path(temporary_file.name)
 
-        upload_source_path = Path(bucket_file_path.value)
-        upload_source_path.parent.mkdir(parents=True, exist_ok=True)
-
         try:
             document = self._build_document(petition_draft)
             document.save(str(local_file_path))
-            shutil.copy2(local_file_path, upload_source_path)
-            self._file_storage_provider.upload_files([bucket_file_path])
+            self._file_storage_provider.upload_file(local_file_path, bucket_file_path)
         finally:
             local_file_path.unlink(missing_ok=True)
-            upload_source_path.unlink(missing_ok=True)
 
         return AnalysisDocumentDto(
             analysis_id=analysis_id,

@@ -86,6 +86,14 @@ class SupabaseFileStorageProvider(FileStorageProvider):
                 file_options={'upsert': 'true'},
             )
 
+    def upload_file(self, source_path: Path, destination_path: FilePath) -> None:
+        normalized_file_path = self._normalize_file_path(destination_path.value)
+        self._supabase.storage.from_(self._bucket).upload(
+            path=normalized_file_path,
+            file=source_path,
+            file_options={'upsert': 'true'},
+        )
+
     def remove_files(self, file_paths: list[FilePath]) -> None:
         paths = [self._normalize_file_path(file_path.value) for file_path in file_paths]
         if not paths:

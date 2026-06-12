@@ -88,6 +88,14 @@ class GcsFileStorageProvider(FileStorageProvider):
             blob = bucket.blob(file_path.value)  # pyright: ignore[reportUnknownMemberType]
             blob.upload_from_filename(str(local_file_path))  # pyright: ignore[reportUnknownMemberType]
 
+    def upload_file(self, source_path: Path, destination_path: FilePath) -> None:
+        bucket = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
+        if not bucket.exists():  # pyright: ignore[reportUnknownMemberType]
+            self.client.create_bucket(bucket)  # pyright: ignore[reportUnknownMemberType]
+
+        blob = bucket.blob(destination_path.value)  # pyright: ignore[reportUnknownMemberType]
+        blob.upload_from_filename(str(source_path))  # pyright: ignore[reportUnknownMemberType]
+
     def remove_files(self, file_paths: list[FilePath]) -> None:
         bucket = self.client.bucket(Env.GCS_BUCKET_NAME)  # pyright: ignore[reportUnknownMemberType]
 
